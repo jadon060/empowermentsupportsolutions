@@ -29,14 +29,20 @@
       margin: auto;
     }
 
+    /* Remove extra gap between About and Services */
+    #about {
+      padding-bottom: 5px; /* super tight bottom */
+      margin-bottom: 0;
+    }
+    #services {
+      padding-top: 5px;  /* reduce top space */
+      margin-top: 0;
+    }
+
     .section h2 {
       text-align: left;
       color: #2c3e50;
       margin-bottom: 15px;
-    }
-
-    #about {
-      margin-bottom: 0; /* No gap between About and Services */
     }
 
     .services {
@@ -92,7 +98,7 @@
     Our mission is simple: <strong>supporting people to live their best lives, their way</strong>.</p>
   </div>
 
-  <div class="section">
+  <div class="section" id="services">
     <h2>Our Services</h2>
     <div class="services">
       <div class="service-card">
@@ -126,4 +132,5 @@
   </footer>
 </body>
 </html>
+
 
