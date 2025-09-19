@@ -1,95 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Empowerment Support Solutions LLC</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f7f7fb;
-      color: #333;
-    }
+    /* Base */
+    :root { --brand:#2c3e50; --bg:#f7f7fb; --card:#fff; --text:#333; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
 
-    header {
-      background: #2f4156;
-      color: white;
-      padding: 20px 40px;
+    /* Header: logo left, title centered */
+    header { background:var(--brand); color:#fff; }
+    .header-wrap {
+      position: relative;
       display: flex;
       align-items: center;
-      justify-content: center;
-      position: relative;
+      justify-content: center;   /* centers the title regardless of logo width */
+      padding: 14px 30px;
     }
-
-    header img.logo-left {
-      position: absolute;
-      left: 20px;
-      height: 90px; /* ✅ increased logo size */
-    }
-
-    header h1 {
+    .header-wrap h1 {
       margin: 0;
-      font-size: 2em;
-      font-weight: bold;
-    }
-
-    section {
-      padding: 40px 20px;
-      max-width: 1000px;
-      margin: auto;
-    }
-
-    h2 {
-      font-size: 1.8em;
-      margin-bottom: 15px;
-      color: #2f4156;
-    }
-
-    .services {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .service {
-      flex: 1;
-      min-width: 250px;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .service h3 {
-      margin-top: 0;
-      color: #2f4156;
-    }
-
-    .contact {
-      background: #ffffff;
-      padding: 30px;
+      font-size: 1.9rem;
       text-align: center;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
-      margin: 40px auto;
+    }
+    .logo-left {
+      position: absolute;
+      left: 30px;                /* keeps logo in the left corner */
+      top: 50%;
+      transform: translateY(-50%);
+      height: 54px;              /* tweak if you want larger/smaller */
     }
 
-    .contact h2 {
-      margin-bottom: 15px;
+    /* Sections */
+    .section { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
+    .section h2 { color: var(--brand); margin: 0 0 15px; text-align: left; }
+
+    /* Tighten gap between About and Services */
+    #about { padding-bottom: 5px; margin-bottom: 0; }
+    #services { padding-top: 5px; margin-top: 0; }
+
+    /* Service cards (left-aligned content) */
+    .service-cards { display: flex; flex-wrap: wrap; gap: 20px; }
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+      flex: 1 1 300px;
     }
+
+    /* Footer */
+    footer { background: var(--brand); color:#fff; text-align:center; padding: 26px 20px; margin-top: 40px; }
+    footer a { color:#9fd0ff; text-decoration:none; }
+    footer a:hover { text-decoration:underline; }
   </style>
 </head>
 <body>
+
   <header>
-    <img src="new.png" alt="ESS Logo" class="logo-left">
-    <h1>Empowerment Support Solutions LLC</h1>
+    <div class="header-wrap">
+      <!-- Use the file exactly named "new png" (with a space) -->
+      <img src="new%20png" alt="ESS Logo" class="logo-left">
+      <h1>Empowerment Support Solutions LLC</h1>
+    </div>
   </header>
 
-  <section id="about">
+  <section id="about" class="section">
     <h2>About Us</h2>
     <p>At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. 
     Our work is rooted in <strong>Person-Centered Thinking (PCT)</strong>, which means we put the voice, choice, and goals of the participant at the center of everything we do. 
@@ -97,35 +74,36 @@
 
     <p>Whether it’s developing daily living skills, connecting with the community, or building independence, 
     we tailor our services to meet the specific needs of each participant. We recognize that every journey is different, 
-    and our role is to walk alongside individuals and families to make sure services are not just provided but are meaningful, respectful, and empowering.</p>
+    and our role is to walk alongside individuals and families to make sure services are not just provided—but are meaningful, respectful, and empowering.</p>
 
     <p>ESS is committed to flexibility, reliability, and collaboration. 
     We work hand-in-hand with families, Independent Facilitators, and regional center teams to ensure that supports are not only effective but also aligned with the participant’s life vision. 
     Our mission is simple: <strong>supporting people to live their best lives, their way</strong>.</p>
   </section>
 
-  <section id="services">
+  <section id="services" class="section">
     <h2>Our Services</h2>
-    <div class="services">
-      <div class="service">
+    <div class="service-cards">
+      <div class="card">
         <h3>Independent Living Support</h3>
         <p>Daily one-on-one support designed around each participant’s strengths, preferences, and goals—helping people build confidence, skills, and independence at their own pace.</p>
       </div>
-      <div class="service">
+      <div class="card">
         <h3>Staff Placement</h3>
         <p>We provide dependable staff you can count on—trained to follow PCT practices, honor individual routines, and collaborate closely with families for consistency and trust.</p>
       </div>
-      <div class="service">
+      <div class="card">
         <h3>SDP Coordination</h3>
         <p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p>
       </div>
     </div>
   </section>
 
-  <section id="contact" class="contact">
+  <footer>
     <h2>Contact Us</h2>
     <p><strong>Phone:</strong> 626-596-6155</p>
     <p><strong>Email:</strong> <a href="mailto:info@empowermentsupportsolutions.com">info@empowermentsupportsolutions.com</a></p>
-  </section>
+  </footer>
+
 </body>
 </html>
