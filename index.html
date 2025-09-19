@@ -9,81 +9,95 @@
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f7f7fb;
+      background-color: #f8f9fc;
       color: #333;
-      line-height: 1.6;
     }
 
     header {
       background: #2c3e50;
       color: white;
-      padding: 20px 0;
-      text-align: center;
-      font-size: 1.8em;
-      font-weight: bold;
+      padding: 15px 30px;
     }
 
-    .section {
-      padding: 30px 20px;
-      max-width: 1000px;
-      margin: auto;
-    }
-
-    /* Remove extra gap between About and Services */
-    #about {
-      padding-bottom: 5px; /* super tight bottom */
-      margin-bottom: 0;
-    }
-    #services {
-      padding-top: 5px;  /* reduce top space */
-      margin-top: 0;
-    }
-
-    .section h2 {
-      text-align: left;
-      color: #2c3e50;
-      margin-bottom: 15px;
-    }
-
-    .services {
+    .header-left {
       display: flex;
-      gap: 20px;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      align-items: center;
     }
 
-    .service-card {
+    .logo {
+      height: 50px;
+      margin-right: 15px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+
+    section {
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    #about {
+      max-width: 900px;
+      margin: 0 auto 10px auto; /* tightened bottom margin */
+      text-align: left;
+    }
+
+    #services {
+      padding-top: 0; /* reduced spacing */
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+
+    .service-cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .card {
       background: white;
+      border-radius: 10px;
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      flex: 1;
-      min-width: 250px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 250px;
+      text-align: left;
     }
 
     footer {
       background: #2c3e50;
       color: white;
-      text-align: center;
       padding: 30px 20px;
+      text-align: center;
       margin-top: 40px;
     }
 
-    footer h2 {
-      margin-bottom: 15px;
+    footer a {
+      color: #4da3ff;
+      text-decoration: none;
     }
 
-    footer p {
-      margin: 5px 0;
+    footer a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
+
   <header>
-    Empowerment Support Solutions LLC
+    <div class="header-left">
+      <img src="logo.png" alt="ESS Logo" class="logo">
+      <h1>Empowerment Support Solutions LLC</h1>
+    </div>
   </header>
 
-  <div class="section" id="about">
+  <section id="about">
     <h2>About Us</h2>
     <p>At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. 
     Our work is rooted in <strong>Person-Centered Thinking (PCT)</strong>, which means we put the voice, choice, and goals of the participant at the center of everything we do. 
@@ -96,41 +110,31 @@
     <p>ESS is committed to flexibility, reliability, and collaboration. 
     We work hand-in-hand with families, Independent Facilitators, and regional center teams to ensure that supports are not only effective but also aligned with the participant’s life vision. 
     Our mission is simple: <strong>supporting people to live their best lives, their way</strong>.</p>
-  </div>
+  </section>
 
-  <div class="section" id="services">
+  <section id="services">
     <h2>Our Services</h2>
-    <div class="services">
-      <div class="service-card">
+    <div class="service-cards">
+      <div class="card">
         <h3>Independent Living Support</h3>
-        <p>
-          Daily one-on-one support designed around each participant’s strengths, preferences, and goals—
-          helping people build confidence, skills, and independence at their own pace.
-        </p>
+        <p>Daily one-on-one support designed around each participant’s strengths, preferences, and goals—helping people build confidence, skills, and independence at their own pace.</p>
       </div>
-      <div class="service-card">
+      <div class="card">
         <h3>Staff Placement</h3>
-        <p>
-          We provide dependable staff you can count on—trained to follow PCT practices, honor individual 
-          routines, and collaborate closely with families for consistency and trust.
-        </p>
+        <p>We provide dependable staff you can count on—trained to follow PCT practices, honor individual routines, and collaborate closely with families for consistency and trust.</p>
       </div>
-      <div class="service-card">
+      <div class="card">
         <h3>SDP Coordination</h3>
-        <p>
-          We partner with Independent Facilitators and FMS providers to ensure services are not only 
-          delivered smoothly but also connected to the person’s vision of a meaningful life.
-        </p>
+        <p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p>
       </div>
     </div>
-  </div>
+  </section>
 
   <footer>
     <h2>Contact Us</h2>
     <p><strong>Phone:</strong> 626-596-6155</p>
-    <p><strong>Email:</strong> <a href="mailto:info@empowermentsupportsolutions.com" style="color: #fff;">info@empowermentsupportsolutions.com</a></p>
+    <p><strong>Email:</strong> <a href="mailto:info@empowermentsupportsolutions.com">info@empowermentsupportsolutions.com</a></p>
   </footer>
+
 </body>
 </html>
-
-
