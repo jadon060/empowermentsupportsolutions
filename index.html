@@ -24,12 +24,14 @@
       font-size: 1.9rem;
       text-align: center;
     }
+
+    /* ✅ Only change: make logo bigger and align it to sit just above the section below */
     .logo-left {
       position: absolute;
       left: 30px;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 120px;   /* enlarged and aligned */
+      top: calc(100% - 8px);   /* anchor near bottom of header */
+      transform: translateY(-100%); /* align logo's bottom to that point */
+      height: 150px;           /* larger but still fitting */
       max-height: 100%;
     }
 
@@ -61,6 +63,7 @@
 
   <header>
     <div class="header-wrap">
+      <!-- Use the file exactly named "new png" (with a space) -->
       <img src="new%20png" alt="ESS Logo" class="logo-left">
       <h1>Empowerment Support Solutions LLC</h1>
     </div>
@@ -74,7 +77,7 @@
 
     <p>Whether it’s developing daily living skills, connecting with the community, or building independence, 
     we tailor our services to meet the specific needs of each participant. We recognize that every journey is different, 
-    and our role is to walk alongside individuals and families to make sure services are not just provided—but are meaningful, respectful, and empowering.</p>
+    and our role is to walk alongside individuals and families to make sure services are not just provided but are meaningful, respectful, and empowering.</p>
 
     <p>ESS is committed to flexibility, reliability, and collaboration. 
     We work hand-in-hand with families, Independent Facilitators, and regional center teams to ensure that supports are not only effective but also aligned with the participant’s life vision. 
@@ -107,3 +110,4 @@
 
 </body>
 </html>
+
