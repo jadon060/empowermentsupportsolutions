@@ -10,7 +10,7 @@
     * { box-sizing: border-box; }
     body { margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
 
-    /* Header: title centered only */
+    /* Header */
     header { background:var(--brand); color:#fff; }
     .header-wrap {
       display: flex;
@@ -24,11 +24,11 @@
       text-align: center;
     }
 
-    /* Logo aligned with About Us */
-    .logo-left {
+    /* Logo centered above About Us */
+    .logo-center {
       display: block;
-      margin: 15px 0 5px 30px; /* left aligned with section text */
-      height: 140px;           /* larger but still fitting */
+      margin: 20px auto 10px auto; /* center and tighten gap */
+      height: 160px;              /* good size */
       max-width: 100%;
     }
 
@@ -40,7 +40,7 @@
     #about { padding-bottom: 5px; margin-bottom: 0; }
     #services { padding-top: 5px; margin-top: 0; }
 
-    /* Service cards (left-aligned content) */
+    /* Service cards */
     .service-cards { display: flex; flex-wrap: wrap; gap: 20px; }
     .card {
       background: var(--card);
@@ -64,8 +64,8 @@
     </div>
   </header>
 
-  <!-- ✅ Logo aligned with About Us -->
-  <img src="new%20png" alt="ESS Logo" class="logo-left">
+  <!-- ✅ Logo centered -->
+  <img src="new%20png" alt="ESS Logo" class="logo-center">
 
   <section id="about" class="section">
     <h2>About Us</h2>
@@ -75,7 +75,7 @@
 
     <p>Whether it’s developing daily living skills, connecting with the community, or building independence, 
     we tailor our services to meet the specific needs of each participant. We recognize that every journey is different, 
-    and our role is to walk alongside individuals and families to make sure services are not just provided but are meaningful, respectful, and empowering.</p>
+    and our role is to walk alongside individuals and families to make sure services are not just provided—but are meaningful, respectful, and empowering.</p>
 
     <p>ESS is committed to flexibility, reliability, and collaboration. 
     We work hand-in-hand with families, Independent Facilitators, and regional center teams to ensure that supports are not only effective but also aligned with the participant’s life vision. 
