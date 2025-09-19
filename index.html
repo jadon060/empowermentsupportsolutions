@@ -3,88 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Empowerment Support Solutions</title>
+  <title>Empowerment Support Solutions LLC</title>
   <style>
-    :root{
-      --brand:#2c3e50;
-      --bg:#f4f4f9;
-      --card:#ffffff;
-      --text:#333;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7fb;
+      color: #333;
+      line-height: 1.6;
     }
-    *{box-sizing:border-box}
-    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:var(--text);line-height:1.6}
-    header{background:var(--brand);color:#fff;padding:22px 16px;text-align:center}
-    header h1{margin:0;font-size:2.2rem}
 
-    /* Sections */
-    section{max-width:1000px;margin:0 auto;padding:28px 20px}
-    h2{color:var(--brand);margin:0 0 16px}
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      font-size: 1.8em;
+      font-weight: bold;
+    }
 
-    /* Cards */
-    .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
-    .service{background:var(--card);padding:20px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+    .section {
+      padding: 40px 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
 
-    /* Contact block centered & mid-page */
-    .contact{background:var(--card);padding:22px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);
-             max-width:720px;margin:10px auto 18px;text-align:center}
-    .contact a{color:#0b66c3;text-decoration:none}
+    .section h2 {
+      text-align: left;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
 
-    /* Tighter gap between About and Services */
-    .tight{padding-top:18px;padding-bottom:18px}
+    .about {
+      margin-bottom: 30px;
+    }
+
+    .services {
+      display: flex;
+      gap: 20px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .service-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      flex: 1;
+      min-width: 250px;
+    }
+
+    footer {
+      background: #2c3e50;
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+      margin-top: 40px;
+    }
+
+    footer h2 {
+      margin-bottom: 15px;
+    }
+
+    footer p {
+      margin: 5px 0;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>Empowerment Support Solutions LLC</h1>
-    <!-- nav removed on purpose -->
+    Empowerment Support Solutions LLC
   </header>
 
-  <section id="about">
+  <div class="section about">
     <h2>About Us</h2>
-    <p>At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. 
-    Our work is rooted in <strong>Person-Centered Thinking (PCT)</strong>, which means we put the voice, choice, and goals of the participant at the center of everything we do. 
-    We listen first, then design supports that reflect what is important <em>to</em> and important <em>for</em> the person.</p>
+    <p>
+      Empowerment Support Solutions LLC (ESS) is dedicated to helping individuals in California’s 
+      Self-Determination Program (SDP) thrive. ESS is guided by Person-Centered Thinking (PCT) principles, 
+      meaning we focus on the unique strengths, preferences, and goals of every individual we support. 
+      Our services are not one-size-fits-all—we tailor our approach to each person’s specific needs, 
+      ensuring that supports are meaningful, respectful, and empowering. By collaborating with families 
+      and honoring individual voices, we provide staffing and community-based services that promote 
+      independence, stability, and opportunities for people to live their best lives, their way.
+    </p>
+  </div>
 
-    <p>Whether it’s developing daily living skills, connecting with the community, or building independence, 
-    we tailor our services to meet the specific needs of each participant. We recognize that every journey is different, 
-    and our role is to walk alongside individuals and families to make sure services are not just provided but are meaningful, respectful, and empowering.</p>
-
-    <p>ESS is committed to flexibility, reliability, and collaboration. 
-    We work hand-in-hand with families, Independent Facilitators, and regional center teams to ensure that supports are not only effective but also aligned with the participant’s life vision. 
-    Our mission is simple: <strong>supporting people to live their best lives, their way</strong>.</p>
-  </section>
-
-  <!-- Contact moved to the middle -->
-  <section id="contact" class="tight">
-    <div class="contact">
-      <h2>Contact Us</h2>
-      <p><strong>Phone:</strong> 626-596-6155</p>
-      <p><strong>Email:</strong> <a href="mailto:info@empowermentsupportsolutions.com">info@empowermentsupportsolutions.com</a></p>
-    </div>
-  </section>
-
-  <!-- Tighter spacing starts here -->
-  <section id="services" class="tight">
+  <div class="section">
     <h2>Our Services</h2>
     <div class="services">
-      <div class="service">
+      <div class="service-card">
         <h3>Independent Living Support</h3>
-        <p>Daily one-on-one support designed around each participant’s strengths, preferences, and goals—helping people build confidence, skills, and independence at their own pace.</p>
+        <p>
+          Daily one-on-one support designed around each participant’s strengths, preferences, and goals—
+          helping people build confidence, skills, and independence at their own pace.
+        </p>
       </div>
-      <div class="service">
+      <div class="service-card">
         <h3>Staff Placement</h3>
-        <p>We provide dependable staff you can count on—trained to follow PCT practices, honor individual routines, and collaborate closely with families for consistency and trust.</p>
+        <p>
+          We provide dependable staff you can count on—trained to follow PCT practices, honor individual 
+          routines, and collaborate closely with families for consistency and trust.
+        </p>
       </div>
-      <div class="service">
+      <div class="service-card">
         <h3>SDP Coordination</h3>
-        <p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p>
+        <p>
+          We partner with Independent Facilitators and FMS providers to ensure services are not only 
+          delivered smoothly but also connected to the person’s vision of a meaningful life.
+        </p>
       </div>
     </div>
-  </section>
+  </div>
 
-  <footer style="background:var(--brand);color:#fff;text-align:center;padding:16px 10px;margin-top:10px;font-size:.9rem">
-    <p>&copy; 2025 Empowerment Support Solutions LLC. All rights reserved.</p>
+  <footer>
+    <h2>Contact Us</h2>
+    <p><strong>Phone:</strong> 626-596-6155</p>
+    <p><strong>Email:</strong> <a href="mailto:info@empowermentsupportsolutions.com" style="color: #fff;">info@empowermentsupportsolutions.com</a></p>
   </footer>
 </body>
 </html>
-
