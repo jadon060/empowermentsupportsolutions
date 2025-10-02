@@ -81,9 +81,28 @@
       font-size:0.9rem;
       color:#ccc;
     }
+
+    /* Translate toggle */
+    .translate-toggle{
+      position:fixed; top:12px; right:12px; z-index:9999;
+      display:flex; gap:6px; font:14px/1.2 system-ui, Arial, sans-serif;
+    }
+    .translate-toggle button{
+      border:1px solid #d0d7de; background:#fff; padding:6px 10px; border-radius:6px;
+      cursor:pointer;
+    }
+    .translate-toggle button.active{ outline:2px solid #2c3e50; }
+    #google_translate_element { display:none; }
   </style>
 </head>
 <body>
+
+  <!-- Translation toggle -->
+  <div class="translate-toggle" aria-label="Site language">
+    <button id="btn-en" type="button">EN</button>
+    <button id="btn-es" type="button">ES</button>
+  </div>
+  <div id="google_translate_element"></div>
 
   <header>
     <h1>Empowerment Support Solutions LLC</h1>
@@ -155,6 +174,44 @@
     <!-- Copyright -->
     <p class="copyright">© 2025 Empowerment Support Solutions LLC. All rights reserved.</p>
   </footer>
+
+  <!-- Google Translate Script -->
+  <script>
+    function googleTranslateElementInit(){
+      new google.translate.TranslateElement(
+        {pageLanguage:'en', includedLanguages:'es', autoDisplay:false},
+        'google_translate_element'
+      );
+      setActiveFromCookie();
+    }
+
+    function setLang(lang){
+      var val = (lang === 'es') ? '/en/es' : '/es/en';
+      document.cookie = 'googtrans=' + val + ';path=/';
+      var hostParts = window.location.hostname.split('.');
+      if (hostParts.length > 1) {
+        var rootDomain = hostParts.slice(-2).join('.');
+        document.cookie = 'googtrans=' + val + ';domain=.' + rootDomain + ';path=/';
+      }
+      location.reload();
+    }
+
+    function setActiveFromCookie(){
+      var c = document.cookie;
+      var isES = /googtrans=\/en\/es/.test(c);
+      document.getElementById('btn-en').classList.toggle('active', !isES);
+      document.getElementById('btn-es').classList.toggle('active', isES);
+    }
+
+    document.getElementById('btn-en').addEventListener('click', function(){ setLang('en'); });
+    document.getElementById('btn-es').addEventListener('click', function(){ setLang('es'); });
+
+    (function(){
+      var s = document.createElement('script');
+      s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      document.head.appendChild(s);
+    })();
+  </script>
 
 </body>
 </html>
