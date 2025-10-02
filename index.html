@@ -8,7 +8,7 @@
     /* Base */
     :root { --brand:#2c3e50; --bg:#f7f7fb; --card:#fff; --text:#333; }
     * { box-sizing: border-box; }
-    body { margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+    body { margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); line-height:1.6; scroll-behavior: smooth; }
 
     /* Header */
     header { background:var(--brand); color:#fff; text-align:center; padding: 20px; }
@@ -34,6 +34,22 @@
       padding: 20px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.08);
       flex: 1 1 300px;
+    }
+
+    /* Contact button */
+    .cta-button {
+      display:inline-block;
+      margin-top:15px;
+      background:#2c3e50;
+      color:white;
+      padding:10px 20px;
+      border-radius:6px;
+      text-decoration:none;
+      font-weight:bold;
+      font-size:1rem;
+    }
+    .cta-button:hover {
+      background:#1f2a3a;
     }
 
     /* Footer */
@@ -86,6 +102,9 @@
             referrerpolicy="strict-origin-when-cross-origin" 
             title="ESS Intro Video">
     </iframe>
+    <br>
+    <!-- Contact Us Button -->
+    <a href="#contact" class="cta-button">Contact Us Today</a>
   </div>
 
   <section id="about" class="section">
@@ -121,7 +140,7 @@
     </div>
   </section>
 
-  <footer>
+  <footer id="contact">
     <h2>Contact Us</h2>
     <p><strong>Phone:</strong> 626-596-6155</p>
     <p><strong>Email:</strong> <a href="mailto:Empowermentess@gmail.com">empowermentess@gmail.com</a></p>
