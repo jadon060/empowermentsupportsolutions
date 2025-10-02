@@ -16,7 +16,8 @@
       color:#fff; 
       text-align:center; 
       padding: 20px; 
-      padding-top: calc(20px + env(safe-area-inset-top)); /* add safe area on iOS */
+      padding-top: calc(60px + env(safe-area-inset-top)); /* extra space for buttons */
+      position: relative;
     }
     header h1 { margin:0; font-size: 1.9rem; }
 
@@ -54,9 +55,7 @@
       font-weight:bold;
       font-size:1rem;
     }
-    .cta-button:hover {
-      background:#1f2a3a;
-    }
+    .cta-button:hover { background:#1f2a3a; }
 
     /* Footer */
     footer { 
@@ -71,17 +70,15 @@
     .trust-badge {
       display:inline-block;
       margin:15px 0;
-      background:#1f4e99; /* darker blue */
+      background:#1f4e99;
       color:white;
-      padding:8px 16px; /* slightly smaller */
+      padding:8px 16px;
       border-radius:6px;
       text-decoration:none;
       font-weight:bold;
       font-size:0.9rem;
     }
-    .trust-badge:hover {
-      background:#163a73; /* darker on hover */
-    }
+    .trust-badge:hover { background:#163a73; }
     .copyright {
       margin-top:15px;
       font-size:0.9rem;
@@ -90,20 +87,21 @@
 
     /* Translate toggle */
     .translate-toggle{
-      position:fixed; 
-      top:50px; /* moved down so it doesn’t overlap header */
-      right:12px; 
+      position:fixed;
+      top: calc(8px + env(safe-area-inset-top)); /* safe for iOS notch */
+      right:12px;
       z-index:9999;
-      display:flex; 
-      gap:6px; 
+      display:flex;
+      gap:6px;
       font:14px/1.2 system-ui, Arial, sans-serif;
     }
     .translate-toggle button{
-      border:1px solid #d0d7de; 
-      background:#fff; 
-      padding:6px 10px; 
+      border:1px solid #d0d7de;
+      background:#fff;
+      padding:4px 8px;
       border-radius:6px;
       cursor:pointer;
+      font-size:13px;
     }
     .translate-toggle button.active{ outline:2px solid #2c3e50; }
     #google_translate_element { display:none; }
@@ -111,7 +109,7 @@
 </head>
 <body>
 
-  <!-- Translation toggle -->
+  <!-- Translation toggle at very top right -->
   <div class="translate-toggle" aria-label="Site language">
     <button id="btn-en" type="button">EN</button>
     <button id="btn-es" type="button">ES</button>
@@ -126,7 +124,7 @@
   <img src="new%20png" alt="ESS Logo" class="logo-center">
 
   <!-- Vimeo video embed -->
-  <div style="text-align:center; margin:12px 0;"> <!-- reduced margin -->
+  <div style="text-align:center; margin:12px 0;">
     <iframe src="https://player.vimeo.com/video/1123978843?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" 
             width="560" height="315" 
             style="max-width:100%; border-radius:10px;" 
