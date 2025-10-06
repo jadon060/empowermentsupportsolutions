@@ -22,22 +22,32 @@
     }
     header h1 { margin:0; font-size: 1.9rem; }
 
-    /* ✅ Login button */
+    /* ✅ Compact Login button */
     .login-btn {
       position: absolute;
-      right: 20px;
-      top: 20px;
-      background: #fff;
+      right: 16px;
+      top: 16px;
+      background: #ffffff;
       color: #2c3e50;
-      font-weight: bold;
-      padding: 8px 14px;
-      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      border-radius: 5px;
       text-decoration: none;
       border: 1px solid #ccc;
       transition: background 0.2s;
+      z-index: 9998; /* stays below translate toggle */
     }
     .login-btn:hover {
       background: #e6e6e6;
+    }
+    @media (max-width: 600px) {
+      .login-btn {
+        right: 10px;
+        top: 10px;
+        font-size: 0.75rem;
+        padding: 4px 8px;
+      }
     }
 
     /* Centered logo */
@@ -137,7 +147,7 @@
 
   <header>
     <h1>Empowerment Support Solutions LLC</h1>
-    <!-- ✅ Login button added -->
+    <!-- ✅ Login button -->
     <a href="/login.html" class="login-btn">Login</a>
   </header>
 
