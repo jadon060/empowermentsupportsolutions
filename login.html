@@ -5,44 +5,103 @@
   <title>ESS Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body{margin:0;display:grid;place-items:center;min-height:100vh;background:#f7f7fb;font-family:Arial,Helvetica,sans-serif}
-    .card{background:#fff;padding:22px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.08);max-width:380px;width:92%}
-    h2{margin:0 0 8px}
-    p{margin:0 0 12px}
-    input,button{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:16px}
-    button{margin-top:12px;background:#2c3e50;color:#fff;border:0;font-weight:600;cursor:pointer}
-    .err{color:#b00020;margin-top:8px;min-height:1.2em}
-    a.home{display:inline-block;margin-top:10px;color:#2c3e50;text-decoration:none}
+    body {
+      margin: 0;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      background: #f7f7fb;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .card {
+      background: #fff;
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.08);
+      max-width: 380px;
+      width: 92%;
+    }
+    h2 {
+      margin: 0 0 8px;
+      color: #2c3e50;
+    }
+    p {
+      margin: 0 0 12px;
+      color: #555;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 12px;
+      background: #2c3e50;
+      color: #fff;
+      border: 0;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    button:hover {
+      background: #1b2a38;
+    }
+    .err {
+      color: #b00020;
+      margin-top: 8px;
+      min-height: 1.2em;
+    }
+    a.home {
+      display: inline-block;
+      margin-top: 10px;
+      color: #2c3e50;
+      text-decoration: none;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <h2>ESS Login</h2>
-    <p>Enter credentials.</p>
+    <p>Enter credentials to access your portal.</p>
     <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
     <button id="go">Login</button>
     <div id="err" class="err"></div>
     <a class="home" href="/">← Back to Home</a>
   </div>
 
-<script>
-  // 🔒 simple hide-only passwords (change these when you want)
-  const FAMILY_PW = "familia2025";
-  const STAFF_PW  = "staff2025";
+  <script>
+    // 🔒 Password routing
+    const FAMILY_PW = "08052023"; // Family password
+    const STAFF_PW  = "05041993"; // Staff password
 
-  function route() {
-    const val = (document.getElementById("pw").value || "").trim();
-    const err = document.getElementById("err");
-    if (!val) { err.textContent = "Please enter a password."; return; }
-    if (val === FAMILY_PW) { location.href = "/family/"; return; }
-    if (val === STAFF_PW)  { location.href = "/staff/";  return; }
-    err.textContent = "Wrong password.";
-  }
+    function route() {
+      const val = (document.getElementById("pw").value || "").trim();
+      const err = document.getElementById("err");
 
-  document.getElementById("go").addEventListener("click", route);
-  document.getElementById("pw").addEventListener("keydown", e => {
-    if (e.key === "Enter") route();
-  });
-</script>
+      if (!val) {
+        err.textContent = "Please enter a password.";
+        return;
+      }
+
+      if (val === FAMILY_PW) {
+        location.href = "families.html"; // ✅ Family portal
+        return;
+      }
+      if (val === STAFF_PW) {
+        location.href = "staff.html"; // ✅ Staff portal
+        return;
+      }
+
+      err.textContent = "Wrong password. Please try again.";
+    }
+
+    document.getElementById("go").addEventListener("click", route);
+    document.getElementById("pw").addEventListener("keydown", e => {
+      if (e.key === "Enter") route();
+    });
+  </script>
 </body>
 </html>
