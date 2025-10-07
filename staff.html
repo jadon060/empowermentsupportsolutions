@@ -2,72 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>ESS • Staff Portal</title>
+  <title>ESS • Family Resources</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    :root{--brand:#2c3e50;--bg:#f7f7fb;--card:#fff}
+    :root{
+      --brand:#2c3e50; --bg:#f7f7fb; --card:#fff;
+      --btn:#2c3e50; --btn-hover:#1b2a38;
+    }
     body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#222}
     header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06)}
     .logo{font-weight:700;color:var(--brand)}
-    .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--brand);color:#fff;text-decoration:none;font-weight:600}
+    .btn-header{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--brand);color:#fff;text-decoration:none;font-weight:600}
     .wrap{max-width:1080px;margin:0 auto;padding:22px}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
     .card{background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.08);padding:18px}
     h2{margin:0 0 12px;color:#2c3e50}
-    h3{margin:0 0 8px}
-    ul{margin:0;padding-left:18px}
+    h3{margin:0 0 12px;color:#2c3e50}
+    .link-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .download-btn{
+      display:inline-block;background:var(--btn);color:#fff;
+      padding:10px 14px;border-radius:8px;text-decoration:none;
+      font-weight:600;font-size:15px;transition:background .2s ease;
+    }
+    .download-btn:hover{background:var(--btn-hover)}
+    .download-btn::before{content:"📄 ";margin-right:2px}
     footer{padding:24px;text-align:center;color:#777}
-    a{color:#2c3e50;text-decoration:none}
-    a:hover{text-decoration:underline}
   </style>
 </head>
 <body>
   <header>
-    <div class="logo">ESS • Staff Portal</div>
-    <a class="btn" href="login.html">Sign out</a>
+    <div class="logo">ESS • Family Resources</div>
+    <a class="btn-header" href="login.html">Back to Login</a>
   </header>
 
   <main class="wrap">
-    <h2>Welcome, ESS Staff</h2>
-    <p>Use the resources below for onboarding, policies, timesheets, and daily documentation.</p>
+    <h2>Welcome, Families</h2>
+    <p>Start here for welcome materials, intake, consent, and service paperwork.</p>
 
     <section class="grid">
-      <!-- Staff Documents -->
+      <!-- Welcome & Orientation -->
       <div class="card">
-        <h3>Staff Documents</h3>
-        <ul>
-          <li><a href="docs/ESS_Staff_ Welcome Packet.pdf" target="_blank" rel="noopener">Staff Welcome Packet — PDF</a></li>
-          <li><a href="docs/Head_to_Toe_Injury_Form.pdf" target="_blank" rel="noopener">Head-to-Toe / Injury Form — PDF</a></li>
-          <li><a href="docs/Staff_Daily_Schedule_Notes_ESS.pdf" target="_blank" rel="noopener">Daily Schedule & Notes — PDF</a></li>
+        <h3>Welcome & Orientation</h3>
+        <ul class="link-list">
+          <li><a class="download-btn" href="docs/ESS_Service_Menu (EN).pdf" target="_blank" rel="noopener">Service Menu (English)</a></li>
+          <li><a class="download-btn" href="docs/ESS Service Menu (ES).pdf" target="_blank" rel="noopener">Menú de Servicios (Español)</a></li>
+          <li><a class="download-btn" href="docs/PCT_Goal_Template.pdf" target="_blank" rel="noopener">PCT Goal Template</a></li>
         </ul>
       </div>
 
-      <!-- Onboarding & Compliance -->
+      <!-- Required Forms -->
       <div class="card">
-        <h3>Onboarding & Compliance (e-sign)</h3>
-        <ul>
-          <li><a href="https://tally.so/r/your-staff-onboarding" target="_blank" rel="noopener">Staff Onboarding Packet (Tally)</a></li>
-          <li><a href="https://tally.so/r/your-w4-i9" target="_blank" rel="noopener">W-4 / I-9 Submission</a></li>
-          <li><a href="https://tally.so/r/your-policy-ack" target="_blank" rel="noopener">Policy Acknowledgments</a></li>
-        </ul>
-      </div>
-
-      <!-- Timesheets & Notes -->
-      <div class="card">
-        <h3>Timesheets & Notes</h3>
-        <ul>
-          <li><a href="docs/Staff_Daily_Schedule_Notes_ESS.pdf" target="_blank" rel="noopener">Timesheet (fillable PDF)</a></li>
-          <li><a href="docs/Head_to_Toe_Injury_Form.pdf" target="_blank" rel="noopener">Incident / Injury Form — PDF</a></li>
+        <h3>Required Forms</h3>
+        <ul class="link-list">
+          <li><a class="download-btn" href="docs/ESS_SDP_Agreement (EN).pdf" target="_blank" rel="noopener">SDP Agreement (English)</a></li>
+          <li><a class="download-btn" href="docs/ESS_SDP_Agreement (ES).pdf" target="_blank" rel="noopener">SDP Agreement (Español)</a></li>
         </ul>
       </div>
 
       <!-- Helpful Links -->
       <div class="card">
         <h3>Helpful Links</h3>
-        <ul>
-          <li><a href="docs/W9.pdf" target="_blank" rel="noopener">W-9 — PDF</a></li>
-          <li><a href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">California Self-Determination Program</a></li>
-          <li><a href="mailto:jadonanthonyc@gmail.com">Contact ESS Admin</a></li>
+        <ul class="link-list">
+          <li><a class="download-btn" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">California Self-Determination Program</a></li>
+          <li><a class="download-btn" href="index.html#contact">Contact ESS</a></li>
         </ul>
       </div>
     </section>
