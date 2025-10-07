@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ESS • Family Resources</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{--brand:#2c3e50;--bg:#f7f7fb;--card:#fff}
+    body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#222}
+    header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+    .logo{font-weight:700;color:var(--brand)}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--brand);color:#fff;text-decoration:none;font-weight:600}
+    .wrap{max-width:1080px;margin:0 auto;padding:22px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .card{background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.08);padding:18px}
+    h2{margin:0 0 12px;color:#2c3e50}
+    h3{margin:0 0 8px}
+    ul{margin:0;padding-left:18px}
+    footer{padding:24px;text-align:center;color:#777}
+    a{color:#2c3e50;text-decoration:none}
+    a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">ESS • Family Resources</div>
+    <a class="btn" href="login.html">Back to Login</a>
+  </header>
+
+  <main class="wrap">
+    <h2>Welcome, Families</h2>
+    <p>Start here for welcome materials, intake, consent, and service paperwork.</p>
+
+    <section class="grid">
+      <div class="card">
+        <h3>Welcome & Orientation</h3>
+        <ul>
+          <li><a href="docs/ESS-Family-Welcome.pdf" target="_blank" rel="noopener">Welcome Packet (PDF)</a></li>
+          <li><a href="docs/ESS-What-to-Expect.pdf" target="_blank" rel="noopener">What to Expect (PDF)</a></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Required Forms (e-sign)</h3>
+        <ul>
+          <!-- Replace with your real e-sign form links -->
+          <li><a href="https://tally.so/r/your-intake-form" target="_blank" rel="noopener">Family Intake Form</a></li>
+          <li><a href="https://tally.so/r/your-service-agreement" target="_blank" rel="noopener">Service Agreement</a></li>
+          <li><a href="https://tally.so/r/your-consent-release" target="_blank" rel="noopener">Consent & Release</a></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Reference Documents</h3>
+        <ul>
+          <li><a href="docs/ESS-Client-Rights.pdf" target="_blank" rel="noopener">Client Rights (PDF)</a></li>
+          <li><a href="docs/ESS-Communication-Guide.pdf" target="_blank" rel="noopener">Communication Guide (PDF)</a></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Helpful Links</h3>
+        <ul>
+          <li><a href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">CA Self-Determination Program</a></li>
+          <li><a href="mailto:jadonanthonyc@gmail.com">Contact ESS</a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>© <span id="y"></span> Empowerment Support Solutions</footer>
+  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+</body>
+</html>
