@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ESS • Staff Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{--brand:#2c3e50;--bg:#f7f7fb;--card:#fff}
+    body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#222}
+    header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+    .logo{font-weight:700;color:var(--brand)}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--brand);color:#fff;text-decoration:none;font-weight:600}
+    .wrap{max-width:1080px;margin:0 auto;padding:22px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .card{background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.08);padding:18px}
+    h2{margin:0 0 12px;color:#2c3e50}
+    h3{margin:0 0 8px}
+    ul{margin:0;padding-left:18px}
+    footer{padding:24px;text-align:center;color:#777}
+    a{color:#2c3e50;text-decoration:none}
+    a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">ESS • Staff Portal</div>
+    <a class="btn" href="login.html">Sign out</a>
+  </header>
+
+  <main class="wrap">
+    <h2>Welcome, ESS Staff</h2>
+    <p>Use the resources below for onboarding, policies, timesheets, and daily documentation.</p>
+
+    <section class="grid">
+      <div class="card">
+        <h3>Staff Documents</h3>
+        <ul>
+          <!-- Put your real files in /docs and update filenames -->
+          <li><a href="docs/ESS-Staff-Handbook.pdf" target="_blank" rel="noopener">Staff Handbook (PDF)</a></li>
+          <li><a href="docs/ESS-Confidentiality-Agreement.pdf" target="_blank" rel="noopener">Confidentiality Agreement (PDF)</a></li>
+          <li><a href="docs/ESS-Safety-Policy.pdf" target="_blank" rel="noopener">Safety & Incident Policy (PDF)</a></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Onboarding & Compliance (e-sign)</h3>
+        <ul>
+          <!-- Replace these with your live form links (Tally/Jotform/etc.) -->
+          <li><a href="https://tally.so/r/your-staff-onboarding" target="_blank" rel="noopener">Staff Onboarding Packet</a></li>
+          <li><a href="https://tally.so/r/your-w4-i9" target="_blank" rel="noopener">W-4 / I-9 Submission</a></li>
+          <li><a href="https://tally.so/r/your-policy-ack" target="_blank" rel="noopener">Policy Acknowledgments</a></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Timesheets & Notes</h3>
+        <ul>
+          <li><a href="docs/ESS-Timesheet-Fillable.pdf" target="_blank" rel="noopener">Timesheet (fillable PDF)</a></li>
+          <li><a href="https://tally.so/r/your-daily-notes" target="_blank" rel="noopener">Daily Notes (submit online)</a></li>
+          <li><a href="https://tally.so/r/your-incident-report" target="_blank" rel="noopener">Incident Report (submit online)</a></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Helpful Links</h3>
+        <ul>
+          <li><a href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">CA Self-Determination Program</a></li>
+          <li><a href="mailto:jadonanthonyc@gmail.com">Contact ESS Admin</a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>© <span id="y"></span> Empowerment Support Solutions</footer>
+  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+</body>
+</html>
