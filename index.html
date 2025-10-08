@@ -6,7 +6,6 @@
   <title>Empowerment Support Solutions LLC</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
-    /* Base */
     :root { --brand:#2c3e50; --bg:#f7f7fb; --card:#fff; --text:#333; }
     * { box-sizing: border-box; }
     body { margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); line-height:1.6; scroll-behavior: smooth; }
@@ -22,7 +21,7 @@
     }
     header h1 { margin:0; font-size: 1.9rem; }
 
-    /* ✅ Login button (bottom right) */
+    /* Login button */
     .login-btn {
       position: fixed;
       right: 16px;
@@ -43,6 +42,7 @@
       background: #1f2a3a;
       transform: translateY(-2px);
     }
+
     @media (max-width: 600px) {
       .login-btn {
         font-size: 0.8rem;
@@ -87,6 +87,16 @@
       font-size:1rem;
     }
     .cta-button:hover { background:#1f2a3a; }
+
+    /* ✅ Team photo (smaller, elegant) */
+    .team-photo {
+      width: 60%;
+      max-width: 600px;
+      display: block;
+      margin: 30px auto 10px auto;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
 
     /* Footer */
     footer { 
@@ -168,6 +178,11 @@
     <a href="#contact" class="cta-button">Contact Us Today</a>
   </div>
 
+  <!-- ✅ Team Photo Section -->
+  <section class="section" aria-label="ESS Team Photo">
+    <img src="images/ess_team.jpg" alt="ESS staff group photo" class="team-photo">
+  </section>
+
   <section id="about" class="section">
     <h2>About Us</h2>
     <p>At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. 
@@ -213,10 +228,8 @@
     <p class="copyright">© 2025 Empowerment Support Solutions LLC. All rights reserved.</p>
   </footer>
 
-  <!-- ✅ Login button (fixed bottom-right) -->
   <a href="/login.html" class="login-btn">Login</a>
 
-  <!-- Google Translate Script -->
   <script>
     function googleTranslateElementInit(){
       new google.translate.TranslateElement(
