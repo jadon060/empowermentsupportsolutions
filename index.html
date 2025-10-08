@@ -75,13 +75,20 @@
     }
 
     /* Service cards */
-    .service-cards { display: flex; flex-wrap: wrap; gap: 20px; }
+    .service-cards { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 20px; 
+      justify-content: center; /* keep rows centered */
+    }
     .card {
       background: var(--card);
       border-radius: 10px;
       padding: 20px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.08);
-      flex: 1 1 300px;
+      flex: 0 1 420px;     /* ✅ fixed card width so the 3rd doesn't stretch full width */
+      max-width: 420px;    /* ✅ matches flex-basis; two per row at this container size */
+      text-align: left;
     }
 
     /* Contact button */
