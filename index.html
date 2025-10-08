@@ -61,37 +61,27 @@
       background: transparent;
     }
 
-    /* Sections */
+    /* Sections (back to original left layout, slightly smaller) */
     .section { 
-      max-width: 1000px; 
+      max-width: 920px; /* slightly narrower than before */
       margin: 15px auto; 
       padding: 10px 20px; 
-      text-align: center; /* ✅ Center all section text */
     }
-
     .section h2 { 
       color: var(--brand); 
-      margin: 0 0 15px; 
-      text-align: center; /* ✅ Center headings */
-      font-size: 1.8rem;
+      margin: 0 0 10px; 
+      text-align: left;
+      font-size: 1.7rem; /* slightly smaller */
     }
 
     /* Service cards */
-    .service-cards { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 20px; 
-      justify-content: center; /* ✅ Center cards horizontally */
-    }
-
+    .service-cards { display: flex; flex-wrap: wrap; gap: 20px; }
     .card {
       background: var(--card);
       border-radius: 10px;
       padding: 20px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.08);
       flex: 1 1 300px;
-      max-width: 320px;
-      text-align: left;
     }
 
     /* Contact button */
@@ -108,14 +98,29 @@
     }
     .cta-button:hover { background:#1f2a3a; }
 
-    /* ✅ Smaller team photo */
+    /* Team photo at bottom */
     .team-photo {
-      width: 40%;
-      max-width: 400px;
+      width: 55%;
+      max-width: 520px;
       display: block;
-      margin: 20px auto;
+      margin: 10px auto 12px auto;
       border-radius: 10px;
       box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    }
+    .testimonial {
+      max-width: 720px;
+      margin: 0 auto 10px auto;
+      padding: 0 16px;
+      text-align: center;
+      color: #444;
+      font-style: italic;
+    }
+    .testimonial cite {
+      display:block;
+      margin-top:6px;
+      font-style: normal;
+      color:#666;
+      font-size: .95rem;
     }
 
     /* Footer */
@@ -198,31 +203,28 @@
     <a href="#contact" class="cta-button">Contact Us Today</a>
   </div>
 
-  <!-- About Us -->
+  <!-- About Us (left, slightly smaller) -->
   <section id="about" class="section">
     <h2>About Us</h2>
-
-    <img src="ess_team.jpg" alt="ESS staff group photo" class="team-photo" loading="lazy">
-
-    <p style="text-align:justify;">At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. 
+    <p>At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. 
     Our work is rooted in <strong>Person-Centered Thinking (PCT)</strong>, which means we put the voice, choice, and goals of the participant at the center of everything we do. 
     We listen first, then design supports that reflect what is important <em>to</em> and important <em>for</em> the person.</p>
 
-    <p style="text-align:justify;">Whether it’s developing daily living skills, connecting with the community, or building independence, 
+    <p>Whether it’s developing daily living skills, connecting with the community, or building independence, 
     we tailor our services to meet the specific needs of each participant. We recognize that every journey is different, 
     and our role is to walk alongside individuals and families to make sure services are not just provided, but are meaningful, respectful, and empowering.</p>
 
-    <p style="text-align:justify;">ESS is committed to flexibility, reliability, and collaboration. 
+    <p>ESS is committed to flexibility, reliability, and collaboration. 
     We work hand-in-hand with families, Independent Facilitators, and regional center teams to ensure that supports are not only effective but also aligned with the participant’s life vision. 
     Our mission is simple: <strong>supporting people to live their best lives, their way</strong>.</p>
   </section>
 
-  <!-- Our Services -->
+  <!-- Our Services (left, slightly smaller) -->
   <section id="services" class="section">
     <h2>Our Services</h2>
     <div class="service-cards">
       <div class="card">
-        <h3>Personalized Living Support</h3>
+        <h3>Independent Living Support</h3>
         <p>Daily one-on-one support designed around each participant’s strengths, preferences, and goals—helping people build confidence, skills, and independence at their own pace.</p>
       </div>
       <div class="card">
@@ -234,6 +236,15 @@
         <p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p>
       </div>
     </div>
+  </section>
+
+  <!-- Team photo & testimonial at the very bottom -->
+  <section id="team" class="section" aria-label="ESS Team Photo & Testimonial" style="text-align:center;">
+    <img src="ess_team.jpg" alt="ESS staff group photo" class="team-photo" loading="lazy">
+    <p class="testimonial">
+      “ESS treats our family with dignity and real care. Our son is more independent than we ever imagined.”
+      <cite>— A grateful parent</cite>
+    </p>
   </section>
 
   <!-- Footer -->
