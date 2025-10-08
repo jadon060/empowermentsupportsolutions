@@ -61,9 +61,9 @@
       background: transparent;
     }
 
-    /* Sections (back to original left layout, slightly smaller) */
+    /* Sections (left layout, slightly smaller headings) */
     .section { 
-      max-width: 920px; /* slightly narrower than before */
+      max-width: 1200px;     /* wider so 3 cards fit side-by-side */
       margin: 15px auto; 
       padding: 10px 20px; 
     }
@@ -71,24 +71,30 @@
       color: var(--brand); 
       margin: 0 0 10px; 
       text-align: left;
-      font-size: 1.7rem; /* slightly smaller */
+      font-size: 1.7rem;
     }
 
-    /* Service cards */
-    .service-cards { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 20px; 
-      justify-content: center; /* keep rows centered */
+    /* Our Services — 3-up grid that stays even */
+    .service-cards{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(300px, 1fr));
+      gap: 20px;
+      align-items: stretch;
     }
     .card {
       background: var(--card);
       border-radius: 10px;
       padding: 20px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.08);
-      flex: 0 1 420px;     /* ✅ fixed card width so the 3rd doesn't stretch full width */
-      max-width: 420px;    /* ✅ matches flex-basis; two per row at this container size */
       text-align: left;
+    }
+
+    /* Responsive columns */
+    @media (max-width: 1024px){
+      .service-cards{ grid-template-columns: repeat(2, minmax(260px, 1fr)); }
+    }
+    @media (max-width: 640px){
+      .service-cards{ grid-template-columns: 1fr; }
     }
 
     /* Contact button */
@@ -210,7 +216,7 @@
     <a href="#contact" class="cta-button">Contact Us Today</a>
   </div>
 
-  <!-- About Us (left, slightly smaller) -->
+  <!-- About Us -->
   <section id="about" class="section">
     <h2>About Us</h2>
     <p>At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. 
@@ -226,12 +232,12 @@
     Our mission is simple: <strong>supporting people to live their best lives, their way</strong>.</p>
   </section>
 
-  <!-- Our Services (left, slightly smaller) -->
+  <!-- Our Services -->
   <section id="services" class="section">
     <h2>Our Services</h2>
     <div class="service-cards">
       <div class="card">
-        <h3>Independent Living Support</h3>
+        <h3>Personalized Living Support</h3>
         <p>Daily one-on-one support designed around each participant’s strengths, preferences, and goals—helping people build confidence, skills, and independence at their own pace.</p>
       </div>
       <div class="card">
