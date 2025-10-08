@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Empowerment Support Solutions LLC</title>
-  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="icon" href="logo full.png" type="image/png" />
   <style>
     :root { --brand:#2c3e50; --bg:#f7f7fb; --card:#fff; --text:#333; }
     * { box-sizing: border-box; }
@@ -55,15 +55,19 @@
     /* Centered logo */
     .logo-center {
       display: block;
-      margin: 10px auto 5px auto;
-      max-height: 160px;
+      margin: 20px auto 10px auto;
+      max-width: 340px;
       height: auto;
-      background: transparent;
+      image-rendering: crisp-edges;
     }
 
-    /* Sections (left layout, slightly smaller headings) */
+    @media (max-width: 600px) {
+      .logo-center { max-width: 240px; }
+    }
+
+    /* Sections */
     .section { 
-      max-width: 1200px;     /* wider so 3 cards fit side-by-side */
+      max-width: 1200px;
       margin: 15px auto; 
       padding: 10px 20px; 
     }
@@ -74,8 +78,8 @@
       font-size: 1.7rem;
     }
 
-    /* Our Services — 3-up grid that stays even */
-    .service-cards{
+    /* Our Services Grid */
+    .service-cards {
       display: grid;
       grid-template-columns: repeat(3, minmax(300px, 1fr));
       gap: 20px;
@@ -89,12 +93,11 @@
       text-align: left;
     }
 
-    /* Responsive columns */
     @media (max-width: 1024px){
-      .service-cards{ grid-template-columns: repeat(2, minmax(260px, 1fr)); }
+      .service-cards { grid-template-columns: repeat(2, minmax(260px, 1fr)); }
     }
     @media (max-width: 640px){
-      .service-cards{ grid-template-columns: 1fr; }
+      .service-cards { grid-template-columns: 1fr; }
     }
 
     /* Contact button */
@@ -111,7 +114,7 @@
     }
     .cta-button:hover { background:#1f2a3a; }
 
-    /* Team photo at bottom */
+    /* Team photo & testimonial */
     .team-photo {
       width: 55%;
       max-width: 520px;
@@ -199,8 +202,8 @@
     <h1>Empowerment Support Solutions LLC</h1>
   </header>
 
-  <!-- Logo -->
-  <img src="logo.png" alt="ESS Logo" class="logo-center" loading="lazy">
+  <!-- Transparent Logo -->
+  <img src="logo full.png" alt="ESS Logo" class="logo-center" loading="lazy">
 
   <!-- Vimeo video -->
   <div style="text-align:center; margin:12px 0;">
@@ -251,11 +254,11 @@
     </div>
   </section>
 
-  <!-- Team photo & testimonial at the very bottom -->
+  <!-- Team photo & testimonial -->
   <section id="team" class="section" aria-label="ESS Team Photo & Testimonial" style="text-align:center;">
     <img src="ess_team.jpg" alt="ESS staff group photo" class="team-photo" loading="lazy">
     <p class="testimonial">
-     “Our family finally feels understood. ESS listens, adapts, and genuinely puts our loved one first.”
+      “Our family finally feels understood. ESS listens, adapts, and genuinely puts our loved one first.”
       <cite>— A grateful parent</cite>
     </p>
   </section>
