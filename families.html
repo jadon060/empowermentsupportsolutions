@@ -28,19 +28,8 @@
     .download-btn:hover{background:var(--btn-hover)}
     .download-btn::before{content:"📄 ";margin-right:2px}
     .muted{color:var(--muted);font-size:14px}
-    .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-    .input, textarea{
-      width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;outline:none
-    }
-    textarea{min-height:120px;resize:vertical}
-    .actions{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700;background:var(--btn);color:#fff
-    }
-    .btn:hover{background:var(--btn-hover)}
     footer{padding:24px;text-align:center;color:#777}
-    .fine{font-size:12px;color:#6b7280}
+    html{scroll-behavior:smooth}
   </style>
 </head>
 <body>
@@ -54,27 +43,14 @@
     <p class="muted">Quick access to your most-used forms and resources. Clean. Simple. No clutter.</p>
 
     <section class="grid">
-      <!-- Family Documents -->
+      <!-- Family Agreements -->
       <div class="card">
-        <h3>Family Documents</h3>
+        <h3>Family Agreements</h3>
         <ul class="link-list">
-          <li><a class="download-btn" href="docs/Family_Intake_Packet.pdf" target="_blank" rel="noopener">Family Intake Packet</a></li>
-          <li><a class="download-btn" href="docs/Service_Agreement_ESS.pdf" target="_blank" rel="noopener">Service Agreement</a></li>
-          <li><a class="download-btn" href="docs/Incident_Report.pdf" target="_blank" rel="noopener">Incident Report</a></li>
-          <li><a class="download-btn" href="docs/Staff_Daily_Schedule_Notes_ESS.pdf" target="_blank" rel="noopener">Daily Schedule & Notes</a></li>
+          <li><a class="download-btn" href="docs/Service_Agreement_ESS.pdf" target="_blank" rel="noopener">Service Agreement (English)</a></li>
+          <li><a class="download-btn" href="docs/Acuerdo_de_Servicios_ESS.pdf" target="_blank" rel="noopener">Acuerdo de Servicios (Español)</a></li>
+          <li><a class="download-btn" href="docs/PCT_Form.pdf" target="_blank" rel="noopener">Person-Centered Plan (PCT) Form</a></li>
         </ul>
-        <p class="fine">Tip: Avoid spaces in file names (use underscores) on GitHub Pages.</p>
-      </div>
-
-      <!-- Fillable Forms (browser-ready) -->
-      <div class="card">
-        <h3>Fillable Forms (PDF)</h3>
-        <ul class="link-list">
-          <li><a class="download-btn" href="docs/Monthly_Progress_Notes.pdf" target="_blank" rel="noopener">Monthly Progress Notes</a></li>
-          <li><a class="download-btn" href="docs/Behavior_Tracking_Sheet.pdf" target="_blank" rel="noopener">Behavior Tracking Sheet</a></li>
-          <li><a class="download-btn" href="docs/Head_to_Toe_Injury_Form.pdf" target="_blank" rel="noopener">Head‑to‑Toe / Injury Form</a></li>
-        </ul>
-        <p class="fine">Open in-browser, type, then save or print. If a PDF won’t type, re-export as fillable.</p>
       </div>
 
       <!-- Helpful Links -->
@@ -82,44 +58,16 @@
         <h3>Helpful Links</h3>
         <ul class="link-list">
           <li><a class="download-btn" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">California Self‑Determination Program</a></li>
-          <li><a class="download-btn" href="mailto:jadonanthonyc@gmail.com">Email ESS Admin</a></li>
+          <li><a class="download-btn" href="#footer">Contact ESS</a></li>
         </ul>
-        <p class="fine">For secure uploads, use your preferred cloud link and email us the share URL.</p>
-      </div>
-
-      <!-- Quick Message (with Send button) -->
-      <div class="card">
-        <h3>Quick Message</h3>
-        <p class="muted">Send us a note. This opens your email app with the info pre‑filled.</p>
-        <form onsubmit="sendMailto(event)">
-          <div class="row">
-            <input class="input" id="fam_name" placeholder="Your name" required />
-            <input class="input" id="fam_email" type="email" placeholder="Your email" required />
-            <textarea id="fam_msg" class="input" placeholder="Your message..." required></textarea>
-          </div>
-          <div class="actions" style="margin-top:12px">
-            <button class="btn" type="submit">Send</button>
-            <a class="btn" href="mailto:jadonanthonyc@gmail.com" title="Open email">Open Email</a>
-          </div>
-        </form>
-        <p class="fine">No backend needed (works on GitHub Pages). If you prefer a form backend later, we can wire one up.</p>
       </div>
     </section>
   </main>
 
-  <footer>© <span id="y"></span> Empowerment Support Solutions</footer>
+  <footer id="footer">© <span id="y"></span> Empowerment Support Solutions</footer>
 
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
-    function sendMailto(e){
-      e.preventDefault();
-      const name = encodeURIComponent(document.getElementById('fam_name').value.trim());
-      const email = encodeURIComponent(document.getElementById('fam_email').value.trim());
-      const msg = encodeURIComponent(document.getElementById('fam_msg').value.trim());
-      const subject = `ESS Family Message — ${decodeURIComponent(name)}`;
-      const body = `From: ${decodeURIComponent(name)}%0D%0AEmail: ${decodeURIComponent(email)}%0D%0A%0D%0A${decodeURIComponent(msg)}`;
-      window.location.href = `mailto:jadonanthonyc@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    }
   </script>
 </body>
 </html>
