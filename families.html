@@ -1,44 +1,125 @@
-<section class="grid">
-  <!-- Fillable Forms (embedded viewer + buttons) -->
-  <div class="card">
-    <h3>Fillable Forms</h3>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ESS • Family Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --brand:#2c3e50; --bg:#f7f7fb; --card:#fff;
+      --btn:#2c3e50; --btn-hover:#1b2a38; --muted:#6b7280;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#222}
+    header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
+    .logo{font-weight:700;color:var(--brand)}
+    .btn-header{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--brand);color:#fff;text-decoration:none;font-weight:600}
+    .wrap{max-width:1080px;margin:0 auto;padding:22px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .card{background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.08);padding:18px}
+    h1,h2,h3{color:#2c3e50;margin:0 0 12px}
+    p{margin:0 0 16px}
+    .link-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .download-btn{
+      display:inline-block;background:var(--btn);color:#fff;
+      padding:10px 14px;border-radius:8px;text-decoration:none;
+      font-weight:600;font-size:15px;transition:background .2s ease;
+    }
+    .download-btn:hover{background:var(--btn-hover)}
+    .download-btn::before{content:"📄 ";margin-right:2px}
+    .muted{color:var(--muted);font-size:14px}
+    .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+    .input, textarea{
+      width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;outline:none
+    }
+    textarea{min-height:120px;resize:vertical}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700;background:var(--btn);color:#fff
+    }
+    .btn:hover{background:var(--btn-hover)}
+    footer{padding:24px;text-align:center;color:#777}
+    .fine{font-size:12px;color:#6b7280}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">ESS • Family Portal</div>
+    <a class="btn-header" href="login.html">Sign out</a>
+  </header>
 
-    <!-- Embedded PDF viewer -->
-    <iframe
-      id="pdfForm"
-      title="ESS Fillable PDF"
-      src="/pdfjs/web/viewer.html?file=/pdfs/pdf.net_ESS_SDP_Agreement-(EN).pdf#zoom=page-width&view=FitH"
-      style="width:100%;height:80vh;border:0"
-      allow="fullscreen"
-    ></iframe>
+  <main class="wrap">
+    <h2>Welcome, ESS Families</h2>
+    <p class="muted">Quick access to your most-used forms and resources. Clean. Simple. No clutter.</p>
 
-    <!-- Buttons that load into the viewer (matches your existing style) -->
-    <ul class="link-list" style="margin-top:12px">
-      <li><a class="download-btn" href="#" onclick="return loadPDF('/pdfs/pdf.net_ESS_SDP_Agreement-(EN).pdf')">SDP Agreement (English) — Fillable</a></li>
-      <li><a class="download-btn" href="#" onclick="return loadPDF('/pdfs/pdf.net_ESS_SDP_Agreement-(ES).pdf')">SDP Agreement (Español) — Fillable</a></li>
-      <li><a class="download-btn" href="#" onclick="return loadPDF('/pdfs/pdf.net_PCT_Goal_Template.pdf')">PCT Goal Template — Fillable</a></li>
-      <li><a class="download-btn" href="#" onclick="return loadPDF('/pdfs/pdf.net_Head_to_Toe_Injury_Form.pdf')">Head-to-Toe Injury Form — Fillable</a></li>
-      <li><a class="download-btn" href="#" onclick="return loadPDF('/pdfs/pdf.net_Staff_Daily_Schedule_Notes_ESS.pdf')">Daily Schedule & Notes — Fillable</a></li>
-      <li><a class="download-btn" href="#" onclick="return loadPDF('/pdfs/pdf.net_ESS_Staff-Welcome-Packet.pdf')">Staff Welcome Packet — Fillable</a></li>
-      <li><a class="download-btn" href="#" onclick="return loadPDF('/pdfs/W9.pdf')">W-9 — Fillable</a></li>
-    </ul>
-  </div>
+    <section class="grid">
+      <!-- Family Documents -->
+      <div class="card">
+        <h3>Family Documents</h3>
+        <ul class="link-list">
+          <li><a class="download-btn" href="docs/Family_Intake_Packet.pdf" target="_blank" rel="noopener">Family Intake Packet</a></li>
+          <li><a class="download-btn" href="docs/Service_Agreement_ESS.pdf" target="_blank" rel="noopener">Service Agreement</a></li>
+          <li><a class="download-btn" href="docs/Incident_Report.pdf" target="_blank" rel="noopener">Incident Report</a></li>
+          <li><a class="download-btn" href="docs/Staff_Daily_Schedule_Notes_ESS.pdf" target="_blank" rel="noopener">Daily Schedule & Notes</a></li>
+        </ul>
+        <p class="fine">Tip: Avoid spaces in file names (use underscores) on GitHub Pages.</p>
+      </div>
 
-  <!-- Helpful Links (unchanged look) -->
-  <div class="card">
-    <h3>Helpful Links</h3>
-    <ul class="link-list">
-      <li><a class="download-btn" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">California Self-Determination Program</a></li>
-      <li><a class="download-btn" href="index.html#contact">Contact ESS</a></li>
-    </ul>
-  </div>
-</section>
+      <!-- Fillable Forms (browser-ready) -->
+      <div class="card">
+        <h3>Fillable Forms (PDF)</h3>
+        <ul class="link-list">
+          <li><a class="download-btn" href="docs/Monthly_Progress_Notes.pdf" target="_blank" rel="noopener">Monthly Progress Notes</a></li>
+          <li><a class="download-btn" href="docs/Behavior_Tracking_Sheet.pdf" target="_blank" rel="noopener">Behavior Tracking Sheet</a></li>
+          <li><a class="download-btn" href="docs/Head_to_Toe_Injury_Form.pdf" target="_blank" rel="noopener">Head‑to‑Toe / Injury Form</a></li>
+        </ul>
+        <p class="fine">Open in-browser, type, then save or print. If a PDF won’t type, re-export as fillable.</p>
+      </div>
 
-<script>
-  // Swap the PDF in the embedded viewer without changing your page style
-  function loadPDF(path) {
-    var viewer = '/pdfjs/web/viewer.html?file=' + encodeURI(path) + '#zoom=page-width&view=FitH';
-    document.getElementById('pdfForm').src = viewer;
-    return false; // prevents page jump
-  }
-</script>
+      <!-- Helpful Links -->
+      <div class="card">
+        <h3>Helpful Links</h3>
+        <ul class="link-list">
+          <li><a class="download-btn" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">California Self‑Determination Program</a></li>
+          <li><a class="download-btn" href="mailto:jadonanthonyc@gmail.com">Email ESS Admin</a></li>
+        </ul>
+        <p class="fine">For secure uploads, use your preferred cloud link and email us the share URL.</p>
+      </div>
+
+      <!-- Quick Message (with Send button) -->
+      <div class="card">
+        <h3>Quick Message</h3>
+        <p class="muted">Send us a note. This opens your email app with the info pre‑filled.</p>
+        <form onsubmit="sendMailto(event)">
+          <div class="row">
+            <input class="input" id="fam_name" placeholder="Your name" required />
+            <input class="input" id="fam_email" type="email" placeholder="Your email" required />
+            <textarea id="fam_msg" class="input" placeholder="Your message..." required></textarea>
+          </div>
+          <div class="actions" style="margin-top:12px">
+            <button class="btn" type="submit">Send</button>
+            <a class="btn" href="mailto:jadonanthonyc@gmail.com" title="Open email">Open Email</a>
+          </div>
+        </form>
+        <p class="fine">No backend needed (works on GitHub Pages). If you prefer a form backend later, we can wire one up.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>© <span id="y"></span> Empowerment Support Solutions</footer>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+    function sendMailto(e){
+      e.preventDefault();
+      const name = encodeURIComponent(document.getElementById('fam_name').value.trim());
+      const email = encodeURIComponent(document.getElementById('fam_email').value.trim());
+      const msg = encodeURIComponent(document.getElementById('fam_msg').value.trim());
+      const subject = `ESS Family Message — ${decodeURIComponent(name)}`;
+      const body = `From: ${decodeURIComponent(name)}%0D%0AEmail: ${decodeURIComponent(email)}%0D%0A%0D%0A${decodeURIComponent(msg)}`;
+      window.location.href = `mailto:jadonanthonyc@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+  </script>
+</body>
+</html>
