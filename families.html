@@ -5,26 +5,75 @@
   <title>ESS • Family Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root{ --brand:#2c3e50; --bg:#f7f7fb; --card:#fff; --btn:#2c3e50; --btn-hover:#1b2a38; --muted:#6b7280; }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#222}
-    header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
-    .logo{font-weight:700;color:var(--brand)}
-    .btn-header{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--brand);color:#fff;text-decoration:none;font-weight:600}
-    .wrap{max-width:1080px;margin:0 auto;padding:22px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-    .card{background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.08);padding:18px}
-    h1,h2,h3{color:#2c3e50;margin:0 0 12px}
-    p{margin:0 0 16px}
-    .link-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-    .download-btn{display:inline-block;background:var(--btn);color:#fff;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;transition:background .2s ease}
-    .download-btn:hover{background:var(--btn-hover)}
-    .download-btn::before{content:"📄 ";margin-right:2px}
-    .muted{color:var(--muted);font-size:14px}
-    footer{padding:24px;text-align:center;color:#777}
-    html{scroll-behavior:smooth}
+    :root {
+      --brand:#2c3e50; --bg:#f7f7fb; --card:#fff;
+      --btn:#2c3e50; --btn-hover:#1b2a38; --muted:#6b7280;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      background:var(--bg);
+      font-family:Arial,Helvetica,sans-serif;
+      color:#222;
+    }
+    header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:16px 18px;
+      background:#fff;
+      box-shadow:0 2px 12px rgba(0,0,0,.06);
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    .logo { font-weight:700; color:var(--brand); }
+    .btn-header {
+      display:inline-block;
+      padding:10px 14px;
+      border-radius:10px;
+      background:var(--brand);
+      color:#fff;
+      text-decoration:none;
+      font-weight:600;
+    }
+    .wrap { max-width:1080px; margin:0 auto; padding:22px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+    .card {
+      background:var(--card);
+      border-radius:12px;
+      box-shadow:0 8px 30px rgba(0,0,0,.08);
+      padding:18px;
+    }
+    h1,h2,h3 { color:#2c3e50; margin:0 0 12px; }
+    p { margin:0 0 16px; }
+    .link-list {
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .download-btn {
+      display:inline-block;
+      background:var(--btn);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:8px;
+      text-decoration:none;
+      font-weight:600;
+      font-size:15px;
+      transition:background .2s ease;
+    }
+    .download-btn:hover { background:var(--btn-hover); }
+    .download-btn::before { content:"📄 "; margin-right:2px; }
+    .muted { color:var(--muted); font-size:14px; }
+    footer { padding:24px; text-align:center; color:#777; }
+    html { scroll-behavior:smooth; }
   </style>
 </head>
+
 <body>
   <header>
     <div class="logo">ESS • Family Portal</div>
@@ -40,8 +89,16 @@
       <div class="card">
         <h3>Family Agreements</h3>
         <ul class="link-list">
-          <li><a class="download-btn" href="/ESS_SDP_Agreement_(EN).pdf" target="_blank" rel="noopener">Service Agreement (English)</a></li>
-          <li><a class="download-btn" href="/ESS_SDP_Agreement_(ES).pdf" target="_blank" rel="noopener">Acuerdo de Servicios (Español)</a></li>
+          <li>
+            <a class="download-btn" href="/ESS_SDP_Agreement_(EN).pdf" target="_blank" rel="noopener">
+              Service Agreement (English)
+            </a>
+          </li>
+          <li>
+            <a class="download-btn" href="/ESS_SDP_Agreement_(ES).pdf" target="_blank" rel="noopener">
+              Acuerdo de Servicios (Español)
+            </a>
+          </li>
         </ul>
       </div>
 
@@ -49,10 +106,16 @@
       <div class="card">
         <h3>Service Menu</h3>
         <ul class="link-list">
-          <li><a class="download-btn" href="/ESS_Service_Menu_(EN).pdf" target="_blank" rel="noopener">Service Menu (English)</a></li>
-          <li><a class="download-btn" href="/ESS_Service_Menu_(ES).pdf" target="_blank" rel="noopener">Menú de Servicios (Español)</a></li>
-          <!-- If your ES file actually has spaces, use this instead:
-               href="/ESS%20Service%20Menu%20(ES).pdf" -->
+          <li>
+            <a class="download-btn" href="/ESS_Service_Menu_(EN).pdf" target="_blank" rel="noopener">
+              Service Menu (English)
+            </a>
+          </li>
+          <li>
+            <a class="download-btn" href="/ESS%20Service%20Menu%20(ES).pdf" target="_blank" rel="noopener">
+              Menú de Servicios (Español)
+            </a>
+          </li>
         </ul>
       </div>
 
@@ -60,7 +123,11 @@
       <div class="card">
         <h3>PCT Planning</h3>
         <ul class="link-list">
-          <li><a class="download-btn" href="/PCT_Goal_Template.pdf" target="_blank" rel="noopener">PCT Goal Template</a></li>
+          <li>
+            <a class="download-btn" href="/PCT_Goal_Template.pdf" target="_blank" rel="noopener">
+              PCT Goal Template
+            </a>
+          </li>
         </ul>
       </div>
 
@@ -68,8 +135,16 @@
       <div class="card">
         <h3>Helpful Links</h3>
         <ul class="link-list">
-          <li><a class="download-btn" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">California Self-Determination Program</a></li>
-          <li><a class="download-btn" href="/#footer">Contact ESS</a></li>
+          <li>
+            <a class="download-btn" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">
+              California Self-Determination Program
+            </a>
+          </li>
+          <li>
+            <a class="download-btn" href="index.html#footer">
+              Contact ESS
+            </a>
+          </li>
         </ul>
       </div>
     </section>
