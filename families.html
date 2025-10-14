@@ -23,6 +23,8 @@
     .download-btn { display:inline-block; background:var(--btn); color:#fff; padding:10px 14px; border-radius:8px; text-decoration:none; font-weight:600; font-size:15px; transition:background .2s ease; }
     .download-btn:hover { background:var(--btn-hover); }
     .download-btn::before { content:"📄 "; margin-right:2px; }
+    /* turn off the 📄 for non-document actions (e.g., meeting) */
+    .no-doc::before { content:""; }
     .muted { color:var(--muted); font-size:14px; }
     footer { padding:24px; text-align:center; color:#777; }
     html { scroll-behavior:smooth; }
@@ -91,12 +93,18 @@
         <h3>Helpful Links</h3>
         <ul class="link-list">
           <li>
+            <!-- Virtual meeting (Jitsi) -->
+            <a class="download-btn no-doc" href="https://meet.jit.si/ESS-Virtual-Meeting-Room" target="_blank" rel="noopener">
+              ▶️ Start Virtual Meeting
+            </a>
+          </li>
+          <li>
             <a class="download-btn" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">
               California Self-Determination Program
             </a>
           </li>
           <li>
-            <!-- send to the Contact section on the homepage -->
+            <!-- back to homepage Contact section -->
             <a class="download-btn" href="index.html#contact">
               Contact ESS
             </a>
