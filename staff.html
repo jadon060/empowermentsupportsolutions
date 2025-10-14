@@ -45,10 +45,7 @@
       box-shadow:0 8px 30px rgba(0,0,0,.08);
       padding:18px;
     }
-    h2,h3 {
-      margin:0 0 12px;
-      color:#2c3e50;
-    }
+    h2,h3 { margin:0 0 12px; color:#2c3e50; }
     .link-list {
       list-style:none;
       margin:0;
@@ -70,11 +67,9 @@
     }
     .download-btn:hover {background:var(--btn-hover);}
     .download-btn::before {content:"📄 ";margin-right:2px;}
-    footer {
-      padding:24px;
-      text-align:center;
-      color:#777;
-    }
+    /* hide the 📄 icon for non-document buttons (like the meeting) */
+    .no-doc::before { content:""; }
+    footer { padding:24px; text-align:center; color:#777; }
   </style>
 </head>
 
@@ -133,12 +128,16 @@
         <h3>Helpful Links</h3>
         <ul class="link-list">
           <li>
+            <a class="download-btn no-doc" href="https://meet.jit.si/ESS-Virtual-Meeting-Room" target="_blank" rel="noopener">
+              ▶️ Start Virtual Meeting
+            </a>
+          </li>
+          <li>
             <a class="download-btn" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">
               California Self-Determination Program
             </a>
           </li>
           <li>
-            <!-- Link back to homepage Contact section -->
             <a class="download-btn" href="index.html#contact">
               Contact ESS Admin
             </a>
