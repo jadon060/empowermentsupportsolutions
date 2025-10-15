@@ -10,10 +10,10 @@
     body { margin:0; background:var(--bg); font-family:Arial,Helvetica,sans-serif; color:#222; }
     header { display:flex; align-items:center; gap:8px; padding:14px 16px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.06); }
     a.back { text-decoration:none; color:var(--brand); font-weight:700; }
-    .wrap { max-width: 700px; margin:0 auto; padding:24px 16px; text-align:center; }
+    .wrap { max-width:700px; margin:0 auto; padding:24px 16px; text-align:center; }
     h1 { margin:6px 0 12px; color:var(--brand); font-size:1.4rem; }
-    p.muted { margin:6px 0 16px; color:var(--muted); font-size:.95rem; }
-    .card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 12px 30px rgba(0,0,0,.08); }
+    p.muted { margin:6px 0 16px; color:#6b7280; font-size:.95rem; }
+    .card { background:#fff; border-radius:12px; padding:24px; box-shadow:0 12px 30px rgba(0,0,0,.08); }
     .btn { display:inline-block; padding:12px 18px; border-radius:10px; background:var(--brand); color:#fff; text-decoration:none; font-weight:700; }
     .links { margin-top:12px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
     .links a { color:var(--brand); text-decoration:none; font-weight:600; }
@@ -27,26 +27,25 @@
 
   <main class="wrap">
     <div class="card">
-      <p class="muted">We’re launching your meeting room now.</p>
-      <a class="btn" id="joinBtn" href="https://meet.jit.si/ESSVirtualMeetingRoom" target="_blank" rel="noopener">
-        Join Meeting
-      </a>
+      <p class="muted">
+        Tap <b>Join Meeting</b> below. Your tap lets the browser show the camera & microphone prompt on mobile. ✅
+      </p>
+
+      <!-- IMPORTANT: same-tab navigation + disable app deep-linking -->
+      <a class="btn" href="https://meet.jit.si/ESSVirtualMeetingRoom#config.disableDeepLinking=true"
+         rel="noopener">Join Meeting</a>
+
       <div class="links">
-        <a href="https://meet.jit.si/ESSVirtualMeetingRoom" target="_blank" rel="noopener">Open in a new tab</a>
+        <a href="https://meet.jit.si/ESSVirtualMeetingRoom#config.disableDeepLinking=true" rel="noopener">
+          Open directly if button fails
+        </a>
         <a href="https://test.webrtc.org/" target="_blank" rel="noopener">Test mic/camera</a>
       </div>
+
       <p class="muted" style="margin-top:14px;">
-        Tip: Allow camera &amp; microphone when prompted. Sessions can run 1+ hours ✅
+        If prompted, choose <b>Allow</b> for both Camera and Microphone.
       </p>
     </div>
   </main>
-
-  <script>
-    // Redirect automatically to avoid the 5-minute embed limit.
-    // Prefer same-tab navigation so pop-up blockers don't interfere.
-    const url = "https://meet.jit.si/ESSVirtualMeetingRoom";
-    // Change to location.replace(url) if you want no back navigation.
-    setTimeout(() => { window.location.href = url; }, 800);
-  </script>
 </body>
 </html>
