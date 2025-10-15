@@ -11,11 +11,10 @@
     body { margin:0; background:var(--bg); font-family:Arial,Helvetica,sans-serif; color:#222; }
     header { display:flex; align-items:center; gap:8px; padding:14px 16px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.06); }
     a.back { text-decoration:none; color:var(--brand); font-weight:700; }
-    .wrap { max-width: 1200px; margin:0 auto; padding:16px; }
+    .wrap { max-width:1200px; margin:0 auto; padding:16px; }
     h1 { margin:6px 0 12px; color:var(--brand); font-size:1.2rem; }
     p.muted { margin:0 0 12px; color:var(--muted); font-size:.95rem; }
-    .meet { position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden;
-            box-shadow:0 12px 30px rgba(0,0,0,.12); }
+    .meet { position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden; box-shadow:0 12px 30px rgba(0,0,0,.12); }
     .meet iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
     @media (min-height:900px) { .meet { aspect-ratio:auto; height:78vh; } }
     .help { margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
@@ -30,11 +29,11 @@
   </header>
 
   <main class="wrap">
-    <p class="muted">You’re joining our static room. If your browser asks, allow camera & microphone.</p>
+    <p class="muted">You’re joining our static room. If your browser asks, allow camera &amp; microphone.</p>
 
     <div class="meet">
       <iframe
-        src="https://meet.jit.si/ESSVirtualMeetingRoom#config.disableDeepLinking=true&config.prejoinConfig.enabled=true&config.startWithAudioMuted=true"
+        src="https://meet.jit.si/ESSVirtualMeetingRoom#userInfo.displayName=%27ESS%20Host%27&config.prejoinConfig.enabled=false&config.requireDisplayName=false&config.startWithAudioMuted=true&config.disableDeepLinking=true"
         allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
         allowfullscreen
         referrerpolicy="no-referrer-when-downgrade">
@@ -42,12 +41,12 @@
     </div>
 
     <div class="help">
-      <a class="btn" href="https://meet.jit.si/ESSVirtualMeetingRoom" target="_blank" rel="noopener">Open in New Tab</a>
+      <a class="btn" href="https://meet.jit.si/ESSVirtualMeetingRoom#config.prejoinConfig.enabled=false" target="_blank" rel="noopener">Open in New Tab</a>
       <a class="btn btn-outline" href="https://test.webrtc.org/" target="_blank" rel="noopener">Test Mic/Camera</a>
     </div>
 
     <p class="muted" style="margin-top:8px;">
-      Tip: If the embed is blocked on older iPhones, use <em>Open in New Tab</em>.
+      Tip: If the embed is blocked on some phones, tap <em>Open in New Tab</em>. Meetings can run 1+ hours as long as someone stays in the room. ✅
     </p>
   </main>
 </body>
