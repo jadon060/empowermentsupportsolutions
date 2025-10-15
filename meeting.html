@@ -6,95 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://meet.jit.si">
   <style>
-    :root {
-      --brand:#2c3e50;
-      --bg:#f7f7fb;
-      --card:#fff;
-      --muted:#6b7280;
-    }
+    :root { --brand:#2c3e50; --bg:#f7f7fb; --card:#fff; --muted:#6b7280; }
     * { box-sizing:border-box; }
-    body {
-      margin:0;
-      background:var(--bg);
-      font-family:Arial,Helvetica,sans-serif;
-      color:#222;
-    }
-    header {
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:14px 16px;
-      background:#fff;
-      box-shadow:0 2px 12px rgba(0,0,0,.06);
-    }
-    a.back {
-      text-decoration:none;
-      color:var(--brand);
-      font-weight:700;
-    }
-    .wrap {
-      max-width:1200px;
-      margin:0 auto;
-      padding:16px;
-    }
-    h1 {
-      margin:6px 0 12px;
-      color:var(--brand);
-      font-size:1.2rem;
-    }
-    p.muted {
-      margin:0 0 12px;
-      color:var(--muted);
-      font-size:.95rem;
-    }
-    .meet {
-      position:relative;
-      width:100%;
-      aspect-ratio:16/9;
-      background:#000;
-      border-radius:12px;
-      overflow:hidden;
-      box-shadow:0 12px 30px rgba(0,0,0,.12);
-    }
-    .meet iframe {
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      border:0;
-    }
-    @media (min-height:900px) {
-      .meet { aspect-ratio:auto; height:78vh; }
-    }
-    .help {
-      margin-top:10px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .btn {
-      display:inline-block;
-      padding:10px 14px;
-      border-radius:8px;
-      background:var(--brand);
-      color:#fff;
-      text-decoration:none;
-      font-weight:600;
-      transition:background .2s ease;
-    }
-    .btn:hover {
-      background:#1b2a38;
-    }
-    .btn-outline {
-      background:transparent;
-      color:var(--brand);
-      border:2px solid var(--brand);
-    }
-    .btn-outline:hover {
-      background:var(--brand);
-      color:#fff;
-    }
+    body { margin:0; background:var(--bg); font-family:Arial,Helvetica,sans-serif; color:#222; }
+    header { display:flex; align-items:center; gap:8px; padding:14px 16px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+    a.back { text-decoration:none; color:var(--brand); font-weight:700; }
+    .wrap { max-width: 1200px; margin:0 auto; padding:16px; }
+    h1 { margin:6px 0 12px; color:var(--brand); font-size:1.2rem; }
+    p.muted { margin:0 0 12px; color:var(--muted); font-size:.95rem; }
+    .meet { position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden;
+            box-shadow:0 12px 30px rgba(0,0,0,.12); }
+    .meet iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+    @media (min-height:900px) { .meet { aspect-ratio:auto; height:78vh; } }
+    .help { margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .btn { display:inline-block; padding:10px 14px; border-radius:8px; background:var(--brand); color:#fff; text-decoration:none; font-weight:600; }
+    .btn.btn-outline { background:transparent; color:var(--brand); border:2px solid var(--brand); }
   </style>
 </head>
 <body>
@@ -104,14 +30,11 @@
   </header>
 
   <main class="wrap">
-    <p class="muted">
-      Welcome to the <strong>ESS Virtual Meeting Room</strong> — a static space for staff and families.
-      Please allow camera & microphone when prompted. You can stay connected for over an hour — no time limit.
-    </p>
+    <p class="muted">You’re joining our static room. If your browser asks, allow camera & microphone.</p>
 
     <div class="meet">
       <iframe
-        src="https://meet.jit.si/ESSVirtualMeeting#config.disableDeepLinking=true&config.prejoinConfig.enabled=true&config.startWithAudioMuted=true"
+        src="https://meet.jit.si/ESSVirtualMeetingRoom#config.disableDeepLinking=true&config.prejoinConfig.enabled=true&config.startWithAudioMuted=true"
         allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
         allowfullscreen
         referrerpolicy="no-referrer-when-downgrade">
@@ -119,13 +42,12 @@
     </div>
 
     <div class="help">
-      <a class="btn" href="https://meet.jit.si/ESSVirtualMeeting" target="_blank" rel="noopener">Open in New Tab</a>
+      <a class="btn" href="https://meet.jit.si/ESSVirtualMeetingRoom" target="_blank" rel="noopener">Open in New Tab</a>
       <a class="btn btn-outline" href="https://test.webrtc.org/" target="_blank" rel="noopener">Test Mic/Camera</a>
     </div>
 
     <p class="muted" style="margin-top:8px;">
-      🔒 Tip: Once inside, click the <b>shield</b> icon to set a <b>meeting password</b> for privacy.<br>
-      📱 If the embed doesn’t load on some phones, tap <em>Open in New Tab</em> instead.
+      Tip: If the embed is blocked on older iPhones, use <em>Open in New Tab</em>.
     </p>
   </main>
 </body>
