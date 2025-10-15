@@ -4,22 +4,19 @@
   <meta charset="utf-8" />
   <title>ESS • Virtual Meeting</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="preconnect" href="https://meet.jit.si">
   <style>
     :root { --brand:#2c3e50; --bg:#f7f7fb; --card:#fff; --muted:#6b7280; }
     * { box-sizing:border-box; }
     body { margin:0; background:var(--bg); font-family:Arial,Helvetica,sans-serif; color:#222; }
     header { display:flex; align-items:center; gap:8px; padding:14px 16px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.06); }
     a.back { text-decoration:none; color:var(--brand); font-weight:700; }
-    .wrap { max-width:1200px; margin:0 auto; padding:16px; }
-    h1 { margin:6px 0 12px; color:var(--brand); font-size:1.2rem; }
-    p.muted { margin:0 0 12px; color:var(--muted); font-size:.95rem; }
-    .meet { position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden; box-shadow:0 12px 30px rgba(0,0,0,.12); }
-    .meet iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
-    @media (min-height:900px) { .meet { aspect-ratio:auto; height:78vh; } }
-    .help { margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .btn { display:inline-block; padding:10px 14px; border-radius:8px; background:var(--brand); color:#fff; text-decoration:none; font-weight:600; }
-    .btn.btn-outline { background:transparent; color:var(--brand); border:2px solid var(--brand); }
+    .wrap { max-width: 700px; margin:0 auto; padding:24px 16px; text-align:center; }
+    h1 { margin:6px 0 12px; color:var(--brand); font-size:1.4rem; }
+    p.muted { margin:6px 0 16px; color:var(--muted); font-size:.95rem; }
+    .card { background:var(--card); border-radius:12px; padding:24px; box-shadow:0 12px 30px rgba(0,0,0,.08); }
+    .btn { display:inline-block; padding:12px 18px; border-radius:10px; background:var(--brand); color:#fff; text-decoration:none; font-weight:700; }
+    .links { margin-top:12px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .links a { color:var(--brand); text-decoration:none; font-weight:600; }
   </style>
 </head>
 <body>
@@ -29,25 +26,27 @@
   </header>
 
   <main class="wrap">
-    <p class="muted">You’re joining our static room. If your browser asks, allow camera &amp; microphone.</p>
-
-    <div class="meet">
-      <iframe
-        src="https://meet.jit.si/ESSVirtualMeetingRoom#userInfo.displayName=%27ESS%20Host%27&config.prejoinConfig.enabled=false&config.requireDisplayName=false&config.startWithAudioMuted=true&config.disableDeepLinking=true"
-        allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-        allowfullscreen
-        referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
+    <div class="card">
+      <p class="muted">We’re launching your meeting room now.</p>
+      <a class="btn" id="joinBtn" href="https://meet.jit.si/ESSVirtualMeetingRoom" target="_blank" rel="noopener">
+        Join Meeting
+      </a>
+      <div class="links">
+        <a href="https://meet.jit.si/ESSVirtualMeetingRoom" target="_blank" rel="noopener">Open in a new tab</a>
+        <a href="https://test.webrtc.org/" target="_blank" rel="noopener">Test mic/camera</a>
+      </div>
+      <p class="muted" style="margin-top:14px;">
+        Tip: Allow camera &amp; microphone when prompted. Sessions can run 1+ hours ✅
+      </p>
     </div>
-
-    <div class="help">
-      <a class="btn" href="https://meet.jit.si/ESSVirtualMeetingRoom#config.prejoinConfig.enabled=false" target="_blank" rel="noopener">Open in New Tab</a>
-      <a class="btn btn-outline" href="https://test.webrtc.org/" target="_blank" rel="noopener">Test Mic/Camera</a>
-    </div>
-
-    <p class="muted" style="margin-top:8px;">
-      Tip: If the embed is blocked on some phones, tap <em>Open in New Tab</em>. Meetings can run 1+ hours as long as someone stays in the room. ✅
-    </p>
   </main>
+
+  <script>
+    // Redirect automatically to avoid the 5-minute embed limit.
+    // Prefer same-tab navigation so pop-up blockers don't interfere.
+    const url = "https://meet.jit.si/ESSVirtualMeetingRoom";
+    // Change to location.replace(url) if you want no back navigation.
+    setTimeout(() => { window.location.href = url; }, 800);
+  </script>
 </body>
 </html>
