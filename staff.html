@@ -8,9 +8,7 @@
     :root{
       --brand:#2c3e50; --bg:#f7f7fb; --card:#fff;
       --btn:#2c3e50; --btn-hover:#1b2a38; --muted:#6b7280;
-      --accent:#0ea5e9; /* sky */
-      --accent-2:#22c55e; /* green */
-      --accent-4:#a78bfa; /* violet */
+      --accent:#0ea5e9; --accent-2:#22c55e; --accent-4:#a78bfa;
     }
     *{ box-sizing:border-box; }
     body{
@@ -57,7 +55,7 @@
     }
     .download-btn:hover{ background:var(--btn-hover); transform:translateY(-1px); box-shadow:0 10px 22px rgba(44,62,80,.22); }
     .download-btn::before{ content:"📄 "; margin-right:2px; }
-    .no-doc::before{ content:""; } /* non-PDF actions */
+    .no-doc::before{ content:""; }
     footer{ padding:24px; text-align:center; color:#777; }
     html{ scroll-behavior:smooth; }
   </style>
@@ -76,58 +74,29 @@
     </section>
 
     <section class="grid">
-      <!-- Staff Documents -->
       <div class="card">
         <h3>📚 Staff Documents</h3>
         <ul class="link-list">
-          <li>
-            <a class="download-btn" href="/Head_to_Toe_Injury_Form.pdf" target="_blank" rel="noopener">
-              Head-to-Toe / Injury Form
-            </a>
-          </li>
-          <li>
-            <a class="download-btn" href="/Daily_Schedule_Notes.pdf" target="_blank" rel="noopener">
-              Daily Schedule & Notes
-            </a>
-          </li>
-          <li>
-            <a class="download-btn" href="/PCT_Goal_Template.pdf" target="_blank" rel="noopener">
-              PCT Goal Template
-            </a>
-          </li>
+          <li><a class="download-btn" href="/Head_to_Toe_Injury_Form.pdf" target="_blank" rel="noopener">Head-to-Toe / Injury Form</a></li>
+          <li><a class="download-btn" href="/Daily_Schedule_Notes.pdf" target="_blank" rel="noopener">Daily Schedule & Notes</a></li>
+          <li><a class="download-btn" href="/PCT_Goal_Template.pdf" target="_blank" rel="noopener">PCT Goal Template</a></li>
         </ul>
       </div>
 
-      <!-- Onboarding & Compliance -->
       <div class="card">
         <h3>📝 Onboarding & Compliance</h3>
         <ul class="link-list">
-          <li>
-            <a class="download-btn" href="/ESS_Staff_Welcome_Packet.pdf" target="_blank" rel="noopener">
-              Staff Welcome Packet
-            </a>
-          </li>
-          <li>
-            <a class="download-btn" href="/W9_Form.pdf" target="_blank" rel="noopener">
-              W-9 Form
-            </a>
-          </li>
+          <li><a class="download-btn" href="/ESS_Staff_Welcome_Packet.pdf" target="_blank" rel="noopener">Staff Welcome Packet</a></li>
+          <li><a class="download-btn" href="/W9_Form.pdf" target="_blank" rel="noopener">W-9 Form</a></li>
         </ul>
       </div>
 
-      <!-- Helpful Links -->
       <div class="card">
         <h3>🔗 Helpful Links</h3>
         <ul class="link-list">
           <li>
-            <!-- Open Jitsi in a new tab (non-embedded) -->
             <a class="download-btn no-doc" href="https://meet.jit.si/EmpowermentSupportSolutions" target="_blank" rel="noopener">
               ▶️ Start Virtual Meeting
-            </a>
-          </li>
-          <li>
-            <a class="download-btn no-doc" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">
-              🌐 California Self-Determination Program
             </a>
           </li>
           <li>
