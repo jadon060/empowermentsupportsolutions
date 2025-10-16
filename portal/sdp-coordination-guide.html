@@ -95,7 +95,8 @@
       <!-- Custom language toggle (EN / ES) -->
       <div class="lang" aria-label="Language toggle">
         <button id="lang-en" type="button">EN</button>
-        <button id="lang-es" type="button">ES</button>
+        <!-- ONLY CHANGE: link ES button to the static Spanish page -->
+        <button id="lang-es" type="button" onclick="window.location.href='/portal/sdp-coordination-guide-es.html'">ES</button>
       </div>
 
       <div class="toolbar">
@@ -303,7 +304,7 @@
     // Wire up custom buttons
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('lang-en').addEventListener('click', () => setLang('en'));
-      document.getElementById('lang-es').addEventListener('click', () => setLang('es'));
+      // NOTE: lang-es now navigates via inline onclick above; leaving this as-is causes no harm if kept.
       document.getElementById('lang-en').classList.add('active'); // default highlight
     });
   </script>
