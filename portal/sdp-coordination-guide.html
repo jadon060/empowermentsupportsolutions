@@ -14,17 +14,27 @@
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+
     /* Top banner */
     .banner{
       background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 60%, #1b2a38 100%);
-      color:#fff; padding:28px 16px;
+      color:#fff; padding:18px 16px 22px;
       box-shadow:0 2px 12px rgba(0,0,0,.15);
     }
-    .banner .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .title{font-weight:800;letter-spacing:.2px}
+    .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      font-weight:800; letter-spacing:.2px;
+    }
+    .brand img{height:34px; width:auto; border-radius:6px; background:#fff; padding:4px}
+    .brand-title{display:flex; flex-direction:column; line-height:1.15}
+    .brand-title .top{font-size:16px; opacity:.95}
+    .brand-title .bottom{font-size:18px; font-weight:800}
+
     .toolbar{display:flex;gap:10px;flex-wrap:wrap}
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
     .btn:hover{background:rgba(255,255,255,.22)}
+
     /* Main */
     .container{max-width:1000px;margin:22px auto;padding:0 16px}
     .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin:16px 0;border:1px solid var(--line)}
@@ -38,39 +48,51 @@
       background:#fff;font-size:13px;color:var(--muted);box-shadow:0 2px 8px rgba(0,0,0,.03)
     }
     .divider{height:1px;background:linear-gradient(90deg,transparent, var(--line), transparent);margin:14px 0}
+
     /* Collapsibles */
     details{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
     details+details{margin-top:10px}
     summary{list-style:none;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:10px}
     summary::-webkit-details-marker{display:none}
     .sumicon{font-size:18px;opacity:.9}
+
     ul{margin:8px 0 0 18px}
     .list-tight li{margin-bottom:6px}
+
     /* Grid */
     .grid{display:grid;gap:16px}
     @media (min-width:860px){ .grid-2{grid-template-columns:1fr 1fr} }
+
     /* Callout */
     .callout{
       border-left:4px solid var(--accent); padding:12px 14px; background:linear-gradient(0deg,#f0f7ff,#ffffff);
       border-radius:10px; color:#0f172a
     }
+
     /* Files */
     a.file{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);
       border-radius:10px;background:#fff;text-decoration:none;color:var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.04)}
     a.file:hover{border-color:#d1d5db}
+
     /* Footer */
     footer{color:var(--muted);font-size:13px;padding:24px 0 40px;text-align:center}
     .contact{margin-top:8px}
   </style>
 </head>
 <body>
-  <!-- Gradient banner -->
+  <!-- Gradient banner with logo + full title -->
   <div class="banner">
     <div class="wrap">
-      <div class="title">ESS • Self-Determination</div>
+      <div class="brand">
+        <img src="/ESS%20Logo.png" alt="ESS logo" />
+        <div class="brand-title">
+          <div class="top">Empowerment Support Solutions</div>
+          <div class="bottom">Self-Determination Program</div>
+        </div>
+      </div>
       <div class="toolbar">
         <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
-        <a class="btn" href="/portal/index.html">↩️ Back to Portal</a>
+        <button class="btn" onclick="goPortal()">↩️ Back to Portal</button>
       </div>
     </div>
   </div>
@@ -106,7 +128,7 @@
 
     <!-- Objectives -->
     <section class="card">
-      <h2><span class="emoji">🎛️</span>Meeting Objectives</h2>
+      <h2><span class="emoji">🗂️</span>Meeting Objectives</h2>
       <ul class="list-tight">
         <li>Review current IPP goals and any relevant PCP notes.</li>
         <li>Confirm authorized hours and applicable budget categories.</li>
@@ -116,11 +138,11 @@
       </ul>
     </section>
 
-    <!-- Timeline -->
+    <!-- Framework (renamed) -->
     <section class="card">
-      <h2><span class="emoji">🗓️</span>Coordination Timeline</h2>
+      <h2><span class="emoji">🧭</span>Coordination Framework</h2>
       <details open>
-        <summary><span class="sumicon">🧠</span> Plan Alignment</summary>
+        <summary><span class="sumicon">📌</span> Plan Alignment</summary>
         <ul class="list-tight">
           <li>Match IPP goals to ESS support areas (life skills, community integration, health & safety, behavioral support, etc.).</li>
           <li>Note goals to begin now and goals to phase in later.</li>
@@ -169,7 +191,7 @@
         </ul>
       </div>
       <div>
-        <h2><span class="emoji">📦</span>Documents Provided by ESS</h2>
+        <h2><span class="emoji">📎</span>Documents Provided by ESS</h2>
         <ul class="list-tight">
           <li>W-9 and service agreement (to FMS)</li>
           <li>Staffing plan aligned to IPP goals</li>
@@ -181,7 +203,7 @@
 
     <!-- After meeting -->
     <section class="card">
-      <h2><span class="emoji">🚀</span>After the Meeting</h2>
+      <h2><span class="emoji">📅</span>After the Meeting</h2>
       <ul class="list-tight">
         <li>ESS submits required documents to the FMS.</li>
         <li>Family completes any remaining FMS or orientation items.</li>
@@ -205,11 +227,32 @@
 
     <footer class="container">
       <div>© <span id="y"></span> Empowerment Support Solutions • SDP Coordination Guide</div>
-      <div class="contact">📧 support@empowermentss.com • 🌐 empowermentss.com</div>
+      <div class="contact">📧 empowermentess@gmail.com • 🌐 empowermentss.com</div>
       <div style="margin-top:6px;color:var(--muted)">This page is informational and may be updated as Regional Center and FMS processes evolve.</div>
     </footer>
   </main>
 
-  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+  <script>
+    // Footer year
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Smarter "Back to Portal" to avoid 404s
+    async function goPortal(){
+      const origin = location.origin;
+      const candidates = [
+        `${origin}/portal/index.html`,
+        `${origin}/portal/`,
+        `${origin}/`      // final fallback to home
+      ];
+      for (const url of candidates){
+        try{
+          const res = await fetch(url, {method:'HEAD', cache:'no-store'});
+          if (res.ok){ location.href = url; return; }
+        }catch(e){}
+      }
+      // if all else fails
+      location.href = `${origin}/`;
+    }
+  </script>
 </body>
 </html>
