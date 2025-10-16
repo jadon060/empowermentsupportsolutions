@@ -9,8 +9,7 @@
     :root{
       --brand:#2c3e50; --brand-2:#0f4c81;
       --bg:#f6f8fc; --card:#ffffff; --ink:#1f2937; --muted:#64748b; --line:#e5e7eb;
-      --accent:#3b82f6; --accent-2:#06b6d4;
-      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.06);
+      --accent:#3b82f6; --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.06);
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
@@ -21,19 +20,18 @@
       color:#fff; padding:18px 16px 22px;
       box-shadow:0 2px 12px rgba(0,0,0,.15);
     }
-    .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .brand{
-      display:flex; align-items:center; gap:12px;
-      font-weight:800; letter-spacing:.2px;
-    }
-    .brand img{height:34px; width:auto; border-radius:6px; background:#fff; padding:4px}
-    .brand-title{display:flex; flex-direction:column; line-height:1.15}
-    .brand-title .top{font-size:16px; opacity:.95}
-    .brand-title .bottom{font-size:18px; font-weight:800}
-
+    .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand img{height:34px;width:auto;border-radius:6px;background:#fff;padding:4px}
+    .brand-title{display:flex;flex-direction:column;line-height:1.15}
+    .brand-title .top{font-size:16px;opacity:.95}
+    .brand-title .bottom{font-size:18px;font-weight:800}
     .toolbar{display:flex;gap:10px;flex-wrap:wrap}
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
     .btn:hover{background:rgba(255,255,255,.22)}
+
+    /* Translate widget placement */
+    #google_translate_element{margin-left:auto}
 
     /* Main */
     .container{max-width:1000px;margin:22px auto;padding:0 16px}
@@ -43,13 +41,9 @@
     h2 .emoji{font-size:20px}
     p.lead{color:var(--muted);margin:0}
     .pillrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .pill{
-      display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);
-      background:#fff;font-size:13px;color:var(--muted);box-shadow:0 2px 8px rgba(0,0,0,.03)
-    }
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;color:var(--muted);box-shadow:0 2px 8px rgba(0,0,0,.03)}
     .divider{height:1px;background:linear-gradient(90deg,transparent, var(--line), transparent);margin:14px 0}
 
-    /* Collapsibles */
     details{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
     details+details{margin-top:10px}
     summary{list-style:none;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:10px}
@@ -59,28 +53,19 @@
     ul{margin:8px 0 0 18px}
     .list-tight li{margin-bottom:6px}
 
-    /* Grid */
     .grid{display:grid;gap:16px}
     @media (min-width:860px){ .grid-2{grid-template-columns:1fr 1fr} }
 
-    /* Callout */
-    .callout{
-      border-left:4px solid var(--accent); padding:12px 14px; background:linear-gradient(0deg,#f0f7ff,#ffffff);
-      border-radius:10px; color:#0f172a
-    }
+    .callout{border-left:4px solid var(--accent);padding:12px 14px;background:linear-gradient(0deg,#f0f7ff,#ffffff);border-radius:10px;color:#0f172a}
 
-    /* Files */
-    a.file{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);
-      border-radius:10px;background:#fff;text-decoration:none;color:var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    a.file{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;text-decoration:none;color:var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.04)}
     a.file:hover{border-color:#d1d5db}
 
-    /* Footer */
     footer{color:var(--muted);font-size:13px;padding:24px 0 40px;text-align:center}
     .contact{margin-top:8px}
   </style>
 </head>
 <body>
-  <!-- Gradient banner with logo + full title -->
   <div class="banner">
     <div class="wrap">
       <div class="brand">
@@ -90,15 +75,15 @@
           <div class="bottom">Self-Determination Program</div>
         </div>
       </div>
+      <div id="google_translate_element"></div>
       <div class="toolbar">
         <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
-        <button class="btn" onclick="goPortal()">↩️ Back to Portal</button>
+        <a class="btn" href="/portal/welcome.html">↩️ Back to Portal</a>
       </div>
     </div>
   </div>
 
   <main class="container">
-    <!-- Header card -->
     <section class="card">
       <h1>SDP Coordination Guide</h1>
       <p class="lead">Public overview of how Empowerment Support Solutions (ESS) coordinates services within California’s Self-Determination Program (SDP). Designed for participants, families, Service Coordinators, and FMS partners.</p>
@@ -109,10 +94,9 @@
       </div>
       <div class="divider"></div>
       <h2><span class="emoji">📌</span>Purpose of this Guide</h2>
-      <p class="list-tight">This page provides a shared, transparent outline so everyone leaves meetings with the same understanding of goals, responsibilities, and next steps. It is not an internal script and contains no private rates or information.</p>
+      <p>This page provides a shared, transparent outline so everyone leaves meetings with the same understanding of goals, responsibilities, and next steps. It is not an internal script and contains no private rates or information.</p>
     </section>
 
-    <!-- Role fit -->
     <section class="card">
       <h2><span class="emoji">🧩</span>How ESS Fits in SDP</h2>
       <div class="callout">
@@ -126,7 +110,6 @@
       </ul>
     </section>
 
-    <!-- Objectives -->
     <section class="card">
       <h2><span class="emoji">🗂️</span>Meeting Objectives</h2>
       <ul class="list-tight">
@@ -138,13 +121,12 @@
       </ul>
     </section>
 
-    <!-- Framework (renamed) -->
     <section class="card">
       <h2><span class="emoji">🧭</span>Coordination Framework</h2>
       <details open>
         <summary><span class="sumicon">📌</span> Plan Alignment</summary>
         <ul class="list-tight">
-          <li>Match IPP goals to ESS support areas (life skills, community integration, health & safety, behavioral support, etc.).</li>
+          <li>Match IPP goals to ESS support areas.</li>
           <li>Note goals to begin now and goals to phase in later.</li>
         </ul>
       </details>
@@ -159,7 +141,7 @@
         <summary><span class="sumicon">🏦</span> FMS Coordination</summary>
         <ul class="list-tight">
           <li>Record FMS name, model, and onboarding contact.</li>
-          <li>List required FMS documents (e.g., W-9, agreement, insurance if applicable).</li>
+          <li>List required FMS documents.</li>
         </ul>
       </details>
       <details>
@@ -172,13 +154,12 @@
       <details>
         <summary><span class="sumicon">✅</span> Authorization & Start</summary>
         <ul class="list-tight">
-          <li>Document who submits what (ESS, SC, FMS) and the expected processing time.</li>
-          <li>Confirm start date, documentation cadence, and monthly invoicing window.</li>
+          <li>Document who submits what (ESS, SC, FMS).</li>
+          <li>Confirm start date, documentation cadence, and invoicing window.</li>
         </ul>
       </details>
     </section>
 
-    <!-- Checklists -->
     <section class="card grid grid-2">
       <div>
         <h2><span class="emoji">🧾</span>Information Checklist</h2>
@@ -201,7 +182,6 @@
       </div>
     </section>
 
-    <!-- After meeting -->
     <section class="card">
       <h2><span class="emoji">📅</span>After the Meeting</h2>
       <ul class="list-tight">
@@ -212,16 +192,13 @@
       </ul>
     </section>
 
-    <!-- Resources -->
     <section class="card">
       <h2><span class="emoji">📚</span>Resources & Downloads</h2>
-      <p class="list-tight" style="color:var(--muted)">Files hosted on the ESS website for transparency with families, SCs, and FMS partners.</p>
       <div style="display:flex;flex-wrap:wrap;gap:10px">
-        <a class="file" href="/ESS_Service_Menu_(EN).pdf" target="_blank" rel="noopener">Service Menu (EN)</a>
-        <a class="file" href="/ESS Service Menu (ES).pdf" target="_blank" rel="noopener">Service Menu (ES)</a>
-        <a class="file" href="/Daily_Schedule_Notes.pdf" target="_blank" rel="noopener">Daily Schedule Notes</a>
-        <a class="file" href="/ESS_SDP_Agreement_(EN).pdf" target="_blank" rel="noopener">SDP Agreement (EN)</a>
-        <a class="file" href="/ESS_SDP_Agreement_(ES).pdf" target="_blank" rel="noopener">SDP Agreement (ES)</a>
+        <a class="file" href="/ESS_Service_Menu_(EN).pdf" target="_blank">Service Menu (EN)</a>
+        <a class="file" href="/ESS Service Menu (ES).pdf" target="_blank">Service Menu (ES)</a>
+        <a class="file" href="/ESS_SDP_Agreement_(EN).pdf" target="_blank">SDP Agreement (EN)</a>
+        <a class="file" href="/ESS_SDP_Agreement_(ES).pdf" target="_blank">SDP Agreement (ES)</a>
       </div>
     </section>
 
@@ -233,26 +210,16 @@
   </main>
 
   <script>
-    // Footer year
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // Smarter "Back to Portal" to avoid 404s
-    async function goPortal(){
-      const origin = location.origin;
-      const candidates = [
-        `${origin}/portal/index.html`,
-        `${origin}/portal/`,
-        `${origin}/`      // final fallback to home
-      ];
-      for (const url of candidates){
-        try{
-          const res = await fetch(url, {method:'HEAD', cache:'no-store'});
-          if (res.ok){ location.href = url; return; }
-        }catch(e){}
-      }
-      // if all else fails
-      location.href = `${origin}/`;
+    // Google Translate
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {pageLanguage: 'en', includedLanguages: 'en,es', layout: google.translate.TranslateElement.InlineLayout.SIMPLE},
+        'google_translate_element'
+      );
     }
   </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
