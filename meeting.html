@@ -328,14 +328,19 @@
     document.getElementById('btn-en').addEventListener('click', () => switchLang('en'));
     document.getElementById('btn-es').addEventListener('click', () => switchLang('es'));
 
-    // Google callback
+    // Google callback — FORCE SIMPLE LAYOUT so the <select.goog-te-combo> is created
     function googleTranslateElementInit() {
       try {
         new google.translate.TranslateElement(
-          { pageLanguage: 'en', includedLanguages: 'en,es', autoDisplay: false },
+          {
+            pageLanguage: 'en',
+            includedLanguages: 'en,es',
+            autoDisplay: false,
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+          },
           'google_translate_element'
         );
-        console.log('[GT] TranslateElement injected.');
+        console.log('[GT] TranslateElement injected (SIMPLE layout).');
         showDebugWidget();
         waitForCombo().then(sel => {
           console.log('[GT] Found .goog-te-combo:', !!sel);
