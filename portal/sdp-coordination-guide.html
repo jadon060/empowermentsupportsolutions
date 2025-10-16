@@ -4,79 +4,111 @@
   <meta charset="utf-8" />
   <title>ESS • SDP Coordination Guide</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="A clear, public-facing overview of how Empowerment Support Solutions (ESS) coordinates Self-Determination Program services with participants, families, Service Coordinators, and FMS partners." />
+  <meta name="description" content="Public-facing overview of how Empowerment Support Solutions coordinates Self-Determination Program services with participants, families, Service Coordinators, and FMS partners." />
   <style>
     :root{
-      --brand:#2c3e50; --bg:#f7f7fb; --card:#ffffff;
-      --muted:#6b7280; --ink:#222; --line:#e7e7ee;
-      --btn:#2c3e50; --btn-hover:#1b2a38;
-      --radius:14px; --shadow:0 8px 32px rgba(0,0,0,.06);
+      --brand:#2c3e50; --brand-2:#0f4c81;
+      --bg:#f6f8fc; --card:#ffffff; --ink:#1f2937; --muted:#64748b; --line:#e5e7eb;
+      --accent:#3b82f6; --accent-2:#06b6d4;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.06);
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-    header{position:sticky;top:0;z-index:10;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .logo{font-weight:800;letter-spacing:.2px;color:var(--brand)}
-    .container{max-width:980px;margin:28px auto;padding:0 16px}
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin:16px 0;border:1px solid var(--line)}
-    h1{font-size:28px;margin:10px 0 2px}
-    h2{font-size:20px;margin:0 0 8px}
-    p.lead{color:var(--muted);margin:0}
-    .meta{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:13px}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;color:var(--muted)}
-    .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:var(--btn);border:1px solid transparent;cursor:pointer;font-weight:600}
-    .btn:hover{background:var(--btn-hover)}
+    /* Top banner */
+    .banner{
+      background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 60%, #1b2a38 100%);
+      color:#fff; padding:28px 16px;
+      box-shadow:0 2px 12px rgba(0,0,0,.15);
+    }
+    .banner .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .title{font-weight:800;letter-spacing:.2px}
     .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
+    .btn:hover{background:rgba(255,255,255,.22)}
+    /* Main */
+    .container{max-width:1000px;margin:22px auto;padding:0 16px}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin:16px 0;border:1px solid var(--line)}
+    h1{font-size:30px;margin:6px 0 4px}
+    h2{font-size:20px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+    h2 .emoji{font-size:20px}
+    p.lead{color:var(--muted);margin:0}
+    .pillrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .pill{
+      display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);
+      background:#fff;font-size:13px;color:var(--muted);box-shadow:0 2px 8px rgba(0,0,0,.03)
+    }
+    .divider{height:1px;background:linear-gradient(90deg,transparent, var(--line), transparent);margin:14px 0}
+    /* Collapsibles */
     details{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
     details+details{margin-top:10px}
     summary{list-style:none;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:10px}
     summary::-webkit-details-marker{display:none}
+    .sumicon{font-size:18px;opacity:.9}
     ul{margin:8px 0 0 18px}
-    .grid{display:grid;gap:14px}
-    @media (min-width:860px){ .grid-2{grid-template-columns:1fr 1fr} }
-    .callout{border-left:4px solid var(--brand);padding:12px 14px;background:#f4f7fb;border-radius:8px;color:#1f2a36}
-    footer{color:var(--muted);font-size:13px;padding:24px 0 40px}
-    .small{font-size:13px;color:var(--muted)}
-    a.file{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;text-decoration:none;color:var(--brand)}
     .list-tight li{margin-bottom:6px}
+    /* Grid */
+    .grid{display:grid;gap:16px}
+    @media (min-width:860px){ .grid-2{grid-template-columns:1fr 1fr} }
+    /* Callout */
+    .callout{
+      border-left:4px solid var(--accent); padding:12px 14px; background:linear-gradient(0deg,#f0f7ff,#ffffff);
+      border-radius:10px; color:#0f172a
+    }
+    /* Files */
+    a.file{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);
+      border-radius:10px;background:#fff;text-decoration:none;color:var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    a.file:hover{border-color:#d1d5db}
+    /* Footer */
+    footer{color:var(--muted);font-size:13px;padding:24px 0 40px;text-align:center}
+    .contact{margin-top:8px}
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">ESS • Self-Determination</div>
-    <div class="toolbar">
-      <button class="btn" onclick="window.print()">Print / Save as PDF</button>
-      <a class="btn" href="/portal/index.html">Back to Portal</a>
+  <!-- Gradient banner -->
+  <div class="banner">
+    <div class="wrap">
+      <div class="title">ESS • Self-Determination</div>
+      <div class="toolbar">
+        <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+        <a class="btn" href="/portal/index.html">↩️ Back to Portal</a>
+      </div>
     </div>
-  </header>
+  </div>
 
   <main class="container">
+    <!-- Header card -->
     <section class="card">
       <h1>SDP Coordination Guide</h1>
-      <p class="lead">Public overview of how Empowerment Support Solutions (ESS) coordinates services within California’s Self-Determination Program (SDP). Designed for participants, families, Service Coordinators, and Financial Management Services (FMS).</p>
-      <div class="meta" style="margin-top:10px">
-        <span class="pill">Purpose-Driven</span>
-        <span class="pill">Family-Centered</span>
-        <span class="pill">FMS-Ready</span>
+      <p class="lead">Public overview of how Empowerment Support Solutions (ESS) coordinates services within California’s Self-Determination Program (SDP). Designed for participants, families, Service Coordinators, and FMS partners.</p>
+      <div class="pillrow">
+        <span class="pill">🎯 Purpose-Driven</span>
+        <span class="pill">🤝 Family-Centered</span>
+        <span class="pill">📑 FMS-Ready</span>
       </div>
+      <div class="divider"></div>
+      <h2><span class="emoji">📌</span>Purpose of this Guide</h2>
+      <p class="list-tight">This page provides a shared, transparent outline so everyone leaves meetings with the same understanding of goals, responsibilities, and next steps. It is not an internal script and contains no private rates or information.</p>
     </section>
 
+    <!-- Role fit -->
     <section class="card">
-      <h2>How ESS Fits in SDP</h2>
+      <h2><span class="emoji">🧩</span>How ESS Fits in SDP</h2>
       <div class="callout">
-        ESS operates as a <strong>non-vendored provider</strong> within SDP. The participant and circle of support select ESS, and payment flows through the participant’s <strong>FMS</strong>. Regional Center SCs support planning and authorization.
+        ESS operates as a <strong>non-vendored provider</strong> within SDP. The participant and circle of support select ESS; payment flows through the participant’s <strong>FMS</strong>. Regional Center SCs support planning and authorization.
       </div>
       <ul class="list-tight">
-        <li><strong>Participant & Family:</strong> Lead the plan and choose services.</li>
-        <li><strong>Service Coordinator (SC):</strong> Aligns IPP goals, documents authorizations.</li>
+        <li><strong>Participant & Family:</strong> Lead the plan and select providers.</li>
+        <li><strong>Service Coordinator (SC):</strong> Aligns IPP goals and documents authorizations.</li>
         <li><strong>FMS:</strong> Manages budget, agreements, and provider payments.</li>
-        <li><strong>ESS:</strong> Provides staffing and skills support aligned to the PCP/IPP, with clear documentation for each hour of service.</li>
+        <li><strong>ESS:</strong> Provides staffing and skill development aligned to PCP/IPP, with clear documentation for each hour of service.</li>
       </ul>
     </section>
 
+    <!-- Objectives -->
     <section class="card">
-      <h2>Meeting Objectives</h2>
+      <h2><span class="emoji">🎛️</span>Meeting Objectives</h2>
       <ul class="list-tight">
-        <li>Review current IPP goals and any Person-Centered Plan notes relevant to services.</li>
+        <li>Review current IPP goals and any relevant PCP notes.</li>
         <li>Confirm authorized hours and applicable budget categories.</li>
         <li>Identify the FMS and model (Bill-Payer, Co-Employer, or Sole-Employer).</li>
         <li>Confirm orientation/training requirements and any additional documentation.</li>
@@ -84,38 +116,39 @@
       </ul>
     </section>
 
+    <!-- Timeline -->
     <section class="card">
-      <h2>Coordination Timeline</h2>
+      <h2><span class="emoji">🗓️</span>Coordination Timeline</h2>
       <details open>
-        <summary>1) Plan Alignment</summary>
+        <summary><span class="sumicon">🧠</span> Plan Alignment</summary>
         <ul class="list-tight">
           <li>Match IPP goals to ESS support areas (life skills, community integration, health & safety, behavioral support, etc.).</li>
           <li>Note goals to begin now and goals to phase in later.</li>
         </ul>
       </details>
       <details>
-        <summary>2) Authorized Hours & Budget</summary>
+        <summary><span class="sumicon">⏱️</span> Authorized Hours & Budget</summary>
         <ul class="list-tight">
           <li>Document monthly hours per goal or service area.</li>
           <li>Capture scheduling constraints, service caps, and tentative start date.</li>
         </ul>
       </details>
       <details>
-        <summary>3) FMS Coordination</summary>
+        <summary><span class="sumicon">🏦</span> FMS Coordination</summary>
         <ul class="list-tight">
           <li>Record FMS name, model, and onboarding contact.</li>
           <li>List required FMS documents (e.g., W-9, agreement, insurance if applicable).</li>
         </ul>
       </details>
       <details>
-        <summary>4) Orientation & Compliance</summary>
+        <summary><span class="sumicon">🎓</span> Orientation & Compliance</summary>
         <ul class="list-tight">
           <li>List training/orientation links and proof-of-completion instructions.</li>
-          <li>Note any additional case-specific requirements (e.g., background checks, CPR).</li>
+          <li>Note any case-specific requirements (e.g., background checks, CPR).</li>
         </ul>
       </details>
       <details>
-        <summary>5) Authorization & Start</summary>
+        <summary><span class="sumicon">✅</span> Authorization & Start</summary>
         <ul class="list-tight">
           <li>Document who submits what (ESS, SC, FMS) and the expected processing time.</li>
           <li>Confirm start date, documentation cadence, and monthly invoicing window.</li>
@@ -123,9 +156,10 @@
       </details>
     </section>
 
+    <!-- Checklists -->
     <section class="card grid grid-2">
       <div>
-        <h2>Information Checklist</h2>
+        <h2><span class="emoji">🧾</span>Information Checklist</h2>
         <ul class="list-tight">
           <li>IPP goals and relevant PCP notes</li>
           <li>Authorized hours and budget category</li>
@@ -135,7 +169,7 @@
         </ul>
       </div>
       <div>
-        <h2>Documents Provided by ESS</h2>
+        <h2><span class="emoji">📦</span>Documents Provided by ESS</h2>
         <ul class="list-tight">
           <li>W-9 and service agreement (to FMS)</li>
           <li>Staffing plan aligned to IPP goals</li>
@@ -145,9 +179,21 @@
       </div>
     </section>
 
+    <!-- After meeting -->
     <section class="card">
-      <h2>Resources & Downloads</h2>
-      <p class="small">These files are hosted on the ESS website for transparency with families, SCs, and FMS partners.</p>
+      <h2><span class="emoji">🚀</span>After the Meeting</h2>
+      <ul class="list-tight">
+        <li>ESS submits required documents to the FMS.</li>
+        <li>Family completes any remaining FMS or orientation items.</li>
+        <li>SC finalizes authorization and communicates approval.</li>
+        <li>ESS confirms start date, begins services, and documents progress for invoicing.</li>
+      </ul>
+    </section>
+
+    <!-- Resources -->
+    <section class="card">
+      <h2><span class="emoji">📚</span>Resources & Downloads</h2>
+      <p class="list-tight" style="color:var(--muted)">Files hosted on the ESS website for transparency with families, SCs, and FMS partners.</p>
       <div style="display:flex;flex-wrap:wrap;gap:10px">
         <a class="file" href="/ESS_Service_Menu_(EN).pdf" target="_blank" rel="noopener">Service Menu (EN)</a>
         <a class="file" href="/ESS Service Menu (ES).pdf" target="_blank" rel="noopener">Service Menu (ES)</a>
@@ -159,7 +205,8 @@
 
     <footer class="container">
       <div>© <span id="y"></span> Empowerment Support Solutions • SDP Coordination Guide</div>
-      <div class="small">This page is informational and may be updated as Regional Center and FMS processes evolve.</div>
+      <div class="contact">📧 support@empowermentss.com • 🌐 empowermentss.com</div>
+      <div style="margin-top:6px;color:var(--muted)">This page is informational and may be updated as Regional Center and FMS processes evolve.</div>
     </footer>
   </main>
 
