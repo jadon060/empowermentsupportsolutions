@@ -14,6 +14,7 @@
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
 
+    /* Banner */
     .banner{
       background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 60%, #1b2a38 100%);
       color:#fff; padding:18px 16px 22px;
@@ -31,6 +32,7 @@
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
     .btn:hover{background:rgba(255,255,255,.22)}
 
+    /* Idiomas */
     .lang{display:flex;gap:10px;margin-right:6px}
     .lang button{
       appearance:none;border:1px solid #e6e8ee;background:#fff;color:#1f2937;
@@ -41,6 +43,7 @@
     .lang button:hover{filter:brightness(.98)}
     .lang button.active{outline:2px solid #cfd7ff}
 
+    /* Main */
     .container{max-width:1000px;margin:22px auto;padding:0 16px}
     .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin:16px 0;border:1px solid var(--line)}
     h1{font-size:30px;margin:6px 0 4px}
@@ -70,6 +73,18 @@
 
     footer{color:var(--muted);font-size:13px;padding:24px 0 40px;text-align:center}
     .contact{margin-top:8px}
+
+    /* UI de Códigos de Servicio (igual que EN) */
+    .sc-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 14px}
+    .sc-select{min-width:280px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600}
+    .sc-note{font-size:13px;color:var(--muted)}
+    .sc-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff}
+    .sc-badges{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+    .badge{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:#f8fafc;color:#0f172a}
+    .sc-title{font-weight:800;margin:0 0 4px}
+    .sc-desc{margin:4px 0 6px}
+    .sc-ex{margin:0 0 6px}
+    .sc-cite{font-size:12px;color:var(--muted);margin-top:6px}
   </style>
 </head>
 <body>
@@ -172,50 +187,16 @@
       </details>
     </section>
 
-    <!-- New Section: Service Codes (SDP) -->
-    <section class="card">
-      <h2><span class="emoji">🧾</span>Códigos de Servicio del SDP</h2>
-      <p class="lead">Lista de códigos usados en el Programa de Autodeterminación. Solo incluye servicios aplicables a proveedores no vendorizados como ESS.</p>
-
-      <details>
-        <summary><span class="sumicon">🧠</span> Código 062 – Entrenamiento de Habilidades Individuales y Apoyo</summary>
-        <ul class="list-tight">
-          <li>Apoyo individualizado para desarrollar habilidades de vida diaria, comunicación y comportamiento adaptativo.</li>
-          <li>Enfocado en independencia, autodeterminación y participación comunitaria.</li>
-        </ul>
-      </details>
-
-      <details>
-        <summary><span class="sumicon">🌿</span> Código 331 – Integración Comunitaria</summary>
-        <ul class="list-tight">
-          <li>Apoyos en la comunidad para aumentar independencia, inclusión y relaciones sociales.</li>
-          <li>Incluye acompañamiento a actividades recreativas, educativas o voluntarias.</li>
-        </ul>
-      </details>
-
-      <details>
-        <summary><span class="sumicon">🚗</span> Código 338 – Transporte No Médico</summary>
-        <ul class="list-tight">
-          <li>Transporte hacia y desde actividades de integración comunitaria, empleo o citas no médicas.</li>
-          <li>No incluye servicios de ambulancia o transporte especializado médico.</li>
-        </ul>
-      </details>
-
-      <details>
-        <summary><span class="sumicon">👥</span> Código 360 – Apoyo de Integración y Desarrollo de Habilidades</summary>
-        <ul class="list-tight">
-          <li>Entrenamiento y apoyo para fomentar habilidades interpersonales, sociales y de comunicación.</li>
-          <li>Brinda asistencia directa para mantener rutinas, comportamiento apropiado y participación activa.</li>
-        </ul>
-      </details>
-
-      <details>
-        <summary><span class="sumicon">🏠</span> Código 366 – Servicios de Vida Independiente</summary>
-        <ul class="list-tight">
-          <li>Apoyo en el hogar o comunidad para aprender a administrar dinero, cocinar, limpiar y cuidar la salud.</li>
-          <li>Fomenta independencia y seguridad personal dentro del entorno elegido por el participante.</li>
-        </ul>
-      </details>
+    <!-- NUEVO: Códigos de Servicio (misma UI que EN) -->
+    <section class="card" id="service-codes">
+      <h2><span class="emoji">🧩</span>Códigos de Servicio (SDP)</h2>
+      <div class="sc-toolbar">
+        <select id="scSelect" class="sc-select" aria-label="Elegir un código de servicio">
+          <option value="">— Selecciona un código de servicio —</option>
+        </select>
+        <span class="sc-note">Escribe para buscar por código o nombre. Solo se muestran apoyos relevantes del SDP (no vendorizados/ no clínicos).</span>
+      </div>
+      <div id="scResult" class="sc-card" style="display:none"></div>
     </section>
 
     <section class="card grid grid-2">
@@ -248,7 +229,76 @@
   </main>
 
   <script>
+    // Año
     document.getElementById('y').textContent = new Date().getFullYear();
+
+    // --------- Códigos de Servicio (idéntico a EN, traducido) ---------
+    const SERVICE_CODES = [
+      {
+        code:'062',
+        name:'Entrenamiento de Habilidades Individuales y Apoyo (Personal Assistance)',
+        budget:'Vida Comunitaria',
+        desc:'Apoyo 1:1 para desarrollar o mantener habilidades de vida diaria, seguridad y participación en el hogar y la comunidad. Incluye entrenamiento, modelado, refuerzo y plan de desvanecimiento hacia independencia.',
+        examples:'Rutinas diarias, acceso a la comunidad, recordatorios de salud/seguridad, apoyo en citas.'
+      },
+      {
+        code:'331',
+        name:'Integración Comunitaria',
+        budget:'Integración Comunitaria',
+        desc:'Apoyos individualizados en la comunidad para participar en actividades significativas según metas e intereses; no es un programa en instalaciones.',
+        examples:'Clases, voluntariado, actividades recreativas con entrenamiento de habilidades y creación de apoyos naturales.'
+      },
+      {
+        code:'338',
+        name:'Transporte No Médico (1)',
+        budget:'Transporte',
+        desc:'Transporte necesario para llegar a actividades autorizadas del plan SDP cuando no hay apoyos naturales disponibles.',
+        examples:'Reembolso de millas, tarifas de transporte público, viajes puerta a puerta a clases/actividades.'
+      },
+      {
+        code:'360',
+        name:'Apoyo de Comunicación / Integración',
+        budget:'Vida Comunitaria',
+        desc:'Entrenamiento y apoyos que mejoran el acceso a la comunicación funcional (no incluye la compra del dispositivo).',
+        examples:'Entrenamiento a compañeros de comunicación, uso de AAC en contextos reales, apoyos visuales.'
+      },
+      {
+        code:'366',
+        name:'Capacitación para Familia/Participante (Vida Independiente)',
+        budget:'Vida Comunitaria',
+        desc:'Capacitación para la persona y/o su círculo para implementar estrategias que aumenten independencia y seguridad.',
+        examples:'Coaching a cuidadores para generalizar habilidades en el hogar; rutinas alineadas al plan.'
+      }
+    ];
+
+    const scSelect = document.getElementById('scSelect');
+    const scResult = document.getElementById('scResult');
+
+    SERVICE_CODES
+      .sort((a,b)=>a.code.localeCompare(b.code))
+      .forEach(item=>{
+        const opt = document.createElement('option');
+        opt.value = item.code;
+        opt.textContent = `${item.code} — ${item.name}`;
+        scSelect.appendChild(opt);
+      });
+
+    scSelect.addEventListener('change', () => {
+      const val = scSelect.value;
+      const item = SERVICE_CODES.find(x=>x.code === val);
+      if (!item){ scResult.style.display='none'; return; }
+      scResult.innerHTML = `
+        <div class="sc-title">${item.code} — ${item.name}</div>
+        <div class="sc-badges">
+          <span class="badge">Presupuesto: ${item.budget}</span>
+        </div>
+        <div class="sc-desc">${item.desc}</div>
+        <div class="sc-ex"><strong>Ejemplos:</strong> ${item.examples}</div>
+        <div class="sc-cite">Nota: En el SDP, estos apoyos los elige la persona y se pagan por medio del FMS. Se excluyen servicios clínicos o que requieren proveedor vendorizado.</div>
+      `;
+      scResult.style.display='block';
+      scResult.scrollIntoView({behavior:'smooth', block:'start'});
+    });
   </script>
 </body>
 </html>
