@@ -31,13 +31,12 @@
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
     .btn:hover{background:rgba(255,255,255,.22)}
 
-    /* Language buttons */
+    /* Language buttons (custom) */
     .lang{display:flex;gap:10px;margin-right:6px}
     .lang button{
       appearance:none;border:1px solid #e6e8ee;background:#fff;color:#1f2937;
       padding:8px 14px;border-radius:12px;font-weight:700;letter-spacing:.5px;
-      box-shadow:0 4px 14px rgba(0,0,0,.08);
-      cursor:pointer
+      box-shadow:0 4px 14px rgba(0,0,0,.08); cursor:pointer
     }
     .lang button:hover{filter:brightness(.98)}
     .lang button.active{outline:2px solid #cfd7ff}
@@ -104,6 +103,7 @@
         </div>
       </div>
 
+      <!-- Language toggle -->
       <div class="lang" aria-label="Language toggle">
         <button id="lang-en" type="button">EN</button>
         <button id="lang-es" type="button" onclick="window.location.href='/portal/sdp-coordination-guide-es.html'">ES</button>
@@ -218,19 +218,16 @@
       </div>
     </section>
 
-    <!-- NEW: Service Codes Reference -->
+    <!-- UPDATED: Service Codes Reference (SDP-friendly, non-vendor) -->
     <section class="card" id="service-codes">
-      <h2><span class="emoji">🧩</span>Service Codes (SDP & Regional Center)</h2>
+      <h2><span class="emoji">🧩</span>Service Codes (SDP-Friendly)</h2>
       <div class="sc-toolbar">
         <select id="scSelect" class="sc-select" aria-label="Choose a service code">
           <option value="">— Select a service code —</option>
         </select>
-        <span class="sc-note">Type to search by code or name. Results include common SDP services and frequently used RC codes.</span>
+        <span class="sc-note">Type to search by code or name. Only non-vendored/SDP-relevant items are shown.</span>
       </div>
       <div id="scResult" class="sc-card" style="display:none"></div>
-      <div class="sc-cite">
-        Sources: DDS Self-Determination Program Service Codes & Definitions (2019) and RC service code references. See DDS PDFs for definitions and rate-reform notes. :contentReference[oaicite:0]{index=0}
-      </div>
     </section>
 
     <section class="card">
@@ -270,15 +267,10 @@
 
     function googleTranslateElementInit() {
       new google.translate.TranslateElement(
-        {
-          pageLanguage: 'en',
-          includedLanguages: 'en,es',
-          autoDisplay: false,
-          layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-        },
+        { pageLanguage:'en', includedLanguages:'en,es', autoDisplay:false,
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
         'google_translate_element'
       );
-
       (function waitForCombo(){
         const sel = document.querySelector('select.goog-te-combo');
         if (sel) { resolveCombo(sel); return; }
@@ -314,35 +306,47 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('lang-en').addEventListener('click', () => setLang('en'));
-      document.getElementById('lang-en').classList.add('active'); // default highlight
+      document.getElementById('lang-en').classList.add('active');
     });
 
-    // ---------- Service Codes (searchable dropdown + details) ----------
-    // Add/extend this list anytime. Keep names short; put detail in "desc" & "examples".
+    // ---------- SDP-Friendly Service Codes ----------
+    // Only codes relevant to ESS in SDP (non-vendored/non-clinical).
     const SERVICE_CODES = [
-      // --- SDP core set (DDS 2019 list) ---
-      {code:'358', name:'Personal Emergency Response System (PERS)', budget:'Health & Safety', desc:'Electronic device/service to request assistance in an emergency.', examples:'Pendant or base unit with 24/7 monitoring; may include installation/activation.', cite:'turn0search1 turn0search3'},
-      {code:'359', name:'Home Health Aide', budget:'Health & Safety', desc:'Assists with basic health-related tasks under nursing supervision when needed.', examples:'Non-licensed aide supports hygiene, mobility, routine health tasks in the home.', cite:'turn0search1 turn0search3'},
-      {code:'360', name:'Communication Support', budget:'Community Living', desc:'Supports to enhance functional communication access.', examples:'Communication partner training; device use support (not the device itself).', cite:'turn0search1 turn0search3'},
-      {code:'361', name:'Skilled Nursing', budget:'Health & Safety', desc:'Nursing services provided by an RN/LVN per plan of care.', examples:'Medication administration training/oversight; health monitoring per orders.', cite:'turn0search1'},
-      {code:'362', name:'Nutritional Consultation', budget:'Community Living', desc:'Assessment and recommendations by qualified nutrition professional.', examples:'Meal planning aligned to health conditions; caregiver training.', cite:'turn0search1'},
-      {code:'363', name:'Crisis Intervention & Supports', budget:'Community Living', desc:'Short-term intervention to resolve/improve a crisis and prevent recurrence.', examples:'Crisis planning, de-escalation, safety strategies, post-crisis follow up.', cite:'turn0search3'},
-      {code:'364', name:'Behavior Intervention Services', budget:'Community Living', desc:'Assessment and behavior services delivered by qualified providers.', examples:'Functional assessment, plan development, training, monitoring.', cite:'turn0search3'},
-      {code:'365', name:'Specialized Medical Equipment & Supplies', budget:'Health & Safety', desc:'Devices/supplies not covered elsewhere that maintain/ improve function.', examples:'Adaptive equipment, certain medical supplies necessary for independence.', cite:'turn0search1'},
-      {code:'366', name:'Family/Participant Training', budget:'Community Living', desc:'Training to help the participant/family implement supports/skills at home.', examples:'Caregiver training to implement behavior or health-related strategies.', cite:'turn0search1'},
-      {code:'367', name:'Dental Services', budget:'Health & Safety', desc:'Dental services per state definition when not available via other coverage.', examples:'Preventive/therapeutic dental care necessary for health and function.', cite:'turn0search1 turn0search3'},
-
-      // --- Common RC codes used for coordination context (grouped references) ---
-      {code:'062', name:'Personal Assistance', budget:'Community Living', desc:'Assistance with activities to live, work, and participate in the community.', examples:'1:1 support in the home/community to build independence; not nursing.', cite:'turn0search4'},
-      {code:'465', name:'Respite (In-Home)', budget:'Health & Safety', desc:'Short-term relief for caregivers. (Note: varies by RC program rules).', examples:'In-home respite hours scheduled to provide caregiver relief.', cite:'turn0search14'},
-      {code:'505', name:'Activity Center (Day Services)', budget:'Community Integration', desc:'Center-based day services focused on community participation skills.', examples:'Site/day program activities; may be tailored day variant.', cite:'turn0search7'},
-      {code:'510', name:'Adult Development Center', budget:'Community Integration', desc:'Day services to develop/maintain functional skills for adults.', examples:'Life skills, communication, self-advocacy; can be tailored day.', cite:'turn0search7'},
-      {code:'515', name:'Behavior Management Program (Day)', budget:'Community Integration', desc:'Day services with behavior management components.', examples:'Structured day program with behavior supports.', cite:'turn0search7'},
-      {code:'520', name:'Independent Living Program', budget:'Community Living', desc:'Training to develop skills to live independently in the community.', examples:'Personal finance, cooking, safety, transportation training.', cite:'turn0search7'},
-      {code:'875', name:'Transportation Company', budget:'Transportation', desc:'Vendor-provided transportation as authorized.', examples:'Scheduled rides to program/work/appointments per plan.', cite:'turn0search0'},
-      {code:'882', name:'Transportation Assistant', budget:'Transportation', desc:'Assistant to accompany/assist during transport.', examples:'Aide supports safe travel to/from activities.', cite:'turn0search0'},
-      {code:'950', name:'Supported Employment – Group', budget:'Employment', desc:'Job supports delivered in group settings.', examples:'Group job-coaching at an integrated employer site.', cite:'turn0search7'},
-      {code:'952', name:'Supported Employment – Individual', budget:'Employment', desc:'1:1 job development/coaching for competitive integrated employment.', examples:'Job search, on-the-job coaching, fading supports plan.', cite:'turn0search7'}
+      {
+        code:'062',
+        name:'Personal Assistance',
+        budget:'Community Living',
+        desc:'1:1 support to build/maintain skills for daily living, safety, and participation in the home/community. May include coaching, prompting, modeling, and fading for independence.',
+        examples:'Daily routines, community access, health/safety prompting, appointment support.'
+      },
+      {
+        code:'331',
+        name:'Community Integration',
+        budget:'Community Integration',
+        desc:'Supports for meaningful participation in community life based on the person’s goals and interests; individualized and non-facility based under SDP.',
+        examples:'Community classes, volunteering support, recreation access, social participation with skill-building and natural supports.'
+      },
+      {
+        code:'338',
+        name:'Non-Medical Transportation (1)',
+        budget:'Transportation',
+        desc:'Transportation necessary to access authorized SDP activities in the plan. Non-medical; generally mileage or ride costs when natural supports are unavailable.',
+        examples:'Mileage reimbursement, public transit fares, door-to-door rides to activities, classes, or programs tied to goals.'
+      },
+      {
+        code:'360',
+        name:'Communication Support',
+        budget:'Community Living',
+        desc:'Training and supports that improve functional communication access and participation (not the device purchase).',
+        examples:'Partner training, AAC use coaching in real settings, visual systems support.'
+      },
+      {
+        code:'366',
+        name:'Family/Participant Training',
+        budget:'Community Living',
+        desc:'Training for the participant and/or family/circle to implement strategies that improve independence and safety.',
+        examples:'Caregiver coaching to generalize skills at home; training aligned to the plan.'
+      }
     ];
 
     const scSelect = document.getElementById('scSelect');
@@ -358,7 +362,7 @@
         scSelect.appendChild(opt);
       });
 
-    // Simple search-as-you-type for native select (desktop browsers jump by typed text)
+    // On select -> show details
     scSelect.addEventListener('change', () => {
       const val = scSelect.value;
       const item = SERVICE_CODES.find(x=>x.code === val);
@@ -370,10 +374,9 @@
         </div>
         <div class="sc-desc">${item.desc}</div>
         <div class="sc-ex"><strong>Examples:</strong> ${item.examples}</div>
-        <div class="sc-cite">Reference: DDS SDP codes/definitions and RC code lists.</div>
+        <div class="sc-cite">Note: Under SDP, these supports are selected by the participant and paid through the FMS. Vendor-only clinical/medical services are intentionally excluded.</div>
       `;
       scResult.style.display='block';
-      // Scroll into view on mobile
       scResult.scrollIntoView({behavior:'smooth', block:'start'});
     });
   </script>
