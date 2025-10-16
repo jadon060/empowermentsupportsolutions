@@ -5,71 +5,61 @@
   <title>ESS • Staff Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    :root {
+    :root{
       --brand:#2c3e50; --bg:#f7f7fb; --card:#fff;
-      --btn:#2c3e50; --btn-hover:#1b2a38;
+      --btn:#2c3e50; --btn-hover:#1b2a38; --muted:#6b7280;
+      --accent:#0ea5e9; /* sky */
+      --accent-2:#22c55e; /* green */
+      --accent-4:#a78bfa; /* violet */
     }
-    body {
-      margin:0;
-      background:var(--bg);
-      font-family:Arial,Helvetica,sans-serif;
-      color:#222;
+    *{ box-sizing:border-box; }
+    body{
+      margin:0; font-family:Arial,Helvetica,sans-serif; color:#222;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(14,165,233,.10), transparent 60%),
+        radial-gradient(1000px 500px at 110% 10%, rgba(167,139,250,.10), transparent 55%),
+        var(--bg);
     }
-    header {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:16px 18px;
-      background:#fff;
+    header{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 18px; background:#fff; position:sticky; top:0; z-index:10;
       box-shadow:0 2px 12px rgba(0,0,0,.06);
     }
-    .logo {font-weight:700;color:var(--brand);}
-    .btn-header {
-      display:inline-block;
-      padding:10px 14px;
-      border-radius:10px;
-      background:var(--brand);
-      color:#fff;
-      text-decoration:none;
-      font-weight:600;
+    .logo{ font-weight:700; color:var(--brand); }
+    .btn-header{
+      display:inline-block; padding:10px 14px; border-radius:10px;
+      background:var(--brand); color:#fff; text-decoration:none; font-weight:600;
     }
-    .wrap {max-width:1080px;margin:0 auto;padding:22px;}
-    .grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-      gap:16px;
+    .wrap{ max-width:1080px; margin:0 auto; padding:22px; }
+    .hero{
+      background:linear-gradient(135deg, rgba(14,165,233,.12), rgba(34,197,94,.12));
+      border:1px solid rgba(44,62,80,.08);
+      padding:18px 20px; border-radius:14px; margin-bottom:18px;
     }
-    .card {
-      background:var(--card);
-      border-radius:12px;
-      box-shadow:0 8px 30px rgba(0,0,0,.08);
-      padding:18px;
+    h1,h2,h3{ color:#2c3e50; margin:0 0 12px; }
+    .muted{ color:var(--muted); font-size:14px; margin:0; }
+    .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+    .card{
+      background:var(--card); border-radius:14px; padding:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08); position:relative; overflow:hidden;
     }
-    h2,h3 { margin:0 0 12px; color:#2c3e50; }
-    .link-list {
-      list-style:none;
-      margin:0;
-      padding:0;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+    .card::after{
+      content:""; position:absolute; inset:auto 0 0 auto; width:100%; height:4px;
+      background:linear-gradient(90deg, var(--accent), var(--accent-4), var(--accent-2));
+      opacity:.6;
     }
-    .download-btn {
-      display:inline-block;
-      background:var(--btn);
-      color:#fff;
-      padding:10px 14px;
-      border-radius:8px;
-      text-decoration:none;
-      font-weight:600;
-      font-size:15px;
-      transition:background .2s ease;
+    .link-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+    .download-btn{
+      display:inline-block; background:var(--btn); color:#fff;
+      padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:600; font-size:15px;
+      transition:transform .15s ease, box-shadow .15s ease, background .2s ease;
+      box-shadow:0 6px 16px rgba(44,62,80,.18);
     }
-    .download-btn:hover {background:var(--btn-hover);}
-    .download-btn::before {content:"📄 ";margin-right:2px;}
-    /* hide the 📄 icon for non-document buttons (like the meeting) */
-    .no-doc::before { content:""; }
-    footer { padding:24px; text-align:center; color:#777; }
+    .download-btn:hover{ background:var(--btn-hover); transform:translateY(-1px); box-shadow:0 10px 22px rgba(44,62,80,.22); }
+    .download-btn::before{ content:"📄 "; margin-right:2px; }
+    .no-doc::before{ content:""; } /* non-PDF actions */
+    footer{ padding:24px; text-align:center; color:#777; }
+    html{ scroll-behavior:smooth; }
   </style>
 </head>
 
@@ -80,13 +70,15 @@
   </header>
 
   <main class="wrap">
-    <h2>Welcome, ESS Staff</h2>
-    <p>Use the resources below for onboarding, policies, and staff documentation.</p>
+    <section class="hero">
+      <h2>👋 Welcome, ESS Staff</h2>
+      <p class="muted">All your staff forms, onboarding, and tools in one place.</p>
+    </section>
 
     <section class="grid">
       <!-- Staff Documents -->
       <div class="card">
-        <h3>Staff Documents</h3>
+        <h3>📚 Staff Documents</h3>
         <ul class="link-list">
           <li>
             <a class="download-btn" href="/Head_to_Toe_Injury_Form.pdf" target="_blank" rel="noopener">
@@ -108,7 +100,7 @@
 
       <!-- Onboarding & Compliance -->
       <div class="card">
-        <h3>Onboarding & Compliance</h3>
+        <h3>📝 Onboarding & Compliance</h3>
         <ul class="link-list">
           <li>
             <a class="download-btn" href="/ESS_Staff_Welcome_Packet.pdf" target="_blank" rel="noopener">
@@ -125,22 +117,22 @@
 
       <!-- Helpful Links -->
       <div class="card">
-        <h3>Helpful Links</h3>
+        <h3>🔗 Helpful Links</h3>
         <ul class="link-list">
           <li>
-            <!-- Updated to open embedded meeting page -->
-            <a class="download-btn no-doc" href="meeting.html" target="_blank" rel="noopener">
+            <!-- Open Jitsi in a new tab (non-embedded) -->
+            <a class="download-btn no-doc" href="https://meet.jit.si/EmpowermentSupportSolutions" target="_blank" rel="noopener">
               ▶️ Start Virtual Meeting
             </a>
           </li>
           <li>
-            <a class="download-btn" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">
-              California Self-Determination Program
+            <a class="download-btn no-doc" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">
+              🌐 California Self-Determination Program
             </a>
           </li>
           <li>
-            <a class="download-btn" href="index.html#contact">
-              Contact ESS Admin
+            <a class="download-btn no-doc" href="index.html#contact">
+              ✉️ Contact ESS Admin
             </a>
           </li>
         </ul>
@@ -149,8 +141,6 @@
   </main>
 
   <footer>© <span id="y"></span> Empowerment Support Solutions</footer>
-  <script>
-    document.getElementById('y').textContent = new Date().getFullYear();
-  </script>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 </body>
 </html>
