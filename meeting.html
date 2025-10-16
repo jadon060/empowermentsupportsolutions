@@ -92,21 +92,20 @@
         </div>
       </div>
 
-      <!-- Custom language toggle (EN / ES) -->
+      <!-- Language toggle (IDs match homepage exactly) -->
       <div class="lang" aria-label="Language toggle">
-        <button id="lang-en" type="button">EN</button>
-        <button id="lang-es" type="button">ES</button>
+        <button id="btn-en" type="button">EN</button>
+        <button id="btn-es" type="button">ES</button>
       </div>
 
       <div class="toolbar">
         <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
-        <!-- Hard link to your Welcome Families page -->
         <a class="btn" href="/families.html">↩️ Back to Portal</a>
       </div>
     </div>
   </div>
 
-  <!-- Hidden Google widget (needed for translation API) -->
+  <!-- Hidden Google widget (needed for translation) -->
   <div id="google_translate_element"></div>
 
   <main class="container">
@@ -239,50 +238,43 @@
     // Footer year
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ========== Google Translate (cookie + hash method) ==========
+    // ===== Google Translate (IDENTICAL method to your homepage) =====
     function googleTranslateElementInit(){
       new google.translate.TranslateElement(
-        { pageLanguage:'en', includedLanguages:'en,es', autoDisplay:false },
+        {pageLanguage:'en', includedLanguages:'es', autoDisplay:false},
         'google_translate_element'
       );
-      highlightFromState();
+      setActiveFromCookie();
     }
 
-    // Set both cookie and URL hash so Google reliably picks it up
     function setLang(lang){
-      var pair = (lang === 'es') ? 'en|es' : 'es|en';
-      // URL hash Google checks
-      if (location.hash !== '#googtrans(' + pair + ')') {
-        location.hash = '#googtrans(' + pair + ')';
-      }
-      // Cookies Google checks
-      var cookieVal = '/'+pair.replace('|','/');
-      document.cookie = 'googtrans=' + cookieVal + ';path=/';
-      // Also set on root domain
-      var hostParts = location.hostname.split('.');
+      var val = (lang === 'es') ? '/en/es' : '/es/en';
+      // Set cookie on path
+      document.cookie = 'googtrans=' + val + ';path=/';
+      // Also set cookie on root domain (works across www/custom domain)
+      var hostParts = window.location.hostname.split('.');
       if (hostParts.length > 1) {
-        var root = '.' + hostParts.slice(-2).join('.');
-        document.cookie = 'googtrans=' + cookieVal + ';domain=' + root + ';path=/';
+        var rootDomain = '.' + hostParts.slice(-2).join('.');
+        document.cookie = 'googtrans=' + val + ';domain=' + rootDomain + ';path=/';
       }
-      // Reload to apply
+      // Also set hash (helps some browsers/extensions)
+      var pair = (lang === 'es') ? 'en|es' : 'es|en';
+      location.hash = '#googtrans(' + pair + ')';
+
+      // Reload so Google applies translation
       location.reload();
     }
 
-    function isSpanish(){
-      return /googtrans=\s*\/en\/es/.test(document.cookie) || /#googtrans\(en\|es\)/.test(location.hash);
+    function setActiveFromCookie(){
+      var isES = /(?:^|;)\s*googtrans=\/en\/es/.test(document.cookie) || /#googtrans\(en\|es\)/.test(location.hash);
+      document.getElementById('btn-en').classList.toggle('active', !isES);
+      document.getElementById('btn-es').classList.toggle('active', isES);
     }
 
-    function highlightFromState(){
-      var es = isSpanish();
-      document.getElementById('lang-en').classList.toggle('active', !es);
-      document.getElementById('lang-es').classList.toggle('active', es);
-    }
+    document.getElementById('btn-en').addEventListener('click', function(){ setLang('en'); });
+    document.getElementById('btn-es').addEventListener('click', function(){ setLang('es'); });
 
-    // Wire buttons
-    document.getElementById('lang-en').addEventListener('click', function(){ setLang('en'); });
-    document.getElementById('lang-es').addEventListener('click', function(){ setLang('es'); });
-
-    // Load Google script over HTTPS
+    // Load Google script over HTTPS (same as homepage)
     (function(){
       var s = document.createElement('script');
       s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
