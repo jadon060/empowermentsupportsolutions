@@ -252,131 +252,22 @@
     // Footer year
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ————— Google Translate: hybrid (no-reload first, cookie fallback) —————
-    const GT = {
-      debugRevealMs: 4000,
-      triedRetry: false
-    };
-
-    function showDebugWidget() {
-      const host = document.getElementById('google_translate_element');
-      host.classList.add('gt-show');
-      setTimeout(() => {
-        host.classList.remove('gt-show');
-        host.classList.add('gt-hide');
-      }, GT.debugRevealMs);
-    }
-
-    function waitForCombo(timeoutMs = 6000) {
-      return new Promise((resolve, reject) => {
-        const start = performance.now();
-        (function check(){
-          const sel = document.querySelector('select.goog-te-combo');
-          if (sel) return resolve(sel);
-          if (performance.now() - start > timeoutMs) return reject(new Error('goog-te-combo not found'));
-          setTimeout(check, 50);
-        })();
-      });
-    }
-
-    function updateActiveFromSelect(sel) {
-      sel = sel || document.querySelector('select.goog-te-combo');
-      const isES = sel && sel.value === 'es';
-      document.getElementById('btn-en').classList.toggle('active', !isES);
-      document.getElementById('btn-es').classList.toggle('active', !!isES);
-    }
-
-    // Cookie fallback for when Google’s select never appears.
-    function setCookie(name, value, days, domain) {
-      let expires = "";
-      if (days) {
-        const d = new Date();
-        d.setTime(d.getTime() + (days*24*60*60*1000));
-        expires = "; expires=" + d.toUTCString();
-      }
-      const dom = domain ? "; domain=" + domain : "";
-      document.cookie = name + "=" + (value || "") + expires + "; path=/" + dom + "; SameSite=None; Secure";
-    }
-    function forceLangViaCookie(lang) {
-      // Google expects /source/target
-      const val = lang === 'es' ? "/en/es" : "/en/en";
-      const host = location.hostname;
-      const root = host.indexOf('.') !== -1 ? "." + host.split('.').slice(-2).join('.') : host;
-
-      // Set on exact host and on root domain (covers www / subdomains)
-      setCookie("googtrans", val, 1);
-      setCookie("googtrans", val, 1, root);
-
-      // Reload once to apply
-      location.reload();
-    }
-
+    // ***** SIMPLE + RELIABLE TRANSLATE (redirect method) *****
+    // ES -> open this same page via Google Translate
+    // EN -> return to the original URL on your domain
     function switchLang(lang) {
-      // Try driving the hidden select (no-reload path)
-      waitForCombo().then(function(sel){
-        sel.value = (lang === 'es' ? 'es' : 'en');
-        sel.dispatchEvent(new Event('change', { bubbles: true }));
-        updateActiveFromSelect(sel);
-        console.log('[GT] Switched (select):', sel.value);
-      }).catch(() => {
-        console.warn('[GT] No .goog-te-combo — using cookie fallback + reload');
-        forceLangViaCookie(lang);
-      });
+      const original = location.origin + location.pathname + location.search + location.hash;
+      if (lang === 'es') {
+        const u = encodeURIComponent(original);
+        window.top.location.href = `https://translate.google.com/translate?hl=es&sl=en&u=${u}`;
+      } else {
+        window.top.location.href = original; // back to English
+      }
     }
 
     // Wire buttons
     document.getElementById('btn-en').addEventListener('click', () => switchLang('en'));
     document.getElementById('btn-es').addEventListener('click', () => switchLang('es'));
-
-    // Google callback — FORCE SIMPLE LAYOUT so the <select.goog-te-combo> is created
-    function googleTranslateElementInit() {
-      try {
-        new google.translate.TranslateElement(
-          {
-            pageLanguage: 'en',
-            includedLanguages: 'en,es',
-            autoDisplay: false,
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-          },
-          'google_translate_element'
-        );
-        console.log('[GT] TranslateElement injected (SIMPLE layout).');
-        showDebugWidget();
-        waitForCombo().then(sel => {
-          console.log('[GT] Found .goog-te-combo:', !!sel);
-          updateActiveFromSelect(sel);
-        }).catch(() => console.warn('[GT] .goog-te-combo NOT found within timeout.'));
-      } catch (e) {
-        console.error('[GT] Init error:', e);
-      }
-    }
-    window.googleTranslateElementInit = googleTranslateElementInit;
-
-    // Load script with cache-buster and one timed retry
-    (function loadGoogleTranslate(){
-      const id = 'gt-loader';
-      if (!document.getElementById(id)) {
-        const s = document.createElement('script');
-        s.id = id;
-        s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&_=' + Date.now();
-        s.onerror = () => console.error('[GT] Script failed to load.');
-        document.head.appendChild(s);
-      }
-
-      setTimeout(() => {
-        const combo = document.querySelector('select.goog-te-combo');
-        if (!combo && !GT.triedRetry) {
-          GT.triedRetry = true;
-          console.warn('[GT] No combo after 6s. Retrying loader…');
-          const again = document.createElement('script');
-          again.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&_retry=' + Date.now();
-          document.head.appendChild(again);
-          showDebugWidget();
-        }
-      }, 6000);
-    })();
-
-    // Footer year already set above
   </script>
 </body>
 </html>
