@@ -26,12 +26,28 @@
     .brand-title{display:flex;flex-direction:column;line-height:1.15}
     .brand-title .top{font-size:16px;opacity:.95}
     .brand-title .bottom{font-size:18px;font-weight:800}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
     .btn:hover{background:rgba(255,255,255,.22)}
 
-    /* Translate widget placement */
-    #google_translate_element{margin-left:auto}
+    /* Language buttons (match your home page look) */
+    .lang{display:flex;gap:10px;margin-right:6px}
+    .lang button{
+      appearance:none;border:1px solid #e6e8ee;background:#fff;color:#1f2937;
+      padding:8px 14px;border-radius:12px;font-weight:700;letter-spacing:.5px;
+      box-shadow:0 4px 14px rgba(0,0,0,.08);
+      cursor:pointer
+    }
+    .lang button:hover{filter:brightness(.98)}
+    .lang button.active{outline:2px solid #cfd7ff}
+
+    /* Hide Google’s default UI */
+    #google_translate_element{position:absolute;left:-9999px}
+    .goog-logo-link{display:none !important}
+    .goog-te-gadget{color:transparent !important}
+    .goog-te-banner-frame.skiptranslate{display:none !important}
+    body{top:0 !important}
 
     /* Main */
     .container{max-width:1000px;margin:22px auto;padding:0 16px}
@@ -75,13 +91,23 @@
           <div class="bottom">Self-Determination Program</div>
         </div>
       </div>
-      <div id="google_translate_element"></div>
+
+      <!-- Custom language toggle (EN / ES) -->
+      <div class="lang" aria-label="Language toggle">
+        <button id="lang-en" type="button">EN</button>
+        <button id="lang-es" type="button">ES</button>
+      </div>
+
       <div class="toolbar">
         <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
-        <a class="btn" href="/portal/welcome.html">↩️ Back to Portal</a>
+        <!-- Hard link to your Welcome Families page -->
+        <a class="btn" href="/families.html">↩️ Back to Portal</a>
       </div>
     </div>
   </div>
+
+  <!-- Hidden Google widget (needed for translation API) -->
+  <div id="google_translate_element"></div>
 
   <main class="container">
     <section class="card">
@@ -210,15 +236,35 @@
   </main>
 
   <script>
+    // Footer year
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // Google Translate
+    // Google Translate init (kept hidden)
     function googleTranslateElementInit() {
       new google.translate.TranslateElement(
-        {pageLanguage: 'en', includedLanguages: 'en,es', layout: google.translate.TranslateElement.InlineLayout.SIMPLE},
+        {pageLanguage:'en', includedLanguages:'en,es', layout:google.translate.TranslateElement.InlineLayout.SIMPLE},
         'google_translate_element'
       );
     }
+
+    // Helper to switch language via the hidden select
+    function setLang(langCode){
+      const sel = document.querySelector('.goog-te-combo');
+      if(!sel){ return; }
+      sel.value = langCode;                   // 'en' or 'es'
+      sel.dispatchEvent(new Event('change')); // trigger translate
+      // Button active state
+      document.getElementById('lang-en').classList.toggle('active', langCode==='en');
+      document.getElementById('lang-es').classList.toggle('active', langCode==='es');
+    }
+
+    // Wire up custom buttons
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('lang-en').addEventListener('click', () => setLang('en'));
+      document.getElementById('lang-es').addEventListener('click', () => setLang('es'));
+      // default active EN
+      document.getElementById('lang-en').classList.add('active');
+    });
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
