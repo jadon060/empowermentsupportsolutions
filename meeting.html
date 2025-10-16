@@ -19,6 +19,7 @@
       background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 60%, #1b2a38 100%);
       color:#fff; padding:18px 16px 22px;
       box-shadow:0 2px 12px rgba(0,0,0,.15);
+      position:relative;
     }
     .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
     .brand{display:flex;align-items:center;gap:12px}
@@ -31,7 +32,7 @@
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
     .btn:hover{background:rgba(255,255,255,.22)}
 
-    /* Language buttons (match your home page look) */
+    /* Language buttons */
     .lang{display:flex;gap:10px;margin-right:6px}
     .lang button{
       appearance:none;border:1px solid #e6e8ee;background:#fff;color:#1f2937;
@@ -42,8 +43,8 @@
     .lang button:hover{filter:brightness(.98)}
     .lang button.active{outline:2px solid #cfd7ff}
 
-    /* Hide Google’s default UI (same as homepage) */
-    #google_translate_element{display:none}
+    /* Hide Google’s UI off-screen (not display:none) so it initializes */
+    #google_translate_element{position:absolute;left:-9999px;top:-9999px}
     .goog-logo-link{display:none !important}
     .goog-te-gadget{color:transparent !important}
     .goog-te-banner-frame.skiptranslate{display:none !important}
@@ -92,7 +93,7 @@
         </div>
       </div>
 
-      <!-- Language toggle (IDs EXACTLY like homepage) -->
+      <!-- Language toggle (no cookies; direct select control) -->
       <div class="lang" aria-label="Language toggle">
         <button id="btn-en" type="button">EN</button>
         <button id="btn-es" type="button">ES</button>
@@ -105,7 +106,7 @@
     </div>
   </div>
 
-  <!-- Hidden Google widget (same as homepage) -->
+  <!-- Hidden Google widget (required for translate) -->
   <div id="google_translate_element"></div>
 
   <main class="container">
@@ -238,38 +239,51 @@
     // Footer year
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ===== IDENTICAL translation logic to your homepage =====
-    function googleTranslateElementInit(){
+    // ---- Google Translate: direct-select method (no cookies, no reloads) ----
+    function googleTranslateElementInit() {
       new google.translate.TranslateElement(
-        {pageLanguage:'en', includedLanguages:'es', autoDisplay:false},
+        { pageLanguage: 'en', includedLanguages: 'en,es', autoDisplay: false },
         'google_translate_element'
       );
-      setActiveFromCookie();
+      // After Google injects, set initial active based on current select (defaults to EN)
+      waitForCombo().then(updateActiveFromSelect);
     }
 
-    function setLang(lang){
-      var val = (lang === 'es') ? '/en/es' : '/es/en';
-      document.cookie = 'googtrans=' + val + ';path=/';
-      var hostParts = window.location.hostname.split('.');
-      if (hostParts.length > 1) {
-        var rootDomain = '.' + hostParts.slice(-2).join('.');
-        document.cookie = 'googtrans=' + val + ';domain=' + rootDomain + ';path=/';
-      }
-      location.reload();
+    // Wait for Google's injected <select.goog-te-combo>
+    function waitForCombo() {
+      return new Promise(function(resolve){
+        (function check(){
+          var sel = document.querySelector('select.goog-te-combo');
+          if (sel) return resolve(sel);
+          setTimeout(check, 50);
+        })();
+      });
     }
 
-    function setActiveFromCookie(){
-      var isES = /googtrans=\/en\/es/.test(document.cookie);
+    // Change language by setting the hidden select and dispatching 'change'
+    function switchLang(lang) {
+      waitForCombo().then(function(sel){
+        sel.value = (lang === 'es' ? 'es' : 'en');
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        updateActiveFromSelect(sel);
+      });
+    }
+
+    function updateActiveFromSelect(sel) {
+      sel = sel || document.querySelector('select.goog-te-combo');
+      var isES = sel && sel.value === 'es';
       document.getElementById('btn-en').classList.toggle('active', !isES);
-      document.getElementById('btn-es').classList.toggle('active', isES);
+      document.getElementById('btn-es').classList.toggle('active', !!isES);
     }
 
-    document.getElementById('btn-en').addEventListener('click', function(){ setLang('en'); });
-    document.getElementById('btn-es').addEventListener('click', function(){ setLang('es'); });
+    // Wire buttons
+    document.getElementById('btn-en').addEventListener('click', function(){ switchLang('en'); });
+    document.getElementById('btn-es').addEventListener('click', function(){ switchLang('es'); });
 
+    // Load Google script (HTTPS)
     (function(){
       var s = document.createElement('script');
-      s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
       document.head.appendChild(s);
     })();
   </script>
