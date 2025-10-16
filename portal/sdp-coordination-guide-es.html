@@ -14,7 +14,6 @@
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
 
-    /* Top banner */
     .banner{
       background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 60%, #1b2a38 100%);
       color:#fff; padding:18px 16px 22px;
@@ -32,7 +31,6 @@
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
     .btn:hover{background:rgba(255,255,255,.22)}
 
-    /* Language buttons */
     .lang{display:flex;gap:10px;margin-right:6px}
     .lang button{
       appearance:none;border:1px solid #e6e8ee;background:#fff;color:#1f2937;
@@ -43,7 +41,6 @@
     .lang button:hover{filter:brightness(.98)}
     .lang button.active{outline:2px solid #cfd7ff}
 
-    /* Main */
     .container{max-width:1000px;margin:22px auto;padding:0 16px}
     .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin:16px 0;border:1px solid var(--line)}
     h1{font-size:30px;margin:6px 0 4px}
@@ -86,7 +83,6 @@
         </div>
       </div>
 
-      <!-- Language toggle -->
       <div class="lang" aria-label="Cambiar idioma">
         <button id="btn-en" type="button" onclick="location.href='/portal/sdp-coordination-guide.html'">EN</button>
         <button id="btn-es" type="button" class="active">ES</button>
@@ -102,7 +98,7 @@
   <main class="container">
     <section class="card">
       <h1>Guía de Coordinación del SDP</h1>
-      <p class="lead">Resumen simple de cómo ESS (Empowerment Support Solutions) coordina apoyos dentro del Programa de Autodeterminación en California (SDP). Hecho para participantes, familias, Coordinadores de Servicios y socios FMS.</p>
+      <p class="lead">Resumen simple de cómo ESS coordina apoyos dentro del Programa de Autodeterminación en California (SDP). Hecho para participantes, familias, Coordinadores de Servicios y socios FMS.</p>
       <div class="pillrow">
         <span class="pill">🎯 Con Propósito</span>
         <span class="pill">🤝 Enfocado en la Familia</span>
@@ -176,17 +172,53 @@
       </details>
     </section>
 
-    <section class="card grid grid-2">
-      <div>
-        <h2><span class="emoji">🧾</span>Lista de información</h2>
+    <!-- New Section: Service Codes (SDP) -->
+    <section class="card">
+      <h2><span class="emoji">🧾</span>Códigos de Servicio del SDP</h2>
+      <p class="lead">Lista de códigos usados en el Programa de Autodeterminación. Solo incluye servicios aplicables a proveedores no vendorizados como ESS.</p>
+
+      <details>
+        <summary><span class="sumicon">🧠</span> Código 062 – Entrenamiento de Habilidades Individuales y Apoyo</summary>
         <ul class="list-tight">
-          <li>Metas del IPP y notas del PCP</li>
-          <li>Horas autorizadas y categoría de presupuesto</li>
-          <li>Contacto y modelo del FMS</li>
-          <li>Links de orientación/capacitación y requisitos</li>
-          <li>Lista de documentos y fechas de entrega</li>
+          <li>Apoyo individualizado para desarrollar habilidades de vida diaria, comunicación y comportamiento adaptativo.</li>
+          <li>Enfocado en independencia, autodeterminación y participación comunitaria.</li>
         </ul>
-      </div>
+      </details>
+
+      <details>
+        <summary><span class="sumicon">🌿</span> Código 331 – Integración Comunitaria</summary>
+        <ul class="list-tight">
+          <li>Apoyos en la comunidad para aumentar independencia, inclusión y relaciones sociales.</li>
+          <li>Incluye acompañamiento a actividades recreativas, educativas o voluntarias.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><span class="sumicon">🚗</span> Código 338 – Transporte No Médico</summary>
+        <ul class="list-tight">
+          <li>Transporte hacia y desde actividades de integración comunitaria, empleo o citas no médicas.</li>
+          <li>No incluye servicios de ambulancia o transporte especializado médico.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><span class="sumicon">👥</span> Código 360 – Apoyo de Integración y Desarrollo de Habilidades</summary>
+        <ul class="list-tight">
+          <li>Entrenamiento y apoyo para fomentar habilidades interpersonales, sociales y de comunicación.</li>
+          <li>Brinda asistencia directa para mantener rutinas, comportamiento apropiado y participación activa.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><span class="sumicon">🏠</span> Código 366 – Servicios de Vida Independiente</summary>
+        <ul class="list-tight">
+          <li>Apoyo en el hogar o comunidad para aprender a administrar dinero, cocinar, limpiar y cuidar la salud.</li>
+          <li>Fomenta independencia y seguridad personal dentro del entorno elegido por el participante.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="card grid grid-2">
       <div>
         <h2><span class="emoji">📎</span>Documentos que entrega ESS</h2>
         <ul class="list-tight">
@@ -196,16 +228,6 @@
           <li>Fecha de inicio estimada y horario</li>
         </ul>
       </div>
-    </section>
-
-    <section class="card">
-      <h2><span class="emoji">📅</span>Después de la reunión</h2>
-      <ul class="list-tight">
-        <li>ESS manda los documentos requeridos al FMS.</li>
-        <li>La familia termina pendientes del FMS u orientaciones.</li>
-        <li>El SC finaliza la autorización y avisa la aprobación.</li>
-        <li>ESS confirma la fecha de inicio, empieza servicios y documenta progreso para facturar.</li>
-      </ul>
     </section>
 
     <section class="card">
@@ -226,10 +248,7 @@
   </main>
 
   <script>
-    // Año del pie de página
     document.getElementById('y').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
-
-
