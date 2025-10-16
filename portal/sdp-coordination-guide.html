@@ -239,31 +239,63 @@
     // Footer year
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // Google Translate init (kept hidden)
+    // ---------- Google Translate (hidden widget + custom buttons) ----------
+    // Promise resolves when Google's <select.goog-te-combo> is actually in the DOM
+    let resolveCombo;
+    const comboReady = new Promise(res => (resolveCombo = res));
+
     function googleTranslateElementInit() {
       new google.translate.TranslateElement(
-        {pageLanguage:'en', includedLanguages:'en,es', layout:google.translate.TranslateElement.InlineLayout.SIMPLE},
+        {
+          pageLanguage: 'en',
+          includedLanguages: 'en,es',
+          autoDisplay: false,
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+        },
         'google_translate_element'
       );
+
+      // Poll until the injected <select> exists, then resolve
+      (function waitForCombo(){
+        const sel = document.querySelector('#google_translate_element select.goog-te-combo');
+        if (sel) { resolveCombo(sel); return; }
+        setTimeout(waitForCombo, 50);
+      })();
     }
 
-    // Helper to switch language via the hidden select
-    function setLang(langCode){
-      const sel = document.querySelector('.goog-te-combo');
-      if(!sel){ return; }
-      sel.value = langCode;                   // 'en' or 'es'
-      sel.dispatchEvent(new Event('change')); // trigger translate
-      // Button active state
-      document.getElementById('lang-en').classList.toggle('active', langCode==='en');
-      document.getElementById('lang-es').classList.toggle('active', langCode==='es');
+    // Last-resort cookie fallback (if Google select can't be triggered)
+    function cookieFallback(lang) {
+      const path = lang === 'es' ? '/en/es' : '/es/en';
+      document.cookie = `googtrans=${path};path=/`;
+      document.cookie = `googtrans=${path};domain=${location.hostname};path=/`;
+      location.reload();
+    }
+
+    async function setLang(langCode) {
+      try {
+        const sel = document.querySelector('#google_translate_element select.goog-te-combo')
+                 || await comboReady; // wait if not mounted yet
+
+        // Some browsers need a slight delay after mount
+        requestAnimationFrame(() => {
+          sel.value = langCode;                          // 'en' or 'es'
+          sel.dispatchEvent(new Event('change'));        // trigger translation
+
+          // Visual state
+          document.getElementById('lang-en').classList.toggle('active', langCode === 'en');
+          document.getElementById('lang-es').classList.toggle('active', langCode === 'es');
+        });
+      } catch (e) {
+        // If anything fails, use cookie fallback
+        cookieFallback(langCode);
+      }
     }
 
     // Wire up custom buttons
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('lang-en').addEventListener('click', () => setLang('en'));
       document.getElementById('lang-es').addEventListener('click', () => setLang('es'));
-      // default active EN
-      document.getElementById('lang-en').classList.add('active');
+      document.getElementById('lang-en').classList.add('active'); // default highlight
     });
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
