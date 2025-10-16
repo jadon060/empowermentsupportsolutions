@@ -5,29 +5,70 @@
   <title>ESS • Family Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
+    :root{
       --brand:#2c3e50; --bg:#f7f7fb; --card:#fff;
       --btn:#2c3e50; --btn-hover:#1b2a38; --muted:#6b7280;
+      --accent:#0ea5e9; /* sky */
+      --accent-2:#22c55e; /* green */
+      --accent-4:#a78bfa; /* violet */
     }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); font-family:Arial,Helvetica,sans-serif; color:#222; }
-    header { display:flex; justify-content:space-between; align-items:center; padding:16px 18px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.06); position:sticky; top:0; z-index:10; }
-    .logo { font-weight:700; color:var(--brand); }
-    .btn-header { display:inline-block; padding:10px 14px; border-radius:10px; background:var(--brand); color:#fff; text-decoration:none; font-weight:600; }
-    .wrap { max-width:1080px; margin:0 auto; padding:22px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
-    .card { background:var(--card); border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,.08); padding:18px; }
-    h1,h2,h3 { color:#2c3e50; margin:0 0 12px; }
-    p { margin:0 0 16px; }
-    .link-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
-    .download-btn { display:inline-block; background:var(--btn); color:#fff; padding:10px 14px; border-radius:8px; text-decoration:none; font-weight:600; font-size:15px; transition:background .2s ease; }
-    .download-btn:hover { background:var(--btn-hover); }
-    .download-btn::before { content:"📄 "; margin-right:2px; }
-    /* turn off the 📄 for non-document actions (e.g., meeting) */
-    .no-doc::before { content:""; }
-    .muted { color:var(--muted); font-size:14px; }
-    footer { padding:24px; text-align:center; color:#777; }
-    html { scroll-behavior:smooth; }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0; font-family:Arial,Helvetica,sans-serif; color:#222;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(14,165,233,.10), transparent 60%),
+        radial-gradient(1000px 500px at 110% 10%, rgba(167,139,250,.10), transparent 55%),
+        var(--bg);
+    }
+    header{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 18px; background:#fff; position:sticky; top:0; z-index:10;
+      box-shadow:0 2px 12px rgba(0,0,0,.06);
+    }
+    .logo{ font-weight:700; color:var(--brand); }
+    .btn-header{
+      display:inline-block; padding:10px 14px; border-radius:10px;
+      background:var(--brand); color:#fff; text-decoration:none; font-weight:600;
+    }
+    .wrap{ max-width:1080px; margin:0 auto; padding:22px; }
+    .hero{
+      background:linear-gradient(135deg, rgba(14,165,233,.12), rgba(34,197,94,.12));
+      border:1px solid rgba(44,62,80,.08);
+      padding:18px 20px; border-radius:14px; margin-bottom:18px;
+    }
+    h1,h2,h3{ color:#2c3e50; margin:0 0 12px; }
+    .muted{ color:var(--muted); font-size:14px; margin:0; }
+    .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+    .card{
+      background:var(--card); border-radius:14px; padding:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08); position:relative; overflow:hidden;
+    }
+    .card::after{
+      content:""; position:absolute; inset:auto 0 0 auto; width:100%; height:4px;
+      background:linear-gradient(90deg, var(--accent), var(--accent-4), var(--accent-2));
+      opacity:.6;
+    }
+    .link-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+    .download-btn{
+      display:inline-block; background:var(--btn); color:#fff;
+      padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:600; font-size:15px;
+      transition:transform .15s ease, box-shadow .15s ease, background .2s ease;
+      box-shadow:0 6px 16px rgba(44,62,80,.18);
+    }
+    .download-btn:hover{ background:var(--btn-hover); transform:translateY(-1px); box-shadow:0 10px 22px rgba(44,62,80,.22); }
+    .download-btn::before{ content:"📄 "; margin-right:2px; }
+    .no-doc::before{ content:""; } /* for non-PDF actions */
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      background:#fff; color:#0f172a; border:1px solid rgba(15,23,42,.08);
+      padding:8px 12px; border-radius:999px; font-weight:600; text-decoration:none;
+      box-shadow:0 4px 12px rgba(0,0,0,.06);
+    }
+    .pill .icon{ font-size:18px; }
+    .pill.sky{ border-color:rgba(14,165,233,.35); }
+    .pill.green{ border-color:rgba(34,197,94,.35); }
+    footer{ padding:24px; text-align:center; color:#777; }
+    html{ scroll-behavior:smooth; }
   </style>
 </head>
 
@@ -38,13 +79,26 @@
   </header>
 
   <main class="wrap">
-    <h2>Welcome, ESS Families</h2>
-    <p class="muted">Quick access to your most-used forms and resources. Clean. Simple. No clutter.</p>
+    <!-- Broadened welcome -->
+    <section class="hero">
+      <h2>👋 Welcome, Families, Service Coordinators, Independent Facilitators & Team Members</h2>
+      <p class="muted">Quick access to your most-used forms and resources — simple, organized, and meeting-ready. 🧭</p>
+
+      <!-- One-click SDP Coordination Guide buttons -->
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="pill sky" href="/portal/sdp-coordination-guide.html">
+          <span class="icon">🧭</span> <span>SDP Coordination Guide (Step-by-Step)</span>
+        </a>
+        <a class="pill green" href="/portal/sdp-coordination-guide-es.html">
+          <span class="icon">🧭</span> <span>Guía de Coordinación SDP (Paso a Paso)</span>
+        </a>
+      </div>
+    </section>
 
     <section class="grid">
       <!-- Family Agreements -->
       <div class="card">
-        <h3>Family Agreements</h3>
+        <h3>📑 Family Agreements</h3>
         <ul class="link-list">
           <li>
             <a class="download-btn" href="/ESS_SDP_Agreement_(EN).pdf" target="_blank" rel="noopener">
@@ -61,7 +115,7 @@
 
       <!-- Service Menu -->
       <div class="card">
-        <h3>Service Menu</h3>
+        <h3>🗂️ Service Menu</h3>
         <ul class="link-list">
           <li>
             <a class="download-btn" href="/ESS_Service_Menu_(EN).pdf" target="_blank" rel="noopener">
@@ -78,7 +132,7 @@
 
       <!-- PCT Goal Template -->
       <div class="card">
-        <h3>PCT Planning</h3>
+        <h3>🎯 PCT Planning</h3>
         <ul class="link-list">
           <li>
             <a class="download-btn" href="/PCT_Goal_Template.pdf" target="_blank" rel="noopener">
@@ -90,23 +144,31 @@
 
       <!-- Helpful Links -->
       <div class="card">
-        <h3>Helpful Links</h3>
+        <h3>🔗 Helpful Links</h3>
         <ul class="link-list">
           <li>
-            <!-- Updated to open embedded version -->
             <a class="download-btn no-doc" href="meeting.html" target="_blank" rel="noopener">
               ▶️ Start Virtual Meeting
             </a>
           </li>
           <li>
-            <a class="download-btn" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">
-              California Self-Determination Program
+            <a class="download-btn no-doc" href="/portal/sdp-coordination-guide.html">
+              🧭 SDP Coordination Guide (Step-by-Step)
             </a>
           </li>
           <li>
-            <!-- back to homepage Contact section -->
-            <a class="download-btn" href="index.html#contact">
-              Contact ESS
+            <a class="download-btn no-doc" href="/portal/sdp-coordination-guide-es.html">
+              🧭 Guía de Coordinación SDP (Español)
+            </a>
+          </li>
+          <li>
+            <a class="download-btn no-doc" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener">
+              🌐 California Self-Determination Program
+            </a>
+          </li>
+          <li>
+            <a class="download-btn no-doc" href="index.html#contact">
+              ✉️ Contact ESS
             </a>
           </li>
         </ul>
