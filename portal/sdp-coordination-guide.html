@@ -240,7 +240,7 @@
     document.getElementById('y').textContent = new Date().getFullYear();
 
     // ---------- Google Translate (hidden widget + custom buttons) ----------
-    // Promise resolves when Google's <select.goog-te-combo> is actually in the DOM
+    // Promise resolves when Google's <select.goog-te-combo> is in the DOM (anywhere)
     let resolveCombo;
     const comboReady = new Promise(res => (resolveCombo = res));
 
@@ -255,9 +255,9 @@
         'google_translate_element'
       );
 
-      // Poll until the injected <select> exists, then resolve
+      // Poll until the injected <select> exists anywhere, then resolve
       (function waitForCombo(){
-        const sel = document.querySelector('#google_translate_element select.goog-te-combo');
+        const sel = document.querySelector('select.goog-te-combo');
         if (sel) { resolveCombo(sel); return; }
         setTimeout(waitForCombo, 50);
       })();
@@ -273,20 +273,29 @@
 
     async function setLang(langCode) {
       try {
-        const sel = document.querySelector('#google_translate_element select.goog-te-combo')
-                 || await comboReady; // wait if not mounted yet
+        // Wait for select to exist (or reuse if already present)
+        const sel = document.querySelector('select.goog-te-combo') || await comboReady;
 
         // Some browsers need a slight delay after mount
         requestAnimationFrame(() => {
           sel.value = langCode;                          // 'en' or 'es'
-          sel.dispatchEvent(new Event('change'));        // trigger translation
+          sel.dispatchEvent(new Event('change', {bubbles:true}));  // trigger translation
+          // If Google doesn't react quickly, try onchange directly
+          if (typeof sel.onchange === 'function') sel.onchange();
 
           // Visual state
           document.getElementById('lang-en').classList.toggle('active', langCode === 'en');
           document.getElementById('lang-es').classList.toggle('active', langCode === 'es');
+
+          // Safeguard: if text hasn't changed after a moment, use cookie fallback
+          setTimeout(() => {
+            const htmlLang = document.documentElement.getAttribute('lang') || '';
+            const switched = (langCode === 'es' && htmlLang.startsWith('es')) ||
+                             (langCode === 'en' && htmlLang.startsWith('en'));
+            if (!switched) cookieFallback(langCode);
+          }, 1200);
         });
       } catch (e) {
-        // If anything fails, use cookie fallback
         cookieFallback(langCode);
       }
     }
@@ -298,6 +307,6 @@
       document.getElementById('lang-en').classList.add('active'); // default highlight
     });
   </script>
-  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
