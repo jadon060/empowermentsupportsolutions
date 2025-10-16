@@ -1,10 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
   <title>ESS • SDP Coordination Guide</title>
-  <link rel="icon" href="/logo full.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Public-facing overview of how Empowerment Support Solutions coordinates Self-Determination Program services with participants, families, Service Coordinators, and FMS partners." />
   <style>
     :root{
@@ -15,12 +14,11 @@
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
 
-    /* Banner */
+    /* Top banner */
     .banner{
       background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 60%, #1b2a38 100%);
       color:#fff; padding:18px 16px 22px;
       box-shadow:0 2px 12px rgba(0,0,0,.15);
-      position:relative;
     }
     .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
     .brand{display:flex;align-items:center;gap:12px}
@@ -29,19 +27,20 @@
     .brand-title .top{font-size:16px;opacity:.95}
     .brand-title .bottom{font-size:18px;font-weight:800}
 
-    /* Language toggle (matches your home page look) */
-    .lang{display:flex;gap:8px;margin-left:auto;margin-right:10px}
-    .lang button{
-      border:1px solid #d0d7de;background:#fff;color:#1f2937;
-      padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;
-      box-shadow:0 4px 14px rgba(0,0,0,.08)
-    }
-    .lang button:hover{filter:brightness(.98)}
-    .lang button.active{outline:2px solid #2c3e50}
-
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
     .btn:hover{background:rgba(255,255,255,.22)}
+
+    /* Language buttons (match your home page look) */
+    .lang{display:flex;gap:10px;margin-right:6px}
+    .lang button{
+      appearance:none;border:1px solid #e6e8ee;background:#fff;color:#1f2937;
+      padding:8px 14px;border-radius:12px;font-weight:700;letter-spacing:.5px;
+      box-shadow:0 4px 14px rgba(0,0,0,.08);
+      cursor:pointer
+    }
+    .lang button:hover{filter:brightness(.98)}
+    .lang button.active{outline:2px solid #cfd7ff}
 
     /* Hide Google’s default UI */
     #google_translate_element{position:absolute;left:-9999px}
@@ -93,20 +92,21 @@
         </div>
       </div>
 
-      <!-- Language toggle (cookie-based like home page) -->
+      <!-- Custom language toggle (EN / ES) -->
       <div class="lang" aria-label="Language toggle">
-        <button id="btn-en" type="button">EN</button>
-        <button id="btn-es" type="button">ES</button>
+        <button id="lang-en" type="button">EN</button>
+        <button id="lang-es" type="button">ES</button>
       </div>
 
       <div class="toolbar">
         <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+        <!-- Hard link to your Welcome Families page -->
         <a class="btn" href="/families.html">↩️ Back to Portal</a>
       </div>
     </div>
   </div>
 
-  <!-- Hidden Google widget (required for translate) -->
+  <!-- Hidden Google widget (needed for translation API) -->
   <div id="google_translate_element"></div>
 
   <main class="container">
@@ -239,41 +239,50 @@
     // Footer year
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ---- Google Translate (same cookie method as your home page) ----
+    // ========== Google Translate (cookie + hash method) ==========
     function googleTranslateElementInit(){
       new google.translate.TranslateElement(
-        { pageLanguage:'en', includedLanguages:'es', autoDisplay:false },
+        { pageLanguage:'en', includedLanguages:'en,es', autoDisplay:false },
         'google_translate_element'
       );
-      setActiveFromCookie();
+      highlightFromState();
     }
 
+    // Set both cookie and URL hash so Google reliably picks it up
     function setLang(lang){
-      // Cookie pattern used by Google Translate
-      var val = (lang === 'es') ? '/en/es' : '/es/en';
-      // Set for current path
-      document.cookie = 'googtrans=' + val + ';path=/';
-      // Also set on root domain for cross-path pages (like your home page)
-      var hostParts = window.location.hostname.split('.');
-      if (hostParts.length > 1) {
-        var rootDomain = hostParts.slice(-2).join('.');
-        document.cookie = 'googtrans=' + val + ';domain=.' + rootDomain + ';path=/';
+      var pair = (lang === 'es') ? 'en|es' : 'es|en';
+      // URL hash Google checks
+      if (location.hash !== '#googtrans(' + pair + ')') {
+        location.hash = '#googtrans(' + pair + ')';
       }
-      // Refresh to apply translation
+      // Cookies Google checks
+      var cookieVal = '/'+pair.replace('|','/');
+      document.cookie = 'googtrans=' + cookieVal + ';path=/';
+      // Also set on root domain
+      var hostParts = location.hostname.split('.');
+      if (hostParts.length > 1) {
+        var root = '.' + hostParts.slice(-2).join('.');
+        document.cookie = 'googtrans=' + cookieVal + ';domain=' + root + ';path=/';
+      }
+      // Reload to apply
       location.reload();
     }
 
-    function setActiveFromCookie(){
-      var isES = /(?:^|;)\s*googtrans=\/en\/es/.test(document.cookie);
-      document.getElementById('btn-en').classList.toggle('active', !isES);
-      document.getElementById('btn-es').classList.toggle('active', isES);
+    function isSpanish(){
+      return /googtrans=\s*\/en\/es/.test(document.cookie) || /#googtrans\(en\|es\)/.test(location.hash);
     }
 
-    // Wire up buttons
-    document.getElementById('btn-en').addEventListener('click', function(){ setLang('en'); });
-    document.getElementById('btn-es').addEventListener('click', function(){ setLang('es'); });
+    function highlightFromState(){
+      var es = isSpanish();
+      document.getElementById('lang-en').classList.toggle('active', !es);
+      document.getElementById('lang-es').classList.toggle('active', es);
+    }
 
-    // Load Google script (same as home page)
+    // Wire buttons
+    document.getElementById('lang-en').addEventListener('click', function(){ setLang('en'); });
+    document.getElementById('lang-es').addEventListener('click', function(){ setLang('es'); });
+
+    // Load Google script over HTTPS
     (function(){
       var s = document.createElement('script');
       s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
