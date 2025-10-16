@@ -1,1 +1,235 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>ESS • Guía de Coordinación del SDP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Vista sencilla de cómo Empowerment Support Solutions coordina servicios del Programa de Autodeterminación (SDP) con participantes, familias, Coordinadores de Servicios y socios FMS." />
+  <style>
+    :root{
+      --brand:#2c3e50; --brand-2:#0f4c81;
+      --bg:#f6f8fc; --card:#ffffff; --ink:#1f2937; --muted:#64748b; --line:#e5e7eb;
+      --accent:#3b82f6; --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+
+    /* Top banner */
+    .banner{
+      background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 60%, #1b2a38 100%);
+      color:#fff; padding:18px 16px 22px;
+      box-shadow:0 2px 12px rgba(0,0,0,.15);
+      position:relative;
+    }
+    .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand img{height:34px;width:auto;border-radius:6px;background:#fff;padding:4px}
+    .brand-title{display:flex;flex-direction:column;line-height:1.15}
+    .brand-title .top{font-size:16px;opacity:.95}
+    .brand-title .bottom{font-size:18px;font-weight:800}
+
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
+    .btn:hover{background:rgba(255,255,255,.22)}
+
+    /* Language buttons */
+    .lang{display:flex;gap:10px;margin-right:6px}
+    .lang button{
+      appearance:none;border:1px solid #e6e8ee;background:#fff;color:#1f2937;
+      padding:8px 14px;border-radius:12px;font-weight:700;letter-spacing:.5px;
+      box-shadow:0 4px 14px rgba(0,0,0,.08);
+      cursor:pointer
+    }
+    .lang button:hover{filter:brightness(.98)}
+    .lang button.active{outline:2px solid #cfd7ff}
+
+    /* Main */
+    .container{max-width:1000px;margin:22px auto;padding:0 16px}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin:16px 0;border:1px solid var(--line)}
+    h1{font-size:30px;margin:6px 0 4px}
+    h2{font-size:20px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+    h2 .emoji{font-size:20px}
+    p.lead{color:var(--muted);margin:0}
+    .pillrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;color:var(--muted);box-shadow:0 2px 8px rgba(0,0,0,.03)}
+    .divider{height:1px;background:linear-gradient(90deg,transparent, var(--line), transparent);margin:14px 0}
+
+    details{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+    details+details{margin-top:10px}
+    summary{list-style:none;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:10px}
+    summary::-webkit-details-marker{display:none}
+    .sumicon{font-size:18px;opacity:.9}
+
+    ul{margin:8px 0 0 18px}
+    .list-tight li{margin-bottom:6px}
+
+    .grid{display:grid;gap:16px}
+    @media (min-width:860px){ .grid-2{grid-template-columns:1fr 1fr} }
+
+    .callout{border-left:4px solid var(--accent);padding:12px 14px;background:linear-gradient(0deg,#f0f7ff,#ffffff);border-radius:10px;color:#0f172a}
+
+    a.file{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;text-decoration:none;color:var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    a.file:hover{border-color:#d1d5db}
+
+    footer{color:var(--muted);font-size:13px;padding:24px 0 40px;text-align:center}
+    .contact{margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="wrap">
+      <div class="brand">
+        <img src="/ESS%20Logo.png" alt="ESS logo" />
+        <div class="brand-title">
+          <div class="top">Empowerment Support Solutions</div>
+          <div class="bottom">Programa de Autodeterminación</div>
+        </div>
+      </div>
+
+      <!-- Language toggle -->
+      <div class="lang" aria-label="Cambiar idioma">
+        <button id="btn-en" type="button" onclick="location.href='/portal/sdp-coordination-guide.html'">EN</button>
+        <button id="btn-es" type="button" class="active">ES</button>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+        <a class="btn" href="/families.html">↩️ Volver al Portal</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <section class="card">
+      <h1>Guía de Coordinación del SDP</h1>
+      <p class="lead">Resumen simple de cómo ESS (Empowerment Support Solutions) coordina apoyos dentro del Programa de Autodeterminación en California (SDP). Hecho para participantes, familias, Coordinadores de Servicios y socios FMS.</p>
+      <div class="pillrow">
+        <span class="pill">🎯 Con Propósito</span>
+        <span class="pill">🤝 Enfocado en la Familia</span>
+        <span class="pill">📑 Listo para FMS</span>
+      </div>
+      <div class="divider"></div>
+      <h2><span class="emoji">📌</span>Propósito de esta guía</h2>
+      <p>Queremos que todos salgan de la reunión con el mismo entendimiento: metas, quién hace qué y para cuándo. No es un guion interno y no tiene tarifas ni datos privados.</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="emoji">🧩</span>Cómo encaja ESS en el SDP</h2>
+      <div class="callout">
+        ESS trabaja como <strong>proveedor no “vendorizado”</strong> en el SDP. La familia y el participante eligen a ESS; el pago va por medio del <strong>FMS</strong> del participante. El Coordinador/a de Servicios (SC) apoya con el plan y las autorizaciones.
+      </div>
+      <ul class="list-tight">
+        <li><strong>Participante y Familia:</strong> Lideran el plan y eligen proveedores.</li>
+        <li><strong>Coordinador/a de Servicios (SC):</strong> Alinea metas del IPP y registra autorizaciones.</li>
+        <li><strong>FMS:</strong> Maneja presupuesto, acuerdos y pagos a proveedores.</li>
+        <li><strong>ESS:</strong> Da personal y apoyo de habilidades según el PCP/IPP, con notas claras por cada hora de servicio.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2><span class="emoji">🗂️</span>Objetivos de la reunión</h2>
+      <ul class="list-tight">
+        <li>Revisar las metas actuales del IPP y notas del PCP si aplica.</li>
+        <li>Confirmar horas autorizadas y categorías de presupuesto.</li>
+        <li>Identificar el FMS y el modelo (Bill-Payer, Co-Employer o Sole-Employer).</li>
+        <li>Confirmar orientaciones/capacitaciones y documentos necesarios.</li>
+        <li>Anotar responsables y fechas objetivo para cada siguiente paso.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2><span class="emoji">🧭</span>Marco de coordinación</h2>
+      <details open>
+        <summary><span class="sumicon">📌</span> Alineación del plan</summary>
+        <ul class="list-tight">
+          <li>Vincular metas del IPP con áreas de apoyo de ESS.</li>
+          <li>Decidir qué metas empiezan ahora y cuáles después.</li>
+        </ul>
+      </details>
+      <details>
+        <summary><span class="sumicon">⏱️</span> Horas autorizadas y presupuesto</summary>
+        <ul class="list-tight">
+          <li>Anotar horas por mes por meta o área.</li>
+          <li>Registrar límites de horario, topes y fecha tentativa de inicio.</li>
+        </ul>
+      </details>
+      <details>
+        <summary><span class="sumicon">🏦</span> Coordinación con FMS</summary>
+        <ul class="list-tight">
+          <li>Nombre del FMS, modelo y contacto de onboarding.</li>
+          <li>Lista de documentos que pide el FMS.</li>
+        </ul>
+      </details>
+      <details>
+        <summary><span class="sumicon">🎓</span> Orientación y cumplimiento</summary>
+        <ul class="list-tight">
+          <li>Links de cursos/orientaciones y cómo mandar comprobantes.</li>
+          <li>Requisitos del caso (por ejemplo: antecedentes, RCP).</li>
+        </ul>
+      </details>
+      <details>
+        <summary><span class="sumicon">✅</span> Autorización e inicio</summary>
+        <ul class="list-tight">
+          <li>Quién entrega qué (ESS, SC, FMS).</li>
+          <li>Confirmar fecha de inicio, ritmo de documentación y ventana de facturación.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="card grid grid-2">
+      <div>
+        <h2><span class="emoji">🧾</span>Lista de información</h2>
+        <ul class="list-tight">
+          <li>Metas del IPP y notas del PCP</li>
+          <li>Horas autorizadas y categoría de presupuesto</li>
+          <li>Contacto y modelo del FMS</li>
+          <li>Links de orientación/capacitación y requisitos</li>
+          <li>Lista de documentos y fechas de entrega</li>
+        </ul>
+      </div>
+      <div>
+        <h2><span class="emoji">📎</span>Documentos que entrega ESS</h2>
+        <ul class="list-tight">
+          <li>W-9 y acuerdo de servicios (para el FMS)</li>
+          <li>Plan de personal alineado al IPP</li>
+          <li>Plantillas de timesheet y notas diarias</li>
+          <li>Fecha de inicio estimada y horario</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="emoji">📅</span>Después de la reunión</h2>
+      <ul class="list-tight">
+        <li>ESS manda los documentos requeridos al FMS.</li>
+        <li>La familia termina pendientes del FMS u orientaciones.</li>
+        <li>El SC finaliza la autorización y avisa la aprobación.</li>
+        <li>ESS confirma la fecha de inicio, empieza servicios y documenta progreso para facturar.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2><span class="emoji">📚</span>Recursos y descargas</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <a class="file" href="/ESS_Service_Menu_(EN).pdf" target="_blank">Menú de Servicios (EN)</a>
+        <a class="file" href="/ESS Service Menu (ES).pdf" target="_blank">Menú de Servicios (ES)</a>
+        <a class="file" href="/ESS_SDP_Agreement_(EN).pdf" target="_blank">Acuerdo SDP (EN)</a>
+        <a class="file" href="/ESS_SDP_Agreement_(ES).pdf" target="_blank">Acuerdo SDP (ES)</a>
+      </div>
+    </section>
+
+    <footer class="container">
+      <div>© <span id="y"></span> Empowerment Support Solutions • Guía de Coordinación del SDP</div>
+      <div class="contact">📧 empowermentess@gmail.com • 🌐 empowermentss.com</div>
+      <div style="margin-top:6px;color:var(--muted)">Esta página es informativa y puede actualizarse si cambian procesos del Centro Regional o del FMS.</div>
+    </footer>
+  </main>
+
+  <script>
+    // Año del pie de página
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
+
 
