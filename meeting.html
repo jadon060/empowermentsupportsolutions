@@ -43,8 +43,21 @@
     .lang button:hover{filter:brightness(.98)}
     .lang button.active{outline:2px solid #cfd7ff}
 
-    /* Hide Google’s UI off-screen (not display:none) so it initializes */
-    #google_translate_element{position:absolute;left:-9999px;top:-9999px}
+    /* —— Google Translate: keep initializable + add 5s debug reveal —— */
+    #google_translate_element{
+      position:fixed; left:12px; bottom:12px; z-index:9999;
+      background:#fff; border:1px solid #e5e7eb; border-radius:10px;
+      padding:8px 10px; box-shadow:0 6px 20px rgba(0,0,0,.08);
+      font-size:14px; line-height:1;
+      opacity:0; pointer-events:none; transition:opacity .25s ease;
+    }
+    #google_translate_element.gt-show{ opacity:1; }
+    /* After debug, shove it off-screen but DON’T display:none (so it stays initialized) */
+    #google_translate_element.gt-hide{
+      position:absolute !important; left:-9999px !important; top:-9999px !important;
+      opacity:0 !important;
+    }
+
     .goog-logo-link{display:none !important}
     .goog-te-gadget{color:transparent !important}
     .goog-te-banner-frame.skiptranslate{display:none !important}
@@ -107,7 +120,7 @@
   </div>
 
   <!-- Hidden Google widget (required for translate) -->
-  <div id="google_translate_element"></div>
+  <div id="google_translate_element" aria-hidden="true"></div>
 
   <main class="container">
     <section class="card">
@@ -239,52 +252,110 @@
     // Footer year
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ---- Google Translate: direct-select method (no cookies, no reloads) ----
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement(
-        { pageLanguage: 'en', includedLanguages: 'en,es', autoDisplay: false },
-        'google_translate_element'
-      );
-      // After Google injects, set initial active based on current select (defaults to EN)
-      waitForCombo().then(updateActiveFromSelect);
+    // ————— Google Translate: robust init + self-diagnose —————
+    // 1) Briefly show the widget for 5s so we can confirm it appears.
+    // 2) Log whether the hidden <select.goog-te-combo> exists.
+    // 3) If it doesn't appear, reload the script with a cache-buster (one retry).
+
+    const GT = {
+      loaded: false,
+      triedBust: false,
+      debugRevealMs: 5000
+    };
+
+    function showDebugWidget() {
+      const host = document.getElementById('google_translate_element');
+      host.classList.add('gt-show');
+      // hide after N seconds, but keep it initialized off-screen
+      setTimeout(() => {
+        host.classList.remove('gt-show');
+        host.classList.add('gt-hide');
+      }, GT.debugRevealMs);
     }
 
-    // Wait for Google's injected <select.goog-te-combo>
-    function waitForCombo() {
-      return new Promise(function(resolve){
+    function waitForCombo(timeoutMs = 5000) {
+      return new Promise((resolve, reject) => {
+        const start = performance.now();
         (function check(){
-          var sel = document.querySelector('select.goog-te-combo');
+          const sel = document.querySelector('select.goog-te-combo');
           if (sel) return resolve(sel);
+          if (performance.now() - start > timeoutMs) return reject(new Error('goog-te-combo not found'));
           setTimeout(check, 50);
         })();
       });
     }
 
-    // Change language by setting the hidden select and dispatching 'change'
+    function updateActiveFromSelect(sel) {
+      sel = sel || document.querySelector('select.goog-te-combo');
+      const isES = sel && sel.value === 'es';
+      document.getElementById('btn-en').classList.toggle('active', !isES);
+      document.getElementById('btn-es').classList.toggle('active', !!isES);
+    }
+
     function switchLang(lang) {
       waitForCombo().then(function(sel){
         sel.value = (lang === 'es' ? 'es' : 'en');
         sel.dispatchEvent(new Event('change', { bubbles: true }));
         updateActiveFromSelect(sel);
+        console.log('[GT] Switched language to:', sel.value);
+      }).catch(err => {
+        console.warn('[GT] Switch requested but combo missing:', err.message);
       });
     }
 
-    function updateActiveFromSelect(sel) {
-      sel = sel || document.querySelector('select.goog-te-combo');
-      var isES = sel && sel.value === 'es';
-      document.getElementById('btn-en').classList.toggle('active', !isES);
-      document.getElementById('btn-es').classList.toggle('active', !!isES);
-    }
-
     // Wire buttons
-    document.getElementById('btn-en').addEventListener('click', function(){ switchLang('en'); });
-    document.getElementById('btn-es').addEventListener('click', function(){ switchLang('es'); });
+    document.getElementById('btn-en').addEventListener('click', () => switchLang('en'));
+    document.getElementById('btn-es').addEventListener('click', () => switchLang('es'));
 
-    // Load Google script (HTTPS)
-    (function(){
-      var s = document.createElement('script');
-      s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    // Global callback for Google
+    function googleTranslateElementInit() {
+      try {
+        new google.translate.TranslateElement(
+          { pageLanguage: 'en', includedLanguages: 'en,es', autoDisplay: false },
+          'google_translate_element'
+        );
+        GT.loaded = true;
+        console.log('[GT] TranslateElement injected.');
+        showDebugWidget();
+
+        // Inspect presence of the driver select and log it
+        waitForCombo().then(sel => {
+          console.log('[GT] Found .goog-te-combo:', !!sel);
+          updateActiveFromSelect(sel);
+        }).catch(() => {
+          console.warn('[GT] .goog-te-combo NOT found within timeout.');
+        });
+      } catch (e) {
+        console.error('[GT] Init error:', e);
+      }
+    }
+    window.googleTranslateElementInit = googleTranslateElementInit;
+
+    // Script loader with cache-bust retry
+    (function loadGoogleTranslate(){
+      const id = 'gt-loader';
+      if (document.getElementById(id)) return; // avoid double-load
+      const s = document.createElement('script');
+      s.id = id;
+      s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&_=' + Date.now();
+      s.onerror = () => {
+        console.error('[GT] Script failed to load.');
+      };
       document.head.appendChild(s);
+
+      // If combo still missing after 6s, try one more hard bust
+      setTimeout(() => {
+        const combo = document.querySelector('select.goog-te-combo');
+        if (!combo && !GT.triedBust) {
+          GT.triedBust = true;
+          console.warn('[GT] No combo after 6s. Retrying with fresh cache-bust…');
+          const again = document.createElement('script');
+          again.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&_retry=' + Date.now();
+          document.head.appendChild(again);
+          // show widget again so you can see second attempt
+          showDebugWidget();
+        }
+      }, 6000);
     })();
   </script>
 </body>
