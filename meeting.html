@@ -19,7 +19,6 @@
       background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 60%, #1b2a38 100%);
       color:#fff; padding:18px 16px 22px;
       box-shadow:0 2px 12px rgba(0,0,0,.15);
-      position:relative;
     }
     .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
     .brand{display:flex;align-items:center;gap:12px}
@@ -43,8 +42,8 @@
     .lang button:hover{filter:brightness(.98)}
     .lang button.active{outline:2px solid #cfd7ff}
 
-    /* Hide Google’s UI (offscreen to keep it functional in some Chrome builds) */
-    #google_translate_element{position:absolute;left:-9999px;top:-9999px}
+    /* Hide Google’s default UI (same as homepage) */
+    #google_translate_element{display:none}
     .goog-logo-link{display:none !important}
     .goog-te-gadget{color:transparent !important}
     .goog-te-banner-frame.skiptranslate{display:none !important}
@@ -93,7 +92,7 @@
         </div>
       </div>
 
-      <!-- Language toggle (IDs match homepage exactly) -->
+      <!-- Language toggle (IDs EXACTLY like homepage) -->
       <div class="lang" aria-label="Language toggle">
         <button id="btn-en" type="button">EN</button>
         <button id="btn-es" type="button">ES</button>
@@ -106,7 +105,7 @@
     </div>
   </div>
 
-  <!-- Hidden Google widget (required for translate) -->
+  <!-- Hidden Google widget (same as homepage) -->
   <div id="google_translate_element"></div>
 
   <main class="container">
@@ -239,79 +238,38 @@
     // Footer year
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ===== Google Translate (homepage method + hybrid fallback) =====
+    // ===== IDENTICAL translation logic to your homepage =====
     function googleTranslateElementInit(){
       new google.translate.TranslateElement(
-        { pageLanguage:'en', includedLanguages:'en,es', autoDisplay:false },
+        {pageLanguage:'en', includedLanguages:'es', autoDisplay:false},
         'google_translate_element'
       );
-      // If cookie/hash already Spanish, try to switch via select once it exists
-      if (isSpanish()) {
-        waitForCombo().then(function(sel){
-          sel.value = 'es';
-          sel.dispatchEvent(new Event('change', {bubbles:true}));
-        });
-      }
-      reflectActive();
+      setActiveFromCookie();
     }
 
-    // Detect current desired state from cookie/hash
-    function isSpanish(){
-      return /(?:^|;)\s*googtrans=\/en\/es/.test(document.cookie) ||
-             /#googtrans\(en\|es\)/.test(location.hash);
-    }
-
-    // Find Google’s injected <select>, waiting if needed
-    function waitForCombo(){
-      return new Promise(function(resolve){
-        (function tryFind(){
-          var sel = document.querySelector('select.goog-te-combo');
-          if (sel) return resolve(sel);
-          setTimeout(tryFind, 50);
-        })();
-      });
-    }
-
-    // Primary click handler: try direct switch; if not available, fall back to cookie+hash+reload
-    function onSetLang(lang){
-      waitForCombo().then(function(sel){
-        sel.value = (lang === 'es' ? 'es' : 'en');
-        sel.dispatchEvent(new Event('change', {bubbles:true}));
-        // Also set cookie/hash so refreshes keep the choice
-        setCookieAndHash(lang, /*reload=*/false);
-        reflectActive();
-      }).catch(function(){
-        setCookieAndHash(lang, /*reload=*/true);
-      });
-    }
-
-    function setCookieAndHash(lang, reload){
-      var pair = (lang === 'es') ? 'en|es' : 'es|en';
-      var cookieVal = '/' + pair.replace('|','/');
-      document.cookie = 'googtrans=' + cookieVal + ';path=/';
-      var hostParts = location.hostname.split('.');
+    function setLang(lang){
+      var val = (lang === 'es') ? '/en/es' : '/es/en';
+      document.cookie = 'googtrans=' + val + ';path=/';
+      var hostParts = window.location.hostname.split('.');
       if (hostParts.length > 1) {
-        var root = '.' + hostParts.slice(-2).join('.');
-        document.cookie = 'googtrans=' + cookieVal + ';domain=' + root + ';path=/';
+        var rootDomain = '.' + hostParts.slice(-2).join('.');
+        document.cookie = 'googtrans=' + val + ';domain=' + rootDomain + ';path=/';
       }
-      location.hash = '#googtrans(' + pair + ')';
-      if (reload) location.reload();
+      location.reload();
     }
 
-    function reflectActive(){
-      var es = isSpanish();
-      document.getElementById('btn-en').classList.toggle('active', !es);
-      document.getElementById('btn-es').classList.toggle('active', es);
+    function setActiveFromCookie(){
+      var isES = /googtrans=\/en\/es/.test(document.cookie);
+      document.getElementById('btn-en').classList.toggle('active', !isES);
+      document.getElementById('btn-es').classList.toggle('active', isES);
     }
 
-    // Wire up buttons (IDs match homepage)
-    document.getElementById('btn-en').addEventListener('click', function(){ onSetLang('en'); });
-    document.getElementById('btn-es').addEventListener('click', function(){ onSetLang('es'); });
+    document.getElementById('btn-en').addEventListener('click', function(){ setLang('en'); });
+    document.getElementById('btn-es').addEventListener('click', function(){ setLang('es'); });
 
-    // Load Google script over HTTPS
     (function(){
       var s = document.createElement('script');
-      s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
       document.head.appendChild(s);
     })();
   </script>
