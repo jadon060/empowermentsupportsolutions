@@ -6,171 +6,195 @@
   <title>Empowerment Support Solutions LLC</title>
   <link rel="icon" href="logo full.png" type="image/png" />
   <style>
-    :root { --brand:#2c3e50; --bg:#f7f7fb; --card:#fff; --text:#333; }
+    :root {
+      --brand:#2c3e50; 
+      --brand-2:#0f4c81;
+      --bg:linear-gradient(180deg,#f9fbff 0%,#f3f6fc 100%);
+      --card:#ffffff; 
+      --text:#2a2a2a;
+      --accent:#4c8cd7;
+    }
+
     * { box-sizing: border-box; }
-    body { margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); line-height:1.6; scroll-behavior: smooth; }
+
+    body {
+      margin:0;
+      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.6;
+      scroll-behavior:smooth;
+    }
 
     /* Header */
-    header { 
-      background:var(--brand); 
-      color:#fff; 
-      text-align:center; 
-      padding: 20px; 
+    header {
+      background:linear-gradient(135deg, var(--brand), var(--brand-2));
+      color:#fff;
+      text-align:center;
+      padding: 26px;
       padding-top: calc(60px + env(safe-area-inset-top));
-      position: relative;
+      box-shadow:0 3px 12px rgba(0,0,0,0.15);
     }
-    header h1 { margin:0; font-size: 1.9rem; }
+    header h1 { 
+      margin:0; 
+      font-size:2rem; 
+      letter-spacing:.5px;
+    }
 
     /* Login button */
     .login-btn {
       position: fixed;
       right: 16px;
       bottom: 16px;
-      background: #2c3e50;
+      background: var(--accent);
       color: #fff;
       font-weight: 600;
       font-size: 0.9rem;
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 9px 15px;
+      border-radius: 8px;
       text-decoration: none;
       border: none;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-      transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      transition: all 0.25s ease;
       z-index: 9999;
     }
     .login-btn:hover {
-      background: #1f2a3a;
-      transform: translateY(-2px);
+      background: #336fb4;
+      transform: translateY(-3px);
     }
 
     @media (max-width: 600px) {
       .login-btn {
         font-size: 0.8rem;
-        padding: 6px 12px;
-        right: 10px;
-        bottom: 10px;
+        padding: 7px 12px;
       }
     }
 
-    /* Centered logo (smaller version) */
+    /* Logo */
     .logo-center {
-      display: block;
-      margin: 18px auto 8px auto;
+      display:block;
+      margin: 26px auto 10px auto;
       max-width: 260px;
-      height: auto;
-      image-rendering: crisp-edges;
+      height:auto;
+      filter: drop-shadow(0 3px 8px rgba(0,0,0,0.1));
     }
-
-    @media (max-width: 600px) {
-      .logo-center { max-width: 190px; }
-    }
+    @media (max-width:600px){ .logo-center{ max-width:190px; } }
 
     /* Sections */
-    .section { 
-      max-width: 1200px;
-      margin: 15px auto; 
-      padding: 10px 20px; 
+    .section {
+      max-width:1200px;
+      margin:25px auto;
+      padding:20px;
+      background:rgba(255,255,255,0.8);
+      border-radius:14px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.05);
     }
-    .section h2 { 
-      color: var(--brand); 
-      margin: 0 0 10px; 
-      text-align: left;
-      font-size: 1.7rem;
+    .section h2 {
+      color:var(--brand-2);
+      margin-bottom:12px;
+      font-size:1.8rem;
+      border-left:6px solid var(--accent);
+      padding-left:10px;
     }
 
-    /* Our Services Grid */
+    /* Service cards */
     .service-cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(300px, 1fr));
-      gap: 20px;
-      align-items: stretch;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(300px,1fr));
+      gap:24px;
+      align-items:stretch;
     }
     .card {
-      background: var(--card);
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.08);
-      text-align: left;
+      background:var(--card);
+      border-radius:12px;
+      padding:22px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.08);
+      transition:transform .25s ease, box-shadow .25s ease;
+      border-top:4px solid var(--accent);
+    }
+    .card:hover {
+      transform:translateY(-5px);
+      box-shadow:0 8px 22px rgba(0,0,0,0.12);
     }
 
-    @media (max-width: 1024px){
-      .service-cards { grid-template-columns: repeat(2, minmax(260px, 1fr)); }
-    }
-    @media (max-width: 640px){
-      .service-cards { grid-template-columns: 1fr; }
-    }
+    @media(max-width:1024px){ .service-cards{grid-template-columns:repeat(2,minmax(260px,1fr));} }
+    @media(max-width:640px){ .service-cards{grid-template-columns:1fr;} }
 
-    /* Contact button */
+    /* CTA Button */
     .cta-button {
       display:inline-block;
       margin-top:15px;
-      background:#2c3e50;
+      background:var(--brand-2);
       color:white;
-      padding:10px 20px;
-      border-radius:6px;
+      padding:12px 24px;
+      border-radius:8px;
       text-decoration:none;
       font-weight:bold;
       font-size:1rem;
+      transition:background .25s ease;
     }
-    .cta-button:hover { background:#1f2a3a; }
+    .cta-button:hover { background:#09355d; }
 
-    /* Team photo & testimonial */
+    /* Team photo + testimonial */
     .team-photo {
-      width: 55%;
-      max-width: 520px;
-      display: block;
-      margin: 10px auto 12px auto;
-      border-radius: 10px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      width:55%;
+      max-width:520px;
+      display:block;
+      margin:10px auto 16px auto;
+      border-radius:12px;
+      box-shadow:0 8px 25px rgba(0,0,0,0.12);
     }
     .testimonial {
-      max-width: 720px;
-      margin: 0 auto 10px auto;
-      padding: 0 16px;
-      text-align: center;
-      color: #444;
-      font-style: italic;
+      max-width:720px;
+      margin:0 auto 10px auto;
+      padding:0 16px;
+      text-align:center;
+      color:#444;
+      font-style:italic;
     }
     .testimonial cite {
       display:block;
       margin-top:6px;
-      font-style: normal;
+      font-style:normal;
       color:#666;
-      font-size: .95rem;
+      font-size:.95rem;
     }
 
     /* Footer */
-    footer { 
-      background: var(--brand); 
-      color:#fff; 
-      text-align:center; 
-      padding: 30px 20px; 
-      margin-top: 40px; 
+    footer {
+      background:linear-gradient(135deg,var(--brand),var(--brand-2));
+      color:#fff;
+      text-align:center;
+      padding:40px 20px;
+      margin-top:50px;
+      box-shadow:0 -4px 12px rgba(0,0,0,0.08);
     }
-    footer a { color:#9fd0ff; text-decoration:none; }
-    footer a:hover { text-decoration:underline; }
+    footer h2{margin-top:0;font-size:1.5rem;}
+    footer a{color:#9fd0ff;text-decoration:none;}
+    footer a:hover{text-decoration:underline;}
     .trust-badge {
       display:inline-block;
       margin:15px 0;
       background:#1f4e99;
       color:white;
-      padding:8px 16px;
-      border-radius:6px;
+      padding:10px 18px;
+      border-radius:8px;
       text-decoration:none;
       font-weight:bold;
       font-size:0.9rem;
+      transition:background .25s ease;
     }
-    .trust-badge:hover { background:#163a73; }
+    .trust-badge:hover { background:#173d78; }
     .copyright {
-      margin-top:15px;
+      margin-top:18px;
       font-size:0.9rem;
-      color:#ccc;
+      color:#d6d6d6;
     }
 
     /* Translate toggle */
     .translate-toggle{
       position:fixed;
-      top: calc(8px + env(safe-area-inset-top));
+      top:calc(8px + env(safe-area-inset-top));
       right:12px;
       z-index:9999;
       display:flex;
@@ -184,14 +208,15 @@
       border-radius:6px;
       cursor:pointer;
       font-size:13px;
+      transition:all 0.2s;
     }
-    .translate-toggle button.active{ outline:2px solid #2c3e50; }
+    .translate-toggle button:hover{background:#f1f5fb;}
+    .translate-toggle button.active{ outline:2px solid var(--accent); background:#eef4ff; }
     #google_translate_element { display:none; }
   </style>
 </head>
 <body>
 
-  <!-- Translation toggle -->
   <div class="translate-toggle" aria-label="Site language">
     <button id="btn-en" type="button">EN</button>
     <button id="btn-es" type="button">ES</button>
@@ -202,24 +227,21 @@
     <h1>Empowerment Support Solutions LLC</h1>
   </header>
 
-  <!-- Transparent Logo -->
   <img src="logo full.png" alt="ESS Logo" class="logo-center" loading="lazy">
 
-  <!-- Vimeo video -->
   <div style="text-align:center; margin:12px 0;">
-    <iframe src="https://player.vimeo.com/video/1123978843?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" 
-            width="560" height="315" 
-            style="max-width:100%; border-radius:10px;" 
-            frameborder="0" 
-            allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
-            referrerpolicy="strict-origin-when-cross-origin" 
-            title="ESS Intro Video">
+    <iframe src="https://player.vimeo.com/video/1123978843?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+      width="560" height="315"
+      style="max-width:100%; border-radius:10px;"
+      frameborder="0"
+      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      title="ESS Intro Video">
     </iframe>
     <br>
     <a href="#contact" class="cta-button">Contact Us Today</a>
   </div>
 
-  <!-- About Us -->
   <section id="about" class="section">
     <h2>About Us</h2>
     <p>At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. 
@@ -235,7 +257,6 @@
     Our mission is simple: <strong>supporting people to live their best lives, their way</strong>.</p>
   </section>
 
-  <!-- Our Services -->
   <section id="services" class="section">
     <h2>Our Services</h2>
     <div class="service-cards">
@@ -254,7 +275,6 @@
     </div>
   </section>
 
-  <!-- Team photo & testimonial -->
   <section id="team" class="section" aria-label="ESS Team Photo & Testimonial" style="text-align:center;">
     <img src="ess_team.jpg" alt="ESS staff group photo" class="team-photo" loading="lazy">
     <p class="testimonial">
@@ -263,7 +283,6 @@
     </p>
   </section>
 
-  <!-- Footer -->
   <footer id="contact">
     <h2>Contact Us</h2>
     <p><strong>Phone:</strong> 626-596-6155</p>
