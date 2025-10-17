@@ -34,6 +34,7 @@
       padding: 26px;
       padding-top: calc(60px + env(safe-area-inset-top));
       box-shadow:0 3px 12px rgba(0,0,0,0.15);
+      position: relative; /* enable absolute children (Careers button) */
     }
     header h1 { 
       margin:0; 
@@ -41,7 +42,7 @@
       letter-spacing:.5px;
     }
 
-    /* Login button */
+    /* Login button (fixed) */
     .login-btn {
       position: fixed;
       right: 16px;
@@ -58,16 +59,31 @@
       transition: all 0.25s ease;
       z-index: 9999;
     }
-    .login-btn:hover {
-      background: #336fb4;
-      transform: translateY(-3px);
-    }
+    .login-btn:hover { background:#336fb4; transform: translateY(-3px); }
 
     @media (max-width: 600px) {
-      .login-btn {
-        font-size: 0.8rem;
-        padding: 7px 12px;
-      }
+      .login-btn { font-size: 0.8rem; padding: 7px 12px; }
+    }
+
+    /* Careers button (top-left in header, NOT sticky) */
+    .careers-btn{
+      position:absolute; 
+      left:16px; 
+      top:16px;
+      background:var(--accent);
+      color:#fff;
+      font-weight:600;
+      font-size:0.9rem;
+      padding:9px 15px;
+      border-radius:8px;
+      text-decoration:none;
+      border:none;
+      box-shadow:0 4px 10px rgba(0,0,0,0.25);
+      transition:background .25s ease, transform .25s ease;
+    }
+    .careers-btn:hover{ background:#336fb4; transform: translateY(-3px); }
+    @media (max-width:600px){
+      .careers-btn{ font-size:0.8rem; padding:7px 12px; }
     }
 
     /* Logo */
@@ -224,6 +240,8 @@
   <div id="google_translate_element"></div>
 
   <header>
+    <!-- New Careers button (top-left in header) -->
+    <a href="/careers/" class="careers-btn">Careers</a>
     <h1>Empowerment Support Solutions LLC</h1>
   </header>
 
@@ -295,6 +313,7 @@
     <p class="copyright">© 2025 Empowerment Support Solutions LLC. All rights reserved.</p>
   </footer>
 
+  <!-- Existing floating login button (unchanged) -->
   <a href="/login.html" class="login-btn">Login</a>
 
   <script>
