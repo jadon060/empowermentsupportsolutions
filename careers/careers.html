@@ -76,7 +76,6 @@
     form label{display:block; font-weight:700; margin:12px 0 6px}
     input,select,textarea{
       width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:12px; outline:none; background:#fff;
-      box-shadow:0 1px 0 rgba(16,24,40,.02);
     }
     input:focus,select:focus,textarea:focus{border-color:#b9d6ff; box-shadow:0 0 0 4px rgba(59,130,246,.12)}
     textarea{min-height:120px; resize:vertical}
@@ -154,6 +153,7 @@
         <span class="pill">Community-Based</span>
         <span class="pill">Flexible Scheduling</span>
         <span class="pill">Spanish a Plus</span>
+        <span class="pill">$22/hr</span> <!-- NEW -->
       </div>
 
       <h2>About the Role</h2>
@@ -175,7 +175,8 @@
 
     <section class="card">
       <h2>Apply Now</h2>
-      <form id="careerForm">
+      <!-- IMPORTANT: enctype enables resume attachment -->
+      <form id="careerForm" enctype="multipart/form-data">
         <div class="row">
           <div>
             <label>First Name<span aria-hidden="true"> *</span></label>
@@ -236,8 +237,8 @@
         <button class="btn" type="submit">Submit Application</button>
         <div id="statusMsg" class="status"></div>
 
-        <!-- Hidden fields sent to EmailJS (so your template can include them if desired) -->
-        <input type="hidden" name="has_cpr" value="Yes" id="has_cpr_hidden">
+        <!-- Hidden fields sent to EmailJS -->
+        <input type="hidden" name="has_cpr" value="No" id="has_cpr_hidden">
       </form>
     </section>
   </main>
