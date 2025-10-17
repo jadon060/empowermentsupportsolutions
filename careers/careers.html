@@ -5,48 +5,103 @@
   <title>ESS • Careers – Direct Support Professional (SDP) Application</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Apply to join Empowerment Support Solutions as a Direct Support Professional under the Self-Determination Program (SDP). Submit your application and resume online." />
-  <link rel="icon" href="logo full.png" type="image/png" />
+  <!-- Use the logo at repo root (note the space is URL-encoded) -->
+  <link rel="icon" href="/logo%20full.png" type="image/png" />
+
   <style>
     :root{
-      --brand:#2c3e50; --brand-2:#0f4c81;
-      --bg:#f6f8fc; --card:#ffffff; --ink:#1f2937; --muted:#64748b; --line:#e5e7eb;
-      --accent:#3b82f6; --ok:#16a34a; --bad:#dc2626;
-      --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.07);
+      /* palette tuned to match your SDP Coordination Guide feel */
+      --ink:#0f172a;            /* slate-900 */
+      --muted:#64748b;          /* slate-500/600 */
+      --bg:#f5f7fb;             /* soft page bg */
+      --card:#ffffff;
+      --line:#e5e7eb;
+
+      --brand:#0b5faa;          /* deep blue */
+      --brand-2:#1e90a1;        /* teal-blue */
+      --accent:#3b82f6;
+
+      --ok:#16a34a;
+      --bad:#dc2626;
+
+      --radius:18px;
+      --shadow:0 18px 40px rgba(16,24,40,.10);
+      --shadow-soft:0 10px 24px rgba(16,24,40,.08);
     }
+
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--ink);line-height:1.6}
-    header{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.06)}
-    header img{height:36px;width:auto}
-    main{max-width:1050px;margin:30px auto;padding:0 18px;display:grid;grid-template-columns:1.1fr .9fr;gap:22px}
-    @media(max-width:980px){main{grid-template-columns:1fr;gap:16px}}
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-    h1{margin:8px 0 4px;font-size:26px}
-    h2{margin:0 0 12px;font-size:20px;color:var(--brand)}
-    h3{margin:18px 0 8px;font-size:16px;color:var(--brand-2)}
-    p,li{color:#111}
-    .pill{display:inline-block;background:#eef2ff;color:#1f3b82;border:1px solid #dbe4ff;border-radius:999px;padding:4px 10px;font-size:12px;margin:4px 6px 0 0}
-    ul{margin:10px 0 0 18px}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+    a{color:inherit;text-decoration:none}
+
+    /* Top banner similar to the guide */
+    .banner{
+      background:linear-gradient(135deg, #0b5faa 0%, #1e90a1 55%, #30c0a0 100%);
+      color:#fff;
+      padding:14px 18px;
+      box-shadow:var(--shadow-soft);
+      position:sticky; top:0; z-index:10;
+    }
+    .nav{
+      max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:14px;
+    }
+    .logo{height:36px; width:auto; border-radius:10px; background:#fff; padding:3px}
+    .brand{
+      font-weight:800; letter-spacing:.2px; display:flex; flex-direction:column; line-height:1.15;
+    }
+    .brand small{opacity:.9; font-weight:600}
+    .spacer{flex:1}
+    .nav-link{
+      background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+      padding:8px 12px; border-radius:999px; font-weight:600
+    }
+    .nav-link:hover{background:rgba(255,255,255,.22)}
+
+    /* Page layout */
+    main{max-width:1200px; margin:26px auto; padding:0 18px; display:grid; grid-template-columns:1.1fr .9fr; gap:22px}
+    @media(max-width:980px){main{grid-template-columns:1fr; gap:16px}}
+
+    .card{
+      background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:22px 22px;
+    }
+    h1{margin:6px 0 10px; font-size:34px}
     .muted{color:var(--muted)}
-    form label{display:block;font-weight:600;margin:12px 0 6px}
-    input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;outline:none;background:#fff}
-    textarea{min-height:110px;resize:vertical}
-    input[type="file"]{padding:10px;background:#fff}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .badges{margin:10px 0 6px; display:flex; flex-wrap:wrap; gap:10px}
+    .pill{
+      background:linear-gradient(180deg, #eef6ff 0%, #e9f4ff 100%);
+      color:#083b8a; border:1px solid #cfe6ff; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    /* Form styling to match the guide vibe */
+    form label{display:block; font-weight:700; margin:12px 0 6px}
+    input,select,textarea{
+      width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:12px; outline:none; background:#fff;
+      box-shadow:0 1px 0 rgba(16,24,40,.02);
+    }
+    input:focus,select:focus,textarea:focus{border-color:#b9d6ff; box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+    textarea{min-height:120px; resize:vertical}
+    input[type="file"]{padding:10px}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
     @media(max-width:700px){.row{grid-template-columns:1fr}}
-    .hint{font-size:12px;color:var(--muted);margin-top:4px}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:12px;border:none;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
-    .btn:hover{background:#1b2a38}
-    .req{color:#c026d3}
-    .status{margin-top:12px;font-size:14px}
-    .ok{color:var(--ok)}
-    .bad{color:var(--bad)}
+
+    .helper{font-size:12px; color:var(--muted); margin-top:4px}
+
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:12px 18px; border-radius:12px; border:1px solid #0b5faa; background:#0b5faa; color:#fff;
+      font-weight:800; letter-spacing:.2px; cursor:pointer; margin-top:8px
+    }
+    .btn:hover{background:#0a4f8f}
+    .status{margin-top:12px; font-size:14px}
+    .ok{color:var(--ok)} .bad{color:var(--bad)}
+    .checkline{display:flex; gap:10px; align-items:flex-start; margin-top:8px}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function(){
-      // ✅ Initialize EmailJS with your public key
-      emailjs.init("0N9XuEuGf3hrEQVvv");
+      // EmailJS wiring
+      emailjs.init("0N9XuEuGf3hrEQVvv"); // Public key
 
       const form = document.getElementById("careerForm");
       const status = document.getElementById("statusMsg");
@@ -58,8 +113,8 @@
 
         try {
           await emailjs.sendForm(
-            "service_8ht4vgl",   // ✅ Your Service ID
-            "template_0n7rhu7",  // ✅ Your Template ID
+            "service_8ht4vgl",      // Service ID
+            "template_0n7rhu7",     // Template ID
             form
           );
           status.textContent = "✅ Application sent successfully!";
@@ -75,16 +130,26 @@
   </script>
 </head>
 <body>
-  <header>
-    <a href="/"><img src="logo full.png" alt="ESS Logo" /></a>
-    <div style="font-weight:700;color:#222">Empowerment Support Solutions • Careers</div>
-  </header>
+  <!-- Gradient banner like your Guide -->
+  <div class="banner">
+    <div class="nav">
+      <!-- Use absolute path to the logo at repo root (space is encoded) -->
+      <a href="/"><img class="logo" src="/logo%20full.png" alt="ESS Logo" /></a>
+      <div class="brand">
+        <span>Empowerment Support Solutions</span>
+        <small>Self-Determination Program</small>
+      </div>
+      <div class="spacer"></div>
+      <a class="nav-link" href="/portal/">Back to Portal</a>
+    </div>
+  </div>
 
   <main>
     <section class="card">
       <h1>Direct Support Professional (SDP)</h1>
-      <div class="muted">Location: Greater Los Angeles • Status: Part-Time/Per-Diem • Start: ASAP</div>
-      <div style="margin-top:10px">
+      <div class="muted">Location: Greater Los Angeles • Status: Part-Time / Per-Diem • Start: ASAP</div>
+
+      <div class="badges">
         <span class="pill">Direct Support</span>
         <span class="pill">Community-Based</span>
         <span class="pill">Flexible Scheduling</span>
@@ -93,16 +158,17 @@
 
       <h2>About the Role</h2>
       <p>
-        Empowerment Support Solutions (ESS) partners with families and Regional Centers to deliver individualized skills training under
-        the Self-Determination Program (SDP). Direct Support Professionals (DSPs) provide one-on-one support in home and community
-        settings, helping clients build life skills like budgeting, housekeeping, and transportation.
+        Empowerment Support Solutions (ESS) partners with families and Regional Centers to deliver individualized supports under
+        California’s Self-Determination Program (SDP). Direct Support Professionals (DSPs) provide one-on-one assistance in
+        home and community settings, helping participants build real-world skills like budgeting, housekeeping, safety awareness,
+        and transportation.
       </p>
 
-      <h3>Qualifications</h3>
+      <h2>Qualifications</h2>
       <ul>
-        <li>Experience supporting individuals with developmental disabilities.</li>
-        <li>Reliable transportation & smartphone.</li>
-        <li>CPR/First Aid preferred.</li>
+        <li><strong>Minimum 1 year</strong> experience supporting individuals with developmental disabilities (paid or lived experience).</li>
+        <li>Reliable transportation & smartphone for documentation and communication.</li>
+        <li><strong>Current CPR/First Aid certification required</strong> (or willing to obtain within 30 days).</li>
         <li>Spanish or bilingual skills are a plus.</li>
       </ul>
     </section>
@@ -111,15 +177,31 @@
       <h2>Apply Now</h2>
       <form id="careerForm">
         <div class="row">
-          <div><label>First Name<span class="req">*</span></label><input name="firstName" required></div>
-          <div><label>Last Name<span class="req">*</span></label><input name="lastName" required></div>
+          <div>
+            <label>First Name<span aria-hidden="true"> *</span></label>
+            <input name="firstName" required>
+          </div>
+          <div>
+            <label>Last Name<span aria-hidden="true"> *</span></label>
+            <input name="lastName" required>
+          </div>
         </div>
+
         <div class="row">
-          <div><label>Email<span class="req">*</span></label><input type="email" name="email" required></div>
-          <div><label>Phone<span class="req">*</span></label><input type="tel" name="phone" required></div>
+          <div>
+            <label>Email<span aria-hidden="true"> *</span></label>
+            <input type="email" name="email" required>
+          </div>
+          <div>
+            <label>Phone<span aria-hidden="true"> *</span></label>
+            <input type="tel" name="phone" required>
+          </div>
         </div>
-        <label>City</label><input name="city">
-        <label>Availability<span class="req">*</span></label>
+
+        <label>City</label>
+        <input name="city" placeholder="e.g., Van Nuys, CA">
+
+        <label>Availability<span aria-hidden="true"> *</span></label>
         <select name="availability" required>
           <option value="">Select…</option>
           <option>Weekdays</option>
@@ -127,16 +209,44 @@
           <option>Weekends</option>
           <option>Flexible</option>
         </select>
-        <label>Relevant Experience<span class="req">*</span></label>
-        <textarea name="experience" required></textarea>
-        <label>Certifications (CPR/First Aid, RBT, etc.)</label>
-        <input name="certs">
-        <label>Attach Resume (PDF/DOC)</label>
+
+        <label>Relevant Experience<span aria-hidden="true"> *</span></label>
+        <textarea name="experience" required placeholder="Briefly describe your SDP / disability support experience…"></textarea>
+
+        <div class="row">
+          <div>
+            <label>Years of Direct Support Experience<span aria-hidden="true"> *</span></label>
+            <input type="number" name="years" min="1" step="1" required placeholder="1+" />
+            <div class="helper">Minimum 1 year required</div>
+          </div>
+          <div>
+            <label>Certifications (CPR/First Aid, RBT, etc.)</label>
+            <input name="certs" placeholder="List any current certifications…" />
+          </div>
+        </div>
+
+        <div class="checkline">
+          <input id="cprok" type="checkbox" required>
+          <label for="cprok"><strong>I currently hold CPR/First Aid</strong> or will obtain it within 30 days.</label>
+        </div>
+
+        <label>Attach Resume (PDF/DOC)<span aria-hidden="true"> *</span></label>
         <input type="file" name="resume" accept=".pdf,.doc,.docx" required>
+
         <button class="btn" type="submit">Submit Application</button>
         <div id="statusMsg" class="status"></div>
+
+        <!-- Hidden fields sent to EmailJS (so your template can include them if desired) -->
+        <input type="hidden" name="has_cpr" value="Yes" id="has_cpr_hidden">
       </form>
     </section>
   </main>
+
+  <script>
+    // keep hidden CPR field in sync with checkbox
+    const cprBox = document.getElementById('cprok');
+    const cprHidden = document.getElementById('has_cpr_hidden');
+    if (cprBox) cprBox.addEventListener('change', ()=>{ cprHidden.value = cprBox.checked ? 'Yes' : 'No'; });
+  </script>
 </body>
 </html>
