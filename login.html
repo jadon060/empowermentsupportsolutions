@@ -13,52 +13,32 @@
       background:var(--bg); font-family:Arial,Helvetica,sans-serif;
     }
 
-    /* 🔹 Wrap = unified container */
+    /* Unified container */
     .wrap {
       width:100%;
       max-width:380px;
       border-radius:12px;
-      overflow:hidden; /* removes the header-to-card gap */
+      overflow:hidden;
       box-shadow:0 8px 30px rgba(0,0,0,.08);
       background:#fff;
     }
 
-    /* 🔹 Header styled like Coordination Guide */
+    /* Header (Coordination-style but no logo) */
     header {
       background:linear-gradient(135deg,var(--brand),var(--brand-2));
       color:#fff;
-      padding:18px 20px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:12px;
-    }
-
-    .logo-tile {
-      height:44px;
-      width:44px;
-      border-radius:10px;
-      background:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .logo-tile img {
-      max-height:30px;
-      width:auto;
-      display:block;
-      object-fit:contain;
+      padding:20px;
+      text-align:center;
     }
 
     header h1 {
       margin:0;
-      font-size:1.4rem;
+      font-size:1.5rem;
       font-weight:700;
       letter-spacing:.3px;
     }
 
-    /* 🔹 Card (content) */
+    /* Card content */
     .card {
       padding:22px;
       text-align:center;
@@ -111,9 +91,6 @@
 <body>
   <div class="wrap">
     <header>
-      <div class="logo-tile">
-        <img src="ess-icon.png" onerror="this.src='logo full.png'" alt="ESS">
-      </div>
       <h1>ESS Login</h1>
     </header>
 
