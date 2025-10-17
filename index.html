@@ -1,338 +1,216 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Empowerment Support Solutions LLC</title>
-  <link rel="icon" href="logo full.png" type="image/png" />
+  <meta charset="utf-8" />
+  <title>ESS • Careers – Direct Support Professional (SDP) Application</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Apply to join Empowerment Support Solutions as a Direct Support Professional under the Self-Determination Program (SDP). Submit your application online." />
+  <!-- Robust paths for GH Pages (careers/ is a subfolder) -->
+  <link rel="icon" href="../logo%20full.png" type="image/png" />
+
   <style>
-    :root {
-      --brand:#2c3e50; 
-      --brand-2:#0f4c81;
-      --bg:linear-gradient(180deg,#f9fbff 0%,#f3f6fc 100%);
-      --card:#ffffff; 
-      --text:#2a2a2a;
-      --accent:#4c8cd7;
+    :root{
+      --ink:#0f172a;
+      --muted:#64748b;
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --brand:#0b5faa;
+      --brand-2:#1e90a1;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --radius:18px;
+      --shadow:0 18px 40px rgba(16,24,40,.10);
+      --shadow-soft:0 10px 24px rgba(16,24,40,.08);
     }
 
-    * { box-sizing: border-box; }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    a{color:inherit;text-decoration:none}
 
-    body {
-      margin:0;
-      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      line-height:1.6;
-      scroll-behavior:smooth;
+    /* Top banner */
+    .banner{
+      background:linear-gradient(135deg,#0b5faa 0%, #1e90a1 55%, #30c0a0 100%);
+      color:#fff;padding:14px 18px;box-shadow:var(--shadow-soft);
+      position:sticky; top:0; z-index:10;
     }
+    .nav{max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:14px;}
+    .logo{height:36px; width:auto; border-radius:10px; background:#fff; padding:3px}
+    .brand{font-weight:800; letter-spacing:.2px; display:flex; flex-direction:column; line-height:1.15;}
+    .brand small{opacity:.9; font-weight:600}
+    .spacer{flex:1}
+    .nav-link{
+      background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+      padding:8px 12px; border-radius:999px; font-weight:600
+    }
+    .nav-link:hover{background:rgba(255,255,255,.22)}
 
-    /* Header */
-    header {
-      background:linear-gradient(135deg, var(--brand), var(--brand-2));
-      color:#fff;
-      text-align:center;
-      padding: 26px;
-      padding-top: calc(60px + env(safe-area-inset-top));
-      box-shadow:0 3px 12px rgba(0,0,0,0.15);
-    }
-    header h1 { 
-      margin:0; 
-      font-size:2rem; 
-      letter-spacing:.5px;
-    }
+    /* Layout */
+    main{max-width:1200px; margin:26px auto; padding:0 18px; display:grid; grid-template-columns:1.1fr .9fr; gap:22px}
+    @media(max-width:980px){main{grid-template-columns:1fr; gap:16px}}
 
-    /* Login button */
-    .login-btn {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 600;
-      font-size: 0.9rem;
-      padding: 9px 15px;
-      border-radius: 8px;
-      text-decoration: none;
-      border: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      transition: all 0.25s ease;
-      z-index: 9999;
-    }
-    .login-btn:hover {
-      background: #336fb4;
-      transform: translateY(-3px);
+    .card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:22px 22px;}
+    h1{margin:6px 0 10px; font-size:34px}
+    .muted{color:var(--muted)}
+    .badges{margin:10px 0 6px; display:flex; flex-wrap:wrap; gap:10px}
+    .pill{
+      background:linear-gradient(180deg, #eef6ff 0%, #e9f4ff 100%);
+      color:#083b8a; border:1px solid #cfe6ff; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
     }
 
-    @media (max-width: 600px) {
-      .login-btn {
-        font-size: 0.8rem;
-        padding: 7px 12px;
-      }
+    form label{display:block; font-weight:700; margin:12px 0 6px}
+    input,select,textarea{
+      width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:12px; outline:none; background:#fff;
+      box-shadow:0 1px 0 rgba(16,24,40,.02);
     }
+    input:focus,select:focus,textarea:focus{border-color:#b9d6ff; box-shadow:0 0 0 4px rgba(11,95,170,.15)}
+    textarea{min-height:120px; resize:vertical}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media(max-width:700px){.row{grid-template-columns:1fr}}
+    .helper{font-size:12px; color:var(--muted); margin-top:4px}
 
-    /* Logo */
-    .logo-center {
-      display:block;
-      margin: 26px auto 10px auto;
-      max-width: 260px;
-      height:auto;
-      filter: drop-shadow(0 3px 8px rgba(0,0,0,0.1));
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:12px 18px; border-radius:12px; border:1px solid #0b5faa; background:#0b5faa; color:#fff;
+      font-weight:800; letter-spacing:.2px; cursor:pointer; margin-top:8px
     }
-    @media (max-width:600px){ .logo-center{ max-width:190px; } }
-
-    /* Sections */
-    .section {
-      max-width:1200px;
-      margin:25px auto;
-      padding:20px;
-      background:rgba(255,255,255,0.8);
-      border-radius:14px;
-      box-shadow:0 6px 20px rgba(0,0,0,0.05);
-    }
-    .section h2 {
-      color:var(--brand-2);
-      margin-bottom:12px;
-      font-size:1.8rem;
-      border-left:6px solid var(--accent);
-      padding-left:10px;
-    }
-
-    /* Service cards */
-    .service-cards {
-      display:grid;
-      grid-template-columns:repeat(3,minmax(300px,1fr));
-      gap:24px;
-      align-items:stretch;
-    }
-    .card {
-      background:var(--card);
-      border-radius:12px;
-      padding:22px;
-      box-shadow:0 4px 15px rgba(0,0,0,0.08);
-      transition:transform .25s ease, box-shadow .25s ease;
-      border-top:4px solid var(--accent);
-    }
-    .card:hover {
-      transform:translateY(-5px);
-      box-shadow:0 8px 22px rgba(0,0,0,0.12);
-    }
-
-    @media(max-width:1024px){ .service-cards{grid-template-columns:repeat(2,minmax(260px,1fr));} }
-    @media(max-width:640px){ .service-cards{grid-template-columns:1fr;} }
-
-    /* CTA Button */
-    .cta-button {
-      display:inline-block;
-      margin-top:15px;
-      background:var(--brand-2);
-      color:white;
-      padding:12px 24px;
-      border-radius:8px;
-      text-decoration:none;
-      font-weight:bold;
-      font-size:1rem;
-      transition:background .25s ease;
-    }
-    .cta-button:hover { background:#09355d; }
-
-    /* Team photo + testimonial */
-    .team-photo {
-      width:55%;
-      max-width:520px;
-      display:block;
-      margin:10px auto 16px auto;
-      border-radius:12px;
-      box-shadow:0 8px 25px rgba(0,0,0,0.12);
-    }
-    .testimonial {
-      max-width:720px;
-      margin:0 auto 10px auto;
-      padding:0 16px;
-      text-align:center;
-      color:#444;
-      font-style:italic;
-    }
-    .testimonial cite {
-      display:block;
-      margin-top:6px;
-      font-style:normal;
-      color:#666;
-      font-size:.95rem;
-    }
-
-    /* Footer */
-    footer {
-      background:linear-gradient(135deg,var(--brand),var(--brand-2));
-      color:#fff;
-      text-align:center;
-      padding:40px 20px;
-      margin-top:50px;
-      box-shadow:0 -4px 12px rgba(0,0,0,0.08);
-    }
-    footer h2{margin-top:0;font-size:1.5rem;}
-    footer a{color:#9fd0ff;text-decoration:none;}
-    footer a:hover{text-decoration:underline;}
-    .trust-badge {
-      display:inline-block;
-      margin:15px 0;
-      background:#1f4e99;
-      color:white;
-      padding:10px 18px;
-      border-radius:8px;
-      text-decoration:none;
-      font-weight:bold;
-      font-size:0.9rem;
-      transition:background .25s ease;
-    }
-    .trust-badge:hover { background:#173d78; }
-    .copyright {
-      margin-top:18px;
-      font-size:0.9rem;
-      color:#d6d6d6;
-    }
-
-    /* Translate toggle */
-    .translate-toggle{
-      position:fixed;
-      top:calc(8px + env(safe-area-inset-top));
-      right:12px;
-      z-index:9999;
-      display:flex;
-      gap:6px;
-      font:14px/1.2 system-ui, Arial, sans-serif;
-    }
-    .translate-toggle button{
-      border:1px solid #d0d7de;
-      background:#fff;
-      padding:4px 8px;
-      border-radius:6px;
-      cursor:pointer;
-      font-size:13px;
-      transition:all 0.2s;
-    }
-    .translate-toggle button:hover{background:#f1f5fb;}
-    .translate-toggle button.active{ outline:2px solid var(--accent); background:#eef4ff; }
-    #google_translate_element { display:none; }
+    .btn:hover{background:#0a4f8f}
+    .status{margin-top:12px; font-size:14px}
+    .ok{color:var(--ok)} .bad{color:var(--bad)}
   </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function(){
+      // EmailJS
+      emailjs.init("0N9XuEuGf3hrEQVvv");
+
+      const form = document.getElementById("careerForm");
+      const status = document.getElementById("statusMsg");
+
+      form.addEventListener("submit", async function(e){
+        e.preventDefault();
+        status.textContent = "Submitting...";
+        status.className = "status";
+
+        try {
+          await emailjs.sendForm("service_8ht4vgl", "template_0n7rhu7", form);
+          status.textContent = "✅ Application sent successfully!";
+          status.className = "status ok";
+          form.reset();
+        } catch (err) {
+          console.error(err);
+          status.textContent = "❌ Error sending application. Please try again.";
+          status.className = "status bad";
+        }
+      });
+    });
+  </script>
 </head>
 <body>
-
-  <div class="translate-toggle" aria-label="Site language">
-    <button id="btn-en" type="button">EN</button>
-    <button id="btn-es" type="button">ES</button>
-  </div>
-  <div id="google_translate_element"></div>
-
-  <header>
-    <h1>Empowerment Support Solutions LLC</h1>
-  </header>
-
-  <img src="logo full.png" alt="ESS Logo" class="logo-center" loading="lazy">
-
-  <div style="text-align:center; margin:12px 0;">
-    <iframe src="https://player.vimeo.com/video/1123978843?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
-      width="560" height="315"
-      style="max-width:100%; border-radius:10px;"
-      frameborder="0"
-      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-      referrerpolicy="strict-origin-when-cross-origin"
-      title="ESS Intro Video">
-    </iframe>
-    <br>
-    <a href="#contact" class="cta-button">Contact Us Today</a>
-  </div>
-
-  <section id="about" class="section">
-    <h2>About Us</h2>
-    <p>At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. 
-    Our work is rooted in <strong>Person-Centered Thinking (PCT)</strong>, which means we put the voice, choice, and goals of the participant at the center of everything we do. 
-    We listen first, then design supports that reflect what is important <em>to</em> and important <em>for</em> the person.</p>
-
-    <p>Whether it’s developing daily living skills, connecting with the community, or building independence, 
-    we tailor our services to meet the specific needs of each participant. We recognize that every journey is different, 
-    and our role is to walk alongside individuals and families to make sure services are not just provided, but are meaningful, respectful, and empowering.</p>
-
-    <p>ESS is committed to flexibility, reliability, and collaboration. 
-    We work hand-in-hand with families, Independent Facilitators, and regional center teams to ensure that supports are not only effective but also aligned with the participant’s life vision. 
-    Our mission is simple: <strong>supporting people to live their best lives, their way</strong>.</p>
-  </section>
-
-  <section id="services" class="section">
-    <h2>Our Services</h2>
-    <div class="service-cards">
-      <div class="card">
-        <h3>Personalized Living Support</h3>
-        <p>Daily one-on-one support designed around each participant’s strengths, preferences and goals, helping people build confidence, skills and independence at their own pace.</p>
+  <!-- Header -->
+  <div class="banner">
+    <div class="nav">
+      <!-- Use a relative path to the logo (this file is in /careers/) -->
+      <a href="../index.html"><img class="logo" src="../logo%20full.png" alt="ESS Logo" /></a>
+      <div class="brand">
+        <span>Empowerment Support Solutions</span>
+        <small>Self-Determination Program</small>
       </div>
-      <div class="card">
-        <h3>Staff Placement</h3>
-        <p>We provide dependable staff you can count on that are trained to follow PCT practices, honor individual routines and collaborate closely with families for consistency and trust.</p>
-      </div>
-      <div class="card">
-        <h3>SDP Coordination</h3>
-        <p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p>
-      </div>
+      <div class="spacer"></div>
+      <!-- UPDATED: Return Home button pointing to site home -->
+      <a class="nav-link" href="/empowermentsupportsolutions/">Return Home</a>
+      <!-- If you prefer relative instead, use: href="../index.html" -->
     </div>
-  </section>
+  </div>
 
-  <section id="team" class="section" aria-label="ESS Team Photo & Testimonial" style="text-align:center;">
-    <img src="ess_team.jpg" alt="ESS staff group photo" class="team-photo" loading="lazy">
-    <p class="testimonial">
-      “Our family finally feels understood. ESS listens, adapts, and genuinely puts our loved one first.”
-      <cite>— A grateful parent</cite>
-    </p>
-  </section>
+  <main>
+    <section class="card">
+      <h1>Direct Support Professional (SDP)</h1>
+      <div class="muted">Location: Greater Los Angeles • Status: Part-Time / As Needed • Start: ASAP</div>
 
-  <footer id="contact">
-    <h2>Contact Us</h2>
-    <p><strong>Phone:</strong> 626-596-6155</p>
-    <p><strong>Email:</strong> <a href="mailto:Empowermentess@gmail.com">empowermentess@gmail.com</a></p>
-    <p>
-      <a href="https://bizfileonline.sos.ca.gov/search/business" target="_blank" class="trust-badge">
-        Verify with CA Secretary of State (Search: Empowerment Support Solutions LLC)
-      </a>
-    </p>
-    <p class="copyright">© 2025 Empowerment Support Solutions LLC. All rights reserved.</p>
-  </footer>
+      <div class="badges">
+        <span class="pill">Direct Support</span>
+        <span class="pill">Community-Based</span>
+        <span class="pill">Flexible Scheduling</span>
+        <span class="pill">Spanish a Plus</span>
+        <span class="pill">$22/hr</span>
+      </div>
 
-  <a href="/login.html" class="login-btn">Login</a>
+      <h2>About the Role</h2>
+      <p>
+        Empowerment Support Solutions (ESS) partners with families and Regional Centers to deliver individualized supports under
+        California’s Self-Determination Program (SDP). Direct Support Professionals (DSPs) provide one-on-one assistance in
+        home and community settings, helping participants build real-world skills like budgeting, housekeeping, safety awareness,
+        and transportation.
+      </p>
 
-  <script>
-    function googleTranslateElementInit(){
-      new google.translate.TranslateElement(
-        {pageLanguage:'en', includedLanguages:'es', autoDisplay:false},
-        'google_translate_element'
-      );
-      setActiveFromCookie();
-    }
+      <h2>Qualifications</h2>
+      <ul>
+        <li><strong>Minimum 1 year</strong> experience supporting individuals with developmental disabilities (paid or lived experience).</li>
+        <li>Reliable transportation & smartphone for documentation and communication.</li>
+        <li><strong>Current CPR/First Aid certification required</strong> (or willing to obtain within 30 days).</li>
+        <li>Spanish or bilingual skills are a plus.</li>
+      </ul>
+    </section>
 
-    function setLang(lang){
-      var val = (lang === 'es') ? '/en/es' : '/es/en';
-      document.cookie = 'googtrans=' + val + ';path=/';
-      var hostParts = window.location.hostname.split('.');
-      if (hostParts.length > 1) {
-        var rootDomain = hostParts.slice(-2).join('.');
-        document.cookie = 'googtrans=' + val + ';domain=.' + rootDomain + ';path=/';
-      }
-      location.reload();
-    }
+    <section class="card">
+      <h2>Apply Now</h2>
+      <form id="careerForm">
+        <div class="row">
+          <div>
+            <label>First Name<span aria-hidden="true"> *</span></label>
+            <input name="firstName" required>
+          </div>
+          <div>
+            <label>Last Name<span aria-hidden="true"> *</span></label>
+            <input name="lastName" required>
+          </div>
+        </div>
 
-    function setActiveFromCookie(){
-      var c = document.cookie;
-      var isES = /googtrans=\/en\/es/.test(c);
-      document.getElementById('btn-en').classList.toggle('active', !isES);
-      document.getElementById('btn-es').classList.toggle('active', isES);
-    }
+        <div class="row">
+          <div>
+            <label>Email<span aria-hidden="true"> *</span></label>
+            <input type="email" name="email" required>
+          </div>
+          <div>
+            <label>Phone<span aria-hidden="true"> *</span></label>
+            <input type="tel" name="phone" required>
+          </div>
+        </div>
 
-    document.getElementById('btn-en').addEventListener('click', function(){ setLang('en'); });
-    document.getElementById('btn-es').addEventListener('click', function(){ setLang('es'); });
+        <label>City</label>
+        <input name="city" placeholder="e.g., Van Nuys, CA">
 
-    (function(){
-      var s = document.createElement('script');
-      s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-      document.head.appendChild(s);
-    })();
-  </script>
+        <label>Availability<span aria-hidden="true"> *</span></label>
+        <select name="availability" required>
+          <option value="">Select…</option>
+          <option>Weekdays</option>
+          <option>Weeknights</option>
+          <option>Weekends</option>
+          <option>Flexible</option>
+        </select>
 
+        <label>Relevant Experience<span aria-hidden="true"> *</span></label>
+        <textarea name="experience" required placeholder="Briefly describe your SDP / disability support experience…"></textarea>
+
+        <div class="row">
+          <div>
+            <label>Years of Direct Support Experience<span aria-hidden="true"> *</span></label>
+            <input type="number" name="years" min="1" step="1" required placeholder="1+" />
+            <div class="helper">Minimum 1 year required</div>
+          </div>
+          <div>
+            <label>Certifications (CPR/First Aid, RBT, etc.)</label>
+            <input name="certs" placeholder="List any current certifications…" />
+          </div>
+        </div>
+
+        <button class="btn" type="submit">Submit Application</button>
+        <div id="statusMsg" class="status"></div>
+      </form>
+    </section>
+  </main>
 </body>
 </html>
