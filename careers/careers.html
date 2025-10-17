@@ -71,13 +71,12 @@
     .btn:hover{background:#0a4f8f}
     .status{margin-top:12px;font-size:14px}
     .ok{color:var(--ok)} .bad{color:var(--bad)}
-    .checkline{display:flex;gap:10px;align-items:flex-start;margin-top:8px}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function(){
-      emailjs.init("0N9XuEuGf3hrEQVvv"); // Public key
+      emailjs.init("0N9XuEuGf3hrEQVvv");
 
       const form = document.getElementById("careerForm");
       const status = document.getElementById("statusMsg");
@@ -117,7 +116,7 @@
   <main>
     <section class="card">
       <h1>Direct Support Professional (SDP)</h1>
-      <div class="muted">Location: Greater Los Angeles • Status: Part-Time / Per-Diem • Start: ASAP</div>
+      <div class="muted">Location: Greater Los Angeles • Status: Part-Time / Per Diem • Start: ASAP</div>
 
       <div class="badges">
         <span class="pill">Direct Support</span>
@@ -196,27 +195,10 @@
           </div>
         </div>
 
-        <div class="checkline">
-          <input id="cprok" type="checkbox" required>
-          <label for="cprok"><strong>I currently hold CPR/First Aid</strong> or will obtain it within 30 days.</label>
-        </div>
-
-        <!-- Replaced file upload with URL link -->
-        <label>Resume Link (Google Drive, Dropbox, etc.)<span aria-hidden="true"> *</span></label>
-        <input type="url" name="resumeLink" placeholder="https://..." required>
-
         <button class="btn" type="submit">Submit Application</button>
         <div id="statusMsg" class="status"></div>
-
-        <input type="hidden" name="has_cpr" value="No" id="has_cpr_hidden">
       </form>
     </section>
   </main>
-
-  <script>
-    const cprBox = document.getElementById('cprok');
-    const cprHidden = document.getElementById('has_cpr_hidden');
-    if (cprBox) cprBox.addEventListener('change', ()=>{ cprHidden.value = cprBox.checked ? 'Yes' : 'No'; });
-  </script>
 </body>
 </html>
