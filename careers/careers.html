@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>ESS • Careers – Educator Application</title>
+  <title>ESS • Careers – Direct Support Professional (SDP) Application</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Apply to join Empowerment Support Solutions as an Educator. Submit your application and resume online." />
+  <meta name="description" content="Apply to join Empowerment Support Solutions as a Direct Support Professional under the Self-Determination Program (SDP). Submit your application and resume online." />
   <link rel="icon" href="logo full.png" type="image/png" />
   <style>
     :root{
@@ -40,41 +40,36 @@
     .status{margin-top:12px;font-size:14px}
     .ok{color:var(--ok)}
     .bad{color:var(--bad)}
-    .small{font-size:12px}
-    .divider{height:1px;background:var(--line);margin:14px 0}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function(){
-      emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); // Replace this with your actual public key
+      // ✅ Initialize EmailJS with your public key
+      emailjs.init("0N9XuEuGf3hrEQVvv");
+
       const form = document.getElementById("careerForm");
       const status = document.getElementById("statusMsg");
 
-      form.addEventListener("submit", function(e){
+      form.addEventListener("submit", async function(e){
         e.preventDefault();
         status.textContent = "Submitting...";
         status.className = "status";
 
-        const formData = new FormData(form);
-        emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
-          firstName: formData.get("firstName"),
-          lastName: formData.get("lastName"),
-          email: formData.get("email"),
-          phone: formData.get("phone"),
-          city: formData.get("city"),
-          availability: formData.get("availability"),
-          experience: formData.get("experience"),
-          certs: formData.get("certs")
-        }).then(() => {
+        try {
+          await emailjs.sendForm(
+            "service_8ht4vgl",   // ✅ Your Service ID
+            "template_0n7rhu7",  // ✅ Your Template ID
+            form
+          );
           status.textContent = "✅ Application sent successfully!";
           status.className = "status ok";
           form.reset();
-        }, (err) => {
-          status.textContent = "❌ Error sending application. Try again.";
-          status.className = "status bad";
+        } catch (err) {
           console.error(err);
-        });
+          status.textContent = "❌ Error sending application. Please try again.";
+          status.className = "status bad";
+        }
       });
     });
   </script>
@@ -87,7 +82,7 @@
 
   <main>
     <section class="card">
-      <h1>Educator (Independent Living Skills / SDP)</h1>
+      <h1>Direct Support Professional (SDP)</h1>
       <div class="muted">Location: Greater Los Angeles • Status: Part-Time/Per-Diem • Start: ASAP</div>
       <div style="margin-top:10px">
         <span class="pill">Direct Support</span>
@@ -98,9 +93,9 @@
 
       <h2>About the Role</h2>
       <p>
-        ESS partners with families and Regional Centers to deliver individualized skills training under
-        the Self-Determination Program (SDP). Educators provide one-on-one support in homes and community
-        settings, helping clients build real-world skills like budgeting, housekeeping, and transportation.
+        Empowerment Support Solutions (ESS) partners with families and Regional Centers to deliver individualized skills training under
+        the Self-Determination Program (SDP). Direct Support Professionals (DSPs) provide one-on-one support in home and community
+        settings, helping clients build life skills like budgeting, housekeeping, and transportation.
       </p>
 
       <h3>Qualifications</h3>
@@ -108,6 +103,7 @@
         <li>Experience supporting individuals with developmental disabilities.</li>
         <li>Reliable transportation & smartphone.</li>
         <li>CPR/First Aid preferred.</li>
+        <li>Spanish or bilingual skills are a plus.</li>
       </ul>
     </section>
 
@@ -126,13 +122,17 @@
         <label>Availability<span class="req">*</span></label>
         <select name="availability" required>
           <option value="">Select…</option>
-          <option>Weekdays</option><option>Weeknights</option>
-          <option>Weekends</option><option>Flexible</option>
+          <option>Weekdays</option>
+          <option>Weeknights</option>
+          <option>Weekends</option>
+          <option>Flexible</option>
         </select>
         <label>Relevant Experience<span class="req">*</span></label>
         <textarea name="experience" required></textarea>
         <label>Certifications (CPR/First Aid, RBT, etc.)</label>
         <input name="certs">
+        <label>Attach Resume (PDF/DOC)</label>
+        <input type="file" name="resume" accept=".pdf,.doc,.docx" required>
         <button class="btn" type="submit">Submit Application</button>
         <div id="statusMsg" class="status"></div>
       </form>
@@ -140,4 +140,3 @@
   </main>
 </body>
 </html>
-
