@@ -36,7 +36,7 @@
     }
     h1,h2,h3{ color:#2c3e50; margin:0 0 12px; }
     .muted{ color:var(--muted); font-size:14px; margin:0; }
-    .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+    .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; align-items:stretch; }
     .card{
       background:var(--card); border-radius:14px; padding:18px;
       box-shadow:0 10px 30px rgba(0,0,0,.08); position:relative; overflow:hidden;
@@ -58,6 +58,20 @@
     .no-doc::before{ content:""; }
     footer{ padding:24px; text-align:center; color:#777; }
     html{ scroll-behavior:smooth; }
+
+    /* 🧩 Symmetrical layout (2x2 grid on desktop) */
+    @media (min-width: 960px){
+      .grid{
+        grid-template-columns: repeat(2, minmax(320px, 1fr)) !important;
+      }
+    }
+
+    /* Optional: back to 3 columns on very large screens */
+    @media (min-width: 1440px){
+      .grid{
+        grid-template-columns: repeat(3, minmax(300px, 1fr)) !important;
+      }
+    }
   </style>
 </head>
 
@@ -87,7 +101,6 @@
         <h3>📝 Onboarding & Compliance</h3>
         <ul class="link-list">
           <li><a class="download-btn" href="/ESS_Staff_Welcome_Packet.pdf" target="_blank" rel="noopener">Staff Welcome Packet</a></li>
-          <li><a class="download-btn" href="/W9_Form.pdf" target="_blank" rel="noopener">W-9 Form</a></li>
         </ul>
       </div>
 
@@ -107,7 +120,7 @@
         </ul>
       </div>
 
-      <!-- NEW CARD: Payroll & HR Forms (added only this) -->
+      <!-- NEW CARD: Payroll & HR Forms -->
       <div class="card">
         <h3>🧾 Payroll &amp; HR Forms</h3>
         <ul class="link-list">
