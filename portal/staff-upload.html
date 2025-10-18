@@ -32,23 +32,10 @@
     }
     header a:hover{background:#1b2a38;}
 
-    /* 📱 Mobile responsive tweak */
     @media (max-width:600px){
-      header{
-        flex-wrap:wrap;
-        justify-content:space-between;
-        padding:10px 14px;
-      }
-      header strong{
-        flex:1 1 100%;
-        font-size:0.95rem;
-        margin-top:4px;
-      }
-      header a{
-        padding:6px 10px;
-        font-size:0.85rem;
-        border-radius:8px;
-      }
+      header{flex-wrap:wrap;justify-content:space-between;padding:10px 14px;}
+      header strong{flex:1 1 100%;font-size:0.95rem;margin-top:4px;}
+      header a{padding:6px 10px;font-size:0.85rem;border-radius:8px;}
     }
 
     main{max-width:900px;margin:32px auto;padding:0 16px}
@@ -144,7 +131,9 @@
   </main>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxppSYt6Lwgs-AF5CmuGuA85k5QJ70tAcuDrEWugy4noi1ljQbSxuDwwR3a6-zbeBr07Q/exec';
+    // NEW: your Version 3 deployment URL
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxWYvW5K7dP_TW1L-KU9zHY15lce0u3ShH3Z3lb9TQt0NzaaV0SVxRtKOrhSreYlZhLzA/exec';
+
     const form = document.getElementById('uploadForm');
     const statusEl = document.getElementById('status');
 
@@ -163,13 +152,24 @@
       try{
         const fd=new FormData(form);
         const res=await fetch(WEB_APP_URL,{method:'POST',body:fd});
-        let ok=false,msg='Upload complete.';
-        try{
-          const data=await res.json();
-          ok=!!data.ok;
-          msg=ok?`✅ Uploaded ${data.saved?.length||0} file(s).`:`❌ ${data.error||'Upload failed.'}`;
-        }catch{ ok=res.ok; }
-        statusEl.innerHTML= ok ? `<span class="ok">${msg}</span>` : `<span class="err">${msg}</span>`;
+
+        // Try to read JSON; fall back to status text for clearer errors
+        let ok=false,msg='';
+        let data=null;
+        try { data = await res.json(); } catch (_) {}
+
+        if (data && typeof data === 'object') {
+          ok = !!data.ok;
+          msg = ok
+            ? `✅ Uploaded ${data.saved?.length||0} file(s).`
+            : `❌ ${data.error || 'Upload failed.'}`;
+        } else {
+          ok = res.ok;
+          msg = ok ? '✅ Upload complete.' : `❌ ${res.status} ${res.statusText}`;
+        }
+
+        statusEl.innerHTML = ok ? `<span class="ok">${msg}</span>`
+                                : `<span class="err">${msg}</span>`;
         if(ok) form.reset();
       }catch(err){
         statusEl.innerHTML=`<span class="err">Network error: ${String(err)}</span>`;
