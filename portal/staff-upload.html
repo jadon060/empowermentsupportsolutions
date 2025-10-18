@@ -12,36 +12,75 @@
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+
     header{
       display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;
       box-shadow:0 2px 12px rgba(0,0,0,.06);
     }
+    header img{height:32px;}
+    header strong{font-size:1rem;}
     header a{
       margin-left:auto;
       background:var(--brand);
       color:#fff;
       text-decoration:none;
-      padding:10px 14px;
+      padding:8px 12px;
       border-radius:10px;
       font-weight:600;
+      font-size:0.9rem;
       transition:background .2s;
     }
-    header a:hover{background:#1b2a38}
+    header a:hover{background:#1b2a38;}
+
+    /* 📱 Mobile responsive tweak */
+    @media (max-width:600px){
+      header{
+        flex-wrap:wrap;
+        justify-content:space-between;
+        padding:10px 14px;
+      }
+      header strong{
+        flex:1 1 100%;
+        font-size:0.95rem;
+        margin-top:4px;
+      }
+      header a{
+        padding:6px 10px;
+        font-size:0.85rem;
+        border-radius:8px;
+      }
+    }
+
     main{max-width:900px;margin:32px auto;padding:0 16px}
     .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
-    h1{margin:0 0 4px;color:var(--brand)} p.lead{margin:0;color:var(--muted)}
-    form{display:grid;gap:14px;margin-top:18px} label{font-weight:600}
-    input[type="text"],input[type="email"],select,textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
-    input[type="file"]{padding:10px;border:1px dashed var(--line);border-radius:10px;background:#fff}
+    h1{margin:0 0 4px;color:var(--brand)} 
+    p.lead{margin:0;color:var(--muted)}
+    form{display:grid;gap:14px;margin-top:18px} 
+    label{font-weight:600}
+    input[type="text"],input[type="email"],select,textarea{
+      width:100%;padding:12px 14px;border:1px solid var(--line);
+      border-radius:10px;background:#fff
+    }
+    input[type="file"]{
+      padding:10px;border:1px dashed var(--line);
+      border-radius:10px;background:#fff
+    }
     .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:600px){.row{grid-template-columns:1fr}}
     .hint{color:var(--muted);font-size:.92rem}
-    button{appearance:none;border:0;border-radius:12px;padding:12px 16px;background:var(--brand);color:#fff;font-weight:700;cursor:pointer}
-    .ok{color:#10b981;font-weight:700} .err{color:#ef4444;font-weight:700} .note{font-size:.9rem;color:var(--muted)}
+    button{
+      appearance:none;border:0;border-radius:12px;
+      padding:12px 16px;background:var(--brand);
+      color:#fff;font-weight:700;cursor:pointer;
+    }
+    .ok{color:#10b981;font-weight:700} 
+    .err{color:#ef4444;font-weight:700} 
+    .note{font-size:.9rem;color:var(--muted)}
   </style>
 </head>
 <body>
   <header>
-    <img src="/logo%20full.png" alt="ESS" height="32" />
+    <img src="/logo%20full.png" alt="ESS" />
     <strong>Empowerment Support Solutions • Staff Upload</strong>
     <a href="/staff.html">← Return to Portal</a>
   </header>
