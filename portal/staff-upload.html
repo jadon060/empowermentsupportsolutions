@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ESS • Staff Document Upload</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --brand:#2c3e50; --bg:#f6f8fc; --card:#fff;
+      --ink:#1f2937; --muted:#64748b; --line:#e5e7eb;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+    header{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+    main{max-width:900px;margin:32px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+    h1{margin:0 0 4px;color:var(--brand)} p.lead{margin:0;color:var(--muted)}
+    form{display:grid;gap:14px;margin-top:18px} label{font-weight:600}
+    input[type="text"],input[type="email"],select,textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    input[type="file"]{padding:10px;border:1px dashed var(--line);border-radius:10px;background:#fff}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .hint{color:var(--muted);font-size:.92rem}
+    button{appearance:none;border:0;border-radius:12px;padding:12px 16px;background:var(--brand);color:#fff;font-weight:700;cursor:pointer}
+    .ok{color:#10b981;font-weight:700} .err{color:#ef4444;font-weight:700} .note{font-size:.9rem;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <img src="/logo%20full.png" alt="ESS" height="32" />
+    <strong>Empowerment Support Solutions • Staff Upload</strong>
+  </header>
+
+  <main>
+    <div class="card">
+      <h1>Upload Staff Documents</h1>
+      <p class="lead">Securely submit CPR/First Aid, ID, TB, timesheets, and more.</p>
+
+      <div id="status" class="hint"></div>
+
+      <form id="uploadForm" enctype="multipart/form-data" method="POST">
+        <div class="row">
+          <div>
+            <label for="staff_name">Your full name</label>
+            <input required id="staff_name" name="staff_name" type="text" placeholder="Jane Doe" />
+          </div>
+          <div>
+            <label for="staff_email">Your email</label>
+            <input required id="staff_email" name="staff_email" type="email" placeholder="jane@example.com" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="doc_type">Document type</label>
+            <select required id="doc_type" name="doc_type">
+              <option value="">Select one…</option>
+              <option>CPR/First Aid Card</option>
+              <option>Government ID</option>
+              <option>TB Test</option>
+              <option>Timesheet</option>
+              <option>Direct Deposit</option>
+              <option>Emergency Contact</option>
+              <option>Training Certificate</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="client_name">Client (optional)</label>
+            <input id="client_name" name="client_name" type="text" placeholder="Client name" />
+          </div>
+        </div>
+
+        <div>
+          <label for="notes">Notes (optional)</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="Anything we should know?"></textarea>
+        </div>
+
+        <div>
+          <label for="files">File(s)</label>
+          <input required id="files" name="file" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" />
+          <div class="hint">Allowed: PDF, JPG/PNG/WEBP, DOC/DOCX • Max total ~15MB</div>
+        </div>
+
+        <input type="hidden" name="upload_token" value="ESS-STAFF-ONLY" />
+        <button type="submit">Submit Documents</button>
+        <div class="note">By submitting, you consent to ESS storing this information for HR purposes.</div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxNyfuRkebNG0tknh_1hhYnnpUx4fkAM9WxDDaJM7V4FAJ3yKNr-l-uCd8I3AsUevW8FQ/exec';
+    const form = document.getElementById('uploadForm');
+    const statusEl = document.getElementById('status');
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      statusEl.textContent='Uploading… please wait.';
+      statusEl.className='hint';
+
+      const files=document.getElementById('files').files;
+      let total=0; for(const f of files) total+=f.size;
+      if(total>15*1024*1024){
+        statusEl.innerHTML='<span class="err">Total file size exceeds 15MB. Please split into smaller uploads.</span>';
+        return;
+      }
+
+      try{
+        const fd=new FormData(form);
+        const res=await fetch(WEB_APP_URL,{method:'POST',body:fd});
+        let ok=false,msg='Upload complete.';
+        try{
+          const data=await res.json();
+          ok=!!data.ok;
+          msg=ok?`✅ Uploaded ${data.saved?.length||0} file(s).`:`❌ ${data.error||'Upload failed.'}`;
+        }catch{ ok=res.ok; }
+        statusEl.innerHTML= ok ? `<span class="ok">${msg}</span>` : `<span class="err">${msg}</span>`;
+        if(ok) form.reset();
+      }catch(err){
+        statusEl.innerHTML=`<span class="err">Network error: ${String(err)}</span>`;
+      }
+    });
+  </script>
+</body>
+</html>
