@@ -12,7 +12,21 @@
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
-    header{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+    header{
+      display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;
+      box-shadow:0 2px 12px rgba(0,0,0,.06);
+    }
+    header a{
+      margin-left:auto;
+      background:var(--brand);
+      color:#fff;
+      text-decoration:none;
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:600;
+      transition:background .2s;
+    }
+    header a:hover{background:#1b2a38}
     main{max-width:900px;margin:32px auto;padding:0 16px}
     .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
     h1{margin:0 0 4px;color:var(--brand)} p.lead{margin:0;color:var(--muted)}
@@ -29,6 +43,7 @@
   <header>
     <img src="/logo%20full.png" alt="ESS" height="32" />
     <strong>Empowerment Support Solutions • Staff Upload</strong>
+    <a href="/portal/staff.html">← Return to Portal</a>
   </header>
 
   <main>
