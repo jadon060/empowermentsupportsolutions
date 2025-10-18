@@ -79,7 +79,8 @@
 
       <div id="status" class="hint"></div>
 
-      <form id="uploadForm" enctype="multipart/form-data" method="POST">
+      <!-- ✅ Added action attribute for fallback -->
+      <form id="uploadForm" enctype="multipart/form-data" method="POST" action="">
         <div class="row">
           <div>
             <label for="staff_name">Your full name</label>
@@ -131,11 +132,12 @@
   </main>
 
   <script>
-    // NEW: your Version 3 deployment URL
+    // ✅ Version 3 Apps Script endpoint
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxWYvW5K7dP_TW1L-KU9zHY15lce0u3ShH3Z3lb9TQt0NzaaV0SVxRtKOrhSreYlZhLzA/exec';
-
     const form = document.getElementById('uploadForm');
     const statusEl = document.getElementById('status');
+
+    form.setAttribute('action', WEB_APP_URL); // fallback URL
 
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
@@ -152,17 +154,14 @@
       try{
         const fd=new FormData(form);
         const res=await fetch(WEB_APP_URL,{method:'POST',body:fd});
-
-        // Try to read JSON; fall back to status text for clearer errors
         let ok=false,msg='';
         let data=null;
         try { data = await res.json(); } catch (_) {}
 
         if (data && typeof data === 'object') {
           ok = !!data.ok;
-          msg = ok
-            ? `✅ Uploaded ${data.saved?.length||0} file(s).`
-            : `❌ ${data.error || 'Upload failed.'}`;
+          msg = ok ? `✅ Uploaded ${data.saved?.length||0} file(s).`
+                   : `❌ ${data.error || 'Upload failed.'}`;
         } else {
           ok = res.ok;
           msg = ok ? '✅ Upload complete.' : `❌ ${res.status} ${res.statusText}`;
@@ -171,8 +170,13 @@
         statusEl.innerHTML = ok ? `<span class="ok">${msg}</span>`
                                 : `<span class="err">${msg}</span>`;
         if(ok) form.reset();
-      }catch(err){
-        statusEl.innerHTML=`<span class="err">Network error: ${String(err)}</span>`;
+
+      } catch (err) {
+        // fallback: open form POST in new tab (bypasses fetch/CORS)
+        statusEl.innerHTML = '<span class="hint">Network blocked fetch — using safe fallback…</span>';
+        form.setAttribute('target','_blank');
+        form.submit();
+        setTimeout(()=>form.removeAttribute('target'),1000);
       }
     });
   </script>
