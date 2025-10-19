@@ -132,12 +132,12 @@
   </main>
 
   <script>
-    // ✅ Version 3 Apps Script endpoint (updated)
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxU6ppNG0jjVesC4nc0A1eMolFM5Vh_yB8GEQbO1RgnRBIns2pA2EVOXIcqF0HI5ttUdA/exec';
+    // ✅ Apps Script endpoint (latest)
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz39Ou6dQWB1J3DLuHXPpDAZOyDo1z6eh7RAqtRWCGmBTC8dRt9_rd1jmsARbeHG59tSA/exec';
     const form = document.getElementById('uploadForm');
     const statusEl = document.getElementById('status');
 
-    form.setAttribute('action', WEB_APP_URL); // fallback URL
+    form.setAttribute('action', WEB_APP_URL); // fallback URL post
 
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
