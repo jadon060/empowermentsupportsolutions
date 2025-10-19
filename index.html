@@ -34,7 +34,7 @@
       padding: 26px;
       padding-top: calc(60px + env(safe-area-inset-top));
       box-shadow:0 3px 12px rgba(0,0,0,0.15);
-      position: relative; /* enable absolute children (Careers button) */
+      position: relative;
     }
     header h1 { 
       margin:0; 
@@ -42,7 +42,7 @@
       letter-spacing:.5px;
     }
 
-    /* Login button (fixed) */
+    /* Login button */
     .login-btn {
       position: fixed;
       right: 16px;
@@ -65,7 +65,7 @@
       .login-btn { font-size: 0.8rem; padding: 7px 12px; }
     }
 
-    /* Careers button (top-left in header, NOT sticky) */
+    /* Careers button */
     .careers-btn{
       position:absolute; 
       left:16px; 
@@ -207,6 +207,22 @@
       color:#d6d6d6;
     }
 
+    /* Footer logos */
+    .footer-logos {
+      margin-top:25px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:30px;
+      flex-wrap:wrap;
+    }
+    .footer-logos img {
+      height:70px;
+      width:auto;
+      border-radius:8px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.25);
+    }
+
     /* Translate toggle */
     .translate-toggle{
       position:fixed;
@@ -240,7 +256,6 @@
   <div id="google_translate_element"></div>
 
   <header>
-    <!-- Careers button (top-left in header) -->
     <a href="https://empowermentss.com/careers/careers.html?_ts=1" class="careers-btn">Careers</a>
     <h1>Empowerment Support Solutions LLC</h1>
   </header>
@@ -310,10 +325,16 @@
         Verify with CA Secretary of State (Search: Empowerment Support Solutions LLC)
       </a>
     </p>
+
+    <!-- Two footer logos -->
+    <div class="footer-logos">
+      <img src="newforms/1631343033971.jpg" alt="Partner Logo 1" loading="lazy">
+      <img src="newforms/DDS_Cover.png" alt="Partner Logo 2" loading="lazy">
+    </div>
+
     <p class="copyright">© 2025 Empowerment Support Solutions LLC. All rights reserved.</p>
   </footer>
 
-  <!-- Existing floating login button (unchanged) -->
   <a href="/login.html" class="login-btn">Login</a>
 
   <script>
