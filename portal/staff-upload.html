@@ -79,8 +79,12 @@
 
       <div id="status" class="hint"></div>
 
-      <!-- ✅ Added action attribute for fallback -->
-      <form id="uploadForm" enctype="multipart/form-data" method="POST" action="">
+      <!-- ✅ Direct POST to Apps Script; opens JSON result in new tab -->
+      <form id="uploadForm"
+            action="https://script.google.com/macros/s/AKfycbz39Ou6dQWB1J3DLuHXPpDAZOyDo1z6eh7RAqtRWCGmBTC8dRt9_rd1jmsARbeHG59tSA/exec"
+            method="POST"
+            enctype="multipart/form-data"
+            target="_blank">
         <div class="row">
           <div>
             <label for="staff_name">Your full name</label>
@@ -131,53 +135,14 @@
     </div>
   </main>
 
+  <!-- Tiny helper: show a message, but DO NOT block submission -->
   <script>
-    // ✅ Apps Script endpoint (latest)
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz39Ou6dQWB1J3DLuHXPpDAZOyDo1z6eh7RAqtRWCGmBTC8dRt9_rd1jmsARbeHG59tSA/exec';
     const form = document.getElementById('uploadForm');
     const statusEl = document.getElementById('status');
-
-    form.setAttribute('action', WEB_APP_URL); // fallback URL post
-
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      statusEl.textContent='Uploading… please wait.';
-      statusEl.className='hint';
-
-      const files=document.getElementById('files').files;
-      let total=0; for(const f of files) total+=f.size;
-      if(total>15*1024*1024){
-        statusEl.innerHTML='<span class="err">Total file size exceeds 15MB. Please split into smaller uploads.</span>';
-        return;
-      }
-
-      try{
-        const fd=new FormData(form);
-        const res=await fetch(WEB_APP_URL,{method:'POST',body:fd});
-        let ok=false,msg='';
-        let data=null;
-        try { data = await res.json(); } catch (_) {}
-
-        if (data && typeof data === 'object') {
-          ok = !!data.ok;
-          msg = ok ? `✅ Uploaded ${data.saved?.length||0} file(s).`
-                   : `❌ ${data.error || 'Upload failed.'}`;
-        } else {
-          ok = res.ok;
-          msg = ok ? '✅ Upload complete.' : `❌ ${res.status} ${res.statusText}`;
-        }
-
-        statusEl.innerHTML = ok ? `<span class="ok">${msg}</span>`
-                                : `<span class="err">${msg}</span>`;
-        if(ok) form.reset();
-
-      } catch (err) {
-        // fallback: open form POST in new tab (bypasses fetch/CORS)
-        statusEl.innerHTML = '<span class="hint">Network blocked fetch — using safe fallback…</span>';
-        form.setAttribute('target','_blank');
-        form.submit();
-        setTimeout(()=>form.removeAttribute('target'),1000);
-      }
+    form.addEventListener('submit', () => {
+      statusEl.textContent = 'Uploading… please wait.';
+      statusEl.className = 'hint';
+      // no preventDefault; browser will post the form directly
     });
   </script>
 </body>
