@@ -133,6 +133,18 @@
         <div class="note">By submitting, you consent to ESS storing this information for HR purposes.</div>
       </form>
     </div>
+
+    <!-- 🔬 Quick Upload Test (Step 1) -->
+    <form action="https://script.google.com/macros/s/AKfycbz39Ou6dQWB1J3DLuHXPpDAZOyDo1z6eh7RAqtRWCGmBTC8dRt9_rd1jmsARbeHG59tSA/exec"
+          method="post"
+          enctype="multipart/form-data"
+          target="_blank"
+          style="margin-top:24px;padding:12px;border:1px dashed #e5e7eb;border-radius:8px">
+      <strong>Quick Upload Test</strong><br><br>
+      <input type="file" name="file" required>
+      <input type="hidden" name="upload_token" value="ESS-STAFF-ONLY">
+      <button type="submit">Test upload</button>
+    </form>
   </main>
 
   <!-- Tiny helper: show a message, but DO NOT block submission -->
