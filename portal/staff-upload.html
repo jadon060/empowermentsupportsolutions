@@ -79,9 +79,9 @@
 
       <div id="status" class="hint"></div>
 
-      <!-- ✅ Direct POST to Apps Script; opens JSON result in new tab -->
+      <!-- ✅ Updated to your working Google Apps Script URL -->
       <form id="uploadForm"
-            action="https://script.google.com/macros/s/AKfycbz39Ou6dQWB1J3DLuHXPpDAZOyDo1z6eh7RAqtRWCGmBTC8dRt9_rd1jmsARbeHG59tSA/exec"
+            action="https://script.google.com/macros/s/AKfycbxppSYt6Lwgs-AF5CmuGuA85k5QJ70tAcuDrEWugy4noi1ljQbSxuDwwR3a6-zbeBr07Q/exec"
             method="POST"
             enctype="multipart/form-data"
             target="_blank">
@@ -134,8 +134,8 @@
       </form>
     </div>
 
-    <!-- 🔬 Quick Upload Test (Step 1) -->
-    <form action="https://script.google.com/macros/s/AKfycbz39Ou6dQWB1J3DLuHXPpDAZOyDo1z6eh7RAqtRWCGmBTC8dRt9_rd1jmsARbeHG59tSA/exec"
+    <!-- 🔬 Quick Upload Test -->
+    <form action="https://script.google.com/macros/s/AKfycbxppSYt6Lwgs-AF5CmuGuA85k5QJ70tAcuDrEWugy4noi1ljQbSxuDwwR3a6-zbeBr07Q/exec"
           method="post"
           enctype="multipart/form-data"
           target="_blank"
@@ -147,14 +147,12 @@
     </form>
   </main>
 
-  <!-- Tiny helper: show a message, but DO NOT block submission -->
   <script>
     const form = document.getElementById('uploadForm');
     const statusEl = document.getElementById('status');
     form.addEventListener('submit', () => {
       statusEl.textContent = 'Uploading… please wait.';
       statusEl.className = 'hint';
-      // no preventDefault; browser will post the form directly
     });
   </script>
 </body>
