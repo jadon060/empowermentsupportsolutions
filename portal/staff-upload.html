@@ -6,55 +6,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
-      --brand:#1f2e3d; --brand-2:#2c3e50; --accent:#0ea5e9;
+      --brand:#1f2e3d; --accent:#0ea5e9;
       --bg:#f5f7fb; --card:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e5e7eb;
-      --radius-xl:24px; --radius-lg:16px;
-      --shadow-lg:0 20px 50px rgba(2,12,27,.08);
-      --shadow-md:0 10px 25px rgba(2,12,27,.06);
+      --radius-xl:20px; --shadow-md:0 8px 25px rgba(2,12,27,.06);
     }
     *{box-sizing:border-box}
     body{
       margin:0; color:var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background:
-        radial-gradient(1200px 600px at 20% -10%, rgba(14,165,233,.12), transparent 60%),
-        radial-gradient(900px 500px at 110% 0%, rgba(44,62,80,.10), transparent 55%),
-        var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background:var(--bg);
     }
 
     /* Topbar */
     .topbar{
       display:flex; align-items:center; gap:12px;
-      padding:16px 20px;
-      background:linear-gradient(180deg,#ffffffcc,#ffffffc0 50%,#ffffff00);
-      backdrop-filter:saturate(120%) blur(4px);
-      border-bottom:1px solid #eef2f7;
-      position:sticky; top:0; z-index:10;
+      padding:16px 20px; background:#fff;
+      border-bottom:1px solid #e5e7eb;
+      box-shadow:0 2px 8px rgba(0,0,0,.04);
     }
     .brand{display:flex; align-items:center; gap:10px; font-weight:700; color:var(--brand)}
     .brand img{height:26px}
     .right{margin-left:auto}
     .btn-ghost{
-      appearance:none; border:1px solid #d1d5db; background:#fff; color:var(--brand);
-      padding:10px 14px; border-radius:12px; font-weight:700; text-decoration:none;
+      appearance:none; border:0; background:var(--brand); color:#fff;
+      padding:10px 14px; border-radius:10px; font-weight:700; text-decoration:none;
     }
-    .btn-ghost:hover{background:#f8fafc}
+    .btn-ghost:hover{filter:brightness(1.1)}
 
     /* Layout */
-    .wrap{max-width:1100px; margin:24px auto 80px; padding:0 16px}
+    .wrap{max-width:900px; margin:24px auto 80px; padding:0 16px}
 
-    .hero{
-      background:linear-gradient(180deg, #ffffff, #fbfdff);
-      border:1px solid var(--line);
+    /* Banner (smaller + gradient like portal) */
+    .banner{
+      background:linear-gradient(135deg,#e0f2fe 0%,#f0fdf4 100%);
+      border:1px solid #dbeafe;
       border-radius:var(--radius-xl);
-      box-shadow:var(--shadow-lg);
-      padding:34px 36px;
+      padding:18px 24px;
+      box-shadow:var(--shadow-md);
+      display:flex; flex-direction:column; gap:4px;
     }
-    .hero h1{margin:0 0 10px; font-size:44px; color:var(--brand)}
-    .hero .lead{margin:0; color:var(--muted); font-size:18px}
+    .banner h1{margin:0; font-size:1.4rem; color:var(--brand); font-weight:800;}
+    .banner p{margin:0; color:var(--muted); font-size:0.95rem;}
 
     .card{
-      margin-top:22px; background:var(--card); border:1px solid var(--line);
+      margin-top:20px; background:var(--card); border:1px solid var(--line);
       border-radius:var(--radius-xl); box-shadow:var(--shadow-md); padding:26px;
     }
     label{display:block; font-weight:600; margin:10px 0 8px}
@@ -62,64 +57,50 @@
       width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:14px;
       background:#fff; outline:none; font:inherit;
     }
-    .input:focus{border-color:#c7d2fe; box-shadow:0 0 0 4px rgba(59,130,246,.08)}
+    .input:focus{border-color:#93c5fd; box-shadow:0 0 0 3px rgba(59,130,246,.1)}
     .row{margin:14px 0}
     .hint{color:var(--muted); font-size:.92rem}
 
     .btn{
       appearance:none; border:0; cursor:pointer;
-      display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      padding:14px 22px; border-radius:16px; font-weight:800; font-size:1.05rem;
-      color:#fff; background:linear-gradient(180deg, var(--brand), var(--brand-2));
-      box-shadow:0 8px 20px rgba(31,46,61,.18);
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:14px 22px; border-radius:12px; font-weight:800; font-size:1rem;
+      color:#fff; background:var(--brand);
+      box-shadow:0 6px 14px rgba(31,46,61,.15);
     }
-    .btn:hover{filter:brightness(1.05)} .btn:disabled{opacity:.55; cursor:not-allowed}
-
+    .btn:hover{filter:brightness(1.05)}
     .progress{height:8px; background:#e5e7eb; border-radius:999px; overflow:hidden; margin-top:16px}
     .bar{height:100%; width:0%; background:linear-gradient(90deg, var(--accent), #60a5fa)}
     pre{white-space:pre-wrap}
 
     /* Toast */
     .toast {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      background: var(--brand);
-      color: #fff;
-      padding: 14px 22px;
-      border-radius: 12px;
+      position: fixed; bottom: 28px; right: 28px;
+      background: var(--brand); color: #fff;
+      padding: 14px 22px; border-radius: 12px;
       box-shadow: 0 8px 25px rgba(0,0,0,.15);
-      opacity: 0;
-      pointer-events: none;
+      opacity: 0; pointer-events: none;
       transform: translateY(20px);
       transition: all 0.35s ease;
-      font-weight: 600;
-      z-index: 99;
+      font-weight: 600; z-index: 99;
     }
-    .toast.show {
-      opacity: 1;
-      pointer-events: all;
-      transform: translateY(0);
-    }
-    .toast span {
-      margin-left: 6px;
-      font-size: 1.1rem;
-    }
+    .toast.show {opacity: 1; transform: translateY(0);}
   </style>
 </head>
 <body>
   <div class="topbar">
     <div class="brand">
       <img src="/logo%20full.png" alt="ESS" />
-      <span>Empowerment Support Solutions • Staff Upload</span>
+      <span>ESS • Staff Upload</span>
     </div>
     <div class="right"><a class="btn-ghost" href="/staff.html">← Return to Portal</a></div>
   </div>
 
   <div class="wrap">
-    <div class="hero">
-      <h1>Upload Staff Documents</h1>
-      <p class="lead">Securely submit CPR/First Aid, ID, TB, timesheets, and more.</p>
+    <!-- Small banner like the portal -->
+    <div class="banner">
+      <h1>📁 Upload Staff Documents</h1>
+      <p>Securely submit CPR/First Aid, ID, TB, timesheets, and more.</p>
     </div>
 
     <div class="card">
@@ -134,7 +115,7 @@
       <div class="row">
         <label for="file">Files</label>
         <input id="file" class="input" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.heic,.webp">
-        <div class="hint mt-2">Tip: You can select multiple files at once.</div>
+        <div class="hint">Tip: you can select multiple files at once.</div>
       </div>
       <button id="upload" class="btn">Upload</button>
 
@@ -143,8 +124,7 @@
     </div>
   </div>
 
-  <!-- ✅ Toast -->
-  <div id="toast" class="toast">✅ Uploaded successfully<span>✔</span></div>
+  <div id="toast" class="toast">✅ Upload successful!</div>
 
   <script>
     const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
@@ -197,7 +177,7 @@
           bar.style.width = `${Math.round(done/files.length*100)}%`;
         }
 
-        out.textContent = `Uploaded ${done} file(s) to secure inbox. ✅`;
+        out.textContent = `Uploaded ${done} file(s) successfully. ✅`;
         showToast("Upload successful!");
       }catch(err){
         out.textContent = `Upload failed: ${err.message}`;
