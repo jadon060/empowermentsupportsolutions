@@ -12,57 +12,19 @@
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
-
-    header{
-      display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;
-      box-shadow:0 2px 12px rgba(0,0,0,.06);
-    }
+    header{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06)}
     header img{height:32px;}
     header strong{font-size:1rem;}
-    header a{
-      margin-left:auto;
-      background:var(--brand);
-      color:#fff;
-      text-decoration:none;
-      padding:8px 12px;
-      border-radius:10px;
-      font-weight:600;
-      font-size:0.9rem;
-      transition:background .2s;
-    }
+    header a{margin-left:auto;background:var(--brand);color:#fff;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:600;font-size:0.9rem;transition:background .2s}
     header a:hover{background:#1b2a38;}
-
-    @media (max-width:600px){
-      header{flex-wrap:wrap;justify-content:space-between;padding:10px 14px;}
-      header strong{flex:1 1 100%;font-size:0.95rem;margin-top:4px;}
-      header a{padding:6px 10px;font-size:0.85rem;border-radius:8px;}
-    }
-
+    @media (max-width:600px){header{flex-wrap:wrap;justify-content:space-between;padding:10px 14px;} header strong{flex:1 1 100%;font-size:0.95rem;margin-top:4px;} header a{padding:6px 10px;font-size:0.85rem;border-radius:8px;}}
     main{max-width:900px;margin:32px auto;padding:0 16px}
     .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
     h1{margin:0 0 4px;color:var(--brand)} 
     p.lead{margin:0;color:var(--muted)}
-    form{display:grid;gap:14px;margin-top:18px} 
-    label{font-weight:600}
-    input[type="text"],input[type="email"],select,textarea{
-      width:100%;padding:12px 14px;border:1px solid var(--line);
-      border-radius:10px;background:#fff
-    }
-    input[type="file"]{
-      padding:10px;border:1px dashed var(--line);
-      border-radius:10px;background:#fff
-    }
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media(max-width:600px){.row{grid-template-columns:1fr}}
     .hint{color:var(--muted);font-size:.92rem}
-    button{
-      appearance:none;border:0;border-radius:12px;
-      padding:12px 16px;background:var(--brand);
-      color:#fff;font-weight:700;cursor:pointer;
-    }
-    .ok{color:#10b981;font-weight:700} 
-    .err{color:#ef4444;font-weight:700} 
-    .note{font-size:.9rem;color:var(--muted)}
+    .btn{display:inline-block;background:var(--brand);color:#fff;padding:12px 16px;border-radius:12px;font-weight:700;text-decoration:none}
+    .btn:hover{background:#1b2a38}
   </style>
 </head>
 <body>
@@ -77,83 +39,19 @@
       <h1>Upload Staff Documents</h1>
       <p class="lead">Securely submit CPR/First Aid, ID, TB, timesheets, and more.</p>
 
-      <div id="status" class="hint"></div>
-
-      <!-- ✅ Updated to your working Google Apps Script URL -->
-      <form id="uploadForm"
-            action="https://script.google.com/macros/s/AKfycbxppSYt6Lwgs-AF5CmuGuA85k5QJ70tAcuDrEWugy4noi1ljQbSxuDwwR3a6-zbeBr07Q/exec"
-            method="POST"
-            enctype="multipart/form-data"
-            target="_blank">
-        <div class="row">
-          <div>
-            <label for="staff_name">Your full name</label>
-            <input required id="staff_name" name="staff_name" type="text" placeholder="Jane Doe" />
-          </div>
-          <div>
-            <label for="staff_email">Your email</label>
-            <input required id="staff_email" name="staff_email" type="email" placeholder="jane@example.com" />
-          </div>
+      <!-- ✅ Open secure Google-hosted uploader (works immediately) -->
+      <div style="margin-top:18px">
+        <a class="btn"
+           href="https://script.google.com/macros/s/AKfycbxppSYt6Lwgs-AF5CmuGuA85k5QJ70tAcuDrEWugy4noi1ljQbSxuDwwR3a6-zbeBr07Q/exec"
+           target="_blank" rel="noopener">
+          Open Secure Upload
+        </a>
+        <div class="hint" style="margin-top:8px">
+          This opens our secure Google uploader in a new tab. After uploading, your files land in
+          <em>ESS • Staff Uploads</em> in Drive.
         </div>
-
-        <div class="row">
-          <div>
-            <label for="doc_type">Document type</label>
-            <select required id="doc_type" name="doc_type">
-              <option value="">Select one…</option>
-              <option>CPR/First Aid Card</option>
-              <option>Government ID</option>
-              <option>TB Test</option>
-              <option>Timesheet</option>
-              <option>Direct Deposit</option>
-              <option>Emergency Contact</option>
-              <option>Training Certificate</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div>
-            <label for="client_name">Client (optional)</label>
-            <input id="client_name" name="client_name" type="text" placeholder="Client name" />
-          </div>
-        </div>
-
-        <div>
-          <label for="notes">Notes (optional)</label>
-          <textarea id="notes" name="notes" rows="3" placeholder="Anything we should know?"></textarea>
-        </div>
-
-        <div>
-          <label for="files">File(s)</label>
-          <input required id="files" name="file" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" />
-          <div class="hint">Allowed: PDF, JPG/PNG/WEBP, DOC/DOCX • Max total ~15MB</div>
-        </div>
-
-        <input type="hidden" name="upload_token" value="ESS-STAFF-ONLY" />
-        <button type="submit">Submit Documents</button>
-        <div class="note">By submitting, you consent to ESS storing this information for HR purposes.</div>
-      </form>
+      </div>
     </div>
-
-    <!-- 🔬 Quick Upload Test -->
-    <form action="https://script.google.com/macros/s/AKfycbxppSYt6Lwgs-AF5CmuGuA85k5QJ70tAcuDrEWugy4noi1ljQbSxuDwwR3a6-zbeBr07Q/exec"
-          method="post"
-          enctype="multipart/form-data"
-          target="_blank"
-          style="margin-top:24px;padding:12px;border:1px dashed #e5e7eb;border-radius:8px">
-      <strong>Quick Upload Test</strong><br><br>
-      <input type="file" name="file" required>
-      <input type="hidden" name="upload_token" value="ESS-STAFF-ONLY">
-      <button type="submit">Test upload</button>
-    </form>
   </main>
-
-  <script>
-    const form = document.getElementById('uploadForm');
-    const statusEl = document.getElementById('status');
-    form.addEventListener('submit', () => {
-      statusEl.textContent = 'Uploading… please wait.';
-      statusEl.className = 'hint';
-    });
-  </script>
 </body>
 </html>
