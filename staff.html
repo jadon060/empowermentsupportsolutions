@@ -59,14 +59,11 @@
     footer{ padding:24px; text-align:center; color:#777; }
     html{ scroll-behavior:smooth; }
 
-    /* 🧩 Symmetrical layout (2x2 grid on desktop) */
     @media (min-width: 960px){
       .grid{
         grid-template-columns: repeat(2, minmax(320px, 1fr)) !important;
       }
     }
-
-    /* Optional: back to 3 columns on very large screens */
     @media (min-width: 1440px){
       .grid{
         grid-template-columns: repeat(3, minmax(300px, 1fr)) !important;
@@ -93,6 +90,8 @@
         <ul class="link-list">
           <li><a class="download-btn" href="/newforms/ESS_SDP_Head_to_Toe_Injury_Form_Final_v3.pdf" target="_blank" rel="noopener">Head-to-Toe / Injury Form</a></li>
           <li><a class="download-btn" href="/newforms/ESS_SDP_Daily_Schedule_Notes_Final_v3.pdf" target="_blank" rel="noopener">Daily Schedule & Notes</a></li>
+          <!-- ✅ Newly Added Weekly Staff Schedule Button -->
+          <li><a class="download-btn" href="/newforms/ESS_Weekly_Staff_Schedule_12HR.pdf" target="_blank" rel="noopener">Weekly Staff Schedule</a></li>
         </ul>
       </div>
 
@@ -116,7 +115,6 @@
               ✉️ Contact ESS Admin
             </a>
           </li>
-          <!-- ✅ Added Upload Documents Button -->
           <li>
             <a class="download-btn no-doc" href="/portal/staff-upload.html">
               📤 Upload Staff Documents
@@ -125,7 +123,6 @@
         </ul>
       </div>
 
-      <!-- NEW CARD: Payroll & HR Forms -->
       <div class="card">
         <h3>🧾 Payroll &amp; HR Forms</h3>
         <ul class="link-list">
@@ -136,7 +133,6 @@
           <li><a class="download-btn" href="/newforms/ESS_Emergency_Contact_Final.pdf" target="_blank" rel="noopener">Emergency Contact Form</a></li>
         </ul>
       </div>
-      <!-- END NEW CARD -->
     </section>
   </main>
 
