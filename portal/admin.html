@@ -32,13 +32,13 @@
     .hero h1{margin:0 0 4px;font-size:28px}
     .hero .tagline{color:var(--muted);margin:0 0 12px}
 
-    /* Single card grid */
+    /* Cards grid */
     .grid{display:grid;gap:16px;margin-top:16px}
     .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
     .card h2{margin:2px 0 8px;font-size:18px;display:flex;align-items:center;gap:8px}
     .slot{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 
-    /* Compact link button (not stretched) */
+    /* Compact link button */
     .link{
       display:inline-flex;align-items:center;gap:10px;justify-content:flex-start;
       background:#1f2f3f;color:#fff;text-decoration:none;border-radius:14px;
@@ -74,12 +74,30 @@
       <p class="tagline">No luck, only lessons. Fail Forward, learn and adapt.</p>
 
       <div class="grid">
+        <!-- Existing: Embedded Guides -->
         <div class="card">
           <h2>🧠 Embedded Guides (ESS)</h2>
           <div class="slot">
             <a class="link" href="/portal/admin-sdp-coordination.html">
               🧭 Admin SDP Coordination Guide
               <span class="small">opens page</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- NEW: Helpful Links with Start Virtual Meeting -->
+        <div class="card">
+          <h2>🔗 Helpful Links</h2>
+          <div class="slot">
+            <a
+              class="link"
+              href="https://meet.jit.si/EmpowermentSupportSolutions"
+              target="_blank"
+              rel="noopener"
+              aria-label="Start Virtual Meeting in new tab"
+            >
+              ▶️ Start Virtual Meeting
+              <span class="small">opens new tab</span>
             </a>
           </div>
         </div>
