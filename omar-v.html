@@ -69,7 +69,7 @@
 <script>
   // -------- CONFIG --------
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
-  const SUPABASE_ANON_KEY = "SUPABASE_ANON_KEY"; // <-- paste your anon key
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
   const CLIENT_ID = document.getElementById("client_id").value; // Omar's UUID
 
   // Init client + schema
@@ -103,12 +103,16 @@
     const sel = $("staff_id");
     sel.disabled = true;
 
-    const { data, error } = await ess.from("staff").select("id, full_name").order("full_name", { ascending: true });
+    const { data, error } = await ess
+      .from("staff")
+      .select("id, full_name")
+      .order("full_name", { ascending: true });
+
     if (error) {
       showErr(error.message);
       return;
     }
-    data.forEach(s => {
+    (data || []).forEach(s => {
       const opt = document.createElement("option");
       opt.value = s.id;
       opt.textContent = s.full_name;
@@ -135,13 +139,14 @@
     };
 
     // Basic required checks
-    if (!entry.staff_id)  return showErr("Please select a Staff.");
-    if (!entry.service_date) return showErr("Please select a Date of Service.");
+    if (!entry.staff_id)  { showErr("Please select a Staff."); return; }
+    if (!entry.service_date) { showErr("Please select a Date of Service."); return; }
 
     const { data, error } = await ess.from("daily_entries").insert(entry).select();
     if (error) {
       debug.textContent = "";
-      return showErr(error.message);
+      showErr(error.message);
+      return;
     }
 
     // Success
