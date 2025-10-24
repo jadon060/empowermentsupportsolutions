@@ -1,0 +1,157 @@
+<!-- ========== ESS • Omar • Daily Service Entry (Live to Supabase) ========== -->
+<section style="max-width:720px;margin:2rem auto;padding:2rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;">
+  <h2 style="margin:0 0 8px 0;">📝 Daily Service Entry — Omar A.</h2>
+  <p style="margin:0 0 16px 0;color:#6b7280;">Week runs Mon → Sun. EVV will be added later.</p>
+
+  <!-- Status / alerts -->
+  <div id="alert" style="display:none;margin-bottom:12px;padding:10px;border-radius:8px;"></div>
+
+  <form id="dailyForm">
+    <!-- Hidden client (prefilled) -->
+    <input type="hidden" id="client_id" value="CLIENT_UUID_OMAR" />
+
+    <!-- Staff (loaded from ess.staff) -->
+    <label for="staff_id" style="font-weight:600;">Staff</label>
+    <select id="staff_id" required style="width:100%;padding:10px;margin:6px 0 14px 0;border:1px solid #e5e7eb;border-radius:8px;">
+      <option value="">Select staff…</option>
+    </select>
+
+    <!-- Date -->
+    <label for="service_date" style="font-weight:600;">Date of Service</label>
+    <input type="date" id="service_date" required
+           style="width:100%;padding:10px;margin:6px 0 14px 0;border:1px solid #e5e7eb;border-radius:8px;">
+
+    <!-- Times -->
+    <div style="display:flex;gap:12px;margin-bottom:14px;">
+      <div style="flex:1;">
+        <label for="start_time" style="font-weight:600;">Start Time</label>
+        <input type="time" id="start_time"
+               style="width:100%;padding:10px;margin-top:6px;border:1px solid #e5e7eb;border-radius:8px;">
+      </div>
+      <div style="flex:1;">
+        <label for="end_time" style="font-weight:600;">End Time</label>
+        <input type="time" id="end_time"
+               style="width:100%;padding:10px;margin-top:6px;border:1px solid #e5e7eb;border-radius:8px;">
+      </div>
+    </div>
+
+    <!-- Modality (must match DB: Home | Community | Remote) -->
+    <label for="modality" style="font-weight:600;">Modality / Location</label>
+    <select id="modality" required
+            style="width:100%;padding:10px;margin:6px 0 14px 0;border:1px solid #e5e7eb;border-radius:8px;">
+      <option value="Home">Home</option>
+      <option value="Community">Community</option>
+      <option value="Remote" selected>Remote</option>
+    </select>
+
+    <!-- Activities (free text for now) -->
+    <label for="activities" style="font-weight:600;">Activities (quick summary)</label>
+    <textarea id="activities" placeholder="e.g., Personal: morning routine; Technology: tablet practice"
+              style="width:100%;min-height:84px;padding:10px;margin:6px 0 14px 0;border:1px solid #e5e7eb;border-radius:8px;"></textarea>
+
+    <!-- Narrative notes -->
+    <label for="service_notes" style="font-weight:600;">Service Notes (narrative)</label>
+    <textarea id="service_notes" placeholder="what/where/with whom, goals, outcomes, behaviors/resources"
+              style="width:100%;min-height:120px;padding:10px;margin:6px 0 16px 0;border:1px solid #e5e7eb;border-radius:8px;"></textarea>
+
+    <button type="submit"
+            style="padding:12px 16px;border-radius:10px;border:1px solid #111827;background:#111827;color:#fff;cursor:pointer;">
+      Save Daily Entry
+    </button>
+  </form>
+
+  <!-- Debug output (optional) -->
+  <pre id="debug" style="margin-top:1rem;background:#f9fafb;padding:12px;border-radius:8px;white-space:pre-wrap;"></pre>
+</section>
+
+<!-- Supabase client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // -------- CONFIG --------
+  const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
+  const SUPABASE_ANON_KEY = "SUPABASE_ANON_KEY"; // <-- paste your anon key
+  const CLIENT_ID = document.getElementById("client_id").value; // Omar's UUID
+
+  // Init client + schema
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const ess = sb.schema("ess");
+
+  const $ = (id) => document.getElementById(id);
+  const alertBox = $("alert");
+  const debug = $("debug");
+
+  // Simple alert helpers
+  function showOk(msg) {
+    alertBox.style.display = "block";
+    alertBox.style.background = "#ecfdf5";
+    alertBox.style.border = "1px solid #34d399";
+    alertBox.textContent = "✅ " + msg;
+  }
+  function showErr(msg) {
+    alertBox.style.display = "block";
+    alertBox.style.background = "#fef2f2";
+    alertBox.style.border = "1px solid #fca5a5";
+    alertBox.textContent = "❌ " + msg;
+  }
+  function clearAlert() {
+    alertBox.style.display = "none";
+    alertBox.textContent = "";
+  }
+
+  // -------- INIT: load staff list --------
+  (async function loadStaff() {
+    const sel = $("staff_id");
+    sel.disabled = true;
+
+    const { data, error } = await ess.from("staff").select("id, full_name").order("full_name", { ascending: true });
+    if (error) {
+      showErr(error.message);
+      return;
+    }
+    data.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = s.full_name;
+      sel.appendChild(opt);
+    });
+    sel.disabled = false;
+  })();
+
+  // -------- SUBMIT HANDLER --------
+  $("dailyForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearAlert();
+    debug.textContent = "⏳ Saving…";
+
+    const entry = {
+      client_id: CLIENT_ID,
+      staff_id: $("staff_id").value,
+      service_date: $("service_date").value,                 // date (YYYY-MM-DD)
+      start_time: $("start_time").value || null,             // time or null
+      end_time: $("end_time").value || null,                 // time or null
+      modality: $("modality").value,                         // Home | Community | Remote
+      activities: [($("activities").value || "").trim()],    // simple array for now
+      service_notes: ($("service_notes").value || "").trim() || null
+    };
+
+    // Basic required checks
+    if (!entry.staff_id)  return showErr("Please select a Staff.");
+    if (!entry.service_date) return showErr("Please select a Date of Service.");
+
+    const { data, error } = await ess.from("daily_entries").insert(entry).select();
+    if (error) {
+      debug.textContent = "";
+      return showErr(error.message);
+    }
+
+    // Success
+    showOk("Saved! Your daily entry has been recorded.");
+    debug.textContent = JSON.stringify(data, null, 2);
+
+    // Optional: clear most fields for the next entry
+    $("start_time").value = "";
+    $("end_time").value = "";
+    $("activities").value = "";
+    $("service_notes").value = "";
+  });
+</script>
