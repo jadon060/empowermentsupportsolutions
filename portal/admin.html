@@ -117,10 +117,22 @@
               ▶️ Start Virtual Meeting
               <span class="small">opens new tab</span>
             </a>
+
+            <!-- ✅ NEW Clockify Reports Button -->
+            <a
+              class="link"
+              href="https://app.clockify.me/reports/summary"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Clockify Reports in new tab"
+            >
+              📊 Clockify Reports
+              <span class="small">opens new tab</span>
+            </a>
           </div>
         </div>
 
-        <!-- NEW: Private Notes -->
+        <!-- Private Notes -->
         <div class="card">
           <h2>🗒️ My Notes</h2>
           <p class="muted" style="margin-top:-6px">Organize yourself before you try to organize anything else. </p>
@@ -203,7 +215,6 @@
         try{
           const imported = JSON.parse(reader.result);
           if(!Array.isArray(imported)) throw new Error("Invalid file");
-          // Merge: keep unique by id, newest first
           const map = new Map();
           [...imported, ...loadNotes()].forEach(n => map.set(n.id || crypto.randomUUID(), { id:n.id || crypto.randomUUID(), ts:n.ts || new Date().toISOString(), body:String(n.body||"") }));
           const merged = [...map.values()].sort((a,b)=> (b.ts||"").localeCompare(a.ts||""));
@@ -246,7 +257,6 @@
       return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
-    // Wire up events
     $("#saveNote").addEventListener("click", saveNote);
     $("#noteText").addEventListener("keydown", (e)=>{ if(e.ctrlKey && e.key==='Enter'){ saveNote(); }});
     $("#exportJson").addEventListener("click", exportJson);
@@ -254,7 +264,6 @@
     $("#clearAll").addEventListener("click", clearAll);
     searchBox.addEventListener("input", render);
 
-    // Initial render
     render();
   </script>
 </body>
