@@ -15,7 +15,7 @@
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
 
-    /* Header (buttons removed) */
+    /* Header */
     header{
       position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);
       display:flex;align-items:center;justify-content:flex-start;gap:12px;padding:12px 16px;
@@ -34,8 +34,9 @@
 
     /* Cards grid */
     .grid{display:grid;gap:16px;margin-top:16px}
+    @media (min-width:920px){ .grid{grid-template-columns:1fr 1fr;} }
     .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
-    .card h2{margin:2px 0 8px;font-size:18px;display:flex;align-items:center;gap:8px}
+    .card h2{margin:2px 0 12px;font-size:18px;display:flex;align-items:center;gap:8px}
     .slot{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 
     /* Compact link button */
@@ -47,10 +48,31 @@
     }
     .small{font-size:13px;color:#cbd5e1;font-weight:600;margin-left:auto}
 
+    /* Private Notes UI */
+    .notes-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 10px}
+    .notes-controls input[type="text"]{flex:1 1 260px;padding:8px 10px;border:1px solid var(--line);border-radius:10px}
+    .btn{
+      appearance:none;border:1px solid var(--line);background:#0f1f2f;color:#fff;border-radius:12px;
+      padding:8px 12px;font-weight:700;box-shadow:0 6px 16px rgba(0,0,0,.12);cursor:pointer
+    }
+    .btn.ghost{background:#fff;color:#0f172a}
+    .btn.warn{background:#b91c1c;border-color:#7f1d1d}
+    textarea#noteText{
+      width:100%;min-height:120px;padding:12px;border:1px solid var(--line);border-radius:12px;resize:vertical
+    }
+    .note-row{
+      display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;padding:10px;border:1px solid var(--line);
+      border-radius:12px;background:#fafcff
+    }
+    .note-meta{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .note-actions{display:flex;gap:6px}
+    .chip{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;border:1px solid #dbeafe;color:#1e3a8a;
+      padding:4px 8px;border-radius:999px;font-size:12px}
+    .muted{color:var(--muted)}
     footer{color:var(--muted);font-size:13px;text-align:center;padding:24px 0 36px}
   </style>
 
-  <!-- 🔒 client-side guard -->
+  <!-- 🔒 simple client-side guard -->
   <script>
     (function(){
       try{
@@ -65,7 +87,6 @@
 <body>
   <header class="container">
     <div class="brand">ESS • <small>Admin Portal</small></div>
-    <!-- actions removed per request -->
   </header>
 
   <main class="container">
@@ -74,7 +95,7 @@
       <p class="tagline">No luck, only lessons. Fail Forward, learn and adapt.</p>
 
       <div class="grid">
-        <!-- Existing: Embedded Guides -->
+        <!-- Guides -->
         <div class="card">
           <h2>🧠 Your Guide </h2>
           <div class="slot">
@@ -83,11 +104,8 @@
               <span class="small">opens page</span>
             </a>
           </div>
-        </div>
 
-        <!-- NEW: Helpful Links with Start Virtual Meeting -->
-        <div class="card">
-          <h2>🔗 Virtual Video Link </h2>
+          <h2 style="margin-top:18px">🔗 Connect </h2>
           <div class="slot">
             <a
               class="link"
@@ -101,6 +119,30 @@
             </a>
           </div>
         </div>
+
+        <!-- NEW: Private Notes -->
+        <div class="card">
+          <h2>🗒️ Private Notes</h2>
+          <p class="muted" style="margin-top:-6px">Quickly jot dates, times, contacts, decisions. Saved privately in this browser. (Export to back up.)</p>
+
+          <div class="notes-controls">
+            <input id="search" type="text" placeholder="Search notes (client, date, keyword)…" />
+            <button class="btn ghost" id="exportJson">Export</button>
+            <label class="btn ghost" for="importFile" style="cursor:pointer">Import</label>
+            <input id="importFile" type="file" accept=".json" style="display:none" />
+            <button class="btn warn" id="clearAll">Clear All</button>
+          </div>
+
+          <div class="chip"><input id="prependTs" type="checkbox" checked style="margin:0" /> <label for="prependTs" style="cursor:pointer">Prepend timestamp</label></div>
+
+          <textarea id="noteText" placeholder="Example: 10/23 4:00pm — Spoke with Imani (SG/PRC). Family completed orientation; awaiting budget worksheet." ></textarea>
+          <div style="display:flex;gap:10px;margin-top:10px">
+            <button class="btn" id="saveNote">Save (Ctrl+Enter)</button>
+            <span class="muted" id="saveStatus" aria-live="polite"></span>
+          </div>
+
+          <div style="margin-top:16px" id="notesList"></div>
+        </div>
       </div>
     </section>
 
@@ -109,7 +151,111 @@
 
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
-    /* logout button removed, keep no-op */
+
+    // ---- Private Notes logic (localStorage) ----
+    const LS_KEY = "ESS_Admin_PrivateNotes_v1";
+    const $ = sel => document.querySelector(sel);
+    const notesList = $("#notesList");
+    const searchBox = $("#search");
+    const statusEl = $("#saveStatus");
+
+    function loadNotes(){
+      try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+      catch { return []; }
+    }
+    function persist(notes){
+      localStorage.setItem(LS_KEY, JSON.stringify(notes));
+    }
+    function nowStamp(){
+      const d = new Date();
+      return d.toLocaleString(undefined, { year:'2-digit', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+    }
+    function saveNote(){
+      const txt = $("#noteText").value.trim();
+      if(!txt) return;
+      const notes = loadNotes();
+      const body = $("#prependTs").checked ? `${nowStamp()} — ${txt}` : txt;
+      notes.unshift({ id: crypto.randomUUID(), ts: new Date().toISOString(), body });
+      persist(notes);
+      $("#noteText").value = "";
+      flash("Saved");
+      render();
+    }
+    function deleteNote(id){
+      const notes = loadNotes().filter(n => n.id !== id);
+      persist(notes); render();
+    }
+    async function copyNote(text){
+      try { await navigator.clipboard.writeText(text); flash("Copied"); }
+      catch { flash("Copy failed"); }
+    }
+    function exportJson(){
+      const blob = new Blob([JSON.stringify(loadNotes(), null, 2)], {type:"application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `ESS_PrivateNotes_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    function importJson(file){
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          const imported = JSON.parse(reader.result);
+          if(!Array.isArray(imported)) throw new Error("Invalid file");
+          // Merge: keep unique by id, newest first
+          const map = new Map();
+          [...imported, ...loadNotes()].forEach(n => map.set(n.id || crypto.randomUUID(), { id:n.id || crypto.randomUUID(), ts:n.ts || new Date().toISOString(), body:String(n.body||"") }));
+          const merged = [...map.values()].sort((a,b)=> (b.ts||"").localeCompare(a.ts||""));
+          persist(merged); render(); flash("Imported");
+        }catch(e){ flash("Import failed"); }
+      };
+      reader.readAsText(file);
+    }
+    function clearAll(){
+      if(confirm("Delete ALL private notes on this device?")){ persist([]); render(); }
+    }
+    function flash(msg){
+      statusEl.textContent = msg;
+      setTimeout(()=> statusEl.textContent = "", 1200);
+    }
+    function render(){
+      const q = (searchBox.value || "").toLowerCase();
+      const notes = loadNotes().filter(n => n.body.toLowerCase().includes(q));
+      if(notes.length === 0){
+        notesList.innerHTML = `<p class="muted">No notes yet.</p>`;
+        return;
+      }
+      notesList.innerHTML = notes.map(n => {
+        const when = new Date(n.ts).toLocaleString();
+        return `
+          <div class="note-row">
+            <div>
+              <div class="note-meta">${when}</div>
+              <div style="white-space:pre-wrap">${escapeHtml(n.body)}</div>
+            </div>
+            <div class="note-actions">
+              <button class="btn ghost" onclick='(${copyNote}).call(null, ${JSON.stringify(n.body)})'>Copy</button>
+              <button class="btn warn" onclick='(${deleteNote}).call(null, "${n.id}")'>Delete</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+    function escapeHtml(s){
+      return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    // Wire up events
+    $("#saveNote").addEventListener("click", saveNote);
+    $("#noteText").addEventListener("keydown", (e)=>{ if(e.ctrlKey && e.key==='Enter'){ saveNote(); }});
+    $("#exportJson").addEventListener("click", exportJson);
+    $("#importFile").addEventListener("change", e => e.target.files[0] && importJson(e.target.files[0]));
+    $("#clearAll").addEventListener("click", clearAll);
+    searchBox.addEventListener("input", render);
+
+    // Initial render
+    render();
   </script>
 </body>
 </html>
