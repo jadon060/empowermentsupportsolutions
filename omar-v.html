@@ -1,4 +1,220 @@
-<!-- ========== ESS • Omar • Daily Service Entry (Live to Supabase) ========== -->
+<!-- ========== ESS • Weekly Charting (Drafts Only, Safe to Add) + Daily Service Entry (Live) ========== -->
+
+<!-- ===== Weekly Chart (NEW) ===== -->
+<section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <h2 style="margin:0;">📅 Weekly Chart (Mon–Sun)</h2>
+    <button id="w_submitWeek" disabled title="Enabled in Step 2"
+            style="padding:10px 14px;border-radius:10px;border:1px solid #2c3e50;background:#2c3e50;color:#fff;cursor:not-allowed;opacity:.6;">
+      Submit Weekly Report
+    </button>
+  </div>
+  <p style="margin:.25rem 0 1rem 0;color:#6b7280;">Click a day, enter notes/hours, and <strong>Save Day</strong>. Drafts store only in this browser for now.</p>
+
+  <!-- Week bar -->
+  <div style="display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;padding:10px;border-radius:10px;background:#f8fafc;">
+    <button id="w_prevWeek" aria-label="Previous week"
+            style="width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">◀</button>
+    <div>
+      <div id="w_range" style="font-weight:700;color:#0f172a;">Mon — Sun</div>
+      <div style="color:#6b7280;font-size:13px;">Week of <span id="w_startTxt"></span> to <span id="w_endTxt"></span></div>
+    </div>
+    <button id="w_nextWeek" aria-label="Next week"
+            style="width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">▶</button>
+    <div style="flex:1;"></div>
+    <span style="font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a;">
+      Drafts saved locally
+    </span>
+  </div>
+
+  <!-- Days grid -->
+  <div id="w_days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:14px;"></div>
+
+  <!-- Day panel -->
+  <div id="w_panel" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px;">
+    <div id="w_panelDate" style="color:#6b7280;margin-bottom:10px;"></div>
+
+    <div style="display:grid;gap:12px;grid-template-columns:1fr 1fr;">
+      <div>
+        <label for="w_hours" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Hours Worked</label>
+        <input id="w_hours" type="number" min="0" step="0.25" placeholder="e.g., 3.5"
+               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;">
+      </div>
+      <div>
+        <label for="w_acts" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Activities (quick summary)</label>
+        <input id="w_acts" type="text" placeholder="Shopping, meal prep, budgeting…"
+               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;">
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <label for="w_notes" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Progress Notes</label>
+      <textarea id="w_notes" placeholder="Objective notes about the session…"
+                style="width:100%;min-height:120px;padding:10px;border:1px solid #e5e7eb;border-radius:10px;resize:vertical;"></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
+      <button id="w_clearDay" style="padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">Clear Day</button>
+      <button id="w_saveDay"  style="padding:10px 14px;border-radius:10px;border:1px solid #2c3e50;background:#2c3e50;color:#fff;cursor:pointer;">Save Day</button>
+    </div>
+
+    <div style="font-size:12px;color:#6b7280;margin-top:8px;">✅ Saved drafts live only in this browser (localStorage). In Step 2 we’ll wire Supabase + weekly submit.</div>
+  </div>
+
+  <!-- Local toast -->
+  <div id="w_toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s;"></div>
+</section>
+
+<script>
+(() => {
+  // ===== CONFIG (use your existing IDs; this does not hit DB yet) =====
+  const CLIENT_ID = 'CLIENT_UUID_OMAR';      // for keying drafts
+  const STAFF_ID  = 'STAFF_UUID_PLACEHOLDER';// temp; weekly isn’t submitting yet
+
+  // ===== Helpers =====
+  const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(d);
+  const ymd = (d)=>d.toISOString().slice(0,10);
+  function startOfWeekMonday(d){
+    const nd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const day = nd.getDay(); // 0=Sun
+    const diff = (day===0 ? -6 : 1 - day);
+    nd.setDate(nd.getDate()+diff);
+    nd.setHours(0,0,0,0);
+    return nd;
+  }
+  function addDays(d,n){ const nd=new Date(d); nd.setDate(nd.getDate()+n); return nd; }
+
+  const w_days = document.getElementById('w_days');
+  const w_range= document.getElementById('w_range');
+  const w_startTxt = document.getElementById('w_startTxt');
+  const w_endTxt = document.getElementById('w_endTxt');
+  const w_prevWeek = document.getElementById('w_prevWeek');
+  const w_nextWeek = document.getElementById('w_nextWeek');
+  const w_panel = document.getElementById('w_panel');
+  const w_panelDate = document.getElementById('w_panelDate');
+  const w_hours = document.getElementById('w_hours');
+  const w_acts  = document.getElementById('w_acts');
+  const w_notes = document.getElementById('w_notes');
+  const w_saveDay = document.getElementById('w_saveDay');
+  const w_clearDay= document.getElementById('w_clearDay');
+  const w_toast = document.getElementById('w_toast');
+
+  let current = startOfWeekMonday(new Date());
+  let activeIndex = null;
+
+  const weekKey = (wk)=>`essWeek_${CLIENT_ID}_${STAFF_ID}_${ymd(wk)}`;
+  const dayKey  = (wk,i)=>`${weekKey(wk)}_d${i}`; // 0..6
+
+  function toast(msg){
+    w_toast.textContent = msg;
+    w_toast.style.opacity='1';
+    setTimeout(()=>w_toast.style.opacity='0', 1400);
+  }
+
+  function markDots(){
+    for(let i=0;i<7;i++){
+      const dot = document.getElementById(`w_dot${i}`);
+      const has = localStorage.getItem(dayKey(current,i));
+      if(dot){ dot.style.background = has ? '#22c55e' : '#e5e7eb'; }
+    }
+  }
+
+  function renderWeek(){
+    const start = new Date(current);
+    const end = addDays(start,6);
+    w_startTxt.textContent = fmt(start);
+    w_endTxt.textContent   = fmt(end);
+    w_range.textContent = `Mon ${start.getDate()} — Sun ${end.getDate()}`;
+
+    const names = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    w_days.innerHTML = '';
+    for(let i=0;i<7;i++){
+      const d = addDays(start,i);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.cssText = 'position:relative;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;cursor:pointer;width:100%;text-align:left;';
+      btn.innerHTML = `
+        <div style="font-size:12px;color:#6b7280;">${names[i]}</div>
+        <div style="font-size:16px;font-weight:800;color:#0f172a;">${d.getDate()}</div>
+        <div id="w_dot${i}" style="position:absolute;right:10px;top:10px;width:8px;height:8px;border-radius:999px;background:#e5e7eb;"></div>
+      `;
+      btn.addEventListener('click',()=>openDay(i));
+      w_days.appendChild(btn);
+    }
+    markDots();
+
+    // Auto-open today if within range
+    const today = new Date();
+    const inRange = +today>=+start && +today<=+end;
+    openDay(inRange ? (today.getDay()===0?6:today.getDay()-1) : 0);
+  }
+
+  function openDay(i){
+    activeIndex = i;
+    // highlight card
+    [...w_days.children].forEach((el,idx)=>{
+      el.style.outline = (idx===i) ? '2px solid #0ea5e9' : 'none';
+    });
+    const d = addDays(current,i);
+    w_panelDate.textContent = `${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} — ${fmt(d)}`;
+
+    // load draft
+    const raw = localStorage.getItem(dayKey(current,i));
+    if(raw){
+      try{
+        const obj = JSON.parse(raw);
+        w_hours.value = obj.hours ?? '';
+        w_acts.value  = obj.activities ?? '';
+        w_notes.value = obj.notes ?? '';
+      }catch{
+        w_hours.value = w_acts.value = w_notes.value = '';
+      }
+    }else{
+      w_hours.value = w_acts.value = w_notes.value = '';
+    }
+    w_panel.style.display = 'block';
+  }
+
+  function saveDay(){
+    if(activeIndex==null) return;
+    const payload = {
+      client_id: CLIENT_ID,
+      staff_id:  STAFF_ID,
+      week_start: ymd(current),
+      day_index: activeIndex,
+      date: ymd(addDays(current,activeIndex)),
+      hours: (w_hours.value||''),
+      activities: (w_acts.value||''),
+      notes: (w_notes.value||'')
+    };
+    localStorage.setItem(dayKey(current,activeIndex), JSON.stringify(payload));
+    markDots();
+    toast('Day saved ✓');
+  }
+
+  function clearDay(){
+    if(activeIndex==null) return;
+    localStorage.removeItem(dayKey(current,activeIndex));
+    w_hours.value = w_acts.value = w_notes.value = '';
+    markDots();
+    toast('Day cleared');
+  }
+
+  function shiftWeek(delta){
+    current = addDays(current, 7*delta);
+    renderWeek();
+  }
+
+  w_prevWeek.addEventListener('click',()=>shiftWeek(-1));
+  w_nextWeek.addEventListener('click',()=>shiftWeek(1));
+  w_saveDay.addEventListener('click',saveDay);
+  w_clearDay.addEventListener('click',clearDay);
+
+  renderWeek();
+})();
+</script>
+
+<!-- ===== Daily Service Entry (UNCHANGED, LIVE TO SUPABASE) ===== -->
 <section style="max-width:720px;margin:2rem auto;padding:2rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;">
   <h2 style="margin:0 0 8px 0;">📝 Daily Service Entry — Omar A.</h2>
   <p style="margin:0 0 16px 0;color:#6b7280;">Week runs Mon → Sun. EVV will be added later.</p>
@@ -67,7 +283,7 @@
 <!-- Supabase client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // -------- CONFIG --------
+  // -------- CONFIG (UNCHANGED) --------
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
   const CLIENT_ID = document.getElementById("client_id").value; // Omar's UUID
@@ -98,7 +314,7 @@
     alertBox.textContent = "";
   }
 
-  // -------- INIT: load staff list --------
+  // -------- INIT: load staff list (UNCHANGED) --------
   (async function loadStaff() {
     const sel = $("staff_id");
     sel.disabled = true;
@@ -121,7 +337,7 @@
     sel.disabled = false;
   })();
 
-  // -------- SUBMIT HANDLER --------
+  // -------- SUBMIT HANDLER (UNCHANGED) --------
   $("dailyForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     clearAlert();
