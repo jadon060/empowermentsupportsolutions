@@ -1,96 +1,3 @@
-<!-- ========== ESS • Single Weekly Chart (Drafts + Official Submissions) ========== -->
-
-<section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-    <h2 style="margin:0;">📅 Weekly Chart (Mon–Sun)</h2>
-    <button id="w_submitWeek" disabled title="Weekly submit coming next"
-            style="padding:10px 14px;border-radius:10px;border:1px solid #2c3e50;background:#2c3e50;color:#fff;cursor:not-allowed;opacity:.6;">
-      Submit Weekly Report
-    </button>
-  </div>
-
-  <!-- Staff + Client -->
-  <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:10px;">
-    <input type="hidden" id="client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" />
-    <div style="flex:1;min-width:260px;">
-      <label for="staff_id" style="display:block;font-size:12px;color:#6b7280;margin-bottom:6px;">Staff</label>
-      <select id="staff_id" required style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;"></select>
-    </div>
-    <span style="font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a;">
-      Drafts: server + local
-    </span>
-  </div>
-
-  <!-- Week bar -->
-  <div style="display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;padding:10px;border-radius:10px;background:#f8fafc;">
-    <button id="w_prevWeek" style="width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">◀</button>
-    <div>
-      <div id="w_range" style="font-weight:700;color:#0f172a;">Mon — Sun</div>
-      <div style="color:#6b7280;font-size:13px;">Week of <span id="w_startTxt"></span> to <span id="w_endTxt"></span></div>
-    </div>
-    <button id="w_nextWeek" style="width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">▶</button>
-    <div style="flex:1;"></div>
-  </div>
-
-  <!-- Days grid -->
-  <div id="w_days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:14px;"></div>
-
-  <!-- Day panel -->
-  <div id="w_panel" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px;">
-    <div id="w_panelDate" style="color:#6b7280;margin-bottom:10px;"></div>
-
-    <div style="display:grid;gap:12px;grid-template-columns:repeat(3,1fr);">
-      <div>
-        <label for="w_start" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Start Time</label>
-        <input id="w_start" type="time" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;">
-      </div>
-      <div>
-        <label for="w_end" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">End Time</label>
-        <input id="w_end" type="time" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;">
-      </div>
-      <div>
-        <label for="w_modality" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Modality / Location</label>
-        <select id="w_modality" style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;">
-          <option value="Home">Home</option>
-          <option value="Community">Community</option>
-          <option value="Remote" selected>Remote</option>
-        </select>
-      </div>
-    </div>
-
-    <div style="display:grid;gap:12px;grid-template-columns:1fr 1fr;margin-top:12px;">
-      <div>
-        <label for="w_hours" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Hours Worked</label>
-        <input id="w_hours" type="number" min="0" step="0.25" placeholder="e.g., 3.5"
-               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;">
-      </div>
-      <div>
-        <label for="w_acts" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Activities (quick summary)</label>
-        <input id="w_acts" type="text" placeholder="Shopping, meal prep, budgeting…"
-               style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;">
-      </div>
-    </div>
-
-    <div style="margin-top:12px;">
-      <label for="w_notes" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Progress Notes</label>
-      <textarea id="w_notes" placeholder="what/where/with whom, goals, outcomes, behaviors/resources"
-                style="width:100%;min-height:120px;padding:10px;border:1px solid #e5e7eb;border-radius:10px;resize:vertical;"></textarea>
-    </div>
-
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
-      <button id="w_clearDay" style="padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">Clear Day</button>
-      <button id="w_saveDay"  style="padding:10px 14px;border-radius:10px;border:1px solid #1f2937;background:#1f2937;color:#fff;cursor:pointer;">Save Day (Draft)</button>
-      <button id="w_submitDay" style="padding:10px 14px;border-radius:10px;border:1px solid #2c3e50;background:#2c3e50;color:#fff;cursor:pointer;">Submit Day (Official)</button>
-    </div>
-
-    <!-- Debug line -->
-    <div id="w_error" style="margin-top:10px;padding:10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b;display:none;"></div>
-  </div>
-
-  <!-- Toast -->
-  <div id="w_toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s;"></div>
-</section>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ===== Supabase ===== */
@@ -119,7 +26,7 @@ function clearErr(){w_error.style.display='none';w_error.textContent='';}
 /* ===== Staff list ===== */
 (async function loadStaff(){
   STAFF_ID.disabled = true;
-  const { data, error } = await ess.from("staff").select("id, full_name").order("full_name");
+  const { data } = await ess.from("staff").select("id, full_name").order("full_name");
   STAFF_ID.innerHTML = '<option value="">Select staff…</option>';
   (data||[]).forEach(s=>{
     const opt=document.createElement('option');
@@ -167,19 +74,30 @@ async function upsertDraft(i, payload){
   await ess.from("daily_drafts").upsert(body, { onConflict: "client_id,staff_id,week_start,day_index" });
 }
 
-/* ===== Official insert ===== */
+/* ===== Official insert (with safe Activities handling) ===== */
 async function insertDailyEntry(payload){
-  const entry = {
+  // Prepare activities safely
+  const raw = (payload.activities || '').trim();
+  const acts = raw ? [raw] : null;
+
+  const base = {
     client_id: CLIENT_ID.value,
     staff_id:  STAFF_ID.value,
-    service_date: payload.date,               // YYYY-MM-DD
-    start_time: payload.start_time || null,   // 'HH:MM'
+    service_date: payload.date,
+    start_time: payload.start_time || null,
     end_time:   payload.end_time   || null,
     modality:   payload.modality   || 'Remote',
-    activities: payload.activities ? [payload.activities] : [],
     service_notes: payload.notes || null
   };
-  const { data, error } = await ess.from("daily_entries").insert(entry).select();
+
+  // 1) Try with activities (if provided)
+  let { data, error } = await ess.from("daily_entries").insert({ ...base, activities: acts }).select();
+
+  // 2) If the DB check constraint rejects it, retry with activities=null
+  if (error && String(error.message||'').includes('activities_allowed')) {
+    ({ data, error } = await ess.from("daily_entries").insert({ ...base, activities: null }).select());
+  }
+
   if (error) throw error;
   return data;
 }
@@ -288,7 +206,7 @@ async function submitDay(){
     modality: (w_modality.value||'Remote')
   };
   try{
-    const data = await insertDailyEntry(payload);  // official record
+    const data = await insertDailyEntry(payload);  // official record (with safe fallback)
     await upsertDraft(activeIndex, payload);       // keep draft in sync
     localStorage.setItem(dayKey(current,activeIndex), JSON.stringify(payload));
     markDots();
