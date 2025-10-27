@@ -1,231 +1,292 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ===== Supabase ===== */
-const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const ess = sb.schema("ess");
+document.addEventListener("DOMContentLoaded", async () => {
+  /* ===== Supabase ===== */
+  const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
+  const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const ess = sb.schema("ess");
 
-/* ===== DOM ===== */
-const $ = (id)=>document.getElementById(id);
-const CLIENT_ID = $("client_id");
-const STAFF_ID  = $("staff_id");
+  /* ===== DOM ===== */
+  const $ = (id) => document.getElementById(id);
+  const CLIENT_ID = $("client_id");
+  const STAFF_ID = $("staff_id");
+  const w_days = $("w_days"),
+    w_range = $("w_range"),
+    w_startTxt = $("w_startTxt"),
+    w_endTxt = $("w_endTxt"),
+    w_prevWeek = $("w_prevWeek"),
+    w_nextWeek = $("w_nextWeek"),
+    w_panel = $("w_panel"),
+    w_panelDate = $("w_panelDate"),
+    w_start = $("w_start"),
+    w_end = $("w_end"),
+    w_modality = $("w_modality"),
+    w_hours = $("w_hours"),
+    w_acts = $("w_acts"),
+    w_notes = $("w_notes"),
+    w_saveDay = $("w_saveDay"),
+    w_clearDay = $("w_clearDay"),
+    w_submitDay = $("w_submitDay"),
+    w_toast = $("w_toast"),
+    w_error = $("w_error");
 
-const w_days=$("w_days"), w_range=$("w_range"), w_startTxt=$("w_startTxt"), w_endTxt=$("w_endTxt");
-const w_prevWeek=$("w_prevWeek"), w_nextWeek=$("w_nextWeek");
-const w_panel=$("w_panel"), w_panelDate=$("w_panelDate");
-const w_start=$("w_start"), w_end=$("w_end"), w_modality=$("w_modality");
-const w_hours=$("w_hours"), w_acts=$("w_acts"), w_notes=$("w_notes");
-const w_saveDay=$("w_saveDay"), w_clearDay=$("w_clearDay"), w_submitDay=$("w_submitDay");
-const w_toast=$("w_toast"), w_error=$("w_error");
+  function toast(m) {
+    w_toast.textContent = m;
+    w_toast.style.opacity = "1";
+    setTimeout(() => (w_toast.style.opacity = "0"), 1600);
+  }
+  function showErr(m) {
+    w_error.textContent = m;
+    w_error.style.display = "block";
+  }
+  function clearErr() {
+    w_error.style.display = "none";
+    w_error.textContent = "";
+  }
 
-function toast(m){w_toast.textContent=m;w_toast.style.opacity='1';setTimeout(()=>w_toast.style.opacity='0',1600);}
-function showErr(msg){w_error.textContent=msg;w_error.style.display='block';}
-function clearErr(){w_error.style.display='none';w_error.textContent='';}
+  /* ===== Staff list ===== */
+  async function loadStaff() {
+    if (!STAFF_ID) return;
+    STAFF_ID.disabled = true;
+    const { data } = await ess.from("staff").select("id, full_name").order("full_name");
+    STAFF_ID.innerHTML = '<option value="">Select staff…</option>';
+    (data || []).forEach((s) => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = s.full_name;
+      STAFF_ID.appendChild(opt);
+    });
+    STAFF_ID.disabled = false;
+  }
+  loadStaff();
 
-/* ===== Staff list ===== */
-(async function loadStaff(){
-  STAFF_ID.disabled = true;
-  const { data } = await ess.from("staff").select("id, full_name").order("full_name");
-  STAFF_ID.innerHTML = '<option value="">Select staff…</option>';
-  (data||[]).forEach(s=>{
-    const opt=document.createElement('option');
-    opt.value=s.id; opt.textContent=s.full_name; STAFF_ID.appendChild(opt);
-  });
-  STAFF_ID.disabled = false;
-})();
+  /* ===== Helpers ===== */
+  const fmt = (d) =>
+    new Intl.DateTimeFormat("en-US", { month: "short", day: "2-digit", year: "numeric" }).format(d);
+  const ymd = (d) => d.toISOString().slice(0, 10);
+  function startOfWeekMonday(d) {
+    const nd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const day = nd.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    nd.setDate(nd.getDate() + diff);
+    nd.setHours(0, 0, 0, 0);
+    return nd;
+  }
+  function addDays(d, n) {
+    const nd = new Date(d);
+    nd.setDate(nd.getDate() + n);
+    return nd;
+  }
 
-/* ===== Helpers ===== */
-const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(d);
-const ymd = (d)=>d.toISOString().slice(0,10);
-function startOfWeekMonday(d){const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=nd.getDay();const diff=(day===0?-6:1-day);nd.setDate(nd.getDate()+diff);nd.setHours(0,0,0,0);return nd;}
-function addDays(d,n){const nd=new Date(d);nd.setDate(nd.getDate()+n);return nd;}
+  let current = startOfWeekMonday(new Date());
+  let activeIndex = null;
 
-let current = startOfWeekMonday(new Date());
-let activeIndex = null;
+  const weekKey = (wk) => `essWeek_${CLIENT_ID.value}_${STAFF_ID.value}_${ymd(wk)}`;
+  const dayKey = (wk, i) => `${weekKey(wk)}_d${i}`;
 
-const weekKey = (wk)=>`essWeek_${CLIENT_ID.value}_${STAFF_ID.value}_${ymd(wk)}`;
-const dayKey  = (wk,i)=>`${weekKey(wk)}_d${i}`;
-
-/* ===== Drafts (server + local) ===== */
-async function fetchDraft(i){
-  try{
-    if(!STAFF_ID.value) return null;
-    const { data } = await ess.from("daily_drafts")
+  /* ===== Drafts ===== */
+  async function fetchDraft(i) {
+    if (!STAFF_ID.value) return null;
+    const { data } = await ess
+      .from("daily_drafts")
       .select("hours, activities, notes, date, submitted, start_time, end_time, modality")
-      .eq("client_id", CLIENT_ID.value).eq("staff_id", STAFF_ID.value)
-      .eq("week_start", ymd(current)).eq("day_index", i).maybeSingle();
-    return data||null;
-  }catch{ return null; }
-}
-async function upsertDraft(i, payload){
-  if(!STAFF_ID.value) return;
-  const body = {
-    client_id: CLIENT_ID.value, staff_id: STAFF_ID.value,
-    week_start: ymd(current), day_index: i, date: payload.date,
-    hours: payload.hours!==''? Number(payload.hours):null,
-    activities: payload.activities||null,
-    notes: payload.notes||null,
-    start_time: payload.start_time||null,
-    end_time: payload.end_time||null,
-    modality: payload.modality||'Remote',
-    submitted: false
-  };
-  await ess.from("daily_drafts").upsert(body, { onConflict: "client_id,staff_id,week_start,day_index" });
-}
-
-/* ===== Official insert (with safe Activities handling) ===== */
-async function insertDailyEntry(payload){
-  // Prepare activities safely
-  const raw = (payload.activities || '').trim();
-  const acts = raw ? [raw] : null;
-
-  const base = {
-    client_id: CLIENT_ID.value,
-    staff_id:  STAFF_ID.value,
-    service_date: payload.date,
-    start_time: payload.start_time || null,
-    end_time:   payload.end_time   || null,
-    modality:   payload.modality   || 'Remote',
-    service_notes: payload.notes || null
-  };
-
-  // 1) Try with activities (if provided)
-  let { data, error } = await ess.from("daily_entries").insert({ ...base, activities: acts }).select();
-
-  // 2) If the DB check constraint rejects it, retry with activities=null
-  if (error && String(error.message||'').includes('activities_allowed')) {
-    ({ data, error } = await ess.from("daily_entries").insert({ ...base, activities: null }).select());
+      .eq("client_id", CLIENT_ID.value)
+      .eq("staff_id", STAFF_ID.value)
+      .eq("week_start", ymd(current))
+      .eq("day_index", i)
+      .maybeSingle();
+    return data || null;
   }
 
-  if (error) throw error;
-  return data;
-}
-
-/* ===== UI ===== */
-function markDots(){
-  for(let i=0;i<7;i++){
-    const dot = document.getElementById(`w_dot${i}`);
-    const has = localStorage.getItem(dayKey(current,i));
-    if(dot) dot.style.background = has ? '#22c55e' : '#e5e7eb';
+  async function upsertDraft(i, payload) {
+    if (!STAFF_ID.value) return;
+    const body = {
+      client_id: CLIENT_ID.value,
+      staff_id: STAFF_ID.value,
+      week_start: ymd(current),
+      day_index: i,
+      date: payload.date,
+      hours: payload.hours !== "" ? Number(payload.hours) : null,
+      activities: payload.activities || null,
+      notes: payload.notes || null,
+      start_time: payload.start_time || null,
+      end_time: payload.end_time || null,
+      modality: payload.modality || "Remote",
+      submitted: false,
+    };
+    await ess.from("daily_drafts").upsert(body, { onConflict: "client_id,staff_id,week_start,day_index" });
   }
-}
-function renderWeek(){
-  const start=new Date(current), end=addDays(start,6);
-  w_startTxt.textContent = fmt(start);
-  w_endTxt.textContent   = fmt(end);
-  w_range.textContent=`Mon ${start.getDate()} — Sun ${end.getDate()}`;
 
-  const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  w_days.innerHTML='';
-  for(let i=0;i<7;i++){
-    const d=addDays(start,i);
-    const btn=document.createElement('button');
-    btn.type='button';
-    btn.style.cssText='position:relative;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;cursor:pointer;width:100%;text-align:left;';
-    btn.innerHTML=`
-      <div style="font-size:12px;color:#6b7280;">${names[i]}</div>
-      <div style="font-size:16px;font-weight:800;color:#0f172a;">${d.getDate()}</div>
-      <div id="w_dot${i}" style="position:absolute;right:10px;top:10px;width:8px;height:8px;border-radius:999px;background:#e5e7eb;"></div>
-    `;
-    btn.addEventListener('click',()=>openDay(i));
-    w_days.appendChild(btn);
+  /* ===== Official Insert (safe activities handling) ===== */
+  async function insertDailyEntry(payload) {
+    const raw = (payload.activities || "").trim();
+    const acts = raw ? [raw] : null;
+
+    const base = {
+      client_id: CLIENT_ID.value,
+      staff_id: STAFF_ID.value,
+      service_date: payload.date,
+      start_time: payload.start_time || null,
+      end_time: payload.end_time || null,
+      modality: payload.modality || "Remote",
+      service_notes: payload.notes || null,
+    };
+
+    let { data, error } = await ess.from("daily_entries").insert({ ...base, activities: acts }).select();
+    if (error && String(error.message || "").includes("activities_allowed")) {
+      console.warn("Activities not accepted — retrying with null.");
+      ({ data, error } = await ess.from("daily_entries").insert({ ...base, activities: null }).select());
+    }
+    if (error) throw error;
+    return data;
   }
-  markDots();
-  const today=new Date(); const inRange=+today>=+start && +today<=+end;
-  openDay(inRange ? (today.getDay()===0?6:today.getDay()-1) : 0);
-}
-async function openDay(i){
-  activeIndex=i; clearErr();
-  [...w_days.children].forEach((el,idx)=>{ el.style.outline=(idx===i)?'2px solid #0ea5e9':'none'; });
-  const d=addDays(current,i);
-  w_panelDate.textContent=`${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} — ${fmt(d)}`;
 
-  const srv=await fetchDraft(i);
-  if(srv){
-    w_hours.value = srv.hours ?? '';
-    w_acts.value  = srv.activities ?? '';
-    w_notes.value = srv.notes ?? '';
-    w_start.value = srv.start_time ?? '';
-    w_end.value   = srv.end_time ?? '';
-    w_modality.value = srv.modality ?? 'Remote';
-  }else{
-    const raw=localStorage.getItem(dayKey(current,i));
-    if(raw){
-      try{const obj=JSON.parse(raw);
-        w_hours.value=obj.hours ?? '';
-        w_acts.value =obj.activities ?? '';
-        w_notes.value=obj.notes ?? '';
-        w_start.value=obj.start_time ?? '';
-        w_end.value  =obj.end_time ?? '';
-        w_modality.value=obj.modality ?? 'Remote';
-      }catch{ w_hours.value=w_acts.value=w_notes.value=w_start.value=w_end.value=''; w_modality.value='Remote'; }
-    }else{
-      w_hours.value=w_acts.value=w_notes.value=w_start.value=w_end.value=''; w_modality.value='Remote';
+  /* ===== UI ===== */
+  function markDots() {
+    for (let i = 0; i < 7; i++) {
+      const dot = document.getElementById(`w_dot${i}`);
+      const has = localStorage.getItem(dayKey(current, i));
+      if (dot) dot.style.background = has ? "#22c55e" : "#e5e7eb";
     }
   }
-  w_panel.style.display='block';
-}
 
-/* ===== Actions ===== */
-async function saveDay(){
-  if(activeIndex==null) return;
-  if(!STAFF_ID.value){ toast('Select Staff first'); return; }
-  const payload = {
-    date: ymd(addDays(current,activeIndex)),
-    hours: (w_hours.value||''),
-    activities: (w_acts.value||''),
-    notes: (w_notes.value||''),
-    start_time: (w_start.value||''),
-    end_time: (w_end.value||''),
-    modality: (w_modality.value||'Remote')
-  };
-  localStorage.setItem(dayKey(current,activeIndex), JSON.stringify(payload));
-  markDots();
-  await upsertDraft(activeIndex, payload);
-  toast('Day saved (draft) ✓');
-}
-function clearDay(){
-  if(activeIndex==null) return;
-  clearErr();
-  localStorage.removeItem(dayKey(current,activeIndex));
-  w_hours.value=w_acts.value=w_notes.value=w_start.value=w_end.value='';
-  w_modality.value='Remote'; markDots(); toast('Day cleared locally.');
-}
-async function submitDay(){
-  if(activeIndex==null) return;
-  if(!STAFF_ID.value){ toast('Select Staff first'); return; }
-  clearErr();
-  const payload = {
-    date: ymd(addDays(current,activeIndex)),
-    hours: (w_hours.value||''),
-    activities: (w_acts.value||''),
-    notes: (w_notes.value||''),
-    start_time: (w_start.value||''),
-    end_time: (w_end.value||''),
-    modality: (w_modality.value||'Remote')
-  };
-  try{
-    const data = await insertDailyEntry(payload);  // official record (with safe fallback)
-    await upsertDraft(activeIndex, payload);       // keep draft in sync
-    localStorage.setItem(dayKey(current,activeIndex), JSON.stringify(payload));
+  function renderWeek() {
+    const start = new Date(current),
+      end = addDays(start, 6);
+    w_startTxt.textContent = fmt(start);
+    w_endTxt.textContent = fmt(end);
+    w_range.textContent = `Mon ${start.getDate()} — Sun ${end.getDate()}`;
+
+    const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    w_days.innerHTML = "";
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(start, i);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.style.cssText =
+        "position:relative;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;cursor:pointer;width:100%;text-align:left;";
+      btn.innerHTML = `
+        <div style="font-size:12px;color:#6b7280;">${names[i]}</div>
+        <div style="font-size:16px;font-weight:800;color:#0f172a;">${d.getDate()}</div>
+        <div id="w_dot${i}" style="position:absolute;right:10px;top:10px;width:8px;height:8px;border-radius:999px;background:#e5e7eb;"></div>
+      `;
+      btn.addEventListener("click", () => openDay(i));
+      w_days.appendChild(btn);
+    }
     markDots();
-    toast('Day submitted (official) ✅');
-    console.log('Inserted:', data);
-  }catch(e){
-    console.error('Submit error:', e);
-    showErr(`Submit failed: ${e?.message || e || 'Unknown error'}`);
-    toast('Submit failed ❌');
+    const today = new Date();
+    const inRange = +today >= +start && +today <= +end;
+    openDay(inRange ? (today.getDay() === 0 ? 6 : today.getDay() - 1) : 0);
   }
-}
 
-function shiftWeek(delta){ current=addDays(current,7*delta); renderWeek(); }
+  async function openDay(i) {
+    activeIndex = i;
+    clearErr();
+    [...w_days.children].forEach((el, idx) => {
+      el.style.outline = idx === i ? "2px solid #0ea5e9" : "none";
+    });
+    const d = addDays(current, i);
+    w_panelDate.textContent = `${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][i]} — ${fmt(d)}`;
 
-$("w_prevWeek").addEventListener('click',()=>shiftWeek(-1));
-$("w_nextWeek").addEventListener('click',()=>shiftWeek(1));
-w_saveDay.addEventListener('click',saveDay);
-w_clearDay.addEventListener('click',clearDay);
-w_submitDay.addEventListener('click',submitDay);
+    const srv = await fetchDraft(i);
+    const fill = (obj) => {
+      w_hours.value = obj.hours ?? "";
+      w_acts.value = obj.activities ?? "";
+      w_notes.value = obj.notes ?? "";
+      w_start.value = obj.start_time ?? "";
+      w_end.value = obj.end_time ?? "";
+      w_modality.value = obj.modality ?? "Remote";
+    };
 
-renderWeek();
+    if (srv) fill(srv);
+    else {
+      const raw = localStorage.getItem(dayKey(current, i));
+      if (raw) {
+        try {
+          fill(JSON.parse(raw));
+        } catch {
+          fill({});
+        }
+      } else fill({});
+    }
+    w_panel.style.display = "block";
+  }
+
+  /* ===== Actions ===== */
+  async function saveDay() {
+    if (activeIndex == null) return;
+    if (!STAFF_ID.value) {
+      toast("Select Staff first");
+      return;
+    }
+    const payload = {
+      date: ymd(addDays(current, activeIndex)),
+      hours: w_hours.value || "",
+      activities: w_acts.value || "",
+      notes: w_notes.value || "",
+      start_time: w_start.value || "",
+      end_time: w_end.value || "",
+      modality: w_modality.value || "Remote",
+    };
+    localStorage.setItem(dayKey(current, activeIndex), JSON.stringify(payload));
+    markDots();
+    await upsertDraft(activeIndex, payload);
+    toast("Day saved (draft) ✓");
+  }
+
+  function clearDay() {
+    if (activeIndex == null) return;
+    clearErr();
+    localStorage.removeItem(dayKey(current, activeIndex));
+    w_hours.value = w_acts.value = w_notes.value = w_start.value = w_end.value = "";
+    w_modality.value = "Remote";
+    markDots();
+    toast("Day cleared locally.");
+  }
+
+  async function submitDay() {
+    if (activeIndex == null) return;
+    if (!STAFF_ID.value) {
+      toast("Select Staff first");
+      return;
+    }
+    clearErr();
+    const payload = {
+      date: ymd(addDays(current, activeIndex)),
+      hours: w_hours.value || "",
+      activities: w_acts.value || "",
+      notes: w_notes.value || "",
+      start_time: w_start.value || "",
+      end_time: w_end.value || "",
+      modality: w_modality.value || "Remote",
+    };
+    try {
+      const data = await insertDailyEntry(payload);
+      await upsertDraft(activeIndex, payload);
+      localStorage.setItem(dayKey(current, activeIndex), JSON.stringify(payload));
+      markDots();
+      toast("Day submitted (official) ✅");
+      console.log("Inserted:", data);
+    } catch (e) {
+      console.error("Submit error:", e);
+      showErr(`Submit failed: ${e?.message || e}`);
+      toast("Submit failed ❌");
+    }
+  }
+
+  function shiftWeek(delta) {
+    current = addDays(current, 7 * delta);
+    renderWeek();
+  }
+
+  w_prevWeek?.addEventListener("click", () => shiftWeek(-1));
+  w_nextWeek?.addEventListener("click", () => shiftWeek(1));
+  w_saveDay?.addEventListener("click", saveDay);
+  w_clearDay?.addEventListener("click", clearDay);
+  w_submitDay?.addEventListener("click", submitDay);
+
+  renderWeek();
+});
 </script>
