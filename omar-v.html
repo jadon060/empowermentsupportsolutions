@@ -1,15 +1,17 @@
-<!-- ========== ESS • Weekly Charting (Drafts Only, Safe to Add) + Daily Service Entry (Live) ========== -->
+<!-- ========== ESS • Weekly Charting (Hybrid Drafts: Server + Local) + Daily Service Entry (Live) ========== -->
 
-<!-- ===== Weekly Chart (NEW) ===== -->
+<!-- ===== Weekly Chart (HYBRID DRAFTS) ===== -->
 <section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
     <h2 style="margin:0;">📅 Weekly Chart (Mon–Sun)</h2>
-    <button id="w_submitWeek" disabled title="Enabled in Step 2"
+    <button id="w_submitWeek" disabled title="Enabled in Step 2b"
             style="padding:10px 14px;border-radius:10px;border:1px solid #2c3e50;background:#2c3e50;color:#fff;cursor:not-allowed;opacity:.6;">
       Submit Weekly Report
     </button>
   </div>
-  <p style="margin:.25rem 0 1rem 0;color:#6b7280;">Click a day, enter notes/hours, and <strong>Save Day</strong>. Drafts store only in this browser for now.</p>
+  <p style="margin:.25rem 0 1rem 0;color:#6b7280;">
+    Click a day, enter notes/hours, and <strong>Save Day</strong>. Drafts save to <strong>Supabase + local</strong> for safety.
+  </p>
 
   <!-- Week bar -->
   <div style="display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;padding:10px;border-radius:10px;background:#f8fafc;">
@@ -23,7 +25,7 @@
             style="width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">▶</button>
     <div style="flex:1;"></div>
     <span style="font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a;">
-      Drafts saved locally
+      Drafts: server + local
     </span>
   </div>
 
@@ -58,18 +60,21 @@
       <button id="w_saveDay"  style="padding:10px 14px;border-radius:10px;border:1px solid #2c3e50;background:#2c3e50;color:#fff;cursor:pointer;">Save Day</button>
     </div>
 
-    <div style="font-size:12px;color:#6b7280;margin-top:8px;">✅ Saved drafts live only in this browser (localStorage). In Step 2 we’ll wire Supabase + weekly submit.</div>
+    <div style="font-size:12px;color:#6b7280;margin-top:8px;">Drafts load from <strong>server first</strong>, with local fallback.</div>
   </div>
 
-  <!-- Local toast -->
+  <!-- Local toast (created by script if missing) -->
   <div id="w_toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s;"></div>
 </section>
 
+<!-- ===== Weekly Chart Script (SERVER-FIRST LOAD + UPSERT on SAVE) ===== -->
 <script>
 (() => {
-  // ===== CONFIG (use your existing IDs; this does not hit DB yet) =====
-  const CLIENT_ID = 'CLIENT_UUID_OMAR';      // for keying drafts
-  const STAFF_ID  = 'STAFF_UUID_PLACEHOLDER';// temp; weekly isn’t submitting yet
+  // ===== Read real IDs from existing form so drafts belong to the right client/staff =====
+  const CLIENT_ID_INPUT = document.getElementById('client_id');
+  const STAFF_SELECT    = document.getElementById('staff_id');
+  const getClientId = () => (CLIENT_ID_INPUT?.value || 'CLIENT_UUID_OMAR');
+  const getStaffId  = () => (STAFF_SELECT?.value || 'STAFF_UUID_PLACEHOLDER');
 
   // ===== Helpers =====
   const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(d);
@@ -84,31 +89,74 @@
   }
   function addDays(d,n){ const nd=new Date(d); nd.setDate(nd.getDate()+n); return nd; }
 
-  const w_days = document.getElementById('w_days');
-  const w_range= document.getElementById('w_range');
+  // Toast
+  const w_toast = document.getElementById('w_toast') || (() => {
+    const el=document.createElement('div'); el.id='w_toast';
+    el.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s;';
+    document.body.appendChild(el); return el;
+  })();
+  function toast(msg){ w_toast.textContent=msg; w_toast.style.opacity='1'; setTimeout(()=>w_toast.style.opacity='0',1400); }
+
+  // DOM
+  const w_days     = document.getElementById('w_days');
+  const w_range    = document.getElementById('w_range');
   const w_startTxt = document.getElementById('w_startTxt');
-  const w_endTxt = document.getElementById('w_endTxt');
+  const w_endTxt   = document.getElementById('w_endTxt');
   const w_prevWeek = document.getElementById('w_prevWeek');
   const w_nextWeek = document.getElementById('w_nextWeek');
-  const w_panel = document.getElementById('w_panel');
-  const w_panelDate = document.getElementById('w_panelDate');
-  const w_hours = document.getElementById('w_hours');
-  const w_acts  = document.getElementById('w_acts');
-  const w_notes = document.getElementById('w_notes');
-  const w_saveDay = document.getElementById('w_saveDay');
-  const w_clearDay= document.getElementById('w_clearDay');
-  const w_toast = document.getElementById('w_toast');
+  const w_panel    = document.getElementById('w_panel');
+  const w_panelDate= document.getElementById('w_panelDate');
+  const w_hours    = document.getElementById('w_hours');
+  const w_acts     = document.getElementById('w_acts');
+  const w_notes    = document.getElementById('w_notes');
+  const w_saveDay  = document.getElementById('w_saveDay');
+  const w_clearDay = document.getElementById('w_clearDay');
 
+  // State
   let current = startOfWeekMonday(new Date());
   let activeIndex = null;
 
-  const weekKey = (wk)=>`essWeek_${CLIENT_ID}_${STAFF_ID}_${ymd(wk)}`;
+  // Local cache keys
+  const weekKey = (wk)=>`essWeek_${getClientId()}_${getStaffId()}_${ymd(wk)}`;
   const dayKey  = (wk,i)=>`${weekKey(wk)}_d${i}`; // 0..6
 
-  function toast(msg){
-    w_toast.textContent = msg;
-    w_toast.style.opacity='1';
-    setTimeout(()=>w_toast.style.opacity='0', 1400);
+  // Supabase helpers (uses global `ess` that the page creates below)
+  async function fetchDraftFromServer(i){
+    try{
+      if (typeof ess === 'undefined' || !getStaffId() || getStaffId()==='') return null;
+      const { data, error } = await ess
+        .from('daily_drafts')
+        .select('hours, activities, notes')
+        .eq('client_id', getClientId())
+        .eq('staff_id',  getStaffId())
+        .eq('week_start', ymd(current))
+        .eq('day_index', i)
+        .maybeSingle();
+      if (error) return null;
+      return data || null;
+    }catch{ return null; }
+  }
+
+  async function upsertDraftToServer(i, payload){
+    try{
+      if (typeof ess === 'undefined' || !getStaffId() || getStaffId()==='') return;
+      const body = {
+        client_id:  getClientId(),
+        staff_id:   getStaffId(),
+        week_start: ymd(current),
+        day_index:  i,
+        date:       payload.date,
+        hours:      payload.hours !== '' ? Number(payload.hours) : null,
+        activities: payload.activities || null,
+        notes:      payload.notes || null,
+        submitted:  false
+      };
+      await ess
+        .from('daily_drafts')
+        .upsert(body, { onConflict: 'client_id,staff_id,week_start,day_index' });
+    }catch(e){
+      console.warn('Upsert draft failed (local cache still intact):', e);
+    }
   }
 
   function markDots(){
@@ -121,10 +169,10 @@
 
   function renderWeek(){
     const start = new Date(current);
-    const end = addDays(start,6);
+    const end   = addDays(start,6);
     w_startTxt.textContent = fmt(start);
     w_endTxt.textContent   = fmt(end);
-    w_range.textContent = `Mon ${start.getDate()} — Sun ${end.getDate()}`;
+    w_range.textContent    = `Mon ${start.getDate()} — Sun ${end.getDate()}`;
 
     const names = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
     w_days.innerHTML = '';
@@ -149,46 +197,59 @@
     openDay(inRange ? (today.getDay()===0?6:today.getDay()-1) : 0);
   }
 
-  function openDay(i){
+  // Open Day: server-first, fallback to local
+  async function openDay(i){
     activeIndex = i;
-    // highlight card
     [...w_days.children].forEach((el,idx)=>{
       el.style.outline = (idx===i) ? '2px solid #0ea5e9' : 'none';
     });
     const d = addDays(current,i);
     w_panelDate.textContent = `${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} — ${fmt(d)}`;
 
-    // load draft
-    const raw = localStorage.getItem(dayKey(current,i));
-    if(raw){
-      try{
-        const obj = JSON.parse(raw);
-        w_hours.value = obj.hours ?? '';
-        w_acts.value  = obj.activities ?? '';
-        w_notes.value = obj.notes ?? '';
-      }catch{
+    const fromServer = await fetchDraftFromServer(i);
+    if (fromServer) {
+      w_hours.value = (fromServer.hours ?? '') === null ? '' : fromServer.hours;
+      w_acts.value  = fromServer.activities ?? '';
+      w_notes.value = fromServer.notes ?? '';
+    } else {
+      const raw = localStorage.getItem(dayKey(current,i));
+      if(raw){
+        try{
+          const obj = JSON.parse(raw);
+          w_hours.value = obj.hours ?? '';
+          w_acts.value  = obj.activities ?? '';
+          w_notes.value = obj.notes ?? '';
+        }catch{ w_hours.value = w_acts.value = w_notes.value = ''; }
+      } else {
         w_hours.value = w_acts.value = w_notes.value = '';
       }
-    }else{
-      w_hours.value = w_acts.value = w_notes.value = '';
     }
     w_panel.style.display = 'block';
   }
 
-  function saveDay(){
+  // Save Day: local + server UPSERT
+  async function saveDay(){
     if(activeIndex==null) return;
+    if(!getStaffId() || getStaffId()===''){ toast('Select Staff first to save ✓'); return; }
+
     const payload = {
-      client_id: CLIENT_ID,
-      staff_id:  STAFF_ID,
+      client_id:  getClientId(),
+      staff_id:   getStaffId(),
       week_start: ymd(current),
-      day_index: activeIndex,
-      date: ymd(addDays(current,activeIndex)),
-      hours: (w_hours.value||''),
+      day_index:  activeIndex,
+      date:       ymd(addDays(current,activeIndex)),
+      hours:      (w_hours.value||''),
       activities: (w_acts.value||''),
-      notes: (w_notes.value||'')
+      notes:      (w_notes.value||'')
     };
+
+    // 1) Local cache
     localStorage.setItem(dayKey(current,activeIndex), JSON.stringify(payload));
     markDots();
+
+    // 2) Server UPSERT
+    await upsertDraftToServer(activeIndex, payload);
+
     toast('Day saved ✓');
   }
 
@@ -197,7 +258,7 @@
     localStorage.removeItem(dayKey(current,activeIndex));
     w_hours.value = w_acts.value = w_notes.value = '';
     markDots();
-    toast('Day cleared');
+    toast('Day cleared (local only). Server copy remains until weekly submit.');
   }
 
   function shiftWeek(delta){
@@ -207,8 +268,8 @@
 
   w_prevWeek.addEventListener('click',()=>shiftWeek(-1));
   w_nextWeek.addEventListener('click',()=>shiftWeek(1));
-  w_saveDay.addEventListener('click',saveDay);
-  w_clearDay.addEventListener('click',clearDay);
+  w_saveDay.addEventListener('click',()=>saveDay());
+  w_clearDay.addEventListener('click',()=>clearDay());
 
   renderWeek();
 })();
@@ -280,7 +341,7 @@
   <pre id="debug" style="margin-top:1rem;background:#f9fafb;padding:12px;border-radius:8px;white-space:pre-wrap;"></pre>
 </section>
 
-<!-- Supabase client -->
+<!-- Supabase client (for daily form AND weekly drafts server write) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // -------- CONFIG (UNCHANGED) --------
