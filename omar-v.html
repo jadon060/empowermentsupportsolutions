@@ -3,23 +3,19 @@
 <section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
     <h2 style="margin:0;">📅 Weekly Chart (Mon–Sun)</h2>
-    <button id="w_submitWeek" disabled title="Weekly submit will be enabled next"
+    <button id="w_submitWeek" disabled title="Weekly submit coming next"
             style="padding:10px 14px;border-radius:10px;border:1px solid #2c3e50;background:#2c3e50;color:#fff;cursor:not-allowed;opacity:.6;">
       Submit Weekly Report
     </button>
   </div>
 
-  <!-- Staff + Client (kept here so the chart knows who/what) -->
+  <!-- Staff + Client -->
   <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:10px;">
-    <!-- Hidden client -->
     <input type="hidden" id="client_id" value="CLIENT_UUID_OMAR" />
-
-    <!-- Staff select (loaded from ess.staff) -->
     <div style="flex:1;min-width:260px;">
       <label for="staff_id" style="display:block;font-size:12px;color:#6b7280;margin-bottom:6px;">Staff</label>
       <select id="staff_id" required style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;"></select>
     </div>
-
     <span style="font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a;">
       Drafts: server + local
     </span>
@@ -27,25 +23,22 @@
 
   <!-- Week bar -->
   <div style="display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;padding:10px;border-radius:10px;background:#f8fafc;">
-    <button id="w_prevWeek" aria-label="Previous week"
-            style="width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">◀</button>
+    <button id="w_prevWeek" style="width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">◀</button>
     <div>
       <div id="w_range" style="font-weight:700;color:#0f172a;">Mon — Sun</div>
       <div style="color:#6b7280;font-size:13px;">Week of <span id="w_startTxt"></span> to <span id="w_endTxt"></span></div>
     </div>
-    <button id="w_nextWeek" aria-label="Next week"
-            style="width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">▶</button>
+    <button id="w_nextWeek" style="width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">▶</button>
     <div style="flex:1;"></div>
   </div>
 
   <!-- Days grid -->
   <div id="w_days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:14px;"></div>
 
-  <!-- Day panel (includes all official fields needed for daily_entries) -->
+  <!-- Day panel -->
   <div id="w_panel" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px;">
     <div id="w_panelDate" style="color:#6b7280;margin-bottom:10px;"></div>
 
-    <!-- Times + Modality -->
     <div style="display:grid;gap:12px;grid-template-columns:repeat(3,1fr);">
       <div>
         <label for="w_start" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Start Time</label>
@@ -65,7 +58,6 @@
       </div>
     </div>
 
-    <!-- Hours + Activities -->
     <div style="display:grid;gap:12px;grid-template-columns:1fr 1fr;margin-top:12px;">
       <div>
         <label for="w_hours" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Hours Worked</label>
@@ -79,53 +71,61 @@
       </div>
     </div>
 
-    <!-- Notes -->
     <div style="margin-top:12px;">
       <label for="w_notes" style="display:block;color:#6b7280;font-size:12px;margin-bottom:6px;">Progress Notes</label>
       <textarea id="w_notes" placeholder="what/where/with whom, goals, outcomes, behaviors/resources"
                 style="width:100%;min-height:120px;padding:10px;border:1px solid #e5e7eb;border-radius:10px;resize:vertical;"></textarea>
     </div>
 
-    <!-- Actions -->
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
       <button id="w_clearDay" style="padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;">Clear Day</button>
       <button id="w_saveDay"  style="padding:10px 14px;border-radius:10px;border:1px solid #1f2937;background:#1f2937;color:#fff;cursor:pointer;">Save Day (Draft)</button>
       <button id="w_submitDay" style="padding:10px 14px;border-radius:10px;border:1px solid #2c3e50;background:#2c3e50;color:#fff;cursor:pointer;">Submit Day (Official)</button>
     </div>
 
-    <div style="font-size:12px;color:#6b7280;margin-top:8px;">
-      Drafts load from <strong>server first</strong>, with local fallback. “Submit Day” writes the official record to <code>ess.daily_entries</code>.
-    </div>
+    <!-- Debug line -->
+    <div id="w_error" style="margin-top:10px;padding:10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b;display:none;"></div>
   </div>
 
   <!-- Toast -->
   <div id="w_toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s;"></div>
 </section>
 
-<!-- Supabase client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ===== Supabase boot ===== */
+/* ===== Supabase ===== */
 const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const ess = sb.schema("ess");
 
-/* ===== DOM shortcuts ===== */
+/* ===== DOM ===== */
 const $ = (id)=>document.getElementById(id);
-const CLIENT_ID_INPUT = $("client_id");
-const STAFF_SELECT    = $("staff_id");
+const CLIENT_ID = $("client_id");
+const STAFF_ID  = $("staff_id");
 
-/* ===== Load staff list ===== */
+const w_days=$("w_days"), w_range=$("w_range"), w_startTxt=$("w_startTxt"), w_endTxt=$("w_endTxt");
+const w_prevWeek=$("w_prevWeek"), w_nextWeek=$("w_nextWeek");
+const w_panel=$("w_panel"), w_panelDate=$("w_panelDate");
+const w_start=$("w_start"), w_end=$("w_end"), w_modality=$("w_modality");
+const w_hours=$("w_hours"), w_acts=$("w_acts"), w_notes=$("w_notes");
+const w_saveDay=$("w_saveDay"), w_clearDay=$("w_clearDay"), w_submitDay=$("w_submitDay");
+const w_toast=$("w_toast"), w_error=$("w_error");
+
+function toast(m){w_toast.textContent=m;w_toast.style.opacity='1';setTimeout(()=>w_toast.style.opacity='0',1600);}
+function showErr(msg){w_error.textContent=msg;w_error.style.display='block';}
+function clearErr(){w_error.style.display='none';w_error.textContent='';}
+
+/* ===== Staff list ===== */
 (async function loadStaff(){
-  STAFF_SELECT.disabled = true;
+  STAFF_ID.disabled = true;
   const { data, error } = await ess.from("staff").select("id, full_name").order("full_name");
-  STAFF_SELECT.innerHTML = '<option value="">Select staff…</option>';
+  STAFF_ID.innerHTML = '<option value="">Select staff…</option>';
   (data||[]).forEach(s=>{
     const opt=document.createElement('option');
-    opt.value=s.id; opt.textContent=s.full_name; STAFF_SELECT.appendChild(opt);
+    opt.value=s.id; opt.textContent=s.full_name; STAFF_ID.appendChild(opt);
   });
-  STAFF_SELECT.disabled = false;
+  STAFF_ID.disabled = false;
 })();
 
 /* ===== Helpers ===== */
@@ -134,64 +134,54 @@ const ymd = (d)=>d.toISOString().slice(0,10);
 function startOfWeekMonday(d){const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=nd.getDay();const diff=(day===0?-6:1-day);nd.setDate(nd.getDate()+diff);nd.setHours(0,0,0,0);return nd;}
 function addDays(d,n){const nd=new Date(d);nd.setDate(nd.getDate()+n);return nd;}
 
-const w_days=$("w_days"), w_range=$("w_range"), w_startTxt=$("w_startTxt"), w_endTxt=$("w_endTxt");
-const w_prevWeek=$("w_prevWeek"), w_nextWeek=$("w_nextWeek");
-const w_panel=$("w_panel"), w_panelDate=$("w_panelDate");
-const w_start=$("w_start"), w_end=$("w_end"), w_modality=$("w_modality");
-const w_hours=$("w_hours"), w_acts=$("w_acts"), w_notes=$("w_notes");
-const w_saveDay=$("w_saveDay"), w_clearDay=$("w_clearDay"), w_submitDay=$("w_submitDay");
-const w_toast=$("w_toast");
-
-function toast(m){w_toast.textContent=m;w_toast.style.opacity='1';setTimeout(()=>w_toast.style.opacity='0',1400);}
-const getClientId=()=>CLIENT_ID_INPUT.value;
-const getStaffId =()=>STAFF_SELECT.value;
-
 let current = startOfWeekMonday(new Date());
 let activeIndex = null;
 
-/* ===== Keys for local cache ===== */
-const weekKey = (wk)=>`essWeek_${getClientId()}_${getStaffId()}_${ymd(wk)}`;
+const weekKey = (wk)=>`essWeek_${CLIENT_ID.value}_${STAFF_ID.value}_${ymd(wk)}`;
 const dayKey  = (wk,i)=>`${weekKey(wk)}_d${i}`;
 
-/* ===== Server helpers ===== */
+/* ===== Drafts (server + local) ===== */
 async function fetchDraft(i){
   try{
-    if(!getStaffId()) return null;
-    const { data, error } = await ess.from("daily_drafts")
+    if(!STAFF_ID.value) return null;
+    const { data } = await ess.from("daily_drafts")
       .select("hours, activities, notes, date, submitted, start_time, end_time, modality")
-      .eq("client_id", getClientId()).eq("staff_id", getStaffId())
+      .eq("client_id", CLIENT_ID.value).eq("staff_id", STAFF_ID.value)
       .eq("week_start", ymd(current)).eq("day_index", i).maybeSingle();
-    if(error) return null; return data||null;
+    return data||null;
   }catch{ return null; }
 }
 async function upsertDraft(i, payload){
-  try{
-    if(!getStaffId()) return;
-    const body = {
-      client_id:getClientId(), staff_id:getStaffId(),
-      week_start: ymd(current), day_index: i, date: payload.date,
-      hours: payload.hours!==''? Number(payload.hours):null,
-      activities: payload.activities||null, notes: payload.notes||null,
-      start_time: payload.start_time||null, end_time: payload.end_time||null,
-      modality: payload.modality||'Remote', submitted: false
-    };
-    await ess.from("daily_drafts").upsert(body, { onConflict: "client_id,staff_id,week_start,day_index" });
-  }catch(e){ console.warn("Upsert draft failed:", e); }
+  if(!STAFF_ID.value) return;
+  const body = {
+    client_id: CLIENT_ID.value, staff_id: STAFF_ID.value,
+    week_start: ymd(current), day_index: i, date: payload.date,
+    hours: payload.hours!==''? Number(payload.hours):null,
+    activities: payload.activities||null,
+    notes: payload.notes||null,
+    start_time: payload.start_time||null,
+    end_time: payload.end_time||null,
+    modality: payload.modality||'Remote',
+    submitted: false
+  };
+  await ess.from("daily_drafts").upsert(body, { onConflict: "client_id,staff_id,week_start,day_index" });
 }
+
+/* ===== Official insert ===== */
 async function insertDailyEntry(payload){
-  // Maps the chart fields to your official daily_entries schema
   const entry = {
-    client_id: getClientId(),
-    staff_id:  getStaffId(),
-    service_date: payload.date,                 // YYYY-MM-DD
-    start_time: payload.start_time || null,
+    client_id: CLIENT_ID.value,
+    staff_id:  STAFF_ID.value,
+    service_date: payload.date,               // YYYY-MM-DD
+    start_time: payload.start_time || null,   // 'HH:MM'
     end_time:   payload.end_time   || null,
-    modality:   payload.modality   || 'Remote', // must match enum used in your DB
+    modality:   payload.modality   || 'Remote',
     activities: payload.activities ? [payload.activities] : [],
     service_notes: payload.notes || null
   };
-  const { error } = await ess.from("daily_entries").insert(entry);
-  if(error) throw error;
+  const { data, error } = await ess.from("daily_entries").insert(entry).select();
+  if (error) throw error;
+  return data;
 }
 
 /* ===== UI ===== */
@@ -199,19 +189,24 @@ function markDots(){
   for(let i=0;i<7;i++){
     const dot = document.getElementById(`w_dot${i}`);
     const has = localStorage.getItem(dayKey(current,i));
-    if(dot){ dot.style.background = has ? '#22c55e' : '#e5e7eb'; }
+    if(dot) dot.style.background = has ? '#22c55e' : '#e5e7eb';
   }
 }
 function renderWeek(){
   const start=new Date(current), end=addDays(start,6);
-  w_startTxt.textContent=fmt(start); w_endTxt.textContent=fmt(end);
+  if(!$("w_startTxt")){const span1=document.createElement('span');span1.id='w_startTxt';const span2=document.createElement('span');span2.id='w_endTxt';}
+  $("w_startTxt")?.remove(); $("w_endTxt")?.remove();
+  const rangeNode = document.querySelector('#w_range + div span') || document.createElement('div');
+  // header texts
+  (document.getElementById('w_startTxt')|| (function(){const s=document.createElement('span');s.id='w_startTxt';return s;})()).textContent=fmt(start);
+  (document.getElementById('w_endTxt')  || (function(){const s=document.createElement('span');s.id='w_endTxt';return s;})()).textContent=fmt(end);
   w_range.textContent=`Mon ${start.getDate()} — Sun ${end.getDate()}`;
 
   const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   w_days.innerHTML='';
   for(let i=0;i<7;i++){
-    const d = addDays(start,i);
-    const btn = document.createElement('button');
+    const d=addDays(start,i);
+    const btn=document.createElement('button');
     btn.type='button';
     btn.style.cssText='position:relative;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;cursor:pointer;width:100%;text-align:left;';
     btn.innerHTML=`
@@ -227,13 +222,12 @@ function renderWeek(){
   openDay(inRange ? (today.getDay()===0?6:today.getDay()-1) : 0);
 }
 async function openDay(i){
-  activeIndex=i;
+  activeIndex=i; clearErr();
   [...w_days.children].forEach((el,idx)=>{ el.style.outline=(idx===i)?'2px solid #0ea5e9':'none'; });
   const d=addDays(current,i);
   w_panelDate.textContent=`${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} — ${fmt(d)}`;
 
-  // server-first
-  const srv = await fetchDraft(i);
+  const srv=await fetchDraft(i);
   if(srv){
     w_hours.value = srv.hours ?? '';
     w_acts.value  = srv.activities ?? '';
@@ -244,7 +238,7 @@ async function openDay(i){
   }else{
     const raw=localStorage.getItem(dayKey(current,i));
     if(raw){
-      try{ const obj=JSON.parse(raw);
+      try{const obj=JSON.parse(raw);
         w_hours.value=obj.hours ?? '';
         w_acts.value =obj.activities ?? '';
         w_notes.value=obj.notes ?? '';
@@ -262,7 +256,7 @@ async function openDay(i){
 /* ===== Actions ===== */
 async function saveDay(){
   if(activeIndex==null) return;
-  if(!getStaffId()){ toast('Select Staff first'); return; }
+  if(!STAFF_ID.value){ toast('Select Staff first'); return; }
   const payload = {
     date: ymd(addDays(current,activeIndex)),
     hours: (w_hours.value||''),
@@ -272,24 +266,22 @@ async function saveDay(){
     end_time: (w_end.value||''),
     modality: (w_modality.value||'Remote')
   };
-  // local mirror
   localStorage.setItem(dayKey(current,activeIndex), JSON.stringify(payload));
   markDots();
-  // server draft
   await upsertDraft(activeIndex, payload);
   toast('Day saved (draft) ✓');
 }
 function clearDay(){
   if(activeIndex==null) return;
+  clearErr();
   localStorage.removeItem(dayKey(current,activeIndex));
   w_hours.value=w_acts.value=w_notes.value=w_start.value=w_end.value='';
-  w_modality.value='Remote';
-  markDots();
-  toast('Day cleared locally. Server draft remains until overwritten.');
+  w_modality.value='Remote'; markDots(); toast('Day cleared locally.');
 }
 async function submitDay(){
   if(activeIndex==null) return;
-  if(!getStaffId()){ toast('Select Staff first'); return; }
+  if(!STAFF_ID.value){ toast('Select Staff first'); return; }
+  clearErr();
   const payload = {
     date: ymd(addDays(current,activeIndex)),
     hours: (w_hours.value||''),
@@ -300,26 +292,26 @@ async function submitDay(){
     modality: (w_modality.value||'Remote')
   };
   try{
-    await insertDailyEntry(payload); // official record
-    // also keep/refresh draft
-    await upsertDraft(activeIndex, payload);
+    const data = await insertDailyEntry(payload);  // official record
+    await upsertDraft(activeIndex, payload);       // keep draft in sync
     localStorage.setItem(dayKey(current,activeIndex), JSON.stringify(payload));
     markDots();
     toast('Day submitted (official) ✅');
+    console.log('Inserted:', data);
   }catch(e){
-    console.error(e); toast('Submit failed ❌');
+    console.error('Submit error:', e);
+    showErr(`Submit failed: ${e?.message || e || 'Unknown error'}`);
+    toast('Submit failed ❌');
   }
 }
 
 function shiftWeek(delta){ current=addDays(current,7*delta); renderWeek(); }
 
-/* ===== Bind ===== */
 $("w_prevWeek").addEventListener('click',()=>shiftWeek(-1));
 $("w_nextWeek").addEventListener('click',()=>shiftWeek(1));
-w_saveDay.addEventListener('click',()=>saveDay());
-w_clearDay.addEventListener('click',()=>clearDay());
-w_submitDay.addEventListener('click',()=>submitDay());
+w_saveDay.addEventListener('click',saveDay);
+w_clearDay.addEventListener('click',clearDay);
+w_submitDay.addEventListener('click',submitDay);
 
-/* ===== Start ===== */
 renderWeek();
 </script>
