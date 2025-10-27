@@ -11,7 +11,7 @@
 
   <!-- Staff + Client -->
   <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:10px;">
-    <input type="hidden" id="client_id" value="CLIENT_UUID_OMAR" />
+    <input type="hidden" id="client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" />
     <div style="flex:1;min-width:260px;">
       <label for="staff_id" style="display:block;font-size:12px;color:#6b7280;margin-bottom:6px;">Staff</label>
       <select id="staff_id" required style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px;"></select>
@@ -194,12 +194,8 @@ function markDots(){
 }
 function renderWeek(){
   const start=new Date(current), end=addDays(start,6);
-  if(!$("w_startTxt")){const span1=document.createElement('span');span1.id='w_startTxt';const span2=document.createElement('span');span2.id='w_endTxt';}
-  $("w_startTxt")?.remove(); $("w_endTxt")?.remove();
-  const rangeNode = document.querySelector('#w_range + div span') || document.createElement('div');
-  // header texts
-  (document.getElementById('w_startTxt')|| (function(){const s=document.createElement('span');s.id='w_startTxt';return s;})()).textContent=fmt(start);
-  (document.getElementById('w_endTxt')  || (function(){const s=document.createElement('span');s.id='w_endTxt';return s;})()).textContent=fmt(end);
+  w_startTxt.textContent = fmt(start);
+  w_endTxt.textContent   = fmt(end);
   w_range.textContent=`Mon ${start.getDate()} — Sun ${end.getDate()}`;
 
   const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
