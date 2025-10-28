@@ -7,6 +7,8 @@
   <style>
     /* optional: smooth font & base reset */
     html,body{margin:0;padding:0;background:#f7f7fb;color:#0f172a}
+    /* NEW: prevent overflow from padding/borders */
+    *,*::before,*::after{box-sizing:border-box}
 
     /* Fix overlapping on narrow screens */
     .row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
@@ -76,7 +78,7 @@
   </div>
 
   <!-- Days grid -->
-  <div id="w_days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:14px;"></div>
+  <div id="w_days" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:14px;"></div>
 
   <!-- Day panel -->
   <div id="w_panel" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px;">
