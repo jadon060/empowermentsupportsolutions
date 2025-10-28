@@ -1,157 +1,3 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>ESS • Weekly Chart (Mon–Sun)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    /* optional: smooth font & base reset */
-    html,body{margin:0;padding:0;background:#f7f7fb;color:#0f172a}
-    /* NEW: prevent overflow from padding/borders */
-    *,*::before,*::after{box-sizing:border-box}
-
-    /* Fix overlapping on narrow screens */
-    .row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
-    .row > *{min-width:240px;flex:1}
-    .weekbar{display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;padding:10px;border-radius:10px;background:#f8fafc;flex-wrap:wrap}
-    .weekbar > *{flex:0 0 auto}
-    .weekbar .spacer{flex:1 1 auto;min-width:60px}
-
-    /* Buttons */
-    .btn{padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
-    .btn--primary{border-color:#2c3e50;background:#2c3e50;color:#fff}
-    .btn--dark{border-color:#1f2937;background:#1f2937;color:#fff}
-    .btn--icon{width:36px;height:36px}
-
-    /* Day buttons */
-    .daybtn{position:relative;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;cursor:pointer;width:100%;text-align:left}
-    .dot{position:absolute;right:10px;top:10px;width:8px;height:8px;border-radius:999px;background:#e5e7eb}
-
-    /* Inputs */
-    .input, .select, .textarea{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px}
-    .textarea{min-height:120px;resize:vertical}
-
-    /* Labels */
-    .label{display:block;color:#6b7280;font-size:12px;margin-bottom:6px}
-
-    /* Pills */
-    .pill{font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a}
-
-    /* Toast + error */
-    #w_toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s}
-    #w_error{display:none;margin-top:12px;padding:10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b}
-  </style>
-</head>
-<body>
-
-<!-- ========== ESS • Single Weekly Chart (Drafts + Official Submissions) ========== -->
-<section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
-    <h2 style="margin:0;">📅 Weekly Chart (Mon–Sun)</h2>
-    <button id="w_submitWeek" disabled title="Weekly submit will be enabled next"
-            class="btn btn--primary" style="opacity:.6;cursor:not-allowed;">
-      Submit Weekly Report
-    </button>
-  </div>
-
-  <!-- Staff + Client -->
-  <div class="row" style="margin-bottom:10px;">
-    <!-- REAL Omar UUID to prevent uuid errors -->
-    <input type="hidden" id="client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" />
-    <div>
-      <label for="staff_id" class="label">Staff (type your name)</label>
-      <!-- switched from <select> to free-text input -->
-      <input id="staff_id" type="text" class="input" placeholder="e.g., Jane Smith" required />
-    </div>
-    <span class="pill">Drafts: server + local</span>
-  </div>
-
-  <!-- Week bar -->
-  <div class="weekbar">
-    <button id="w_prevWeek" aria-label="Previous week" class="btn btn--icon">◀</button>
-    <div>
-      <div id="w_range" style="font-weight:700;color:#0f172a;">Mon — Sun</div>
-      <div style="color:#6b7280;font-size:13px;">Week of <span id="w_startTxt"></span> to <span id="w_endTxt"></span></div>
-    </div>
-    <button id="w_nextWeek" aria-label="Next week" class="btn btn--icon">▶</button>
-    <div class="spacer"></div>
-  </div>
-
-  <!-- Days grid -->
-  <div id="w_days" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:14px;"></div>
-
-  <!-- Day panel -->
-  <div id="w_panel" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px;">
-    <div id="w_panelDate" style="color:#6b7280;margin-bottom:10px;"></div>
-
-    <!-- Times + Modality -->
-    <div class="row">
-      <div>
-        <label for="w_start" class="label">Start Time</label>
-        <input id="w_start" type="time" class="input">
-      </div>
-      <div>
-        <label for="w_end" class="label">End Time</label>
-        <input id="w_end" type="time" class="input">
-      </div>
-      <div>
-        <label for="w_modality" class="label">Modality / Location</label>
-        <select id="w_modality" class="select">
-          <option value="Home">Home</option>
-          <option value="Community">Community</option>
-          <option value="Remote" selected>Remote</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Hours + Domain -->
-    <div class="row" style="margin-top:12px;">
-      <div>
-        <label for="w_hours" class="label">Hours Worked</label>
-        <input id="w_hours" type="number" min="0" step="0.25" placeholder="e.g., 3.5" class="input">
-      </div>
-      <div>
-        <label for="w_domain" class="label">Domain (service codes worked on)</label>
-        <input id="w_domain" type="text" placeholder="e.g., Money Mgmt, Hygiene, Safety…" class="input">
-      </div>
-    </div>
-
-    <!-- Progress Notes -->
-    <div style="margin-top:12px;">
-      <label for="w_notes" class="label">Progress Notes</label>
-      <textarea id="w_notes" class="textarea" placeholder="what/where/with whom, goals"></textarea>
-    </div>
-
-    <!-- Observation -->
-    <div style="margin-top:12px;">
-      <label for="w_obs" class="label">Observation</label>
-      <textarea id="w_obs" class="textarea" placeholder="reaction/response to today's services"></textarea>
-    </div>
-
-    <!-- Action Plan -->
-    <div style="margin-top:12px;">
-      <label for="w_plan" class="label">Action Plan</label>
-      <textarea id="w_plan" class="textarea" placeholder="next steps to work on the service codes"></textarea>
-    </div>
-
-    <!-- Actions -->
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
-      <button id="w_clearDay" class="btn">Clear Day</button>
-      <button id="w_saveDay"  class="btn btn--dark">Save Day (Draft)</button>
-      <button id="w_submitDay" class="btn btn--primary">Submit Day (Official)</button>
-    </div>
-
-    <!-- (removed the helper sentence per your request) -->
-  </div>
-
-  <!-- Error banner (hidden by default) -->
-  <div id="w_error"></div>
-
-  <!-- Toast -->
-  <div id="w_toast"></div>
-</section>
-
-<!-- Supabase client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -190,28 +36,41 @@ document.addEventListener('DOMContentLoaded', () => {
   function startOfWeekMonday(d){const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=nd.getDay();const diff=(day===0?-6:1-day);nd.setDate(nd.getDate()+diff);nd.setHours(0,0,0,0);return nd;}
   function addDays(d,n){const nd=new Date(d);nd.setDate(nd.getDate()+n);return nd;}
 
-  const getClientId=()=>CLIENT_ID_INPUT.value;
-  const getStaffId =()=> (STAFF_INPUT.value || "").trim(); // now free-text
+  const getClientId = ()=> CLIENT_ID_INPUT.value;
+  const getStaffName = ()=> (STAFF_INPUT.value || "").trim();
+
+  // UUID helper + resolver (keeps your free-text UX, satisfies DB uuid)
+  const isUuid = (s)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
+  async function getStaffUuid() {
+    const nameOrId = getStaffName();
+    if (!nameOrId) return null;
+    if (isUuid(nameOrId)) return nameOrId; // user pasted uuid
+    // exact match first
+    let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", nameOrId).maybeSingle();
+    if (data?.id) return data.id;
+    // fallback: case-insensitive contains
+    ({ data, error } = await ess.from("staff").select("id, full_name").ilike("full_name", `%${nameOrId}%`).limit(1).maybeSingle());
+    if (data?.id) return data.id;
+    throw new Error(`Staff name not found in roster: "${nameOrId}".`);
+  }
 
   let current = startOfWeekMonday(new Date());
   let activeIndex = null;
 
   /* ===== Local cache keys ===== */
-  const weekKey = (wk)=>`essWeek_${getClientId()}_${getStaffId()}_${ymd(wk)}`;
+  const weekKey = (wk)=>`essWeek_${getClientId()}_${getStaffName()}_${ymd(wk)}`;
   const dayKey  = (wk,i)=>`${weekKey(wk)}_d${i}`;
 
   /* ===== Server helpers =====
-     For compatibility, we continue to use:
-     - daily_drafts: hours, activities, notes, date, submitted, start_time, end_time, modality
-     - daily_entries: activities, service_notes (+ other base fields)
-     We only RELABEL "activities" -> "domain" in UI.
-     Observation + Action Plan are merged into notes on save/submit so schema remains unchanged. */
+     We keep using the same schema. "Domain" stays mapped to activities.
+     Observation + Action Plan are merged into notes for DB. */
   async function fetchDraft(i){
     try{
-      if(!getStaffId()) return null;
+      const staffUuid = await getStaffUuid();
+      if(!staffUuid) return null;
       const { data, error } = await ess.from("daily_drafts")
         .select("hours, activities, notes, date, submitted, start_time, end_time, modality")
-        .eq("client_id", getClientId()).eq("staff_id", getStaffId())
+        .eq("client_id", getClientId()).eq("staff_id", staffUuid)
         .eq("week_start", ymd(current)).eq("day_index", i).maybeSingle();
       if(error) return null; return data||null;
     }catch{ return null; }
@@ -219,13 +78,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function upsertDraft(i, payload){
     try{
-      if(!getStaffId()) return;
+      const staffUuid = await getStaffUuid();
+      if(!staffUuid) { toast('Type a valid Staff name'); return; }
       const body = {
-        client_id:getClientId(), staff_id:getStaffId(),
+        client_id:getClientId(), staff_id:staffUuid,
         week_start: ymd(current), day_index: i, date: payload.date,
         hours: payload.hours!==''? Number(payload.hours):null,
-        activities: payload.activities||null, // store the typed domain here
-        notes: payload.notes || null,         // merged notes including Observation + Plan
+        activities: payload.activities||null,
+        notes: payload.notes || null,
         start_time: payload.start_time||null, end_time: payload.end_time||null,
         modality: payload.modality||'Remote', submitted: false
       };
@@ -235,12 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Insert official record while keeping activities compatibility
   async function insertDailyEntry(payload){
+    const staffUuid = await getStaffUuid();
+    if(!staffUuid) throw new Error('Type a valid Staff name');
     const raw = (payload.activities||"").trim();
-    const acts = raw ? [raw] : null; // single-item array if your column is text[] with a constraint
+    const acts = raw ? [raw] : null; // text[] compatibility
 
     const entryBase = {
       client_id: getClientId(),
-      staff_id:  getStaffId(),
+      staff_id:  staffUuid,
       service_date: payload.date,
       start_time: payload.start_time || null,
       end_time:   payload.end_time   || null,
@@ -248,10 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
       service_notes: payload.notes || null
     };
 
-    // 1) Try with activities (if provided)
     let { error } = await ess.from("daily_entries").insert({ ...entryBase, activities: acts });
     if (error && String(error.message||'').includes('activities_allowed')) {
-      // 2) Fallback: submit with activities = null (in case of constraint mismatch)
       ({ error } = await ess.from("daily_entries").insert({ ...entryBase, activities: null }));
     }
     if (error) throw error;
@@ -292,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function parseMergedNotes(text){
-    // Split back into the three parts if previously merged; very forgiving
     const out = { notes:'', obs:'', plan:'' };
     if(!text) return out;
     const N='## Progress Notes:', O='## Observation:', P='## Action Plan:';
@@ -301,17 +160,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const oIdx=text.indexOf(O, nIdx);
       const pIdx=text.indexOf(P, oIdx>-1?oIdx:nIdx);
       out.notes = text.slice(nIdx, oIdx>-1?oIdx: (pIdx>-1?pIdx:text.length)).trim();
-      if(oIdx>-1){
-        out.obs = text.slice(oIdx+O.length, pIdx>-1?pIdx:text.length).trim();
-      }
-      if(pIdx>-1){
-        out.plan = text.slice(pIdx+P.length).trim();
-      }
+      if(oIdx>-1){ out.obs = text.slice(oIdx+O.length, pIdx>-1?pIdx:text.length).trim(); }
+      if(pIdx>-1){ out.plan = text.slice(pIdx+P.length).trim(); }
       return out;
     }
-    // legacy plain notes
-    out.notes = text;
-    return out;
+    out.notes = text; return out;
   }
 
   function mergeNotes(notes, obs, plan){
@@ -331,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const srv=await fetchDraft(i);
     if(srv){
       w_hours.value = srv.hours ?? '';
-      w_domain.value= srv.activities ?? ''; // domain label, still stored in activities
+      w_domain.value= srv.activities ?? '';
       const parsed = parseMergedNotes(srv.notes ?? '');
       w_notes.value = parsed.notes ?? '';
       w_obs.value   = parsed.obs ?? '';
@@ -366,17 +219,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== Actions ===== */
   function buildPayload(){
-    const notesMerged = mergeNotes(
-      (w_notes.value||''),
-      (w_obs.value||''),
-      (w_plan.value||'')
-    );
+    const notesMerged = mergeNotes((w_notes.value||''),(w_obs.value||''),(w_plan.value||''));
     return {
       date: ymd(addDays(current,activeIndex)),
       hours: (w_hours.value||''),
-      activities: (w_domain.value||''), // UI "Domain" mapped to activities field for DB compatibility
+      activities: (w_domain.value||''),
       notes: notesMerged,
-      notes_only: (w_notes.value||''), // keep for local convenience
+      notes_only: (w_notes.value||''),
       observation: (w_obs.value||''),
       action_plan: (w_plan.value||''),
       start_time: (w_start.value||''),
@@ -387,13 +236,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function saveDay(){
     if(activeIndex==null) return;
-    if(!getStaffId()){ toast('Type Staff name first'); return; }
+    if(!getStaffName()){ toast('Type Staff name first'); return; }
+    try{
+      // ensure the name can resolve to a uuid before saving server-side
+      await getStaffUuid();
+    }catch(e){
+      w_error.style.display='block';
+      w_error.textContent = e.message || 'Unknown staff error';
+      toast('Staff not found ❌');
+      return;
+    }
+
     const payload = buildPayload();
 
-    // local cache (keep domain + split sections too)
+    // local cache
     localStorage.setItem(dayKey(current,activeIndex), JSON.stringify({
       ...payload,
-      domain: payload.activities // alias for clarity in local storage
+      domain: payload.activities
     }));
     markDots();
 
@@ -413,13 +272,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function submitDay(){
     if(activeIndex==null) return;
-    if(!getStaffId()){ toast('Type Staff name first'); return; }
+    if(!getStaffName()){ toast('Type Staff name first'); return; }
     const payload = buildPayload();
 
     try{
       await insertDailyEntry(payload);      // official record
       await upsertDraft(activeIndex, payload);
-      // persist locally
       localStorage.setItem(dayKey(current,activeIndex), JSON.stringify({
         ...payload,
         domain: payload.activities
@@ -447,5 +305,3 @@ document.addEventListener('DOMContentLoaded', () => {
   renderWeek();
 });
 </script>
-</body>
-</html>
