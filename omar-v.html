@@ -183,22 +183,61 @@ document.addEventListener('DOMContentLoaded', () => {
     function startOfWeekMonday(d){const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=nd.getDay();const diff=(day===0?-6:1-day);nd.setDate(nd.getDate()+diff);nd.setHours(0,0,0,0);return nd;}
     function addDays(d,n){const nd=new Date(d);nd.setDate(nd.getDate()+n);return nd;}
 
-    const getClientId = ()=> CLIENT_ID_INPUT.value;
-    const getStaffName = ()=> (STAFF_INPUT.value || "").trim();
+    const getClientId  = ()=> CLIENT_ID_INPUT.value;
+    const getStaffName = ()=> (STAFF_INPUT.value || "").replace(/\s+/g,' ').trim();
 
-    // UUID helper + resolver
+    /* ===== UUID / Roster resolution ===== */
     const isUuid = (s)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
-    async function getStaffUuid() {
+
+    // Cache resolved UUIDs per name for this session
+    const staffUuidCache = new Map();
+
+    /**
+     * Returns a UUID for whatever is typed:
+     * - If a UUID is typed, returns it.
+     * - Else finds staff.full_name exact/fuzzy.
+     * - If not found, AUTO-CREATES a staff row {id, full_name} and returns the new id.
+     */
+    async function getOrCreateStaffUuid() {
       const nameOrId = getStaffName();
       if (!nameOrId) return null;
+
+      // Already looks like a UUID?
       if (isUuid(nameOrId)) return nameOrId;
-      // exact match
-      let { data } = await ess.from("staff").select("id, full_name").eq("full_name", nameOrId).maybeSingle();
-      if (data?.id) return data.id;
-      // fuzzy match
-      ({ data } = await ess.from("staff").select("id, full_name").ilike("full_name", `%${nameOrId}%`).limit(1).maybeSingle());
-      if (data?.id) return data.id;
-      throw new Error(`Staff name not found in roster: "${nameOrId}".`);
+
+      // Check cache
+      if (staffUuidCache.has(nameOrId)) return staffUuidCache.get(nameOrId);
+
+      // 1) Exact match
+      let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", nameOrId).maybeSingle();
+      if (!error && data?.id) {
+        staffUuidCache.set(nameOrId, data.id);
+        return data.id;
+      }
+
+      // 2) Fuzzy (first match)
+      ({ data, error } = await ess.from("staff").select("id, full_name").ilike("full_name", `%${nameOrId}%`).limit(1).maybeSingle());
+      if (!error && data?.id) {
+        staffUuidCache.set(nameOrId, data.id);
+        return data.id;
+      }
+
+      // 3) Create it
+      const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
+                    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+                      const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
+                    });
+
+      const insert = await ess.from("staff").insert([{ id: newId, full_name: nameOrId }]).select("id").maybeSingle();
+
+      if (insert.error) {
+        // If RLS blocks insert, tell user clearly
+        throw new Error(`Could not add staff "${nameOrId}". Ask admin to allow INSERT/SELECT on ess.staff for this page. (${insert.error.message})`);
+      }
+
+      const resolved = insert.data?.id || newId;
+      staffUuidCache.set(nameOrId, resolved);
+      return resolved;
     }
 
     let current = startOfWeekMonday(new Date());
@@ -212,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
        UI label "Domain" maps to DB "activities". Observation/Plan are merged into notes. */
     async function fetchDraft(i){
       try{
-        const staffUuid = await getStaffUuid();
+        const staffUuid = await getOrCreateStaffUuid();
         if(!staffUuid) return null;
         const { data } = await ess.from("daily_drafts")
           .select("hours, activities, notes, date, submitted, start_time, end_time, modality")
@@ -224,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function upsertDraft(i, payload){
       try{
-        const staffUuid = await getStaffUuid();
+        const staffUuid = await getOrCreateStaffUuid();
         if(!staffUuid) { toast('Type a valid Staff name'); return; }
         const body = {
           client_id:getClientId(), staff_id:staffUuid,
@@ -240,9 +279,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function insertDailyEntry(payload){
-      const staffUuid = await getStaffUuid();
+      const staffUuid = await getOrCreateStaffUuid();
       if(!staffUuid) throw new Error('Type a valid Staff name');
-      const raw = (payload.activities||"").trim();
+      const raw  = (payload.activities||"").trim();
       const acts = raw ? [raw] : null;
 
       const entryBase = {
@@ -382,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function saveDay(){
       if(activeIndex==null) return;
       if(!getStaffName()){ toast('Type Staff name first'); return; }
-      try{ await getStaffUuid(); }catch(e){ w_error.style.display='block'; w_error.textContent = e.message; toast('Staff not found ❌'); return; }
+      try{ await getOrCreateStaffUuid(); }catch(e){ w_error.style.display='block'; w_error.textContent = e.message; toast('Staff error ❌'); return; }
 
       const payload = buildPayload();
       localStorage.setItem(dayKey(current,activeIndex), JSON.stringify({ ...payload, domain: payload.activities }));
