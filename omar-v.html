@@ -37,6 +37,14 @@
     /* toast + error */
     #w_toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s}
     #w_error{display:none;margin-top:12px;padding:10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b}
+
+    /* signatures */
+    .sig-wrap{margin-top:16px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;padding:12px}
+    .sig-title{margin:0 0 8px 0;font-weight:600;color:#0f172a}
+    .sig-canvas{width:100%;height:130px;border:1px dashed #d1d5db;border-radius:8px;background:#fff;touch-action:none}
+    .sig-row{display:flex;gap:12px;flex-wrap:wrap}
+    .sig-row > div{flex:1 1 260px}
+    .sig-hint{font-size:12px;color:#6b7280;margin-top:4px}
   </style>
 </head>
 <body>
@@ -128,6 +136,25 @@
       <textarea id="w_plan" class="textarea" placeholder="next steps to work on the service codes"></textarea>
     </div>
 
+    <!-- ✍️ Signatures -->
+    <div class="sig-wrap" id="w_sigSection">
+      <p class="sig-title">Signatures</p>
+      <div class="sig-row">
+        <div>
+          <label class="label" for="w_sig_staff">Staff Signature</label>
+          <canvas id="w_sig_staff" class="sig-canvas"></canvas>
+          <div class="sig-hint">Draw with mouse/finger.</div>
+          <button type="button" id="w_sig_staff_clear" class="btn" style="margin-top:6px;">Clear Staff Signature</button>
+        </div>
+        <div>
+          <label class="label" for="w_sig_client">Client / Parent / Authorized Signature</label>
+          <canvas id="w_sig_client" class="sig-canvas"></canvas>
+          <div class="sig-hint">Draw with mouse/finger.</div>
+          <button type="button" id="w_sig_client_clear" class="btn" style="margin-top:6px;">Clear Client Signature</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Actions -->
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
       <button id="w_clearDay" class="btn">Clear Day</button>
@@ -168,7 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const w_saveDay=$("w_saveDay"), w_clearDay=$("w_clearDay"), w_submitDay=$("w_submitDay");
     const w_toast=$("w_toast"), w_error=$("w_error");
 
-    const REQUIRED = ["client_id","staff_id","w_days","w_range","w_startTxt","w_endTxt","w_prevWeek","w_nextWeek","w_panel","w_panelDate","w_start","w_end","w_modality","w_hours","w_domain","w_notes","w_obs","w_plan","w_saveDay","w_clearDay","w_submitDay","w_toast","w_error"];
+    /* signatures DOM */
+    const w_sig_staff = $("w_sig_staff");
+    const w_sig_client = $("w_sig_client");
+    const w_sig_staff_clear = $("w_sig_staff_clear");
+    const w_sig_client_clear = $("w_sig_client_clear");
+
+    const REQUIRED = ["client_id","staff_id","w_days","w_range","w_startTxt","w_endTxt","w_prevWeek","w_nextWeek","w_panel","w_panelDate","w_start","w_end","w_modality","w_hours","w_domain","w_notes","w_obs","w_plan","w_saveDay","w_clearDay","w_submitDay","w_toast","w_error","w_sig_staff","w_sig_client"];
     const missing = REQUIRED.filter(id => !$(id));
     if (missing.length) {
       w_error.style.display='block';
@@ -186,43 +219,118 @@ document.addEventListener('DOMContentLoaded', () => {
     const getClientId  = ()=> CLIENT_ID_INPUT.value;
     const getStaffName = ()=> (STAFF_INPUT.value || "").replace(/\s+/g,' ').trim();
 
+    /* ===== Signature helpers ===== */
+    function createSignaturePad(canvas){
+      const ctx = canvas.getContext('2d');
+      let drawing = false;
+      let prev = { x:0, y:0 };
+
+      function resizeCanvas(){
+        const rect = canvas.getBoundingClientRect();
+        const data = canvas.toDataURL();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        if (data && data !== 'data:,') {
+          const img = new Image();
+          img.onload = ()=>{ ctx.drawImage(img,0,0,canvas.width,canvas.height); };
+          img.src = data;
+        }
+      }
+
+      // initial sizing
+      setTimeout(resizeCanvas, 50);
+      window.addEventListener('resize', resizeCanvas);
+
+      function getPos(e){
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches && e.touches.length){
+          return {
+            x: e.touches[0].clientX - rect.left,
+            y: e.touches[0].clientY - rect.top
+          };
+        }
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+
+      function start(e){
+        e.preventDefault();
+        drawing = true;
+        prev = getPos(e);
+      }
+      function move(e){
+        if (!drawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000';
+        ctx.beginPath();
+        ctx.moveTo(prev.x, prev.y);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        prev = pos;
+      }
+      function end(e){
+        if (!drawing) return;
+        drawing = false;
+      }
+
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      canvas.addEventListener('mouseup', end);
+      canvas.addEventListener('mouseleave', end);
+
+      canvas.addEventListener('touchstart', start, {passive:false});
+      canvas.addEventListener('touchmove', move, {passive:false});
+      canvas.addEventListener('touchend', end);
+
+      return {
+        clear: ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); },
+        toData: ()=> canvas.toDataURL('image/png'),
+        fromData: (data)=>{
+          if (!data) return;
+          const img = new Image();
+          img.onload = ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,canvas.width,canvas.height); };
+          img.src = data;
+        },
+        resize: resizeCanvas
+      };
+    }
+
+    const staffSigPad = createSignaturePad(w_sig_staff);
+    const clientSigPad = createSignaturePad(w_sig_client);
+
+    w_sig_staff_clear.addEventListener('click', ()=>staffSigPad.clear());
+    w_sig_client_clear.addEventListener('click', ()=>clientSigPad.clear());
+
     /* ===== UUID / Roster resolution ===== */
     const isUuid = (s)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
 
     // Cache resolved UUIDs per name for this session
     const staffUuidCache = new Map();
 
-    /**
-     * Returns a UUID for whatever is typed:
-     * - If a UUID is typed, returns it.
-     * - Else finds staff.full_name exact/fuzzy.
-     * - If not found, AUTO-CREATES a staff row {id, full_name} and returns the new id.
-     */
     async function getOrCreateStaffUuid() {
       const nameOrId = getStaffName();
       if (!nameOrId) return null;
 
-      // Already looks like a UUID?
       if (isUuid(nameOrId)) return nameOrId;
-
-      // Check cache
       if (staffUuidCache.has(nameOrId)) return staffUuidCache.get(nameOrId);
 
-      // 1) Exact match
       let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", nameOrId).maybeSingle();
       if (!error && data?.id) {
         staffUuidCache.set(nameOrId, data.id);
         return data.id;
       }
 
-      // 2) Fuzzy (first match)
       ({ data, error } = await ess.from("staff").select("id, full_name").ilike("full_name", `%${nameOrId}%`).limit(1).maybeSingle());
       if (!error && data?.id) {
         staffUuidCache.set(nameOrId, data.id);
         return data.id;
       }
 
-      // 3) Create it
       const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
                     'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
                       const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
@@ -231,7 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const insert = await ess.from("staff").insert([{ id: newId, full_name: nameOrId }]).select("id").maybeSingle();
 
       if (insert.error) {
-        // If RLS blocks insert, tell user clearly
         throw new Error(`Could not add staff "${nameOrId}". Ask admin to allow INSERT/SELECT on ess.staff for this page. (${insert.error.message})`);
       }
 
@@ -247,8 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const weekKey = (wk)=>`essWeek_${getClientId()}_${getStaffName()}_${ymd(wk)}`;
     const dayKey  = (wk,i)=>`${weekKey(wk)}_d${i}`;
 
-    /* ===== Server helpers =====
-       UI label "Domain" maps to DB "activities". Observation/Plan are merged into notes. */
+    /* ===== Server helpers ===== */
     async function fetchDraft(i){
       try{
         const staffUuid = await getOrCreateStaffUuid();
@@ -265,6 +371,8 @@ document.addEventListener('DOMContentLoaded', () => {
       try{
         const staffUuid = await getOrCreateStaffUuid();
         if(!staffUuid) { toast('Type a valid Staff name'); return; }
+
+        // We keep server payload CLEAN (no signature fields here to avoid column errors)
         const body = {
           client_id:getClientId(), staff_id:staffUuid,
           week_start: ymd(current), day_index: i, date: payload.date,
@@ -366,6 +474,9 @@ document.addEventListener('DOMContentLoaded', () => {
       w_panelDate.textContent=`${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} — ${fmt(d)}`;
 
       const srv=await fetchDraft(i);
+      let sigStaffData = null;
+      let sigClientData = null;
+
       if(srv){
         w_hours.value = srv.hours ?? '';
         w_domain.value= srv.activities ?? '';
@@ -376,6 +487,16 @@ document.addEventListener('DOMContentLoaded', () => {
         w_start.value = srv.start_time ?? '';
         w_end.value   = srv.end_time ?? '';
         w_modality.value = srv.modality ?? 'Remote';
+
+        // signatures from localStorage (server doesn't store)
+        const rawLS = localStorage.getItem(dayKey(current,i));
+        if (rawLS){
+          try {
+            const obj = JSON.parse(rawLS);
+            sigStaffData = obj.staff_signature || null;
+            sigClientData = obj.client_signature || null;
+          } catch {}
+        }
       }else{
         const raw=localStorage.getItem(dayKey(current,i));
         if(raw){
@@ -389,6 +510,8 @@ document.addEventListener('DOMContentLoaded', () => {
             w_start.value = obj.start_time ?? '';
             w_end.value   = obj.end_time ?? '';
             w_modality.value = obj.modality ?? 'Remote';
+            sigStaffData = obj.staff_signature || null;
+            sigClientData = obj.client_signature || null;
           }catch{
             w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
             w_modality.value='Remote';
@@ -398,12 +521,21 @@ document.addEventListener('DOMContentLoaded', () => {
           w_modality.value='Remote';
         }
       }
+
+      // load signatures into canvases
+      staffSigPad.resize();
+      clientSigPad.resize();
+      if (sigStaffData) staffSigPad.fromData(sigStaffData); else staffSigPad.clear();
+      if (sigClientData) clientSigPad.fromData(sigClientData); else clientSigPad.clear();
+
       w_panel.style.display='block';
     }
 
     /* ===== Actions ===== */
     function buildPayload(){
       const notesMerged = mergeNotes((w_notes.value||''),(w_obs.value||''),(w_plan.value||''));
+      const staffSigData = staffSigPad.toData();
+      const clientSigData = clientSigPad.toData();
       return {
         date: ymd(addDays(current,activeIndex)),
         hours: (w_hours.value||''),
@@ -414,7 +546,9 @@ document.addEventListener('DOMContentLoaded', () => {
         action_plan: (w_plan.value||''),
         start_time: (w_start.value||''),
         end_time: (w_end.value||''),
-        modality: (w_modality.value||'Remote')
+        modality: (w_modality.value||'Remote'),
+        staff_signature: staffSigData,
+        client_signature: clientSigData
       };
     }
 
@@ -435,6 +569,8 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem(dayKey(current,activeIndex));
       w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
       w_modality.value='Remote';
+      staffSigPad.clear();
+      clientSigPad.clear();
       markDots();
       toast('Day cleared locally. Server draft remains until overwritten.');
     }
