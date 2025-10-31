@@ -237,7 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // initial sizing
       setTimeout(resizeCanvas, 50);
       window.addEventListener('resize', resizeCanvas);
 
@@ -309,8 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ===== UUID / Roster resolution ===== */
     const isUuid = (s)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
 
-    // Cache resolved UUIDs per name for this session
     const staffUuidCache = new Map();
+    let STAFF_REMOTE_BLOCKED = false;  // 👈 if true, we only save locally
 
     async function getOrCreateStaffUuid() {
       const nameOrId = getStaffName();
@@ -319,18 +318,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isUuid(nameOrId)) return nameOrId;
       if (staffUuidCache.has(nameOrId)) return staffUuidCache.get(nameOrId);
 
+      // 1) exact
       let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", nameOrId).maybeSingle();
       if (!error && data?.id) {
         staffUuidCache.set(nameOrId, data.id);
         return data.id;
       }
 
+      // 2) fuzzy
       ({ data, error } = await ess.from("staff").select("id, full_name").ilike("full_name", `%${nameOrId}%`).limit(1).maybeSingle());
       if (!error && data?.id) {
         staffUuidCache.set(nameOrId, data.id);
         return data.id;
       }
 
+      // 3) try create
       const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
                     'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
                       const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
@@ -339,6 +341,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const insert = await ess.from("staff").insert([{ id: newId, full_name: nameOrId }]).select("id").maybeSingle();
 
       if (insert.error) {
+        // THIS is your error
+        if (String(insert.error.message || '').includes('permission denied')) {
+          STAFF_REMOTE_BLOCKED = true; // from now on, local-only
+          const err = new Error(`NO_REMOTE_STAFF`);
+          err.code = 'NO_REMOTE_STAFF';
+          throw err;
+        }
         throw new Error(`Could not add staff "${nameOrId}". Ask admin to allow INSERT/SELECT on ess.staff for this page. (${insert.error.message})`);
       }
 
@@ -350,12 +359,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let current = startOfWeekMonday(new Date());
     let activeIndex = null;
 
-    /* ===== Local cache keys (by staff name for UX) ===== */
+    /* ===== Local cache keys ===== */
     const weekKey = (wk)=>`essWeek_${getClientId()}_${getStaffName()}_${ymd(wk)}`;
     const dayKey  = (wk,i)=>`${weekKey(wk)}_d${i}`;
 
     /* ===== Server helpers ===== */
     async function fetchDraft(i){
+      if (STAFF_REMOTE_BLOCKED) return null;
       try{
         const staffUuid = await getOrCreateStaffUuid();
         if(!staffUuid) return null;
@@ -368,11 +378,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function upsertDraft(i, payload){
+      if (STAFF_REMOTE_BLOCKED) return; // local-only
       try{
         const staffUuid = await getOrCreateStaffUuid();
         if(!staffUuid) { toast('Type a valid Staff name'); return; }
 
-        // We keep server payload CLEAN (no signature fields here to avoid column errors)
         const body = {
           client_id:getClientId(), staff_id:staffUuid,
           week_start: ymd(current), day_index: i, date: payload.date,
@@ -383,10 +393,17 @@ document.addEventListener('DOMContentLoaded', () => {
           modality: payload.modality||'Remote', submitted: false
         };
         await ess.from("daily_drafts").upsert(body, { onConflict: "client_id,staff_id,week_start,day_index" });
-      }catch(e){ console.warn("Upsert draft failed:", e); }
+      }catch(e){
+        console.warn("Upsert draft failed:", e);
+      }
     }
 
     async function insertDailyEntry(payload){
+      if (STAFF_REMOTE_BLOCKED) {
+        const err = new Error('NO_REMOTE_STAFF');
+        err.code = 'NO_REMOTE_STAFF';
+        throw err;
+      }
       const staffUuid = await getOrCreateStaffUuid();
       if(!staffUuid) throw new Error('Type a valid Staff name');
       const raw  = (payload.activities||"").trim();
@@ -488,7 +505,6 @@ document.addEventListener('DOMContentLoaded', () => {
         w_end.value   = srv.end_time ?? '';
         w_modality.value = srv.modality ?? 'Remote';
 
-        // signatures from localStorage (server doesn't store)
         const rawLS = localStorage.getItem(dayKey(current,i));
         if (rawLS){
           try {
@@ -555,13 +571,21 @@ document.addEventListener('DOMContentLoaded', () => {
     async function saveDay(){
       if(activeIndex==null) return;
       if(!getStaffName()){ toast('Type Staff name first'); return; }
-      try{ await getOrCreateStaffUuid(); }catch(e){ w_error.style.display='block'; w_error.textContent = e.message; toast('Staff error ❌'); return; }
 
       const payload = buildPayload();
+
+      // always save local
       localStorage.setItem(dayKey(current,activeIndex), JSON.stringify({ ...payload, domain: payload.activities }));
       markDots();
-      await upsertDraft(activeIndex, payload);
-      toast('Day saved (draft) ✓');
+
+      // try server
+      try{
+        await upsertDraft(activeIndex, payload);
+        toast('Day saved (draft) ✓');
+      }catch(e){
+        console.warn(e);
+        toast('Saved locally (no server permission)');
+      }
     }
 
     function clearDay(){
@@ -579,17 +603,26 @@ document.addEventListener('DOMContentLoaded', () => {
       if(activeIndex==null) return;
       if(!getStaffName()){ toast('Type Staff name first'); return; }
       const payload = buildPayload();
+
+      // always keep local copy
+      localStorage.setItem(dayKey(current,activeIndex), JSON.stringify({ ...payload, domain: payload.activities }));
+      markDots();
+
       try{
         await insertDailyEntry(payload);
         await upsertDraft(activeIndex, payload);
-        localStorage.setItem(dayKey(current,activeIndex), JSON.stringify({ ...payload, domain: payload.activities }));
-        markDots();
         toast('Day submitted (official) ✅');
       }catch(e){
         console.error('Submit error:', e);
-        w_error.style.display='block';
-        w_error.textContent = 'Submit failed: ' + (e?.message || 'Unknown error');
-        toast('Submit failed ❌');
+        if (e.code === 'NO_REMOTE_STAFF') {
+          w_error.style.display='block';
+          w_error.textContent = 'Submit saved locally. Your Supabase policy is blocking new staff names. Add this staff manually or allow INSERT on ess.staff.';
+          toast('Submit saved locally 🟡');
+        } else {
+          w_error.style.display='block';
+          w_error.textContent = 'Submit failed: ' + (e?.message || 'Unknown error');
+          toast('Submit failed ❌');
+        }
       }
     }
 
