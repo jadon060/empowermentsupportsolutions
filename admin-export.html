@@ -96,13 +96,15 @@
           <th>Hours</th>
           <th>Modality</th>
           <th>Domains</th>
+          <th>RC</th>
+          <th>SC</th>
           <th>Staff Sig</th>
           <th>Client Sig</th>
           <th>Source</th>
         </tr>
       </thead>
       <tbody id="daysBody">
-        <tr><td colspan="10">No data loaded.</td></tr>
+        <tr><td colspan="12">No data loaded.</td></tr>
       </tbody>
     </table>
   </div>
@@ -162,7 +164,6 @@
       }));
     }
 
-    // render
     clientSelect.innerHTML = "";
     if (!options.length) {
       clientSelect.innerHTML = `<option value="">— no clients found —</option>`;
@@ -174,7 +175,6 @@
 
   await loadClients();
 
-  // when client is chosen, set hidden uuid
   clientSelect.addEventListener("change", () => {
     clientIdInput.value = clientSelect.value || "";
   });
@@ -207,6 +207,10 @@
     for (let i=0; i<7; i++) {
       const d = addDays(weekStart, i);
       const iso = ymd(d);
+
+      // top-level fallback values (so admin always sees something)
+      const fallbackRC = rcInput.value || "";
+      const fallbackSC = scInput.value || "";
 
       // prefer official entries
       let q = ess.from("daily_entries")
@@ -242,6 +246,8 @@
             notes: draft.notes || "",
             staff_signature: draft.staff_signature || "",
             client_signature: draft.client_signature || "",
+            regional_center: draft.regional_center || fallbackRC,
+            service_coordinator: draft.service_coordinator || fallbackSC,
             source: "draft"
           });
           continue;
@@ -264,9 +270,12 @@
           notes: official.service_notes || "",
           staff_signature: official.staff_signature || "",
           client_signature: official.client_signature || "",
+          regional_center: official.regional_center || fallbackRC,
+          service_coordinator: official.service_coordinator || fallbackSC,
           source: "official"
         });
       } else {
+        // totally missing
         days.push({
           dayIndex: i,
           label: dayNames[i],
@@ -279,6 +288,8 @@
           notes: "",
           staff_signature: "",
           client_signature: "",
+          regional_center: fallbackRC,
+          service_coordinator: fallbackSC,
           source: "missing"
         });
       }
@@ -305,6 +316,8 @@
         <td>${d.hours || "—"}</td>
         <td>${d.modality || "—"}</td>
         <td>${d.domain || "—"}</td>
+        <td>${d.regional_center || "—"}</td>
+        <td>${d.service_coordinator || "—"}</td>
         <td>${d.staff_signature ? "✅" : "—"}</td>
         <td>${d.client_signature ? "✅" : "—"}</td>
         <td>${d.source}</td>
@@ -362,6 +375,8 @@
             ` : ``}
             <div style="font-size:10.5px;margin-top:4px;"><strong>Location / Modality:</strong> ${d.modality || "—"}</div>
             <div style="font-size:10.5px;margin-top:4px;"><strong>Service / Domain:</strong> ${d.domain || "—"}</div>
+            <div style="font-size:10.5px;margin-top:4px;"><strong>Regional Center:</strong> ${d.regional_center || rcName}</div>
+            <div style="font-size:10.5px;margin-top:2px;"><strong>Service Coordinator:</strong> ${d.service_coordinator || scName}</div>
             <div style="font-size:10.5px;margin-top:6px;"><strong>Description / Progress:</strong></div>
             <div style="border:1px solid #e5e7eb;border-radius:6px;padding:5px 6px;white-space:pre-wrap;font-size:10.5px;min-height:40px;">
               ${d.notes || "No note entered."}
@@ -417,7 +432,7 @@
   btnRC.addEventListener("click", () => exportWeek("rc"));
   btnFMS.addEventListener("click", () => exportWeek("fms"));
 
-  // initial load week (will be empty until client picked)
+  // initial
 })();
 </script>
 </body>
