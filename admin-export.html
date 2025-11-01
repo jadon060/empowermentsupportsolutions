@@ -17,13 +17,17 @@
     table{width:100%;border-collapse:collapse;}
     th,td{padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.75rem;}
     .flex{display:flex;gap:10px;flex-wrap:wrap;}
-    /* 🧾 pdf area must be renderable, not display:none */
+
+    /* 🧾 printable area: keep it in-flow but invisible so html2pdf can see it */
     #printArea{
-      position:fixed;
-      top:-9999px;
-      left:-9999px;
+      position:absolute;
+      top:0;
+      left:0;
       width:8.5in;
+      min-height:11in;
       background:#fff;
+      opacity:0;
+      pointer-events:none;
       z-index:-1;
     }
   </style>
@@ -33,7 +37,7 @@
   <img src="https://empowermentss.com/logo.png" alt="ESS" onerror="this.style.display='none'">
   <div>
     <div style="font-weight:600;">Empowerment Support Solutions, LLC</div>
-    <div style="font-size:.72rem;opacity:.7;">SDP • Weekly Service Log Exports (FMS / Regional Center)</div>
+    <div style="font-size:.72rem;opacity:.7;">SDP • Service Log Exports (FMS / Regional Center)</div>
   </div>
 </header>
 
@@ -77,13 +81,21 @@
         <label>&nbsp;</label>
         <button id="loadWeek">Load Week</button>
       </div>
+      <!-- unified week export -->
       <div>
         <label>&nbsp;</label>
-        <button id="exportRC" class="btn-muted" disabled>Export Week (RC)</button>
+        <button id="exportWeekUnified" class="btn-muted" disabled>Export Week (Unified)</button>
+      </div>
+      <!-- new: single day export -->
+      <div>
+        <label for="daySelect">Day to export</label>
+        <select id="daySelect" disabled>
+          <option value="">— load week first —</option>
+        </select>
       </div>
       <div>
         <label>&nbsp;</label>
-        <button id="exportFMS" class="btn-muted" disabled>Export Week (FMS)</button>
+        <button id="exportDayUnified" class="btn-muted" disabled>Export Day (Unified)</button>
       </div>
     </div>
   </div>
@@ -115,7 +127,7 @@
   </div>
 </div>
 
-<!-- off-screen printable area -->
+<!-- off-screen printable area (visible to html2pdf) -->
 <div id="printArea"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -136,8 +148,9 @@
   const scInput       = document.getElementById("scName");
   const daysBody      = document.getElementById("daysBody");
   const btnLoad       = document.getElementById("loadWeek");
-  const btnRC         = document.getElementById("exportRC");
-  const btnFMS        = document.getElementById("exportFMS");
+  const btnExportWeek = document.getElementById("exportWeekUnified");
+  const btnExportDay  = document.getElementById("exportDayUnified");
+  const daySelect     = document.getElementById("daySelect");
   const printArea     = document.getElementById("printArea");
 
   const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -206,7 +219,7 @@
     const days = [];
     let totalHours = 0;
 
-    // 1️⃣ try weekly_reports first
+    // 1) try weekly_reports
     let { data: weeklyRow } = await ess
       .from("weekly_reports")
       .select("client_id, staff_id, week_start, entries")
@@ -240,7 +253,7 @@
         });
       });
 
-      // fill any missing days
+      // fill missing days
       for (let i=0;i<7;i++){
         if (!days.find(d => d.dayIndex === i)){
           const d = addDays(weekStart,i);
@@ -265,7 +278,7 @@
 
       days.sort((a,b)=>a.dayIndex-b.dayIndex);
     } else {
-      // 2️⃣ fallback to per-day tables
+      // 2) fallback to daily tables (what you're actually using now)
       for (let i=0; i<7; i++) {
         const d = addDays(weekStart, i);
         const iso = ymd(d);
@@ -381,30 +394,32 @@
       daysBody.appendChild(tr);
     });
 
-    btnRC.disabled = false;
-    btnFMS.disabled = false;
+    // fill day select
+    daySelect.innerHTML = days.map(d => `<option value="${d.dayIndex}">${d.label} – ${fmt(new Date(d.date))}</option>`).join("");
+    daySelect.disabled = false;
+
+    btnExportWeek.disabled = false;
+    btnExportDay.disabled  = false;
   }
 
   btnLoad.addEventListener("click", loadWeek);
 
-  async function exportWeek(which) {
-    if (!currentWeekData) return;
-    const { clientLabel, weekStart, days, staffName, totalHours } = currentWeekData;
-    const weekStartDate = new Date(weekStart);
-    const weekEndDate = addDays(weekStartDate, 6);
-
+  // 🔁 unified builder (used for week + day)
+  function buildPrintableHTML({clientLabel, weekStart, days, staffName, totalHours}, opts = {}) {
     const businessName = "Empowerment Support Solutions, LLC";
     const serviceCode  = serviceInput.value || "SDP Service Code";
     const rcName       = rcInput.value || "Regional Center";
     const scName       = scInput.value || "";
     const contactLine  = "empowermentss.com • (562) 000-0000 • info@empowermentss.com";
+    const weekStartDate = new Date(weekStart);
+    const weekEndDate = addDays(weekStartDate, 6);
 
-    printArea.innerHTML = `
-      <div style="width:8.5in;min-height:11in;padding:0.6in 0.6in;background:#fff;">
+    return `
+      <div style="width:8.5in;min-height:11in;padding:0.6in 0.6in;background:#fff;font-family:system-ui, -apple-system, 'Segoe UI', sans-serif;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
           <div>
             <div style="font-size:15px;font-weight:700;">${businessName}</div>
-            <div style="font-size:11px;">${which === "fms" ? "SDP – FMS Weekly Service Log" : "SDP – Regional Center / Case Documentation"}</div>
+            <div style="font-size:11px;">SDP – Service Log (Universal RC / FMS)</div>
             <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${clientLabel}</div>
             <div style="font-size:11px;"><strong>Week of:</strong> ${fmt(weekStartDate)} – ${fmt(weekEndDate)}</div>
             <div style="font-size:11px;"><strong>Staff:</strong> ${staffName || "—"}</div>
@@ -417,7 +432,7 @@
           </div>
         </div>
 
-        <div style="margin-bottom:10px;font-size:11px;"><strong>Total hours this week:</strong> ${totalHours ? totalHours.toFixed(2) : "0.00"}</div>
+        ${typeof totalHours === "number" ? `<div style="margin-bottom:10px;font-size:11px;"><strong>Total hours this week:</strong> ${totalHours.toFixed(2)}</div>` : ""}
 
         ${days.map(d => `
           <div style="border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;padding:8px 10px;">
@@ -425,9 +440,11 @@
               <div><strong>${d.label}</strong> • ${fmt(new Date(d.date))}</div>
               <div style="font-size:10px;color:#6b7280;">Source: ${d.source}</div>
             </div>
-            ${which === "fms" ? `
-              <div style="font-size:10.5px;margin-top:4px;"><strong>Time In:</strong> ${d.start_time || "—"} &nbsp; <strong>Time Out:</strong> ${d.end_time || "—"} &nbsp; <strong>Hours:</strong> ${d.hours || "—"}</div>
-            ` : ``}
+            <div style="font-size:10.5px;margin-top:4px;">
+              <strong>Time In:</strong> ${d.start_time || "—"} &nbsp; 
+              <strong>Time Out:</strong> ${d.end_time || "—"} &nbsp; 
+              <strong>Hours:</strong> ${d.hours || "—"}
+            </div>
             <div style="font-size:10.5px;margin-top:4px;"><strong>Location / Modality:</strong> ${d.modality || "—"}</div>
             <div style="font-size:10.5px;margin-top:4px;"><strong>Service / Domain:</strong> ${d.domain || "—"}</div>
             <div style="font-size:10.5px;margin-top:4px;"><strong>Regional Center:</strong> ${d.regional_center || rcName}</div>
@@ -454,7 +471,7 @@
         `).join("")}
 
         <div style="margin-top:14px;font-size:9.5px;line-height:1.35;">
-          I certify that the services listed above were actually provided to the participant in accordance with the participant’s Individual Program Plan (IPP) and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
+          I certify that the services listed above were actually provided to the participant in accordance with the participant’s IPP and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
         </div>
 
         <div style="display:flex;gap:40px;margin-top:16px;">
@@ -473,19 +490,53 @@
         </div>
       </div>
     `;
+  }
 
+  async function exportWeekUnified() {
+    if (!currentWeekData) return;
+    printArea.innerHTML = buildPrintableHTML(currentWeekData);
+    const clientLabel = currentWeekData.clientLabel;
+    const weekStart = currentWeekData.weekStart;
     const opt = {
       margin: 0,
-      filename: `ESS_${clientLabel.replace(/\s+/g,"_")}_SDP_Week_of_${weekStart}.pdf`,
+      filename: `ESS_${clientLabel.replace(/\s+/g,"_")}_Week_of_${weekStart}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
     await html2pdf().set(opt).from(printArea).save();
   }
 
-  btnRC.addEventListener("click", () => exportWeek("rc"));
-  btnFMS.addEventListener("click", () => exportWeek("fms"));
+  async function exportDayUnified() {
+    if (!currentWeekData) return;
+    const dayIdx = parseInt(daySelect.value, 10);
+    if (isNaN(dayIdx)) return;
+    const day = currentWeekData.days.find(d => d.dayIndex === dayIdx);
+    if (!day) return;
+
+    const singlePayload = {
+      clientId: currentWeekData.clientId,
+      clientLabel: currentWeekData.clientLabel,
+      weekStart: currentWeekData.weekStart,
+      days: [day],                    // only 1 day
+      staffName: currentWeekData.staffName,
+      totalHours: day.hours ? Number(day.hours) : 0
+    };
+
+    printArea.innerHTML = buildPrintableHTML(singlePayload);
+    const clientLabel = currentWeekData.clientLabel;
+    const opt = {
+      margin: 0,
+      filename: `ESS_${clientLabel.replace(/\s+/g,"_")}_${day.label}_${day.date}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    await html2pdf().set(opt).from(printArea).save();
+  }
+
+  btnExportWeek.addEventListener("click", exportWeekUnified);
+  btnExportDay.addEventListener("click", exportDayUnified);
 })();
 </script>
 </body>
