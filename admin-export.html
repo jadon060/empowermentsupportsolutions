@@ -98,7 +98,6 @@
   </div>
 </div>
 
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (async () => {
@@ -119,6 +118,7 @@
   const btnExport     = document.getElementById("exportDay");
 
   const LOGO_URL = "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
+  const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
 
   // default date
   const today = new Date();
@@ -126,14 +126,12 @@
 
   let currentDayData = null;
 
-  // load clients
   async function loadClients() {
     let { data: clients, error } = await ess.from("clients").select("id, full_name").order("full_name",{ascending:true});
     let options = [];
     if (!error && Array.isArray(clients) && clients.length) {
       options = clients.map(c => ({ id: c.id, label: c.full_name || c.id }));
     } else {
-      // fallback: collect from entries/drafts
       const collected = new Map();
       const { data: e1 } = await ess.from("daily_entries").select("client_id").limit(2000);
       (e1||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
@@ -158,7 +156,7 @@
     return null;
   }
 
-  // helper: split the "## Progress Notes" blob the staff form saves
+  // split notes from staff form
   function splitNotes(raw) {
     if (!raw) return { progress: "", observation: "", action: "" };
     const P = "## Progress Notes:";
@@ -179,11 +177,35 @@
         action = raw.slice(aIdx + A.length).trim();
       }
     } else {
-      // no markers, just dump whole thing under progress
       progress = raw.trim();
     }
-
     return { progress, observation, action };
+  }
+
+  // format time to 12h
+  function to12h(t) {
+    if (!t) return "—";
+    // allow "16:01:00" or "16:01"
+    const parts = t.split(":");
+    let h = parseInt(parts[0], 10);
+    const m = parts[1] ?? "00";
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${h}:${m.padStart(2,"0")} ${ampm}`;
+  }
+
+  // compute hours if missing
+  function computeHours(start, end) {
+    if (!start || !end) return "";
+    const [sh, sm] = start.split(":").map(Number);
+    const [eh, em] = end.split(":").map(Number);
+    if (Number.isNaN(sh) || Number.isNaN(eh)) return "";
+    const startMins = sh*60 + (sm||0);
+    const endMins   = eh*60 + (em||0);
+    let diff = endMins - startMins;
+    if (diff <= 0) return "";
+    return (diff/60).toFixed(2);
   }
 
   async function loadDay() {
@@ -197,17 +219,13 @@
     let staffIdFilter = null;
     if (staffName) staffIdFilter = await resolveStaffIdByName(staffName);
 
-    // 1) official
-    let q = ess.from("daily_entries")
-      .select("*")
-      .eq("client_id", clientId)
-      .eq("service_date", serviceDate)
-      .limit(10);
+    // official
+    let q = ess.from("daily_entries").select("*").eq("client_id", clientId).eq("service_date", serviceDate).limit(10);
     if (staffIdFilter) q = q.eq("staff_id", staffIdFilter);
     const { data: officialRows } = await q;
     const official = Array.isArray(officialRows) && officialRows.length ? officialRows[0] : null;
 
-    // 2) draft
+    // draft
     const { data: draftRows } = await ess.from("daily_drafts").select("*").eq("client_id", clientId).eq("date", serviceDate).limit(10);
     const draft = Array.isArray(draftRows) && draftRows.length ? draftRows[0] : null;
 
@@ -218,15 +236,24 @@
       return;
     }
 
+    const start_time = official?.start_time || draft?.start_time || "";
+    const end_time   = official?.end_time   || draft?.end_time   || "";
+    let hours        = (official && official.hours != null) ? official.hours
+                      : (draft && draft.hours != null) ? draft.hours
+                      : "";
+
+    if (hours === "" || hours === null) {
+      const computed = computeHours(start_time, end_time);
+      if (computed) hours = computed;
+    }
+
     const merged = {
       clientId,
       clientLabel: clientSelect.options[clientSelect.selectedIndex]?.text || clientId,
       date: serviceDate,
-      start_time: official?.start_time || draft?.start_time || "",
-      end_time: official?.end_time || draft?.end_time || "",
-      hours: (official && official.hours != null) ? official.hours
-             : (draft && draft.hours != null) ? draft.hours
-             : "",
+      start_time,
+      end_time,
+      hours,
       modality: official?.modality || draft?.modality || "",
       domain: (() => {
         if (official?.activities) {
@@ -248,8 +275,8 @@
     dayBody.innerHTML = `
       <tr>
         <td>${new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(new Date(serviceDate))}</td>
-        <td>${merged.start_time || "—"}</td>
-        <td>${merged.end_time || "—"}</td>
+        <td>${merged.start_time ? to12h(merged.start_time) : "—"}</td>
+        <td>${merged.end_time ? to12h(merged.end_time) : "—"}</td>
         <td>${merged.hours !== "" ? Number(merged.hours).toFixed(2) : "—"}</td>
         <td>${merged.modality || "—"}</td>
         <td>${merged.domain || "—"}</td>
@@ -265,7 +292,6 @@
   }
   btnLoad.addEventListener("click", loadDay);
 
-  // ===== PRINT-BASED EXPORT =====
   function exportDay() {
     if (!currentDayData) return;
 
@@ -276,11 +302,9 @@
     } = currentDayData;
 
     const businessName = "Empowerment Support Solutions, LLC";
-    const contactLine  = "empowermentss.com • (562) 000-0000 • info@empowermentss.com";
     const serviceCode  = serviceInput.value || "SDP Service Code";
     const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(new Date(d));
 
-    // split the notes into 3 nice sections
     const { progress, observation, action } = splitNotes(notes);
 
     const win = window.open("", "_blank", "width=900,height=1100");
@@ -293,12 +317,9 @@
           .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in 0.5in 0.6in 0.5in;box-sizing:border-box;}
           .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
           .header-left{max-width:70%;}
-          .logo{height:62px;object-fit:contain;}
+          .logo{height:90px;object-fit:contain;}
           .box{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:10px;}
-          .sigrow{display:flex;gap:20px;margin-top:10px;align-items:flex-end;}
           img.sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
-          .line{width:210px;border-bottom:1px solid #000;height:46px;}
-          .label{font-weight:600;font-size:11px;margin-bottom:2px;}
           .section-title{font-weight:600;font-size:11px;margin-top:6px;margin-bottom:3px;}
           .note-box{border:1px solid #e5e7eb;border-radius:6px;padding:4px 6px;min-height:40px;font-size:11px;white-space:pre-wrap;}
           @media print {
@@ -328,9 +349,9 @@
 
           <div class="box">
             <div style="font-size:11.5px;margin-bottom:4px;">
-              <strong>Time In:</strong> ${start_time || "—"} &nbsp;
-              <strong>Time Out:</strong> ${end_time || "—"} &nbsp;
-              <strong>Hours:</strong> ${hours !== "" ? Number(hours).toFixed(2) : "—"}
+              <strong>Time In:</strong> ${start_time ? ${'`'}${'${to12h(start_time)}'}${'`'} : "—"} &nbsp;
+              <strong>Time Out:</strong> ${end_time ? ${'`'}${'${to12h(end_time)}'}${'`'} : "—"} &nbsp;
+              <strong>Hours:</strong> ${hours !== "" && hours !== null ? Number(hours).toFixed(2) : "—"}
             </div>
             <div style="font-size:11.5px;margin-bottom:4px;"><strong>Location / Modality:</strong> ${modality || "—"}</div>
             <div style="font-size:11.5px;margin-bottom:4px;"><strong>Service / Domain:</strong> ${domain || "—"}</div>
@@ -345,13 +366,13 @@
             <div class="section-title">Action Plan:</div>
             <div class="note-box">${action || "—"}</div>
 
-            <div class="sigrow">
+            <div style="display:flex;gap:20px;margin-top:10px;align-items:flex-end;">
               <div>
                 <div style="font-size:10.5px;font-weight:600;">Staff Signature:</div>
                 ${
                   staff_signature
                     ? `<img class="sig" src="${staff_signature}">`
-                    : `<div class="sig" style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
+                    : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
                 }
               </div>
               <div>
@@ -359,7 +380,7 @@
                 ${
                   client_signature
                     ? `<img class="sig" src="${client_signature}">`
-                    : `<div class="sig" style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
+                    : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
                 }
               </div>
             </div>
@@ -369,32 +390,21 @@
             I certify that the services listed above were actually provided to the participant in accordance with the participant’s Individual Program Plan (IPP) and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
           </div>
 
-          <div style="display:flex;gap:40px;margin-top:14px;">
-            <div>
-              <div class="line"></div>
-              <div style="font-size:9.5px;margin-top:3px;">Staff / Provider Signature &nbsp;&nbsp; Date: ___________</div>
-            </div>
-            <div>
-              <div class="line"></div>
-              <div style="font-size:9.5px;margin-top:3px;">Participant / Parent / Authorized Rep &nbsp;&nbsp; Date: ___________</div>
-            </div>
-          </div>
-
           <div style="margin-top:14px;font-size:9px;color:#6b7280;">
-            ${businessName} • ${contactLine}
+            ${businessName} • ${CONTACT_LINE}
           </div>
         </div>
       </body>
       </html>
     `);
 
+    // inject the to12h function into the new window (simpler: re-string)
     win.document.close();
     win.focus();
     setTimeout(() => {
       win.print();
     }, 400);
   }
-
   btnExport.addEventListener("click", exportDay);
 })();
 </script>
