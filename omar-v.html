@@ -5,60 +5,41 @@
   <title>ESS • Weekly Chart (Mon–Sun)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* base */
     html,body{margin:0;padding:0;background:#f7f7fb;color:#0f172a}
     *,*::before,*::after{box-sizing:border-box}
-
-    /* layout helpers (prevents overlap) */
     .row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
     .row > *{min-width:240px;flex:1}
     .weekbar{display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;padding:10px;border-radius:10px;background:#f8fafc;flex-wrap:wrap}
-    .weekbar > *{flex:0 0 auto}
     .weekbar .spacer{flex:1 1 auto;min-width:60px}
-
-    /* buttons */
     .btn{padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
     .btn--primary{border-color:#2c3e50;background:#2c3e50;color:#fff}
     .btn--dark{border-color:#1f2937;background:#1f2937;color:#fff}
     .btn--icon{width:36px;height:36px}
-
-    /* day tiles */
     .daybtn{position:relative;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;cursor:pointer;width:100%;text-align:left}
     .dot{position:absolute;right:10px;top:10px;width:8px;height:8px;border-radius:999px;background:#e5e7eb}
-
-    /* inputs */
     .input,.select,.textarea{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px}
     .textarea{min-height:120px;resize:vertical}
-
-    /* labels/pills */
     .label{display:block;color:#6b7280;font-size:12px;margin-bottom:6px}
     .pill{font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a}
-
-    /* toast + error */
     #w_toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s}
     #w_error{display:none;margin-top:12px;padding:10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b}
-
-    /* signatures */
     .sig-wrap{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:14px;padding:18px;margin-top:14px;}
     .sig-title{font-weight:600;margin-bottom:8px;}
     .sig-box{border:1px dashed #d1d5db;border-radius:10px;background:#fff;}
-    canvas.sig{width:100%;height:140px;display:block;border-radius:10px;}
+    canvas.sig{width:100%;height:140px;display:block;border-radius:10px;touch-action:none;cursor:crosshair;}
   </style>
 </head>
 <body>
-
 <section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
     <h2 style="margin:0;">📅 Weekly Chart (Mon–Sun)</h2>
-    <button id="w_submitWeek" disabled title="Weekly submit will be enabled next"
-            class="btn btn--primary" style="opacity:.6;cursor:not-allowed;">
+    <!-- ✅ now enabled -->
+    <button id="w_submitWeek" class="btn btn--primary">
       Submit Weekly Report
     </button>
   </div>
 
-  <!-- Staff + fixed client -->
   <div class="row" style="margin-bottom:10px;">
-    <!-- 🔒 pinned to Omar V. -->
     <input type="hidden" id="client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" />
     <div>
       <label for="staff_id" class="label">Staff (type your name)</label>
@@ -67,7 +48,6 @@
     <span class="pill">Drafts: server + local</span>
   </div>
 
-  <!-- Week bar -->
   <div class="weekbar">
     <button id="w_prevWeek" aria-label="Previous week" class="btn btn--icon">◀</button>
     <div>
@@ -78,14 +58,11 @@
     <div class="spacer"></div>
   </div>
 
-  <!-- Days grid -->
   <div id="w_days" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:14px;"></div>
 
-  <!-- Day panel -->
   <div id="w_panel" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px;">
     <div id="w_panelDate" style="color:#6b7280;margin-bottom:10px;"></div>
 
-    <!-- Times + Modality -->
     <div class="row">
       <div>
         <label for="w_start" class="label">Start Time</label>
@@ -105,7 +82,6 @@
       </div>
     </div>
 
-    <!-- Hours + Domain -->
     <div class="row" style="margin-top:12px;">
       <div>
         <label for="w_hours" class="label">Hours Worked</label>
@@ -117,11 +93,10 @@
       </div>
     </div>
 
-    <!-- Regional Center + Service Coordinator -->
     <div class="row" style="margin-top:12px;">
       <div>
         <label for="w_rc" class="label">Regional Center</label>
-        <input id="w_rc" type="text" class="input" placeholder="e.g., San Gabriel / Pomona RC">
+        <input id="w_rc" type="text" class="input" placeholder="e.g., SG/PRC">
       </div>
       <div>
         <label for="w_sc" class="label">Service Coordinator</label>
@@ -129,25 +104,21 @@
       </div>
     </div>
 
-    <!-- Progress Notes -->
     <div style="margin-top:12px;">
       <label for="w_notes" class="label">Progress Notes</label>
       <textarea id="w_notes" class="textarea" placeholder="what/where/with whom, goals"></textarea>
     </div>
 
-    <!-- Observation -->
     <div style="margin-top:12px;">
       <label for="w_obs" class="label">Observation</label>
       <textarea id="w_obs" class="textarea" placeholder="reaction/response to today's services"></textarea>
     </div>
 
-    <!-- Action Plan -->
     <div style="margin-top:12px;">
       <label for="w_plan" class="label">Action Plan</label>
       <textarea id="w_plan" class="textarea" placeholder="next steps to work on the service codes"></textarea>
     </div>
 
-    <!-- SIGNATURES -->
     <div class="sig-wrap">
       <div style="display:flex;gap:20px;flex-wrap:wrap;">
         <div style="flex:1;min-width:240px;">
@@ -169,7 +140,6 @@
       </div>
     </div>
 
-    <!-- Actions -->
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
       <button id="w_clearDay" class="btn">Clear Day</button>
       <button id="w_saveDay"  class="btn btn--dark">Save Day (Draft)</button>
@@ -177,25 +147,19 @@
     </div>
   </div>
 
-  <!-- Error banner (hidden by default) -->
   <div id="w_error"></div>
-
-  <!-- Toast -->
   <div id="w_toast"></div>
 </section>
 
-<!-- Supabase client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   try {
-    /* ===== Supabase boot ===== */
     const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const ess = sb.schema("ess");
 
-    /* ===== DOM ===== */
     const $ = (id)=>document.getElementById(id);
     const CLIENT_ID_INPUT = $("client_id");
     const STAFF_INPUT     = $("staff_id");
@@ -208,94 +172,81 @@ document.addEventListener('DOMContentLoaded', () => {
     const w_obs=$("w_obs"), w_plan=$("w_plan");
     const w_rc=$("w_rc"), w_sc=$("w_sc");
     const w_saveDay=$("w_saveDay"), w_clearDay=$("w_clearDay"), w_submitDay=$("w_submitDay");
+    const w_submitWeek = $("w_submitWeek");
     const w_toast=$("w_toast"), w_error=$("w_error");
 
-    /* ===== Signatures ===== */
     const staffSigCanvas = $("staffSig");
     const clientSigCanvas = $("clientSig");
-    let staffSigCtx, clientSigCtx;
     let staffSigData = null, clientSigData = null;
 
-    function resizeCanvasForHiDPI(c) {
-      const rect = c.getBoundingClientRect();
+    function initSignatureCanvas(canvas){
+      const box = canvas.getBoundingClientRect();
       const ratio = window.devicePixelRatio || 1;
-      c.width  = rect.width * ratio;
-      c.height = rect.height * ratio;
-      const ctx = c.getContext('2d');
+      canvas.width  = box.width * ratio;
+      canvas.height = 140 * ratio;
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(1,0,0,1,0,0);
       ctx.scale(ratio, ratio);
       ctx.lineWidth = 2;
       ctx.lineCap = "round";
       ctx.strokeStyle = "#000";
       return ctx;
     }
-    staffSigCtx = resizeCanvasForHiDPI(staffSigCanvas);
-    clientSigCtx = resizeCanvasForHiDPI(clientSigCanvas);
 
-    const staffSig = { canvas: staffSigCanvas, ctx: staffSigCtx, drawing:false };
-    const clientSig = { canvas: clientSigCanvas, ctx: clientSigCtx, drawing:false };
+    let staffSigCtx = initSignatureCanvas(staffSigCanvas);
+    let clientSigCtx = initSignatureCanvas(clientSigCanvas);
 
-    function startDraw(e, which){
-      e.preventDefault();
-      const rect = which.canvas.getBoundingClientRect();
-      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-      which.drawing = true;
-      which.ctx.beginPath();
-      which.ctx.moveTo(x,y);
-    }
-    function draw(e, which){
-      if(!which.drawing) return;
-      const rect = which.canvas.getBoundingClientRect();
-      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-      which.ctx.lineTo(x,y);
-      which.ctx.stroke();
-    }
-    function endDraw(which){
-      if(!which.drawing) return;
-      which.drawing = false;
-      if(which === staffSig){
-        staffSigData = staffSigCanvas.toDataURL("image/png");
-      }else{
-        clientSigData = clientSigCanvas.toDataURL("image/png");
+    function makeDrawable(canvas, ctx, onEnd){
+      let drawing = false;
+      function getPos(e){
+        const r = canvas.getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+        return {x,y};
       }
+      function down(e){ e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+      function move(e){ if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }
+      function up(){ if(!drawing) return; drawing=false; if(onEnd) onEnd(canvas); }
+
+      canvas.addEventListener("pointerdown", down);
+      canvas.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+      canvas.addEventListener("touchstart", down, {passive:false});
+      canvas.addEventListener("touchmove", move, {passive:false});
+      canvas.addEventListener("touchend", up);
     }
 
-    ["mousedown","touchstart"].forEach(ev=>{
-      staffSigCanvas.addEventListener(ev,(e)=>startDraw(e,staffSig));
-      clientSigCanvas.addEventListener(ev,(e)=>startDraw(e,clientSig));
-    });
-    ["mousemove","touchmove"].forEach(ev=>{
-      staffSigCanvas.addEventListener(ev,(e)=>draw(e,staffSig));
-      clientSigCanvas.addEventListener(ev,(e)=>draw(e,clientSig));
-    });
-    ["mouseup","mouseleave","touchend","touchcancel"].forEach(ev=>{
-      staffSigCanvas.addEventListener(ev,()=>endDraw(staffSig));
-      clientSigCanvas.addEventListener(ev,()=>endDraw(clientSig));
-    });
+    function captureCanvasData(c){ return c.toDataURL("image/png"); }
+
+    makeDrawable(staffSigCanvas, staffSigCtx, (c)=>{ staffSigData = captureCanvasData(c); });
+    makeDrawable(clientSigCanvas, clientSigCtx, (c)=>{ clientSigData = captureCanvasData(c); });
 
     $("clearStaffSig").addEventListener("click",()=>{
-      const rect = staffSigCanvas.getBoundingClientRect();
-      staffSigCtx.clearRect(0,0,rect.width,rect.height);
+      staffSigCtx.clearRect(0,0,staffSigCanvas.width,staffSigCanvas.height);
       staffSigData = null;
     });
     $("clearClientSig").addEventListener("click",()=>{
-      const rect = clientSigCanvas.getBoundingClientRect();
-      clientSigCtx.clearRect(0,0,rect.width,rect.height);
+      clientSigCtx.clearRect(0,0,clientSigCanvas.width,clientSigCanvas.height);
       clientSigData = null;
     });
 
-    function repaintSignature(canvas, ctx, dataUrl){
-      const rect = canvas.getBoundingClientRect();
-      ctx.clearRect(0,0,rect.width,rect.height);
-      if(!dataUrl) return;
-      const img = new Image();
-      img.onload = ()=>{ ctx.drawImage(img,0,0,rect.width,rect.height); };
-      img.src = dataUrl;
-    }
+    window.addEventListener("resize", ()=>{
+      staffSigCtx = initSignatureCanvas(staffSigCanvas);
+      clientSigCtx = initSignatureCanvas(clientSigCanvas);
+      // don't wipe saved data on resize
+      if (staffSigData){
+        const img = new Image();
+        img.onload = ()=> staffSigCtx.drawImage(img,0,0,staffSigCanvas.width/(window.devicePixelRatio||1),140);
+        img.src = staffSigData;
+      }
+      if (clientSigData){
+        const img = new Image();
+        img.onload = ()=> clientSigCtx.drawImage(img,0,0,clientSigCanvas.width/(window.devicePixelRatio||1),140);
+        img.src = clientSigData;
+      }
+    });
 
-    /* ===== helpers ===== */
-    function toast(m){w_toast.textContent=m;w_toast.style.opacity='1';setTimeout(()=>w_toast.style.opacity='0',1400);}
+    function toast(m){w_toast.textContent=m;w_toast.style.opacity='1';setTimeout(()=>w_toast.style.opacity='0',1600);}
     const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(d);
     const ymd = (d)=>d.toISOString().slice(0,10);
     function startOfWeekMonday(d){const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=nd.getDay();const diff=(day===0?-6:1-day);nd.setDate(nd.getDate()+diff);nd.setHours(0,0,0,0);return nd;}
@@ -331,9 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
       const insert = await ess.from("staff").insert([{ id: newId, full_name: nameOrId }]).select("id").maybeSingle();
-      if (insert.error) {
-        throw new Error(`Could not add staff "${nameOrId}". Ask admin to allow INSERT/SELECT on ess.staff for this page. (${insert.error.message})`);
-      }
+      if (insert.error) throw new Error(`Could not add staff "${nameOrId}". (${insert.error.message})`);
 
       const resolved = insert.data?.id || newId;
       staffUuidCache.set(nameOrId, resolved);
@@ -345,7 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const dayKey  = (wk,i)=>`essWeek_${getClientId()}_${getStaffName()}_${ymd(wk)}_d${i}`;
 
-    /* ===== server helpers ===== */
     async function fetchDraft(i){
       try{
         const staffUuid = await getOrCreateStaffUuid();
@@ -409,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (error) throw error;
     }
 
-    /* ===== UI ===== */
     function markDots(){
       for(let i=0;i<7;i++){
         const dot = document.getElementById(`w_dot${i}`);
@@ -472,7 +419,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function openDay(i){
       activeIndex=i; 
       w_error.style.display='none'; 
-      w_error.textContent='';
       [...w_days.children].forEach((el,idx)=>{ el.style.outline=(idx===i)?'2px solid #0ea5e9':'none'; });
 
       const d=addDays(current,i);
@@ -494,8 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         staffSigData = srv.staff_signature || null;
         clientSigData = srv.client_signature || null;
-        repaintSignature(staffSigCanvas, staffSigCtx, staffSigData);
-        repaintSignature(clientSigCanvas, clientSigCtx, clientSigData);
+        repaintSig();
       }else{
         const raw=localStorage.getItem(dayKey(current,i));
         if(raw){
@@ -511,31 +456,41 @@ document.addEventListener('DOMContentLoaded', () => {
             w_modality.value = obj.modality ?? 'Remote';
             w_rc.value = obj.regional_center ?? '';
             w_sc.value = obj.service_coordinator ?? '';
-
             staffSigData = obj.staff_signature || null;
             clientSigData = obj.client_signature || null;
-            repaintSignature(staffSigCanvas, staffSigCtx, staffSigData);
-            repaintSignature(clientSigCanvas, clientSigCtx, clientSigData);
+            repaintSig();
           }catch{
-            w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
-            w_modality.value='Remote';
-            w_rc.value = '';
-            w_sc.value = '';
-            staffSigData = clientSigData = null;
-            repaintSignature(staffSigCanvas, staffSigCtx, null);
-            repaintSignature(clientSigCanvas, clientSigCtx, null);
+            resetDay();
           }
         }else{
-          w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
-          w_modality.value='Remote';
-          w_rc.value = '';
-          w_sc.value = '';
-          staffSigData = clientSigData = null;
-          repaintSignature(staffSigCanvas, staffSigCtx, null);
-          repaintSignature(clientSigCanvas, clientSigCtx, null);
+          resetDay();
         }
       }
       w_panel.style.display='block';
+    }
+
+    function repaintSig(){
+      staffSigCtx.clearRect(0,0,staffSigCanvas.width,staffSigCanvas.height);
+      clientSigCtx.clearRect(0,0,clientSigCanvas.width,clientSigCanvas.height);
+      if (staffSigData){
+        const img = new Image();
+        img.onload = ()=> staffSigCtx.drawImage(img,0,0,staffSigCanvas.width/(window.devicePixelRatio||1),140);
+        img.src = staffSigData;
+      }
+      if (clientSigData){
+        const img = new Image();
+        img.onload = ()=> clientSigCtx.drawImage(img,0,0,clientSigCanvas.width/(window.devicePixelRatio||1),140);
+        img.src = clientSigData;
+      }
+    }
+
+    function resetDay(){
+      w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
+      w_modality.value='Remote';
+      w_rc.value = '';
+      w_sc.value = '';
+      staffSigData = clientSigData = null;
+      repaintSig();
     }
 
     function buildPayload(){
@@ -580,13 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearDay(){
       if(activeIndex==null) return;
       localStorage.removeItem(dayKey(current,activeIndex));
-      w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
-      w_modality.value='Remote';
-      w_rc.value = '';
-      w_sc.value = '';
-      staffSigData = clientSigData = null;
-      repaintSignature(staffSigCanvas, staffSigCtx, null);
-      repaintSignature(clientSigCanvas, clientSigCtx, null);
+      resetDay();
       markDots();
       toast('Day cleared locally. Server draft remains until overwritten.');
     }
@@ -610,16 +559,103 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    async function submitWeek(){
+      if(!getStaffName()){
+        toast('Type Staff name first');
+        return;
+      }
+      let staffUuid;
+      try {
+        staffUuid = await getOrCreateStaffUuid();
+      } catch (e) {
+        w_error.style.display='block';
+        w_error.textContent = e.message;
+        return;
+      }
+
+      const weekStart = ymd(current);
+      const entries = [];
+      const names = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+      for (let i=0;i<7;i++){
+        let srv = await fetchDraft(i);
+        if (!srv){
+          const raw = localStorage.getItem(dayKey(current,i));
+          if (raw){
+            try {
+              const obj = JSON.parse(raw);
+              srv = {
+                date: obj.date || ymd(addDays(current,i)),
+                hours: obj.hours || '',
+                activities: obj.activities || obj.domain || '',
+                notes: mergeNotes(obj.notes_only||obj.notes||'', obj.observation||'', obj.action_plan||''),
+                start_time: obj.start_time || '',
+                end_time: obj.end_time || '',
+                modality: obj.modality || 'Remote',
+                regional_center: obj.regional_center || '',
+                service_coordinator: obj.service_coordinator || '',
+                staff_signature: obj.staff_signature || null,
+                client_signature: obj.client_signature || null
+              };
+            } catch {}
+          }
+        }
+        if (srv){
+          // ✅ match admin portal format
+          const hrsNum = srv.hours ? Number(srv.hours) : null;
+          entries.push({
+            dayIndex: i,
+            label: names[i],
+            date: srv.date || ymd(addDays(current,i)),
+            start_time: srv.start_time || "",
+            end_time: srv.end_time || "",
+            hours: hrsNum !== null && !Number.isNaN(hrsNum) ? hrsNum : null,
+            modality: srv.modality || "Remote",
+            domain: srv.activities || "",
+            notes: srv.notes || "",
+            staff_signature: srv.staff_signature || "",
+            client_signature: srv.client_signature || "",
+            regional_center: srv.regional_center || "",
+            service_coordinator: srv.service_coordinator || "",
+            source: "weekly"     // 👈 admin will now see source==="weekly"
+          });
+        }
+      }
+
+      if (!entries.length){
+        toast('No days to submit ❌');
+        return;
+      }
+
+      const { error } = await ess.from("weekly_reports")
+        .upsert({
+          client_id: getClientId(),
+          staff_id: staffUuid,
+          week_start: weekStart,
+          entries: entries,
+          submitted_at: new Date().toISOString()
+        }, { onConflict: "client_id,staff_id,week_start" });
+
+      if (error){
+        console.error(error);
+        w_error.style.display='block';
+        w_error.textContent = 'Weekly submit failed: ' + error.message;
+        toast('Weekly submit failed ❌');
+        return;
+      }
+
+      toast('Weekly report submitted ✅');
+    }
+
     function shiftWeek(delta){ current=addDays(current,7*delta); renderWeek(); }
 
-    /* ===== Bind ===== */
     w_prevWeek.addEventListener('click',()=>shiftWeek(-1));
     w_nextWeek.addEventListener('click',()=>shiftWeek(1));
     w_saveDay.addEventListener('click',saveDay);
     w_clearDay.addEventListener('click',clearDay);
     w_submitDay.addEventListener('click',submitDay);
+    w_submitWeek.addEventListener('click',submitWeek);
 
-    /* ===== Start ===== */
     renderWeek();
   } catch (e) {
     const err = document.getElementById('w_error');
