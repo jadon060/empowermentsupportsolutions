@@ -33,14 +33,21 @@
 <section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
     <h2 style="margin:0;">📅 Weekly Chart (Mon–Sun)</h2>
-    <!-- ✅ now enabled -->
     <button id="w_submitWeek" class="btn btn--primary">
       Submit Weekly Report
     </button>
   </div>
 
+  <!-- ✅ top bar -->
   <div class="row" style="margin-bottom:10px;">
+    <!-- real client id for supabase -->
     <input type="hidden" id="client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" />
+    <!-- show client name but lock it -->
+    <div>
+      <label class="label">Client</label>
+      <input type="text" class="input" value="Omar V." readonly style="background:#e5e7eb;cursor:not-allowed;">
+    </div>
+    <!-- staff still types their own name -->
     <div>
       <label for="staff_id" class="label">Staff (type your name)</label>
       <input id="staff_id" type="text" class="input" placeholder="e.g., Maria Perez" required />
@@ -161,8 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const ess = sb.schema("ess");
 
     const $ = (id)=>document.getElementById(id);
-    const CLIENT_ID_INPUT = $("client_id");
-    const STAFF_INPUT     = $("staff_id");
+    const CLIENT_ID_INPUT = $("client_id");              // fixed Omar UUID
+    const STAFF_INPUT     = $("staff_id");               // staff still types this
 
     const w_days=$("w_days"), w_range=$("w_range"), w_startTxt=$("w_startTxt"), w_endTxt=$("w_endTxt");
     const w_prevWeek=$("w_prevWeek"), w_nextWeek=$("w_nextWeek");
@@ -179,22 +186,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const clientSigCanvas = $("clientSig");
     let staffSigData = null, clientSigData = null;
 
-    function initSignatureCanvas(canvas){
+    function initSignatureCanvas(canvas, existingDataUrl){
       const box = canvas.getBoundingClientRect();
       const ratio = window.devicePixelRatio || 1;
-      canvas.width  = box.width * ratio;
-      canvas.height = 140 * ratio;
+      const width = Math.max(1, box.width);
+      const height = 140;
+      canvas.width  = width * ratio;
+      canvas.height = height * ratio;
       const ctx = canvas.getContext('2d');
       ctx.setTransform(1,0,0,1,0,0);
       ctx.scale(ratio, ratio);
       ctx.lineWidth = 2;
       ctx.lineCap = "round";
       ctx.strokeStyle = "#000";
+      if (existingDataUrl){
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, width, height);
+        img.src = existingDataUrl;
+      }
       return ctx;
     }
 
-    let staffSigCtx = initSignatureCanvas(staffSigCanvas);
-    let clientSigCtx = initSignatureCanvas(clientSigCanvas);
+    let staffSigCtx = initSignatureCanvas(staffSigCanvas, null);
+    let clientSigCtx = initSignatureCanvas(clientSigCanvas, null);
 
     function makeDrawable(canvas, ctx, onEnd){
       let drawing = false;
@@ -231,18 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener("resize", ()=>{
-      staffSigCtx = initSignatureCanvas(staffSigCanvas);
-      clientSigCtx = initSignatureCanvas(clientSigCanvas);
-      // don't wipe saved data on resize
-      if (staffSigData){
-        const img = new Image();
-        img.onload = ()=> staffSigCtx.drawImage(img,0,0,staffSigCanvas.width/(window.devicePixelRatio||1),140);
-        img.src = staffSigData;
-      }
-      if (clientSigData){
-        const img = new Image();
-        img.onload = ()=> clientSigCtx.drawImage(img,0,0,clientSigCanvas.width/(window.devicePixelRatio||1),140);
-        img.src = clientSigData;
+      if (w_panel.style.display !== "none") {
+        staffSigCtx = initSignatureCanvas(staffSigCanvas, staffSigData);
+        clientSigCtx = initSignatureCanvas(clientSigCanvas, clientSigData);
       }
     });
 
@@ -252,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startOfWeekMonday(d){const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=nd.getDay();const diff=(day===0?-6:1-day);nd.setDate(nd.getDate()+diff);nd.setHours(0,0,0,0);return nd;}
     function addDays(d,n){const nd=new Date(d);nd.setDate(nd.getDate()+n);return nd;}
 
-    const getClientId  = ()=> CLIENT_ID_INPUT.value;
+    const getClientId  = ()=> CLIENT_ID_INPUT.value;                // 👈 fixed
     const getStaffName = ()=> (STAFF_INPUT.value || "").replace(/\s+/g,' ').trim();
     const isUuid = (s)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
 
@@ -424,6 +429,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const d=addDays(current,i);
       w_panelDate.textContent=`${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} — ${fmt(d)}`;
 
+      w_panel.style.display='block';
+      staffSigCtx  = initSignatureCanvas(staffSigCanvas,  staffSigData);
+      clientSigCtx = initSignatureCanvas(clientSigCanvas, clientSigData);
+
       const srv=await fetchDraft(i);
       if(srv){
         w_hours.value = srv.hours ?? '';
@@ -440,7 +449,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         staffSigData = srv.staff_signature || null;
         clientSigData = srv.client_signature || null;
-        repaintSig();
+        staffSigCtx  = initSignatureCanvas(staffSigCanvas,  staffSigData);
+        clientSigCtx = initSignatureCanvas(clientSigCanvas, clientSigData);
       }else{
         const raw=localStorage.getItem(dayKey(current,i));
         if(raw){
@@ -456,31 +466,17 @@ document.addEventListener('DOMContentLoaded', () => {
             w_modality.value = obj.modality ?? 'Remote';
             w_rc.value = obj.regional_center ?? '';
             w_sc.value = obj.service_coordinator ?? '';
+
             staffSigData = obj.staff_signature || null;
             clientSigData = obj.client_signature || null;
-            repaintSig();
+            staffSigCtx  = initSignatureCanvas(staffSigCanvas,  staffSigData);
+            clientSigCtx = initSignatureCanvas(clientSigCanvas, clientSigData);
           }catch{
             resetDay();
           }
         }else{
           resetDay();
         }
-      }
-      w_panel.style.display='block';
-    }
-
-    function repaintSig(){
-      staffSigCtx.clearRect(0,0,staffSigCanvas.width,staffSigCanvas.height);
-      clientSigCtx.clearRect(0,0,clientSigCanvas.width,clientSigCanvas.height);
-      if (staffSigData){
-        const img = new Image();
-        img.onload = ()=> staffSigCtx.drawImage(img,0,0,staffSigCanvas.width/(window.devicePixelRatio||1),140);
-        img.src = staffSigData;
-      }
-      if (clientSigData){
-        const img = new Image();
-        img.onload = ()=> clientSigCtx.drawImage(img,0,0,clientSigCanvas.width/(window.devicePixelRatio||1),140);
-        img.src = clientSigData;
       }
     }
 
@@ -489,8 +485,10 @@ document.addEventListener('DOMContentLoaded', () => {
       w_modality.value='Remote';
       w_rc.value = '';
       w_sc.value = '';
-      staffSigData = clientSigData = null;
-      repaintSig();
+      staffSigData = null;
+      clientSigData = null;
+      staffSigCtx  = initSignatureCanvas(staffSigCanvas,  null);
+      clientSigCtx = initSignatureCanvas(clientSigCanvas, null);
     }
 
     function buildPayload(){
@@ -601,7 +599,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
         if (srv){
-          // ✅ match admin portal format
           const hrsNum = srv.hours ? Number(srv.hours) : null;
           entries.push({
             dayIndex: i,
@@ -617,7 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
             client_signature: srv.client_signature || "",
             regional_center: srv.regional_center || "",
             service_coordinator: srv.service_coordinator || "",
-            source: "weekly"     // 👈 admin will now see source==="weekly"
+            source: "weekly"
           });
         }
       }
