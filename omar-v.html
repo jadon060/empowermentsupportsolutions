@@ -50,7 +50,6 @@
 <section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
     <h2 style="margin:0;">📅 Weekly Chart (Mon–Sun)</h2>
-    <!-- reserved for future weekly submit -->
     <button id="w_submitWeek" disabled title="Weekly submit will be enabled next"
             class="btn btn--primary" style="opacity:.6;cursor:not-allowed;">
       Submit Weekly Report
@@ -59,7 +58,7 @@
 
   <!-- Staff + fixed client -->
   <div class="row" style="margin-bottom:10px;">
-    <!-- 🔒 this pins the form to Omar V. -->
+    <!-- 🔒 pinned to Omar V. -->
     <input type="hidden" id="client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" />
     <div>
       <label for="staff_id" class="label">Staff (type your name)</label>
@@ -115,6 +114,18 @@
       <div>
         <label for="w_domain" class="label">Domain (service codes worked on)</label>
         <input id="w_domain" type="text" placeholder="e.g., Money Mgmt, Hygiene, Safety…" class="input">
+      </div>
+    </div>
+
+    <!-- Regional Center + Service Coordinator -->
+    <div class="row" style="margin-top:12px;">
+      <div>
+        <label for="w_rc" class="label">Regional Center</label>
+        <input id="w_rc" type="text" class="input" placeholder="e.g., San Gabriel / Pomona RC">
+      </div>
+      <div>
+        <label for="w_sc" class="label">Service Coordinator</label>
+        <input id="w_sc" type="text" class="input" placeholder="e.g., Imani T.">
       </div>
     </div>
 
@@ -195,10 +206,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const w_start=$("w_start"), w_end=$("w_end"), w_modality=$("w_modality");
     const w_hours=$("w_hours"), w_domain=$("w_domain"), w_notes=$("w_notes");
     const w_obs=$("w_obs"), w_plan=$("w_plan");
+    const w_rc=$("w_rc"), w_sc=$("w_sc");
     const w_saveDay=$("w_saveDay"), w_clearDay=$("w_clearDay"), w_submitDay=$("w_submitDay");
     const w_toast=$("w_toast"), w_error=$("w_error");
 
-    /* ===== Signatures (2 canvases) ===== */
+    /* ===== Signatures ===== */
     const staffSigCanvas = $("staffSig");
     const clientSigCanvas = $("clientSig");
     let staffSigCtx, clientSigCtx;
@@ -298,9 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function getOrCreateStaffUuid() {
       const nameOrId = getStaffName();
       if (!nameOrId) return null;
-
       if (isUuid(nameOrId)) return nameOrId;
-
       if (staffUuidCache.has(nameOrId)) return staffUuidCache.get(nameOrId);
 
       let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", nameOrId).maybeSingle();
@@ -341,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const staffUuid = await getOrCreateStaffUuid();
         if(!staffUuid) return null;
         const { data } = await ess.from("daily_drafts")
-          .select("hours, activities, notes, date, submitted, start_time, end_time, modality, staff_signature, client_signature")
+          .select("hours, activities, notes, date, submitted, start_time, end_time, modality, staff_signature, client_signature, regional_center, service_coordinator")
           .eq("client_id", getClientId()).eq("staff_id", staffUuid)
           .eq("week_start", ymd(current)).eq("day_index", i).maybeSingle();
         return data||null;
@@ -362,6 +372,8 @@ document.addEventListener('DOMContentLoaded', () => {
           modality: payload.modality||'Remote',
           staff_signature: payload.staff_signature || null,
           client_signature: payload.client_signature || null,
+          regional_center: payload.regional_center || null,
+          service_coordinator: payload.service_coordinator || null,
           submitted: false
         };
         await ess.from("daily_drafts").upsert(body, { onConflict: "client_id,staff_id,week_start,day_index" });
@@ -385,6 +397,8 @@ document.addEventListener('DOMContentLoaded', () => {
         activities: acts,
         staff_signature: payload.staff_signature || null,
         client_signature: payload.client_signature || null,
+        regional_center: payload.regional_center || null,
+        service_coordinator: payload.service_coordinator || null,
         signed_at: new Date().toISOString()
       };
 
@@ -475,6 +489,8 @@ document.addEventListener('DOMContentLoaded', () => {
         w_start.value = srv.start_time ?? '';
         w_end.value   = srv.end_time ?? '';
         w_modality.value = srv.modality ?? 'Remote';
+        w_rc.value = srv.regional_center ?? '';
+        w_sc.value = srv.service_coordinator ?? '';
 
         staffSigData = srv.staff_signature || null;
         clientSigData = srv.client_signature || null;
@@ -493,6 +509,8 @@ document.addEventListener('DOMContentLoaded', () => {
             w_start.value = obj.start_time ?? '';
             w_end.value   = obj.end_time ?? '';
             w_modality.value = obj.modality ?? 'Remote';
+            w_rc.value = obj.regional_center ?? '';
+            w_sc.value = obj.service_coordinator ?? '';
 
             staffSigData = obj.staff_signature || null;
             clientSigData = obj.client_signature || null;
@@ -501,6 +519,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }catch{
             w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
             w_modality.value='Remote';
+            w_rc.value = '';
+            w_sc.value = '';
             staffSigData = clientSigData = null;
             repaintSignature(staffSigCanvas, staffSigCtx, null);
             repaintSignature(clientSigCanvas, clientSigCtx, null);
@@ -508,6 +528,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }else{
           w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
           w_modality.value='Remote';
+          w_rc.value = '';
+          w_sc.value = '';
           staffSigData = clientSigData = null;
           repaintSignature(staffSigCanvas, staffSigCtx, null);
           repaintSignature(clientSigCanvas, clientSigCtx, null);
@@ -529,6 +551,8 @@ document.addEventListener('DOMContentLoaded', () => {
         start_time: (w_start.value||''),
         end_time: (w_end.value||''),
         modality: (w_modality.value||'Remote'),
+        regional_center: (w_rc.value || ''),
+        service_coordinator: (w_sc.value || ''),
         staff_signature: staffSigData || null,
         client_signature: clientSigData || null
       };
@@ -558,6 +582,8 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem(dayKey(current,activeIndex));
       w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
       w_modality.value='Remote';
+      w_rc.value = '';
+      w_sc.value = '';
       staffSigData = clientSigData = null;
       repaintSignature(staffSigCanvas, staffSigCtx, null);
       repaintSignature(clientSigCanvas, clientSigCtx, null);
@@ -571,8 +597,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const payload = buildPayload();
       try{
-        await insertDailyEntry(payload);          // official
-        await upsertDraft(activeIndex, payload);  // keep admin copy
+        await insertDailyEntry(payload);
+        await upsertDraft(activeIndex, payload);
         localStorage.setItem(dayKey(current,activeIndex), JSON.stringify({ ...payload, domain: payload.activities }));
         markDots();
         toast('Day submitted (official) ✅');
