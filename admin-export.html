@@ -120,25 +120,31 @@
   const LOGO_URL = "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
   const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
 
-  // default date
+  // default date = today
   const today = new Date();
   dateInput.value = today.toISOString().slice(0,10);
 
   let currentDayData = null;
 
   async function loadClients() {
-    let { data: clients, error } = await ess.from("clients").select("id, full_name").order("full_name",{ascending:true});
     let options = [];
-    if (!error && Array.isArray(clients) && clients.length) {
-      options = clients.map(c => ({ id: c.id, label: c.full_name || c.id }));
-    } else {
-      const collected = new Map();
-      const { data: e1 } = await ess.from("daily_entries").select("client_id").limit(2000);
-      (e1||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
-      const { data: e2 } = await ess.from("daily_drafts").select("client_id").limit(2000);
-      (e2||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
-      options = Array.from(collected.keys()).map(id => ({ id, label: "Client – " + id.slice(0,8) }));
+    try {
+      let { data: clients, error } = await ess.from("clients").select("id, full_name").order("full_name",{ascending:true});
+      if (!error && Array.isArray(clients) && clients.length) {
+        options = clients.map(c => ({ id: c.id, label: c.full_name || c.id }));
+      } else {
+        // fallback to collecting from entries/drafts
+        const collected = new Map();
+        const { data: e1 } = await ess.from("daily_entries").select("client_id").limit(2000);
+        (e1||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
+        const { data: e2 } = await ess.from("daily_drafts").select("client_id").limit(2000);
+        (e2||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
+        options = Array.from(collected.keys()).map(id => ({ id, label: "Client – " + id.slice(0,8) }));
+      }
+    } catch (err) {
+      console.error("Client load error:", err);
     }
+
     clientSelect.innerHTML = options.length
       ? `<option value="">— select client —</option>` + options.map(o => `<option value="${o.id}">${o.label}</option>`).join("")
       : `<option value="">— no clients found —</option>`;
@@ -156,7 +162,6 @@
     return null;
   }
 
-  // split notes from staff form
   function splitNotes(raw) {
     if (!raw) return { progress: "", observation: "", action: "" };
     const P = "## Progress Notes:";
@@ -169,7 +174,7 @@
       const oIdx = raw.indexOf(O, pIdx);
       const aIdx = raw.indexOf(A, oIdx > -1 ? oIdx : pIdx);
 
-      progress = raw.slice(pIdx, oIdx > -1 ? oIdx : (aIdx > -1 ? aIdx : raw.length)).trim();
+      progress   = raw.slice(pIdx, oIdx > -1 ? oIdx : (aIdx > -1 ? aIdx : raw.length)).trim();
       if (oIdx > -1) {
         observation = raw.slice(oIdx + O.length, aIdx > -1 ? aIdx : raw.length).trim();
       }
@@ -182,10 +187,8 @@
     return { progress, observation, action };
   }
 
-  // format time to 12h
   function to12h(t) {
     if (!t) return "—";
-    // allow "16:01:00" or "16:01"
     const parts = t.split(":");
     let h = parseInt(parts[0], 10);
     const m = parts[1] ?? "00";
@@ -195,7 +198,6 @@
     return `${h}:${m.padStart(2,"0")} ${ampm}`;
   }
 
-  // compute hours if missing
   function computeHours(start, end) {
     if (!start || !end) return "";
     const [sh, sm] = start.split(":").map(Number);
@@ -203,7 +205,7 @@
     if (Number.isNaN(sh) || Number.isNaN(eh)) return "";
     const startMins = sh*60 + (sm||0);
     const endMins   = eh*60 + (em||0);
-    let diff = endMins - startMins;
+    const diff = endMins - startMins;
     if (diff <= 0) return "";
     return (diff/60).toFixed(2);
   }
@@ -219,14 +221,29 @@
     let staffIdFilter = null;
     if (staffName) staffIdFilter = await resolveStaffIdByName(staffName);
 
-    // official
-    let q = ess.from("daily_entries").select("*").eq("client_id", clientId).eq("service_date", serviceDate).limit(10);
-    if (staffIdFilter) q = q.eq("staff_id", staffIdFilter);
-    const { data: officialRows } = await q;
-    const official = Array.isArray(officialRows) && officialRows.length ? officialRows[0] : null;
+    // 1) official
+    let { data: officialRows } = await ess.from("daily_entries")
+      .select("*")
+      .eq("client_id", clientId)
+      .eq("service_date", serviceDate)
+      .limit(10)
+      .maybeSingle()
+      .then(r => ({ data: r.data ? [r.data] : [] })); // normalize
 
-    // draft
-    const { data: draftRows } = await ess.from("daily_drafts").select("*").eq("client_id", clientId).eq("date", serviceDate).limit(10);
+    // note: .maybeSingle() returned single, we wrapped
+
+    let official = Array.isArray(officialRows) && officialRows.length ? officialRows[0] : null;
+    if (official && staffIdFilter && official.staff_id !== staffIdFilter) {
+      official = null;
+    }
+
+    // 2) draft
+    const { data: draftRows } = await ess.from("daily_drafts")
+      .select("*")
+      .eq("client_id", clientId)
+      .eq("date", serviceDate)
+      .limit(10);
+
     const draft = Array.isArray(draftRows) && draftRows.length ? draftRows[0] : null;
 
     if (!official && !draft) {
@@ -294,7 +311,6 @@
 
   function exportDay() {
     if (!currentDayData) return;
-
     const {
       clientLabel, date, start_time, end_time, hours, modality,
       domain, notes, staff_signature, client_signature,
@@ -304,8 +320,11 @@
     const businessName = "Empowerment Support Solutions, LLC";
     const serviceCode  = serviceInput.value || "SDP Service Code";
     const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(new Date(d));
-
     const { progress, observation, action } = splitNotes(notes);
+
+    const start12  = start_time ? to12h(start_time) : "—";
+    const end12    = end_time ? to12h(end_time)     : "—";
+    const hoursStr = (hours !== "" && hours !== null) ? Number(hours).toFixed(2) : "—";
 
     const win = window.open("", "_blank", "width=900,height=1100");
     win.document.write(`
@@ -322,10 +341,7 @@
           img.sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
           .section-title{font-weight:600;font-size:11px;margin-top:6px;margin-bottom:3px;}
           .note-box{border:1px solid #e5e7eb;border-radius:6px;padding:4px 6px;min-height:40px;font-size:11px;white-space:pre-wrap;}
-          @media print {
-            body{background:#fff;}
-            .page{margin:0;}
-          }
+          @media print { body{background:#fff;} .page{margin:0;} }
         </style>
       </head>
       <body>
@@ -349,9 +365,9 @@
 
           <div class="box">
             <div style="font-size:11.5px;margin-bottom:4px;">
-              <strong>Time In:</strong> ${start_time ? ${'`'}${'${to12h(start_time)}'}${'`'} : "—"} &nbsp;
-              <strong>Time Out:</strong> ${end_time ? ${'`'}${'${to12h(end_time)}'}${'`'} : "—"} &nbsp;
-              <strong>Hours:</strong> ${hours !== "" && hours !== null ? Number(hours).toFixed(2) : "—"}
+              <strong>Time In:</strong> ${start12} &nbsp;
+              <strong>Time Out:</strong> ${end12} &nbsp;
+              <strong>Hours:</strong> ${hoursStr}
             </div>
             <div style="font-size:11.5px;margin-bottom:4px;"><strong>Location / Modality:</strong> ${modality || "—"}</div>
             <div style="font-size:11.5px;margin-bottom:4px;"><strong>Service / Domain:</strong> ${domain || "—"}</div>
@@ -397,13 +413,9 @@
       </body>
       </html>
     `);
-
-    // inject the to12h function into the new window (simpler: re-string)
     win.document.close();
     win.focus();
-    setTimeout(() => {
-      win.print();
-    }, 400);
+    setTimeout(() => win.print(), 400);
   }
   btnExport.addEventListener("click", exportDay);
 })();
