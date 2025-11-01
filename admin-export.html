@@ -21,7 +21,7 @@
 </head>
 <body>
 <header>
-  <img src="https://empowermentss.com/logo.png" alt="ESS" onerror="this.style.display='none'">
+  <img src="https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png" alt="ESS" onerror="this.style.display='none'">
   <div>
     <div style="font-weight:600;">Empowerment Support Solutions, LLC</div>
     <div style="font-size:.72rem;opacity:.7;">SDP • Service Log Export (Daily – Unified)</div>
@@ -118,6 +118,8 @@
   const btnLoad       = document.getElementById("loadDay");
   const btnExport     = document.getElementById("exportDay");
 
+  const LOGO_URL = "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
+
   // default date
   const today = new Date();
   dateInput.value = today.toISOString().slice(0,10);
@@ -154,6 +156,34 @@
     const { data, error } = await ess.from("staff").select("id").eq("full_name", name).maybeSingle();
     if (!error && data?.id) return data.id;
     return null;
+  }
+
+  // helper: split the "## Progress Notes" blob the staff form saves
+  function splitNotes(raw) {
+    if (!raw) return { progress: "", observation: "", action: "" };
+    const P = "## Progress Notes:";
+    const O = "## Observation:";
+    const A = "## Action Plan:";
+    let progress = "", observation = "", action = "";
+
+    if (raw.includes(P)) {
+      const pIdx = raw.indexOf(P) + P.length;
+      const oIdx = raw.indexOf(O, pIdx);
+      const aIdx = raw.indexOf(A, oIdx > -1 ? oIdx : pIdx);
+
+      progress = raw.slice(pIdx, oIdx > -1 ? oIdx : (aIdx > -1 ? aIdx : raw.length)).trim();
+      if (oIdx > -1) {
+        observation = raw.slice(oIdx + O.length, aIdx > -1 ? aIdx : raw.length).trim();
+      }
+      if (aIdx > -1) {
+        action = raw.slice(aIdx + A.length).trim();
+      }
+    } else {
+      // no markers, just dump whole thing under progress
+      progress = raw.trim();
+    }
+
+    return { progress, observation, action };
   }
 
   async function loadDay() {
@@ -235,7 +265,7 @@
   }
   btnLoad.addEventListener("click", loadDay);
 
-  // ===== PRINT-BASED EXPORT (works everywhere) =====
+  // ===== PRINT-BASED EXPORT =====
   function exportDay() {
     if (!currentDayData) return;
 
@@ -250,6 +280,9 @@
     const serviceCode  = serviceInput.value || "SDP Service Code";
     const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(new Date(d));
 
+    // split the notes into 3 nice sections
+    const { progress, observation, action } = splitNotes(notes);
+
     const win = window.open("", "_blank", "width=900,height=1100");
     win.document.write(`
       <html>
@@ -257,22 +290,27 @@
         <title>ESS_${clientLabel.replace(/\s+/g,"_")}_${date}.pdf</title>
         <style>
           body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;background:#fff;}
-          .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.6in 0.6in;box-sizing:border-box;}
-          .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+          .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in 0.5in 0.6in 0.5in;box-sizing:border-box;}
+          .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+          .header-left{max-width:70%;}
+          .logo{height:62px;object-fit:contain;}
           .box{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:10px;}
           .sigrow{display:flex;gap:20px;margin-top:10px;align-items:flex-end;}
           img.sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
           .line{width:210px;border-bottom:1px solid #000;height:46px;}
+          .label{font-weight:600;font-size:11px;margin-bottom:2px;}
+          .section-title{font-weight:600;font-size:11px;margin-top:6px;margin-bottom:3px;}
+          .note-box{border:1px solid #e5e7eb;border-radius:6px;padding:4px 6px;min-height:40px;font-size:11px;white-space:pre-wrap;}
           @media print {
             body{background:#fff;}
-            .page{margin:0;padding:0.6in 0.6in;}
+            .page{margin:0;}
           }
         </style>
       </head>
       <body>
         <div class="page">
           <div class="header">
-            <div>
+            <div class="header-left">
               <div style="font-size:15px;font-weight:700;">${businessName}</div>
               <div style="font-size:11px;">SDP – Daily Service Log (Unified: RC / SC / FMS)</div>
               <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${clientLabel}</div>
@@ -282,8 +320,9 @@
               <div style="font-size:11px;"><strong>Regional Center:</strong> ${regional_center || "—"}</div>
               <div style="font-size:11px;"><strong>Service Coordinator:</strong> ${service_coordinator || "—"}</div>
             </div>
-            <div style="font-size:10px;color:#94a3b8;text-align:right;">
-              ESS • Daily export
+            <div>
+              <img src="${LOGO_URL}" class="logo" onerror="this.style.display='none'">
+              <div style="font-size:10px;color:#94a3b8;text-align:right;margin-top:4px;">ESS • Daily export</div>
             </div>
           </div>
 
@@ -295,11 +334,17 @@
             </div>
             <div style="font-size:11.5px;margin-bottom:4px;"><strong>Location / Modality:</strong> ${modality || "—"}</div>
             <div style="font-size:11.5px;margin-bottom:4px;"><strong>Service / Domain:</strong> ${domain || "—"}</div>
-            <div style="font-size:11.5px;margin-bottom:4px;"><strong>Source:</strong> ${source}</div>
-            <div style="font-size:11.5px;margin-top:6px;"><strong>Description / Progress:</strong></div>
-            <div style="border:1px solid #e5e7eb;border-radius:6px;padding:5px 6px;white-space:pre-wrap;font-size:11px;min-height:60px;">
-              ${notes || "No note entered."}
-            </div>
+            <div style="font-size:11.5px;margin-bottom:6px;"><strong>Source:</strong> ${source}</div>
+
+            <div class="section-title">Description / Progress:</div>
+            <div class="note-box">${progress || "—"}</div>
+
+            <div class="section-title">Observation:</div>
+            <div class="note-box">${observation || "—"}</div>
+
+            <div class="section-title">Action Plan:</div>
+            <div class="note-box">${action || "—"}</div>
+
             <div class="sigrow">
               <div>
                 <div style="font-size:10.5px;font-weight:600;">Staff Signature:</div>
@@ -320,11 +365,11 @@
             </div>
           </div>
 
-          <div style="margin-top:14px;font-size:9.5px;line-height:1.35;">
+          <div style="margin-top:12px;font-size:9.5px;line-height:1.35;">
             I certify that the services listed above were actually provided to the participant in accordance with the participant’s Individual Program Plan (IPP) and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
           </div>
 
-          <div style="display:flex;gap:40px;margin-top:16px;">
+          <div style="display:flex;gap:40px;margin-top:14px;">
             <div>
               <div class="line"></div>
               <div style="font-size:9.5px;margin-top:3px;">Staff / Provider Signature &nbsp;&nbsp; Date: ___________</div>
@@ -335,7 +380,7 @@
             </div>
           </div>
 
-          <div style="margin-top:18px;font-size:9px;color:#6b7280;">
+          <div style="margin-top:14px;font-size:9px;color:#6b7280;">
             ${businessName} • ${contactLine}
           </div>
         </div>
@@ -343,13 +388,10 @@
       </html>
     `);
 
-    // give images (signatures) a moment
     win.document.close();
     win.focus();
     setTimeout(() => {
       win.print();
-      // you can close automatically if you want:
-      // setTimeout(() => win.close(), 500);
     }, 400);
   }
 
