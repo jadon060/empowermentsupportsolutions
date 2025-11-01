@@ -16,8 +16,16 @@
     button.btn-muted{background:#e5e7eb;color:#111827;}
     table{width:100%;border-collapse:collapse;}
     th,td{padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.75rem;}
-    #printArea{display:none;}
     .flex{display:flex;gap:10px;flex-wrap:wrap;}
+    /* 🧾 pdf area must be renderable, not display:none */
+    #printArea{
+      position:fixed;
+      top:-9999px;
+      left:-9999px;
+      width:8.5in;
+      background:#fff;
+      z-index:-1;
+    }
   </style>
 </head>
 <body>
@@ -30,6 +38,7 @@
 </header>
 
 <div class="wrap">
+  <!-- Controls -->
   <div class="card">
     <h2 style="margin-top:0;">Weekly export</h2>
     <div class="flex">
@@ -39,6 +48,7 @@
           <option value="">— loading clients… —</option>
         </select>
       </div>
+      <!-- keep UUID input but hide it -->
       <div style="display:none;">
         <label for="clientId">Client ID / UUID</label>
         <input id="clientId" value="">
@@ -78,6 +88,7 @@
     </div>
   </div>
 
+  <!-- Preview table -->
   <div class="card">
     <h3 style="margin-top:0;">Week days</h3>
     <table>
@@ -104,6 +115,7 @@
   </div>
 </div>
 
+<!-- off-screen printable area -->
 <div id="printArea"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -133,12 +145,14 @@
   const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(d);
   const ymd = (d)=>d.toISOString().slice(0,10);
 
+  // default to this Monday
   const now = new Date();
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
   weekInput.value = monday.toISOString().slice(0,10);
 
   let currentWeekData = null;
 
+  // load clients (from clients, fallback to entries/drafts)
   async function loadClients() {
     let options = [];
     let { data: clients, error } = await ess.from("clients").select("id, full_name").order("full_name",{ascending:true});
@@ -152,6 +166,7 @@
       (e2||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
       options = Array.from(collected.keys()).map(id => ({ id, label: "Client – " + id.slice(0,8) }));
     }
+
     clientSelect.innerHTML = "";
     if (!options.length) {
       clientSelect.innerHTML = `<option value="">— no clients found —</option>`;
@@ -173,6 +188,7 @@
       alert("Select a client first.");
       return;
     }
+
     let weekStart = new Date(weekInput.value);
     weekStart.setHours(0,0,0,0);
     const weekStartIso = ymd(weekStart);
@@ -180,13 +196,17 @@
     const fallbackRC = rcInput.value || "";
     const fallbackSC = scInput.value || "";
 
-    // 1️⃣ FIRST: try weekly_reports
+    // resolve staff id filter if given
     let staffIdFilter = null;
     if (staffName) {
       const { data: staffRow } = await ess.from("staff").select("id").eq("full_name", staffName).maybeSingle();
       staffIdFilter = staffRow?.id || null;
     }
 
+    const days = [];
+    let totalHours = 0;
+
+    // 1️⃣ try weekly_reports first
     let { data: weeklyRow } = await ess
       .from("weekly_reports")
       .select("client_id, staff_id, week_start, entries")
@@ -194,16 +214,12 @@
       .eq("week_start", weekStartIso)
       .maybeSingle();
 
-    const days = [];
-    let totalHours = 0;
-
     if (weeklyRow && Array.isArray(weeklyRow.entries) && weeklyRow.entries.length) {
-      // if staff filter is present, only keep that staff
-      const usableEntries = !staffIdFilter
+      const usable = !staffIdFilter
         ? weeklyRow.entries
         : weeklyRow.entries.filter(e => !e.staff_id || e.staff_id === staffIdFilter);
 
-      usableEntries.forEach(e => {
+      usable.forEach(e => {
         const hrs = e.hours ? Number(e.hours) : 0;
         totalHours += hrs;
         days.push({
@@ -224,7 +240,7 @@
         });
       });
 
-      // fill missing days (if any)
+      // fill any missing days
       for (let i=0;i<7;i++){
         if (!days.find(d => d.dayIndex === i)){
           const d = addDays(weekStart,i);
@@ -249,7 +265,7 @@
 
       days.sort((a,b)=>a.dayIndex-b.dayIndex);
     } else {
-      // 2️⃣ FALLBACK: old behavior (daily_entries + daily_drafts)
+      // 2️⃣ fallback to per-day tables
       for (let i=0; i<7; i++) {
         const d = addDays(weekStart, i);
         const iso = ymd(d);
@@ -344,6 +360,7 @@
       totalHours
     };
 
+    // render table
     daysBody.innerHTML = "";
     days.forEach(d => {
       const tr = document.createElement("tr");
