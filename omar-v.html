@@ -39,12 +39,10 @@
     #w_error{display:none;margin-top:12px;padding:10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b}
 
     /* signatures */
-    .sig-wrap{margin-top:16px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;padding:12px}
-    .sig-title{margin:0 0 8px 0;font-weight:600;color:#0f172a}
-    .sig-canvas{width:100%;height:130px;border:1px dashed #d1d5db;border-radius:8px;background:#fff;touch-action:none}
-    .sig-row{display:flex;gap:12px;flex-wrap:wrap}
-    .sig-row > div{flex:1 1 260px}
-    .sig-hint{font-size:12px;color:#6b7280;margin-top:4px}
+    .sig-wrap{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:14px;padding:18px;margin-top:14px;}
+    .sig-title{font-weight:600;margin-bottom:8px;}
+    .sig-box{border:1px dashed #d1d5db;border-radius:10px;background:#fff;}
+    canvas.sig{width:100%;height:140px;display:block;border-radius:10px;}
   </style>
 </head>
 <body>
@@ -136,21 +134,24 @@
       <textarea id="w_plan" class="textarea" placeholder="next steps to work on the service codes"></textarea>
     </div>
 
-    <!-- ✍️ Signatures -->
-    <div class="sig-wrap" id="w_sigSection">
-      <p class="sig-title">Signatures</p>
-      <div class="sig-row">
-        <div>
-          <label class="label" for="w_sig_staff">Staff Signature</label>
-          <canvas id="w_sig_staff" class="sig-canvas"></canvas>
-          <div class="sig-hint">Draw with mouse/finger.</div>
-          <button type="button" id="w_sig_staff_clear" class="btn" style="margin-top:6px;">Clear Staff Signature</button>
+    <!-- SIGNATURES -->
+    <div class="sig-wrap">
+      <div style="display:flex;gap:20px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:240px;">
+          <div class="sig-title">Staff Signature</div>
+          <div class="sig-box">
+            <canvas id="staffSig" class="sig"></canvas>
+          </div>
+          <div style="font-size:12px;color:#6b7280;margin-top:6px;">Draw with mouse/finger.</div>
+          <button id="clearStaffSig" class="btn" style="margin-top:8px;">Clear Staff Signature</button>
         </div>
-        <div>
-          <label class="label" for="w_sig_client">Client / Parent / Authorized Signature</label>
-          <canvas id="w_sig_client" class="sig-canvas"></canvas>
-          <div class="sig-hint">Draw with mouse/finger.</div>
-          <button type="button" id="w_sig_client_clear" class="btn" style="margin-top:6px;">Clear Client Signature</button>
+        <div style="flex:1;min-width:240px;">
+          <div class="sig-title">Client / Parent / Authorized Signature</div>
+          <div class="sig-box">
+            <canvas id="clientSig" class="sig"></canvas>
+          </div>
+          <div style="font-size:12px;color:#6b7280;margin-top:6px;">Draw with mouse/finger.</div>
+          <button id="clearClientSig" class="btn" style="margin-top:8px;">Clear Client Signature</button>
         </div>
       </div>
     </div>
@@ -195,13 +196,96 @@ document.addEventListener('DOMContentLoaded', () => {
     const w_saveDay=$("w_saveDay"), w_clearDay=$("w_clearDay"), w_submitDay=$("w_submitDay");
     const w_toast=$("w_toast"), w_error=$("w_error");
 
-    /* signatures DOM */
-    const w_sig_staff = $("w_sig_staff");
-    const w_sig_client = $("w_sig_client");
-    const w_sig_staff_clear = $("w_sig_staff_clear");
-    const w_sig_client_clear = $("w_sig_client_clear");
+    // signature canvases
+    const staffSigCanvas = $("staffSig");
+    const clientSigCanvas = $("clientSig");
+    let staffSigCtx, clientSigCtx;
+    let staffDrawing = false, clientDrawing = false;
+    let staffSigData = null, clientSigData = null;
 
-    const REQUIRED = ["client_id","staff_id","w_days","w_range","w_startTxt","w_endTxt","w_prevWeek","w_nextWeek","w_panel","w_panelDate","w_start","w_end","w_modality","w_hours","w_domain","w_notes","w_obs","w_plan","w_saveDay","w_clearDay","w_submitDay","w_toast","w_error","w_sig_staff","w_sig_client"];
+    function resizeCanvasForHiDPI(c) {
+      const rect = c.getBoundingClientRect();
+      const ratio = window.devicePixelRatio || 1;
+      c.width  = rect.width * ratio;
+      c.height = rect.height * ratio;
+      const ctx = c.getContext('2d');
+      ctx.scale(ratio, ratio);
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#000";
+      return ctx;
+    }
+    staffSigCtx = resizeCanvasForHiDPI(staffSigCanvas);
+    clientSigCtx = resizeCanvasForHiDPI(clientSigCanvas);
+
+    function startDraw(e, which){
+      e.preventDefault();
+      const rect = which.canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      which.drawing = true;
+      which.ctx.beginPath();
+      which.ctx.moveTo(x,y);
+    }
+    function draw(e, which){
+      if(!which.drawing) return;
+      const rect = which.canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      which.ctx.lineTo(x,y);
+      which.ctx.stroke();
+    }
+    function endDraw(which){
+      if(!which.drawing) return;
+      which.drawing = false;
+      // store current dataURL
+      if(which === staffSig){
+        staffSigData = staffSigCanvas.toDataURL("image/png");
+      }else{
+        clientSigData = clientSigCanvas.toDataURL("image/png");
+      }
+    }
+
+    // wrap in objects
+    const staffSig = { canvas: staffSigCanvas, ctx: staffSigCtx, drawing:false };
+    const clientSig = { canvas: clientSigCanvas, ctx: clientSigCtx, drawing:false };
+
+    // attach events
+    ["mousedown","touchstart"].forEach(ev=>{
+      staffSigCanvas.addEventListener(ev,(e)=>startDraw(e,staffSig));
+      clientSigCanvas.addEventListener(ev,(e)=>startDraw(e,clientSig));
+    });
+    ["mousemove","touchmove"].forEach(ev=>{
+      staffSigCanvas.addEventListener(ev,(e)=>draw(e,staffSig));
+      clientSigCanvas.addEventListener(ev,(e)=>draw(e,clientSig));
+    });
+    ["mouseup","mouseleave","touchend","touchcancel"].forEach(ev=>{
+      staffSigCanvas.addEventListener(ev,()=>endDraw(staffSig));
+      clientSigCanvas.addEventListener(ev,()=>endDraw(clientSig));
+    });
+
+    $("clearStaffSig").addEventListener("click",()=>{
+      const rect = staffSigCanvas.getBoundingClientRect();
+      staffSigCtx.clearRect(0,0,rect.width,rect.height);
+      staffSigData = null;
+    });
+    $("clearClientSig").addEventListener("click",()=>{
+      const rect = clientSigCanvas.getBoundingClientRect();
+      clientSigCtx.clearRect(0,0,rect.width,rect.height);
+      clientSigData = null;
+    });
+
+    // repaint function
+    function repaintSignature(canvas, ctx, dataUrl){
+      const rect = canvas.getBoundingClientRect();
+      ctx.clearRect(0,0,rect.width,rect.height);
+      if(!dataUrl) return;
+      const img = new Image();
+      img.onload = ()=>{ ctx.drawImage(img,0,0,rect.width,rect.height); };
+      img.src = dataUrl;
+    }
+
+    const REQUIRED = ["client_id","staff_id","w_days","w_range","w_startTxt","w_endTxt","w_prevWeek","w_nextWeek","w_panel","w_panelDate","w_start","w_end","w_modality","w_hours","w_domain","w_notes","w_obs","w_plan","w_saveDay","w_clearDay","w_submitDay","w_toast","w_error","staffSig","clientSig"];
     const missing = REQUIRED.filter(id => !$(id));
     if (missing.length) {
       w_error.style.display='block';
@@ -219,120 +303,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const getClientId  = ()=> CLIENT_ID_INPUT.value;
     const getStaffName = ()=> (STAFF_INPUT.value || "").replace(/\s+/g,' ').trim();
 
-    /* ===== Signature helpers ===== */
-    function createSignaturePad(canvas){
-      const ctx = canvas.getContext('2d');
-      let drawing = false;
-      let prev = { x:0, y:0 };
-
-      function resizeCanvas(){
-        const rect = canvas.getBoundingClientRect();
-        const data = canvas.toDataURL();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        if (data && data !== 'data:,') {
-          const img = new Image();
-          img.onload = ()=>{ ctx.drawImage(img,0,0,canvas.width,canvas.height); };
-          img.src = data;
-        }
-      }
-
-      setTimeout(resizeCanvas, 50);
-      window.addEventListener('resize', resizeCanvas);
-
-      function getPos(e){
-        const rect = canvas.getBoundingClientRect();
-        if (e.touches && e.touches.length){
-          return {
-            x: e.touches[0].clientX - rect.left,
-            y: e.touches[0].clientY - rect.top
-          };
-        }
-        return {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        };
-      }
-
-      function start(e){
-        e.preventDefault();
-        drawing = true;
-        prev = getPos(e);
-      }
-      function move(e){
-        if (!drawing) return;
-        e.preventDefault();
-        const pos = getPos(e);
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000';
-        ctx.beginPath();
-        ctx.moveTo(prev.x, prev.y);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-        prev = pos;
-      }
-      function end(e){
-        if (!drawing) return;
-        drawing = false;
-      }
-
-      canvas.addEventListener('mousedown', start);
-      canvas.addEventListener('mousemove', move);
-      canvas.addEventListener('mouseup', end);
-      canvas.addEventListener('mouseleave', end);
-
-      canvas.addEventListener('touchstart', start, {passive:false});
-      canvas.addEventListener('touchmove', move, {passive:false});
-      canvas.addEventListener('touchend', end);
-
-      return {
-        clear: ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); },
-        toData: ()=> canvas.toDataURL('image/png'),
-        fromData: (data)=>{
-          if (!data) return;
-          const img = new Image();
-          img.onload = ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,canvas.width,canvas.height); };
-          img.src = data;
-        },
-        resize: resizeCanvas
-      };
-    }
-
-    const staffSigPad = createSignaturePad(w_sig_staff);
-    const clientSigPad = createSignaturePad(w_sig_client);
-
-    w_sig_staff_clear.addEventListener('click', ()=>staffSigPad.clear());
-    w_sig_client_clear.addEventListener('click', ()=>clientSigPad.clear());
-
     /* ===== UUID / Roster resolution ===== */
     const isUuid = (s)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
 
+    // Cache resolved UUIDs per name for this session
     const staffUuidCache = new Map();
-    let STAFF_REMOTE_BLOCKED = false;  // 👈 if true, we only save locally
 
     async function getOrCreateStaffUuid() {
       const nameOrId = getStaffName();
       if (!nameOrId) return null;
 
       if (isUuid(nameOrId)) return nameOrId;
+
       if (staffUuidCache.has(nameOrId)) return staffUuidCache.get(nameOrId);
 
-      // 1) exact
       let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", nameOrId).maybeSingle();
       if (!error && data?.id) {
         staffUuidCache.set(nameOrId, data.id);
         return data.id;
       }
 
-      // 2) fuzzy
       ({ data, error } = await ess.from("staff").select("id, full_name").ilike("full_name", `%${nameOrId}%`).limit(1).maybeSingle());
       if (!error && data?.id) {
         staffUuidCache.set(nameOrId, data.id);
         return data.id;
       }
 
-      // 3) try create
+      // create
       const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
                     'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
                       const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
@@ -341,13 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const insert = await ess.from("staff").insert([{ id: newId, full_name: nameOrId }]).select("id").maybeSingle();
 
       if (insert.error) {
-        // THIS is your error
-        if (String(insert.error.message || '').includes('permission denied')) {
-          STAFF_REMOTE_BLOCKED = true; // from now on, local-only
-          const err = new Error(`NO_REMOTE_STAFF`);
-          err.code = 'NO_REMOTE_STAFF';
-          throw err;
-        }
         throw new Error(`Could not add staff "${nameOrId}". Ask admin to allow INSERT/SELECT on ess.staff for this page. (${insert.error.message})`);
       }
 
@@ -365,12 +355,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ===== Server helpers ===== */
     async function fetchDraft(i){
-      if (STAFF_REMOTE_BLOCKED) return null;
       try{
         const staffUuid = await getOrCreateStaffUuid();
         if(!staffUuid) return null;
         const { data } = await ess.from("daily_drafts")
-          .select("hours, activities, notes, date, submitted, start_time, end_time, modality")
+          .select("hours, activities, notes, date, submitted, start_time, end_time, modality, staff_signature, client_signature")
           .eq("client_id", getClientId()).eq("staff_id", staffUuid)
           .eq("week_start", ymd(current)).eq("day_index", i).maybeSingle();
         return data||null;
@@ -378,11 +367,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function upsertDraft(i, payload){
-      if (STAFF_REMOTE_BLOCKED) return; // local-only
       try{
         const staffUuid = await getOrCreateStaffUuid();
         if(!staffUuid) { toast('Type a valid Staff name'); return; }
-
         const body = {
           client_id:getClientId(), staff_id:staffUuid,
           week_start: ymd(current), day_index: i, date: payload.date,
@@ -390,20 +377,16 @@ document.addEventListener('DOMContentLoaded', () => {
           activities: payload.activities||null,
           notes: payload.notes || null,
           start_time: payload.start_time||null, end_time: payload.end_time||null,
-          modality: payload.modality||'Remote', submitted: false
+          modality: payload.modality||'Remote',
+          staff_signature: payload.staff_signature || null,
+          client_signature: payload.client_signature || null,
+          submitted: false
         };
         await ess.from("daily_drafts").upsert(body, { onConflict: "client_id,staff_id,week_start,day_index" });
-      }catch(e){
-        console.warn("Upsert draft failed:", e);
-      }
+      }catch(e){ console.warn("Upsert draft failed:", e); }
     }
 
     async function insertDailyEntry(payload){
-      if (STAFF_REMOTE_BLOCKED) {
-        const err = new Error('NO_REMOTE_STAFF');
-        err.code = 'NO_REMOTE_STAFF';
-        throw err;
-      }
       const staffUuid = await getOrCreateStaffUuid();
       if(!staffUuid) throw new Error('Type a valid Staff name');
       const raw  = (payload.activities||"").trim();
@@ -416,10 +399,14 @@ document.addEventListener('DOMContentLoaded', () => {
         start_time: payload.start_time || null,
         end_time:   payload.end_time   || null,
         modality:   payload.modality   || 'Remote',
-        service_notes: payload.notes || null
+        service_notes: payload.notes || null,
+        activities: acts,
+        staff_signature: payload.staff_signature || null,
+        client_signature: payload.client_signature || null,
+        signed_at: new Date().toISOString()
       };
 
-      let { error } = await ess.from("daily_entries").insert({ ...entryBase, activities: acts });
+      let { error } = await ess.from("daily_entries").insert(entryBase);
       if (error && String(error.message||'').includes('activities_allowed')) {
         ({ error } = await ess.from("daily_entries").insert({ ...entryBase, activities: null }));
       }
@@ -491,9 +478,6 @@ document.addEventListener('DOMContentLoaded', () => {
       w_panelDate.textContent=`${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} — ${fmt(d)}`;
 
       const srv=await fetchDraft(i);
-      let sigStaffData = null;
-      let sigClientData = null;
-
       if(srv){
         w_hours.value = srv.hours ?? '';
         w_domain.value= srv.activities ?? '';
@@ -504,15 +488,11 @@ document.addEventListener('DOMContentLoaded', () => {
         w_start.value = srv.start_time ?? '';
         w_end.value   = srv.end_time ?? '';
         w_modality.value = srv.modality ?? 'Remote';
-
-        const rawLS = localStorage.getItem(dayKey(current,i));
-        if (rawLS){
-          try {
-            const obj = JSON.parse(rawLS);
-            sigStaffData = obj.staff_signature || null;
-            sigClientData = obj.client_signature || null;
-          } catch {}
-        }
+        // signatures
+        staffSigData = srv.staff_signature || null;
+        clientSigData = srv.client_signature || null;
+        repaintSignature(staffSigCanvas, staffSigCtx, staffSigData);
+        repaintSignature(clientSigCanvas, clientSigCtx, clientSigData);
       }else{
         const raw=localStorage.getItem(dayKey(current,i));
         if(raw){
@@ -526,32 +506,31 @@ document.addEventListener('DOMContentLoaded', () => {
             w_start.value = obj.start_time ?? '';
             w_end.value   = obj.end_time ?? '';
             w_modality.value = obj.modality ?? 'Remote';
-            sigStaffData = obj.staff_signature || null;
-            sigClientData = obj.client_signature || null;
+            staffSigData = obj.staff_signature || null;
+            clientSigData = obj.client_signature || null;
+            repaintSignature(staffSigCanvas, staffSigCtx, staffSigData);
+            repaintSignature(clientSigCanvas, clientSigCtx, clientSigData);
           }catch{
             w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
             w_modality.value='Remote';
+            staffSigData = clientSigData = null;
+            repaintSignature(staffSigCanvas, staffSigCtx, null);
+            repaintSignature(clientSigCanvas, clientSigCtx, null);
           }
         }else{
           w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
           w_modality.value='Remote';
+          staffSigData = clientSigData = null;
+          repaintSignature(staffSigCanvas, staffSigCtx, null);
+          repaintSignature(clientSigCanvas, clientSigCtx, null);
         }
       }
-
-      // load signatures into canvases
-      staffSigPad.resize();
-      clientSigPad.resize();
-      if (sigStaffData) staffSigPad.fromData(sigStaffData); else staffSigPad.clear();
-      if (sigClientData) clientSigPad.fromData(sigClientData); else clientSigPad.clear();
-
       w_panel.style.display='block';
     }
 
     /* ===== Actions ===== */
     function buildPayload(){
       const notesMerged = mergeNotes((w_notes.value||''),(w_obs.value||''),(w_plan.value||''));
-      const staffSigData = staffSigPad.toData();
-      const clientSigData = clientSigPad.toData();
       return {
         date: ymd(addDays(current,activeIndex)),
         hours: (w_hours.value||''),
@@ -563,29 +542,21 @@ document.addEventListener('DOMContentLoaded', () => {
         start_time: (w_start.value||''),
         end_time: (w_end.value||''),
         modality: (w_modality.value||'Remote'),
-        staff_signature: staffSigData,
-        client_signature: clientSigData
+        staff_signature: staffSigData || null,
+        client_signature: clientSigData || null
       };
     }
 
     async function saveDay(){
       if(activeIndex==null) return;
       if(!getStaffName()){ toast('Type Staff name first'); return; }
+      try{ await getOrCreateStaffUuid(); }catch(e){ w_error.style.display='block'; w_error.textContent = e.message; toast('Staff error ❌'); return; }
 
       const payload = buildPayload();
-
-      // always save local
       localStorage.setItem(dayKey(current,activeIndex), JSON.stringify({ ...payload, domain: payload.activities }));
       markDots();
-
-      // try server
-      try{
-        await upsertDraft(activeIndex, payload);
-        toast('Day saved (draft) ✓');
-      }catch(e){
-        console.warn(e);
-        toast('Saved locally (no server permission)');
-      }
+      await upsertDraft(activeIndex, payload);
+      toast('Day saved (draft) ✓');
     }
 
     function clearDay(){
@@ -593,8 +564,9 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem(dayKey(current,activeIndex));
       w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
       w_modality.value='Remote';
-      staffSigPad.clear();
-      clientSigPad.clear();
+      staffSigData = clientSigData = null;
+      repaintSignature(staffSigCanvas, staffSigCtx, null);
+      repaintSignature(clientSigCanvas, clientSigCtx, null);
       markDots();
       toast('Day cleared locally. Server draft remains until overwritten.');
     }
@@ -603,26 +575,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if(activeIndex==null) return;
       if(!getStaffName()){ toast('Type Staff name first'); return; }
       const payload = buildPayload();
-
-      // always keep local copy
-      localStorage.setItem(dayKey(current,activeIndex), JSON.stringify({ ...payload, domain: payload.activities }));
-      markDots();
-
       try{
         await insertDailyEntry(payload);
         await upsertDraft(activeIndex, payload);
+        localStorage.setItem(dayKey(current,activeIndex), JSON.stringify({ ...payload, domain: payload.activities }));
+        markDots();
         toast('Day submitted (official) ✅');
       }catch(e){
         console.error('Submit error:', e);
-        if (e.code === 'NO_REMOTE_STAFF') {
-          w_error.style.display='block';
-          w_error.textContent = 'Submit saved locally. Your Supabase policy is blocking new staff names. Add this staff manually or allow INSERT on ess.staff.';
-          toast('Submit saved locally 🟡');
-        } else {
-          w_error.style.display='block';
-          w_error.textContent = 'Submit failed: ' + (e?.message || 'Unknown error');
-          toast('Submit failed ❌');
-        }
+        w_error.style.display='block';
+        w_error.textContent = 'Submit failed: ' + (e?.message || 'Unknown error');
+        toast('Submit failed ❌');
       }
     }
 
