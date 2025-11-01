@@ -18,21 +18,25 @@
     th,td{padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.75rem;}
     .flex{display:flex;gap:10px;flex-wrap:wrap;}
 
-    /* 👇 this stays in DOM but is NOT off-screen anymore */
+    /* 🧾 this must be renderable for html2pdf — hide visually, not with display:none */
     #printArea{
+      position:absolute;
+      top:0;
+      left:0;
       width:8.5in;
       min-height:11in;
       background:#fff;
-      position:relative;
-      opacity:0;
-      pointer-events:none;
-      height:0;
-      overflow:hidden;
+      visibility:hidden;          /* browser can still "see" it */
+      z-index:-1;
+      padding:0.6in 0.6in;
+      box-sizing:border-box;
+      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
     }
   </style>
 </head>
 <body>
 <header>
+  <!-- use your uploaded logo -->
   <img src="https://empowermentss.com/logo.png" alt="ESS" onerror="this.style.display='none'">
   <div>
     <div style="font-weight:600;">Empowerment Support Solutions, LLC</div>
@@ -47,18 +51,18 @@
     <div class="flex">
       <div>
         <label for="clientSelect">Client</label>
-        <select id="clientSelect" style="min-width:210px;">
+        <select id="clientSelect" style="min-width:220px;">
           <option value="">— loading clients… —</option>
         </select>
       </div>
-      <!-- hidden uuid -->
+      <!-- hidden UUID field -->
       <div style="display:none;">
         <label for="clientId">Client ID / UUID</label>
         <input id="clientId" value="">
       </div>
       <div>
-        <label for="weekStart">Week (start Monday)</label>
-        <input id="weekStart" type="date">
+        <label for="serviceDate">Service date</label>
+        <input id="serviceDate" type="date">
       </div>
       <div>
         <label for="staffFilter">Staff (optional filter)</label>
@@ -78,17 +82,7 @@
       </div>
       <div>
         <label>&nbsp;</label>
-        <button id="loadWeek">Load Week</button>
-      </div>
-    </div>
-
-    <!-- day export -->
-    <div class="flex" style="margin-top:12px;align-items:flex-end;">
-      <div>
-        <label for="daySelect">Day to export</label>
-        <select id="daySelect" style="min-width:180px;">
-          <option value="">— load a week first —</option>
-        </select>
+        <button id="loadDay">Load Day</button>
       </div>
       <div>
         <label>&nbsp;</label>
@@ -99,11 +93,10 @@
 
   <!-- Preview table -->
   <div class="card">
-    <h3 style="margin-top:0;">Week days</h3>
+    <h3 style="margin-top:0;">Result for this date</h3>
     <table>
       <thead>
         <tr>
-          <th>Day</th>
           <th>Date</th>
           <th>Start</th>
           <th>End</th>
@@ -117,77 +110,87 @@
           <th>Source</th>
         </tr>
       </thead>
-      <tbody id="daysBody">
-        <tr><td colspan="12">No data loaded.</td></tr>
+      <tbody id="dayBody">
+        <tr><td colspan="11">No data loaded.</td></tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- printable area -->
+<!-- off-screen printable area (must stay in DOM) -->
 <div id="printArea"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 (async () => {
+  // ====== SUPABASE INIT ======
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const ess = sb.schema("ess");
 
+  // ====== DOM ======
   const clientSelect = document.getElementById("clientSelect");
   const clientIdInput = document.getElementById("clientId");
-  const weekInput     = document.getElementById("weekStart");
-  const staffInput    = document.getElementById("staffFilter");
-  const serviceInput  = document.getElementById("serviceCode");
-  const rcInput       = document.getElementById("rcName");
-  const scInput       = document.getElementById("scName");
-  const daysBody      = document.getElementById("daysBody");
-  const btnLoad       = document.getElementById("loadWeek");
-  const btnExportDay  = document.getElementById("exportDay");
-  const daySelect     = document.getElementById("daySelect");
-  const printArea     = document.getElementById("printArea");
+  const serviceDateInput = document.getElementById("serviceDate");
+  const staffInput = document.getElementById("staffFilter");
+  const serviceInput = document.getElementById("serviceCode");
+  const rcInput = document.getElementById("rcName");
+  const scInput = document.getElementById("scName");
+  const dayBody = document.getElementById("dayBody");
+  const btnLoad = document.getElementById("loadDay");
+  const btnExport = document.getElementById("exportDay");
+  const printArea = document.getElementById("printArea");
 
-  const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-
-  // ----- date helpers (LOCAL, no TZ slip) -----
-  function ymdLocal(d){
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    const da = String(d.getDate()).padStart(2,"0");
-    return `${y}-${m}-${da}`;
-  }
-  function dateFromISO(iso){
-    // force local midnight
-    return new Date(iso + "T00:00:00");
-  }
-  function addDays(d,n){ const nd = new Date(d); nd.setDate(nd.getDate()+n); return nd; }
+  // ====== HELPERS ======
   const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(d);
+  const ymd = (d)=>d.toISOString().slice(0,10);
+  function toDateOnly(str) {
+    // assume "2025-11-01"
+    const d = new Date(str + "T00:00:00");
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  function calcHours(start, end){
+    if (!start || !end) return "";
+    // supports "17:45:00" or "17:45"
+    const spl1 = start.split(":").map(Number);
+    const spl2 = end.split(":").map(Number);
+    const s = spl1[0]*3600 + spl1[1]*60 + (spl1[2]||0);
+    const e = spl2[0]*3600 + spl2[1]*60 + (spl2[2]||0);
+    const diff = (e - s)/3600;
+    if (diff <= 0) return "";
+    return diff.toFixed(2);
+  }
 
-  // default week -> this Monday
-  const now = new Date();
-  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
-  weekInput.value = ymdLocal(monday);
+  // default date = today
+  const today = new Date();
+  serviceDateInput.value = ymd(today);
 
-  let currentWeekData = null;
+  let currentDayData = null;
 
-  // load clients
+  // ====== LOAD CLIENTS ======
   async function loadClients() {
-    let { data: clients, error } = await ess.from("clients").select("id, full_name").order("full_name",{ascending:true});
     let options = [];
+    let { data: clients, error } = await ess.from("clients").select("id, full_name").order("full_name",{ascending:true});
     if (!error && Array.isArray(clients) && clients.length) {
       options = clients.map(c => ({ id: c.id, label: c.full_name || c.id }));
     } else {
-      // fallback from existing entries
+      // fallback from entries
       const collected = new Map();
       const { data: e1 } = await ess.from("daily_entries").select("client_id").limit(2000);
       (e1||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
       options = Array.from(collected.keys()).map(id => ({ id, label: "Client – " + id.slice(0,8) }));
     }
-    clientSelect.innerHTML = options.length
-      ? `<option value="">— select client —</option>${options.map(o=>`<option value="${o.id}">${o.label}</option>`).join("")}`
-      : `<option value="">— no clients found —</option>`;
+
+    clientSelect.innerHTML = "";
+    if (!options.length) {
+      clientSelect.innerHTML = `<option value="">— no clients found —</option>`;
+    } else {
+      clientSelect.innerHTML = `<option value="">— select client —</option>` +
+        options.map(o => `<option value="${o.id}">${o.label}</option>`).join("");
+    }
   }
   await loadClients();
 
@@ -195,251 +198,213 @@
     clientIdInput.value = clientSelect.value || "";
   });
 
-  // compute hours if not stored
-  function computeHours(start, end){
-    if (!start || !end) return "";
-    const [sh,sm] = start.split(":").map(Number);
-    const [eh,em] = end.split(":").map(Number);
-    if (isNaN(sh) || isNaN(eh)) return "";
-    let dur = (eh + (em||0)/60) - (sh + (sm||0)/60);
-    if (dur < 0) dur += 24; // just in case
-    return dur.toFixed(2);
-  }
-
-  async function loadWeek(){
+  // ====== LOAD ONE DAY ======
+  async function loadDay() {
     const clientId = clientIdInput.value.trim();
-    if (!clientId) { alert("Select a client first."); return; }
+    if (!clientId) {
+      alert("Select a client first.");
+      return;
+    }
+    const chosenDate = serviceDateInput.value;
+    if (!chosenDate) {
+      alert("Pick a date.");
+      return;
+    }
 
-    const weekStartLocal = dateFromISO(weekInput.value);
-    const weekStartIso   = ymdLocal(weekStartLocal);  // store using local → iso
-    const staffName      = staffInput.value.trim();
-    const fallbackRC     = rcInput.value || "";
-    const fallbackSC     = scInput.value || "";
+    const dateIso = chosenDate;
+    const parsedDate = toDateOnly(chosenDate);
+    const staffName = staffInput.value.trim();
+    const fallbackRC = rcInput.value || "";
+    const fallbackSC = scInput.value || "";
 
-    // resolve staff filter
+    // resolve staff filter -> staff_id
     let staffIdFilter = null;
-    if (staffName){
+    if (staffName) {
       const { data: staffRow } = await ess.from("staff").select("id").eq("full_name", staffName).maybeSingle();
       staffIdFilter = staffRow?.id || null;
     }
 
-    const days = [];
-    let totalHours = 0;
+    // 1) try official first
+    let q = ess.from("daily_entries")
+      .select("*")
+      .eq("client_id", clientId)
+      .eq("service_date", dateIso)
+      .limit(1);
+    if (staffIdFilter) q = q.eq("staff_id", staffIdFilter);
+    let { data: official } = await q.maybeSingle();
 
-    // we ONLY care about per-day entries now
-    for (let i=0;i<7;i++){
-      const dayDate = addDays(weekStartLocal, i);
-      const isoDay  = ymdLocal(dayDate);
+    let day = null;
 
-      // try official first
-      let q = ess.from("daily_entries")
+    if (official) {
+      // daily_entries probably does NOT have "hours" -> compute
+      const computedHours = calcHours(official.start_time, official.end_time);
+      const domain = Array.isArray(official.activities)
+        ? official.activities.join(", ")
+        : (official.activities || "");
+      day = {
+        date: dateIso,
+        start_time: official.start_time || "",
+        end_time: official.end_time || "",
+        hours: (official.hours || computedHours || ""),
+        modality: official.modality || "",
+        domain: domain,
+        notes: official.service_notes || "",
+        staff_signature: official.staff_signature || "",
+        client_signature: official.client_signature || "",
+        regional_center: official.regional_center || fallbackRC,
+        service_coordinator: official.service_coordinator || fallbackSC,
+        source: "official",
+        staff_id: official.staff_id || null
+      };
+    } else {
+      // 2) fallback to draft for that week/day
+      // find Monday of that date
+      const base = new Date(parsedDate);
+      const dayNum = base.getDay(); // 0=Sun
+      const diffToMon = (dayNum === 0 ? -6 : 1 - dayNum);
+      const monday = new Date(base);
+      monday.setDate(base.getDate() + diffToMon);
+      monday.setHours(0,0,0,0);
+      const mondayIso = ymd(monday);
+      const dayIndex = dayNum === 0 ? 6 : dayNum-1;
+
+      let dq = ess.from("daily_drafts")
         .select("*")
         .eq("client_id", clientId)
-        .eq("service_date", isoDay)
+        .eq("week_start", mondayIso)
+        .eq("day_index", dayIndex)
         .limit(1);
-      if (staffIdFilter) q = q.eq("staff_id", staffIdFilter);
-      const { data: official } = await q.maybeSingle();
+      if (staffIdFilter) dq = dq.eq("staff_id", staffIdFilter);
+      const { data: draft } = await dq.maybeSingle();
 
-      if (official){
-        const domain = Array.isArray(official.activities)
-          ? official.activities.join(", ")
-          : (official.activities || "");
-        // use stored hours OR compute
-        const hrs = official.hours
-          ? Number(official.hours)
-          : Number(computeHours(official.start_time, official.end_time)) || 0;
-        totalHours += hrs;
-        days.push({
-          dayIndex: i,
-          label: dayNames[i],
-          date: isoDay,
-          start_time: official.start_time || "",
-          end_time: official.end_time || "",
-          hours: hrs ? hrs.toFixed(2) : "",
-          modality: official.modality || "",
-          domain: domain,
-          notes: official.service_notes || "",
-          staff_signature: official.staff_signature || "",
-          client_signature: official.client_signature || "",
-          regional_center: official.regional_center || fallbackRC,
-          service_coordinator: official.service_coordinator || fallbackSC,
-          source: "official",
-          staff_id: official.staff_id || null
-        });
-      } else {
-        // maybe they saved a draft for that day in that week
-        let dq = ess.from("daily_drafts")
-          .select("*")
-          .eq("client_id", clientId)
-          .eq("week_start", weekStartIso)
-          .eq("day_index", i)
-          .limit(1);
-        if (staffIdFilter) dq = dq.eq("staff_id", staffIdFilter);
-        const { data: draft } = await dq.maybeSingle();
-        if (draft){
-          const hrs = draft.hours
-            ? Number(draft.hours)
-            : Number(computeHours(draft.start_time, draft.end_time)) || 0;
-          totalHours += hrs;
-          days.push({
-            dayIndex: i,
-            label: dayNames[i],
-            date: isoDay,
-            start_time: draft.start_time || "",
-            end_time: draft.end_time || "",
-            hours: hrs ? hrs.toFixed(2) : "",
-            modality: draft.modality || "",
-            domain: draft.activities || "",
-            notes: draft.notes || "",
-            staff_signature: draft.staff_signature || "",
-            client_signature: draft.client_signature || "",
-            regional_center: draft.regional_center || fallbackRC,
-            service_coordinator: draft.service_coordinator || fallbackSC,
-            source: "draft",
-            staff_id: draft.staff_id || null
-          });
-        } else {
-          // empty day
-          days.push({
-            dayIndex: i,
-            label: dayNames[i],
-            date: isoDay,
-            start_time: "",
-            end_time: "",
-            hours: "",
-            modality: "",
-            domain: "",
-            notes: "",
-            staff_signature: "",
-            client_signature: "",
-            regional_center: fallbackRC,
-            service_coordinator: fallbackSC,
-            source: "missing",
-            staff_id: null
-          });
-        }
+      if (draft) {
+        const computedHours = calcHours(draft.start_time, draft.end_time);
+        day = {
+          date: draft.date || dateIso,
+          start_time: draft.start_time || "",
+          end_time: draft.end_time || "",
+          hours: (draft.hours ? Number(draft.hours).toFixed(2) : (computedHours || "")),
+          modality: draft.modality || "",
+          domain: draft.activities || "",
+          notes: draft.notes || "",
+          staff_signature: draft.staff_signature || "",
+          client_signature: draft.client_signature || "",
+          regional_center: draft.regional_center || fallbackRC,
+          service_coordinator: draft.service_coordinator || fallbackSC,
+          source: "draft",
+          staff_id: draft.staff_id || null
+        };
       }
     }
 
-    currentWeekData = {
-      clientId,
-      clientLabel: clientSelect.options[clientSelect.selectedIndex]?.text || clientId,
-      weekStart: weekStartIso,
-      days,
-      staffName,
-      totalHours
-    };
-
     // render table
-    daysBody.innerHTML = "";
-    days.forEach(d => {
+    dayBody.innerHTML = "";
+    if (!day) {
+      dayBody.innerHTML = `<tr><td colspan="11">No daily entry found for ${fmt(parsedDate)}.</td></tr>`;
+      currentDayData = null;
+      btnExport.disabled = true;
+      return;
+    } else {
       const tr = document.createElement("tr");
-      const shownDate = fmt(dateFromISO(d.date));  // LOCAL
       tr.innerHTML = `
-        <td>${d.label}</td>
-        <td>${shownDate}</td>
-        <td>${d.start_time || "—"}</td>
-        <td>${d.end_time || "—"}</td>
-        <td>${d.hours || "—"}</td>
-        <td>${d.modality || "—"}</td>
-        <td>${d.domain || "—"}</td>
-        <td>${d.regional_center || "—"}</td>
-        <td>${d.service_coordinator || "—"}</td>
-        <td>${d.staff_signature ? "✅" : "—"}</td>
-        <td>${d.client_signature ? "✅" : "—"}</td>
-        <td>${d.source}</td>
+        <td>${fmt(parsedDate)}</td>
+        <td>${day.start_time || "—"}</td>
+        <td>${day.end_time || "—"}</td>
+        <td>${day.hours || "—"}</td>
+        <td>${day.modality || "—"}</td>
+        <td>${day.domain || "—"}</td>
+        <td>${day.regional_center || "—"}</td>
+        <td>${day.service_coordinator || "—"}</td>
+        <td>${day.staff_signature ? "✅" : "—"}</td>
+        <td>${day.client_signature ? "✅" : "—"}</td>
+        <td>${day.source}</td>
       `;
-      daysBody.appendChild(tr);
-    });
-
-    // fill day dropdown
-    daySelect.innerHTML = days.map(d => {
-      const label = `${d.label} — ${fmt(dateFromISO(d.date))}`;
-      return `<option value="${d.dayIndex}">${label}</option>`;
-    }).join("");
-    btnExportDay.disabled = false;
+      dayBody.appendChild(tr);
+      currentDayData = {
+        clientId,
+        clientLabel: clientSelect.options[clientSelect.selectedIndex]?.text || clientId,
+        dateIso,
+        dateObj: parsedDate,
+        day,
+        staffName,
+      };
+      btnExport.disabled = false;
+    }
   }
 
-  btnLoad.addEventListener("click", loadWeek);
+  btnLoad.addEventListener("click", loadDay);
 
-  // unified daily export
-  async function exportDay(){
-    if (!currentWeekData) return;
-    const dayIndex = Number(daySelect.value);
-    const d = currentWeekData.days.find(x => x.dayIndex === dayIndex);
-    if (!d) { alert("No day data."); return; }
+  // ====== EXPORT ONE DAY (UNIFIED) ======
+  async function exportDay() {
+    if (!currentDayData) return;
+    const { clientLabel, dateIso, dateObj, day, staffName } = currentDayData;
 
     const businessName = "Empowerment Support Solutions, LLC";
-    const clientLabel  = currentWeekData.clientLabel;
-    const staffName    = currentWeekData.staffName || (d.staff_id ? "" : "");
     const serviceCode  = serviceInput.value || "SDP Service Code";
-    const rcName       = d.regional_center || rcInput.value || "";
-    const scName       = d.service_coordinator || scInput.value || "";
+    const rcName       = day.regional_center || rcInput.value || "Regional Center";
+    const scName       = day.service_coordinator || scInput.value || "";
     const contactLine  = "empowermentss.com • (562) 000-0000 • info@empowermentss.com";
-    const niceDate     = fmt(dateFromISO(d.date));
 
-    // build printable html
+    // build PDF content into the hidden div
     printArea.innerHTML = `
-      <div style="width:8.5in;min-height:11in;padding:0.6in 0.6in 0.8in 0.6in;background:#fff;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="font-size:11px;line-height:1.4;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <div>
-            <div style="font-size:15px;font-weight:700;">${businessName}</div>
-            <div style="font-size:11px;margin-top:2px;">SDP – Daily Service Log (Unified RC / FMS)</div>
-            <div style="font-size:11px;margin-top:6px;"><strong>Client:</strong> ${clientLabel}</div>
-            <div style="font-size:11px;"><strong>Date of Service:</strong> ${niceDate} (${d.label})</div>
-            <div style="font-size:11px;"><strong>Staff / Provider:</strong> ${staffName || "—"}</div>
+            <div style="font-size:16px;font-weight:700;">${businessName}</div>
+            <div style="font-size:11px;">SDP – Daily Service Log (RC / FMS / SC)</div>
+            <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${clientLabel}</div>
+            <div style="font-size:11px;"><strong>Date of Service:</strong> ${fmt(dateObj)} (${dateIso})</div>
+            <div style="font-size:11px;"><strong>Staff:</strong> ${staffName || "—"}</div>
             <div style="font-size:11px;"><strong>Service Code:</strong> ${serviceCode}</div>
-            <div style="font-size:11px;"><strong>Regional Center:</strong> ${rcName || "—"}</div>
-            <div style="font-size:11px;"><strong>Service Coordinator:</strong> ${scName || "—"}</div>
+            <div style="font-size:11px;"><strong>Regional Center:</strong> ${rcName}</div>
+            <div style="font-size:11px;"><strong>Service Coordinator:</strong> ${scName}</div>
           </div>
           <div>
-            <img src="https://empowermentss.com/logo.png" style="height:62px;" onerror="this.style.display='none'">
+            <!-- same-origin logo, will render -->
+            <img src="https://empowermentss.com/logo.png" style="height:56px;" onerror="this.style.display='none'">
           </div>
         </div>
 
-        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:14px;">
-          <div style="font-size:11.5px;"><strong>Time In:</strong> ${d.start_time || "—"} &nbsp;&nbsp; <strong>Time Out:</strong> ${d.end_time || "—"} &nbsp;&nbsp; <strong>Total Hours:</strong> ${d.hours || computeHours(d.start_time,d.end_time) || "—"}</div>
-          <div style="font-size:11.5px;margin-top:4px;"><strong>Location / Modality:</strong> ${d.modality || "—"}</div>
-          <div style="font-size:11.5px;margin-top:4px;"><strong>Service / Domains worked on:</strong> ${d.domain || "—"}</div>
-          <div style="font-size:11.5px;margin-top:4px;"><strong>Regional Center:</strong> ${d.regional_center || rcName || "—"}</div>
-          <div style="font-size:11.5px;margin-top:2px;"><strong>Service Coordinator:</strong> ${d.service_coordinator || scName || "—"}</div>
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+          <div style="font-size:11px;"><strong>Time In:</strong> ${day.start_time || "—"} &nbsp;&nbsp; <strong>Time Out:</strong> ${day.end_time || "—"} &nbsp;&nbsp; <strong>Total Hours:</strong> ${day.hours || "—"}</div>
+          <div style="font-size:11px;margin-top:4px;"><strong>Location / Modality:</strong> ${day.modality || "—"}</div>
+          <div style="font-size:11px;margin-top:4px;"><strong>Service / Domain(s):</strong> ${day.domain || "—"}</div>
         </div>
 
-        <div style="font-size:11.5px;margin-bottom:4px;"><strong>Description / Progress / What was done:</strong></div>
-        <div style="border:1px solid #e5e7eb;border-radius:6px;padding:6px 7px;min-height:110px;white-space:pre-wrap;font-size:11.5px;line-height:1.35;">
-          ${d.notes || "No note entered."}
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Progress / Description of Services Provided:</div>
+        <div style="border:1px solid #e5e7eb;border-radius:6px;min-height:90px;padding:8px 9px;white-space:pre-wrap;font-size:10.5px;">
+          ${day.notes || "No note entered."}
         </div>
 
-        <div style="display:flex;gap:26px;margin-top:18px;align-items:flex-end;">
+        <div style="display:flex;gap:30px;margin-top:18px;">
           <div>
-            <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Staff / Provider Signature:</div>
-            ${d.staff_signature
-              ? `<img src="${d.staff_signature}" style="width:210px;height:56px;object-fit:contain;border-bottom:1px solid #000;">`
-              : `<div style="width:210px;height:56px;border-bottom:1px solid #000;"></div>`}
-            <div style="font-size:10px;margin-top:2px;">Date: ____________</div>
+            <div style="font-size:11px;font-weight:600;">Staff Signature:</div>
+            ${day.staff_signature
+              ? `<img src="${day.staff_signature}" style="width:190px;height:55px;object-fit:contain;border-bottom:1px solid #000;margin-top:6px;">`
+              : `<div style="width:190px;height:55px;border-bottom:1px solid #000;margin-top:6px;"></div>`}
           </div>
           <div>
-            <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Participant / Parent / Authorized Rep:</div>
-            ${d.client_signature
-              ? `<img src="${d.client_signature}" style="width:210px;height:56px;object-fit:contain;border-bottom:1px solid #000;">`
-              : `<div style="width:210px;height:56px;border-bottom:1px solid #000;"></div>`}
-            <div style="font-size:10px;margin-top:2px;">Date: ____________</div>
+            <div style="font-size:11px;font-weight:600;">Participant / Parent / Authorized Rep:</div>
+            ${day.client_signature
+              ? `<img src="${day.client_signature}" style="width:190px;height:55px;object-fit:contain;border-bottom:1px solid #000;margin-top:6px;">`
+              : `<div style="width:190px;height:55px;border-bottom:1px solid #000;margin-top:6px;"></div>`}
           </div>
         </div>
 
-        <div style="margin-top:16px;font-size:9.5px;line-height:1.3;">
-          I certify that the services listed above were actually provided to the participant in accordance with the participant’s IPP and SDP Spending Plan, and that the hours and dates reported are accurate.
+        <div style="margin-top:16px;font-size:9.5px;line-height:1.35;">
+          I certify that the services listed above were actually provided to the participant in accordance with the participant’s Individual Program Plan (IPP) and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
         </div>
 
-        <div style="margin-top:16px;font-size:9.2px;color:#6b7280;">
-          Empowerment Support Solutions, LLC • ${contactLine}
+        <div style="margin-top:16px;font-size:9px;color:#6b7280;">
+          ${businessName} • ${contactLine}
         </div>
       </div>
     `;
 
+    // now export
     const opt = {
       margin: 0,
-      filename: `ESS_${clientLabel.replace(/\s+/g,"_")}_${d.date}.pdf`,
+      filename: `ESS_${clientLabel.replace(/\s+/g,"_")}_${dateIso}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -447,7 +412,7 @@
     await html2pdf().set(opt).from(printArea).save();
   }
 
-  btnExportDay.addEventListener("click", exportDay);
+  btnExport.addEventListener("click", exportDay);
 })();
 </script>
 </body>
