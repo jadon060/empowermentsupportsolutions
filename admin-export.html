@@ -30,7 +30,6 @@
 </header>
 
 <div class="wrap">
-  <!-- Controls -->
   <div class="card">
     <h2 style="margin-top:0;">Weekly export</h2>
     <div class="flex">
@@ -40,7 +39,6 @@
           <option value="">— loading clients… —</option>
         </select>
       </div>
-      <!-- keep UUID input but hide it -->
       <div style="display:none;">
         <label for="clientId">Client ID / UUID</label>
         <input id="clientId" value="">
@@ -59,11 +57,11 @@
       </div>
       <div>
         <label for="rcName">Regional Center</label>
-        <input id="rcName" placeholder="e.g. SG/PRC">
+        <input id="rcName" placeholder="">
       </div>
       <div>
         <label for="scName">Service Coordinator</label>
-        <input id="scName" placeholder="e.g. Imani R.">
+        <input id="scName" placeholder="">
       </div>
       <div>
         <label>&nbsp;</label>
@@ -80,7 +78,6 @@
     </div>
   </div>
 
-  <!-- Preview table -->
   <div class="card">
     <h3 style="margin-top:0;">Week days</h3>
     <table>
@@ -107,7 +104,6 @@
   </div>
 </div>
 
-<!-- hidden print area -->
 <div id="printArea"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -132,7 +128,11 @@
   const btnFMS        = document.getElementById("exportFMS");
   const printArea     = document.getElementById("printArea");
 
-  // default Monday
+  const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  function addDays(d,n){ const nd = new Date(d); nd.setDate(nd.getDate()+n); return nd; }
+  const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(d);
+  const ymd = (d)=>d.toISOString().slice(0,10);
+
   const now = new Date();
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
   weekInput.value = monday.toISOString().slice(0,10);
@@ -150,13 +150,8 @@
       (e1||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
       const { data: e2 } = await ess.from("daily_drafts").select("client_id").limit(2000);
       (e2||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
-
-      options = Array.from(collected.keys()).map(id => ({
-        id,
-        label: "Client (no name) – " + id.slice(0,8)
-      }));
+      options = Array.from(collected.keys()).map(id => ({ id, label: "Client – " + id.slice(0,8) }));
     }
-
     clientSelect.innerHTML = "";
     if (!options.length) {
       clientSelect.innerHTML = `<option value="">— no clients found —</option>`;
@@ -172,11 +167,6 @@
     clientIdInput.value = clientSelect.value || "";
   });
 
-  const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-  function addDays(d,n){ const nd = new Date(d); nd.setDate(nd.getDate()+n); return nd; }
-  const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(d);
-  const ymd = (d)=>d.toISOString().slice(0,10);
-
   async function loadWeek() {
     const clientId = clientIdInput.value.trim();
     if (!clientId) {
@@ -185,117 +175,175 @@
     }
     let weekStart = new Date(weekInput.value);
     weekStart.setHours(0,0,0,0);
+    const weekStartIso = ymd(weekStart);
     const staffName = staffInput.value.trim();
+    const fallbackRC = rcInput.value || "";
+    const fallbackSC = scInput.value || "";
 
-    // resolve staff id if filter is given
+    // 1️⃣ FIRST: try weekly_reports
     let staffIdFilter = null;
     if (staffName) {
       const { data: staffRow } = await ess.from("staff").select("id").eq("full_name", staffName).maybeSingle();
       staffIdFilter = staffRow?.id || null;
     }
 
+    let { data: weeklyRow } = await ess
+      .from("weekly_reports")
+      .select("client_id, staff_id, week_start, entries")
+      .eq("client_id", clientId)
+      .eq("week_start", weekStartIso)
+      .maybeSingle();
+
     const days = [];
     let totalHours = 0;
 
-    for (let i=0; i<7; i++) {
-      const d = addDays(weekStart, i);
-      const iso = ymd(d);
+    if (weeklyRow && Array.isArray(weeklyRow.entries) && weeklyRow.entries.length) {
+      // if staff filter is present, only keep that staff
+      const usableEntries = !staffIdFilter
+        ? weeklyRow.entries
+        : weeklyRow.entries.filter(e => !e.staff_id || e.staff_id === staffIdFilter);
 
-      const fallbackRC = rcInput.value || "";
-      const fallbackSC = scInput.value || "";
+      usableEntries.forEach(e => {
+        const hrs = e.hours ? Number(e.hours) : 0;
+        totalHours += hrs;
+        days.push({
+          dayIndex: typeof e.dayIndex === "number" ? e.dayIndex : 0,
+          label: e.label || dayNames[e.dayIndex || 0] || "",
+          date: e.date || ymd(addDays(weekStart, e.dayIndex || 0)),
+          start_time: e.start_time || "",
+          end_time: e.end_time || "",
+          hours: hrs ? hrs.toFixed(2) : "",
+          modality: e.modality || "",
+          domain: e.domain || "",
+          notes: e.notes || "",
+          staff_signature: e.staff_signature || "",
+          client_signature: e.client_signature || "",
+          regional_center: e.regional_center || fallbackRC,
+          service_coordinator: e.service_coordinator || fallbackSC,
+          source: e.source || "weekly"
+        });
+      });
 
-      // official first
-      let q = ess.from("daily_entries")
-        .select("*")
-        .eq("client_id", clientId)
-        .eq("service_date", iso)
-        .limit(1);
-      if (staffIdFilter) q = q.eq("staff_id", staffIdFilter);
-      let { data: official } = await q.maybeSingle();
+      // fill missing days (if any)
+      for (let i=0;i<7;i++){
+        if (!days.find(d => d.dayIndex === i)){
+          const d = addDays(weekStart,i);
+          days.push({
+            dayIndex:i,
+            label:dayNames[i],
+            date:ymd(d),
+            start_time:"",
+            end_time:"",
+            hours:"",
+            modality:"",
+            domain:"",
+            notes:"",
+            staff_signature:"",
+            client_signature:"",
+            regional_center:fallbackRC,
+            service_coordinator:fallbackSC,
+            source:"missing"
+          });
+        }
+      }
 
-      if (!official) {
-        // draft
-        let dq = ess.from("daily_drafts")
+      days.sort((a,b)=>a.dayIndex-b.dayIndex);
+    } else {
+      // 2️⃣ FALLBACK: old behavior (daily_entries + daily_drafts)
+      for (let i=0; i<7; i++) {
+        const d = addDays(weekStart, i);
+        const iso = ymd(d);
+
+        let q = ess.from("daily_entries")
           .select("*")
           .eq("client_id", clientId)
-          .eq("week_start", ymd(weekStart))
-          .eq("day_index", i)
+          .eq("service_date", iso)
           .limit(1);
-        if (staffIdFilter) dq = dq.eq("staff_id", staffIdFilter);
-        const { data: draft } = await dq.maybeSingle();
-        if (draft) {
-          const hours = draft.hours ? Number(draft.hours) : 0;
-          totalHours += hours;
+        if (staffIdFilter) q = q.eq("staff_id", staffIdFilter);
+        let { data: official } = await q.maybeSingle();
+
+        if (!official) {
+          let dq = ess.from("daily_drafts")
+            .select("*")
+            .eq("client_id", clientId)
+            .eq("week_start", weekStartIso)
+            .eq("day_index", i)
+            .limit(1);
+          if (staffIdFilter) dq = dq.eq("staff_id", staffIdFilter);
+          const { data: draft } = await dq.maybeSingle();
+          if (draft) {
+            const hrs = draft.hours ? Number(draft.hours) : 0;
+            totalHours += hrs;
+            days.push({
+              dayIndex: i,
+              label: dayNames[i],
+              date: iso,
+              start_time: draft.start_time || "",
+              end_time: draft.end_time || "",
+              hours: hrs ? hrs.toFixed(2) : "",
+              modality: draft.modality || "",
+              domain: draft.activities || "",
+              notes: draft.notes || "",
+              staff_signature: draft.staff_signature || "",
+              client_signature: draft.client_signature || "",
+              regional_center: draft.regional_center || fallbackRC,
+              service_coordinator: draft.service_coordinator || fallbackSC,
+              source: "draft"
+            });
+            continue;
+          }
+        }
+
+        if (official) {
+          const domain = Array.isArray(official.activities) ? official.activities.join(", ") : (official.activities || "");
+          const hrs = official.hours ? Number(official.hours) : 0;
+          totalHours += hrs;
           days.push({
             dayIndex: i,
             label: dayNames[i],
             date: iso,
-            start_time: draft.start_time || "",
-            end_time: draft.end_time || "",
-            hours: hours ? hours.toFixed(2) : "",
-            modality: draft.modality || "",
-            domain: draft.activities || "",
-            notes: draft.notes || "",
-            staff_signature: draft.staff_signature || "",
-            client_signature: draft.client_signature || "",
-            regional_center: draft.regional_center || fallbackRC,
-            service_coordinator: draft.service_coordinator || fallbackSC,
-            source: "draft"
+            start_time: official.start_time || "",
+            end_time: official.end_time || "",
+            hours: hrs ? hrs.toFixed(2) : "",
+            modality: official.modality || "",
+            domain: domain,
+            notes: official.service_notes || "",
+            staff_signature: official.staff_signature || "",
+            client_signature: official.client_signature || "",
+            regional_center: official.regional_center || fallbackRC,
+            service_coordinator: official.service_coordinator || fallbackSC,
+            source: "official"
           });
-          continue;
+        } else {
+          days.push({
+            dayIndex: i,
+            label: dayNames[i],
+            date: iso,
+            start_time: "",
+            end_time: "",
+            hours: "",
+            modality: "",
+            domain: "",
+            notes: "",
+            staff_signature: "",
+            client_signature: "",
+            regional_center: fallbackRC,
+            service_coordinator: fallbackSC,
+            source: "missing"
+          });
         }
-      }
-
-      if (official) {
-        const domain = Array.isArray(official.activities) ? official.activities.join(", ") : (official.activities || "");
-        const hours = official.hours ? Number(official.hours) : 0;
-        totalHours += hours;
-        days.push({
-          dayIndex: i,
-          label: dayNames[i],
-          date: iso,
-          start_time: official.start_time || "",
-          end_time: official.end_time || "",
-          hours: hours ? hours.toFixed(2) : "",
-          modality: official.modality || "",
-          domain: domain,
-          notes: official.service_notes || "",
-          staff_signature: official.staff_signature || "",
-          client_signature: official.client_signature || "",
-          regional_center: official.regional_center || fallbackRC,
-          service_coordinator: official.service_coordinator || fallbackSC,
-          source: "official"
-        });
-      } else {
-        days.push({
-          dayIndex: i,
-          label: dayNames[i],
-          date: iso,
-          start_time: "",
-          end_time: "",
-          hours: "",
-          modality: "",
-          domain: "",
-          notes: "",
-          staff_signature: "",
-          client_signature: "",
-          regional_center: fallbackRC,
-          service_coordinator: fallbackSC,
-          source: "missing"
-        });
       }
     }
 
     currentWeekData = {
       clientId,
       clientLabel: clientSelect.options[clientSelect.selectedIndex]?.text || clientId,
-      weekStart: ymd(weekStart),
+      weekStart: weekStartIso,
       days,
       staffName,
       totalHours
     };
 
-    // render
     daysBody.innerHTML = "";
     days.forEach(d => {
       const tr = document.createElement("tr");
@@ -334,7 +382,6 @@
     const scName       = scInput.value || "";
     const contactLine  = "empowermentss.com • (562) 000-0000 • info@empowermentss.com";
 
-    const printArea = document.getElementById("printArea");
     printArea.innerHTML = `
       <div style="width:8.5in;min-height:11in;padding:0.6in 0.6in;background:#fff;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
