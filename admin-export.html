@@ -32,7 +32,7 @@
 <div class="wrap">
   <!-- Controls -->
   <div class="card">
-    <h2 style="margin-top:0;">Weekly export (universal FMS-safe)</h2>
+    <h2 style="margin-top:0;">Weekly export</h2>
     <div class="flex">
       <div>
         <label for="clientSelect">Client</label>
@@ -59,11 +59,11 @@
       </div>
       <div>
         <label for="rcName">Regional Center</label>
-        <input id="rcName" value="San Gabriel/Pomona RC">
+        <input id="rcName" placeholder="e.g. SG/PRC">
       </div>
       <div>
         <label for="scName">Service Coordinator</label>
-        <input id="scName" value="(SC)">
+        <input id="scName" placeholder="e.g. Imani R.">
       </div>
       <div>
         <label>&nbsp;</label>
@@ -78,9 +78,6 @@
         <button id="exportFMS" class="btn-muted" disabled>Export Week (FMS)</button>
       </div>
     </div>
-    <p style="font-size:.68rem;color:#6b7280;margin-top:.4rem;">
-      Tip: we pull 7 days (Mon→Sun). If a day has no official entry, we fall back to the staff draft.
-    </p>
   </div>
 
   <!-- Preview table -->
@@ -117,7 +114,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 (async () => {
-  // ===== Supabase init =====
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -136,22 +132,19 @@
   const btnFMS        = document.getElementById("exportFMS");
   const printArea     = document.getElementById("printArea");
 
-  // set default Monday
+  // default Monday
   const now = new Date();
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
   weekInput.value = monday.toISOString().slice(0,10);
 
   let currentWeekData = null;
 
-  // ===== load clients first =====
   async function loadClients() {
     let options = [];
-    // 1) try real clients table
     let { data: clients, error } = await ess.from("clients").select("id, full_name").order("full_name",{ascending:true});
     if (!error && Array.isArray(clients) && clients.length) {
       options = clients.map(c => ({ id: c.id, label: c.full_name || c.id }));
     } else {
-      // 2) fallback: get distinct from entries + drafts
       const collected = new Map();
       const { data: e1 } = await ess.from("daily_entries").select("client_id").limit(2000);
       (e1||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
@@ -208,11 +201,10 @@
       const d = addDays(weekStart, i);
       const iso = ymd(d);
 
-      // top-level fallback values (so admin always sees something)
       const fallbackRC = rcInput.value || "";
       const fallbackSC = scInput.value || "";
 
-      // prefer official entries
+      // official first
       let q = ess.from("daily_entries")
         .select("*")
         .eq("client_id", clientId)
@@ -222,7 +214,7 @@
       let { data: official } = await q.maybeSingle();
 
       if (!official) {
-        // fallback to draft
+        // draft
         let dq = ess.from("daily_drafts")
           .select("*")
           .eq("client_id", clientId)
@@ -275,7 +267,6 @@
           source: "official"
         });
       } else {
-        // totally missing
         days.push({
           dayIndex: i,
           label: dayNames[i],
@@ -304,7 +295,7 @@
       totalHours
     };
 
-    // render table
+    // render
     daysBody.innerHTML = "";
     days.forEach(d => {
       const tr = document.createElement("tr");
@@ -333,7 +324,7 @@
 
   async function exportWeek(which) {
     if (!currentWeekData) return;
-    const { clientId, clientLabel, weekStart, days, staffName, totalHours } = currentWeekData;
+    const { clientLabel, weekStart, days, staffName, totalHours } = currentWeekData;
     const weekStartDate = new Date(weekStart);
     const weekEndDate = addDays(weekStartDate, 6);
 
@@ -431,8 +422,6 @@
 
   btnRC.addEventListener("click", () => exportWeek("rc"));
   btnFMS.addEventListener("click", () => exportWeek("fms"));
-
-  // initial
 })();
 </script>
 </body>
