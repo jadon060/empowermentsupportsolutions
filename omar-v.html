@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (official) {
         return {
           source: "official",
-          hours: official.hours || official.total_hours || null,
+          hours: (official.hours !== null && official.hours !== undefined) ? official.hours : null,
           activities: Array.isArray(official.activities) ? official.activities.join(", ") : (official.activities || ""),
           notes: official.service_notes || "",
           start_time: official.start_time || "",
@@ -323,6 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
       }
 
+      // then drafts (weekly view)
       let { data: draft } = await ess.from("daily_drafts")
         .select("*")
         .eq("client_id", getClientId())
@@ -333,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (draft) {
         return {
           source: "draft",
-          hours: draft.hours || null,
+          hours: (draft.hours !== null && draft.hours !== undefined) ? draft.hours : null,
           activities: draft.activities || "",
           notes: draft.notes || "",
           start_time: draft.start_time || "",
@@ -430,7 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const srv = await fetchServerDay(i);
       if (srv){
         const parsed = parseMergedNotes(srv.notes || "");
-        w_hours.value = srv.hours ?? '';
+        w_hours.value = (srv.hours !== null && srv.hours !== undefined) ? srv.hours : '';
         w_domain.value= srv.activities ?? '';
         w_notes.value = parsed.notes ?? '';
         w_obs.value   = parsed.obs ?? '';
@@ -494,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // 1) insert official daily_entries
+      // 1) insert official daily_entries  ✅ NOW WITH HOURS
       const entryBase = {
         client_id: getClientId(),
         staff_id:  staffUuid,
@@ -508,7 +509,9 @@ document.addEventListener('DOMContentLoaded', () => {
         client_signature: payload.client_signature || null,
         regional_center: payload.regional_center || null,
         service_coordinator: payload.service_coordinator || null,
-        signed_at: new Date().toISOString()
+        signed_at: new Date().toISOString(),
+        // 👇 this was missing
+        hours: payload.hours !== '' ? Number(payload.hours) : null
       };
 
       let { error } = await ess.from("daily_entries").insert(entryBase);
