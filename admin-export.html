@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ESS • SDP Admin Export (FMS / RC)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{margin:0;background:#f3f4f6;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#0f172a;}
+    header{background:#111827;color:#fff;padding:14px 18px;display:flex;align-items:center;gap:14px;}
+    header img{height:40px;}
+    .wrap{max-width:1100px;margin:1.4rem auto;padding:0 1rem;}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;}
+    label{font-size:.75rem;font-weight:500;display:block;margin-bottom:3px;}
+    input,select{padding:6px 9px;border:1px solid #d1d5db;border-radius:8px;font-size:.78rem;}
+    button{border:none;border-radius:8px;padding:7px 12px;background:#111827;color:#fff;cursor:pointer;font-size:.78rem;}
+    button.btn-muted{background:#e5e7eb;color:#111827;}
+    table{width:100%;border-collapse:collapse;}
+    th,td{padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.75rem;}
+    #printArea{display:none;}
+    .flex{display:flex;gap:10px;flex-wrap:wrap;}
+  </style>
+</head>
+<body>
+<header>
+  <!-- your logo -->
+  <img src="https://empowermentss.com/logo.png" alt="ESS" onerror="this.style.display='none'">
+  <div>
+    <div style="font-weight:600;">Empowerment Support Solutions, LLC</div>
+    <div style="font-size:.72rem;opacity:.7;">SDP • Weekly Service Log Exports (FMS / Regional Center)</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- Controls -->
+  <div class="card">
+    <h2 style="margin-top:0;">Weekly export (universal FMS-safe)</h2>
+    <div class="flex">
+      <div>
+        <label for="clientId">Client ID / Name</label>
+        <input id="clientId" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" style="min-width:230px;">
+      </div>
+      <div>
+        <label for="weekStart">Week (start Monday)</label>
+        <input id="weekStart" type="date">
+      </div>
+      <div>
+        <label for="staffFilter">Staff (optional filter)</label>
+        <input id="staffFilter" placeholder="e.g. Maria Perez">
+      </div>
+      <div>
+        <label for="serviceCode">Service Code (SDP)</label>
+        <input id="serviceCode" placeholder="e.g. 520 – ILS / CI">
+      </div>
+      <div>
+        <label for="rcName">Regional Center</label>
+        <input id="rcName" value="San Gabriel/Pomona RC">
+      </div>
+      <div>
+        <label for="scName">Service Coordinator</label>
+        <input id="scName" value="(SC)">
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="loadWeek">Load Week</button>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="exportRC" class="btn-muted" disabled>Export Week (RC)</button>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="exportFMS" class="btn-muted" disabled>Export Week (FMS)</button>
+      </div>
+    </div>
+    <p style="font-size:.68rem;color:#6b7280;margin-top:.4rem;">
+      Tip: we pull 7 days (Mon→Sun). If a day has no official entry, we fall back to the staff draft.
+    </p>
+  </div>
+
+  <!-- Preview table -->
+  <div class="card">
+    <h3 style="margin-top:0;">Week days</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th>Date</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Hours</th>
+          <th>Modality</th>
+          <th>Domains</th>
+          <th>Staff Sig</th>
+          <th>Client Sig</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody id="daysBody">
+        <tr><td colspan="10">No data loaded.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- hidden print area -->
+<div id="printArea"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+(async () => {
+  // ===== supabase init (same as staff page) =====
+  const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const ess = sb.schema("ess");
+
+  const clientIdInput = document.getElementById("clientId");
+  const weekInput     = document.getElementById("weekStart");
+  const staffInput    = document.getElementById("staffFilter");
+  const serviceInput  = document.getElementById("serviceCode");
+  const rcInput       = document.getElementById("rcName");
+  const scInput       = document.getElementById("scName");
+  const daysBody      = document.getElementById("daysBody");
+  const btnLoad       = document.getElementById("loadWeek");
+  const btnRC         = document.getElementById("exportRC");
+  const btnFMS        = document.getElementById("exportFMS");
+  const printArea     = document.getElementById("printArea");
+
+  // set default Monday
+  const now = new Date();
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
+  weekInput.value = monday.toISOString().slice(0,10);
+
+  let currentWeekData = null;
+
+  const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  function addDays(d,n){ const nd = new Date(d); nd.setDate(nd.getDate()+n); return nd; }
+  const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(d);
+  const ymd = (d)=>d.toISOString().slice(0,10);
+
+  async function loadWeek() {
+    const clientId = clientIdInput.value.trim();
+    let weekStart = new Date(weekInput.value);
+    weekStart.setHours(0,0,0,0);
+    const staffName = staffInput.value.trim();
+
+    // resolve staff id if filter is given
+    let staffIdFilter = null;
+    if (staffName) {
+      const { data: staffRow } = await ess.from("staff").select("id").eq("full_name", staffName).maybeSingle();
+      staffIdFilter = staffRow?.id || null;
+    }
+
+    const days = [];
+    let totalHours = 0;
+
+    for (let i=0; i<7; i++) {
+      const d = addDays(weekStart, i);
+      const iso = ymd(d);
+
+      // prefer official entries
+      let q = ess.from("daily_entries")
+        .select("*")
+        .eq("client_id", clientId)
+        .eq("service_date", iso)
+        .limit(1);
+      if (staffIdFilter) q = q.eq("staff_id", staffIdFilter);
+      let { data: official } = await q.maybeSingle();
+
+      if (!official) {
+        // fallback to draft
+        let dq = ess.from("daily_drafts")
+          .select("*")
+          .eq("client_id", clientId)
+          .eq("week_start", ymd(weekStart))
+          .eq("day_index", i)
+          .limit(1);
+        if (staffIdFilter) dq = dq.eq("staff_id", staffIdFilter);
+        const { data: draft } = await dq.maybeSingle();
+        if (draft) {
+          const hours = draft.hours ? Number(draft.hours) : 0;
+          totalHours += hours;
+          days.push({
+            dayIndex: i,
+            label: dayNames[i],
+            date: iso,
+            start_time: draft.start_time || "",
+            end_time: draft.end_time || "",
+            hours: hours ? hours.toFixed(2) : "",
+            modality: draft.modality || "",
+            domain: draft.activities || "",
+            notes: draft.notes || "",
+            staff_signature: draft.staff_signature || "",
+            client_signature: draft.client_signature || "",
+            source: "draft"
+          });
+          continue;
+        }
+      }
+
+      if (official) {
+        // official may store activities as array
+        const domain = Array.isArray(official.activities) ? official.activities.join(", ") : (official.activities || "");
+        const hours = official.hours ? Number(official.hours) : 0;
+        totalHours += hours;
+        days.push({
+          dayIndex: i,
+          label: dayNames[i],
+          date: iso,
+          start_time: official.start_time || "",
+          end_time: official.end_time || "",
+          hours: hours ? hours.toFixed(2) : "",
+          modality: official.modality || "",
+          domain: domain,
+          notes: official.service_notes || "",
+          staff_signature: official.staff_signature || "",
+          client_signature: official.client_signature || "",
+          source: "official"
+        });
+      } else {
+        days.push({
+          dayIndex: i,
+          label: dayNames[i],
+          date: iso,
+          start_time: "",
+          end_time: "",
+          hours: "",
+          modality: "",
+          domain: "",
+          notes: "",
+          staff_signature: "",
+          client_signature: "",
+          source: "missing"
+        });
+      }
+    }
+
+    currentWeekData = {
+      clientId,
+      weekStart: ymd(weekStart),
+      days,
+      staffName,
+      totalHours
+    };
+
+    // render table
+    daysBody.innerHTML = "";
+    days.forEach(d => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.label}</td>
+        <td>${fmt(new Date(d.date))}</td>
+        <td>${d.start_time || "—"}</td>
+        <td>${d.end_time || "—"}</td>
+        <td>${d.hours || "—"}</td>
+        <td>${d.modality || "—"}</td>
+        <td>${d.domain || "—"}</td>
+        <td>${d.staff_signature ? "✅" : "—"}</td>
+        <td>${d.client_signature ? "✅" : "—"}</td>
+        <td>${d.source}</td>
+      `;
+      daysBody.appendChild(tr);
+    });
+
+    btnRC.disabled = false;
+    btnFMS.disabled = false;
+  }
+
+  btnLoad.addEventListener("click", loadWeek);
+
+  async function exportWeek(which) {
+    if (!currentWeekData) return;
+    const { clientId, weekStart, days, staffName, totalHours } = currentWeekData;
+    const weekStartDate = new Date(weekStart);
+    const weekEndDate = addDays(weekStartDate, 6);
+
+    const businessName = "Empowerment Support Solutions, LLC";
+    const serviceCode  = serviceInput.value || "SDP Service Code";
+    const rcName       = rcInput.value || "Regional Center";
+    const scName       = scInput.value || "";
+    const contactLine  = "empowermentss.com • (562) 000-0000 • info@empowermentss.com";
+
+    // build PDF content
+    printArea.innerHTML = `
+      <div style="width:8.5in;min-height:11in;padding:0.6in 0.6in;background:#fff;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+          <div>
+            <div style="font-size:15px;font-weight:700;">${businessName}</div>
+            <div style="font-size:11px;">${which === "fms" ? "SDP – FMS Weekly Service Log" : "SDP – Regional Center / Case Documentation"}</div>
+            <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${clientId}</div>
+            <div style="font-size:11px;"><strong>Week of:</strong> ${fmt(weekStartDate)} – ${fmt(weekEndDate)}</div>
+            <div style="font-size:11px;"><strong>Staff:</strong> ${staffName || "—"}</div>
+            <div style="font-size:11px;"><strong>Service Code:</strong> ${serviceCode}</div>
+            <div style="font-size:11px;"><strong>Regional Center:</strong> ${rcName}</div>
+            <div style="font-size:11px;"><strong>Service Coordinator:</strong> ${scName}</div>
+          </div>
+          <div>
+            <img src="https://empowermentss.com/logo.png" style="height:54px;" onerror="this.style.display='none'">
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px;font-size:11px;"><strong>Total hours this week:</strong> ${totalHours ? totalHours.toFixed(2) : "0.00"}</div>
+
+        ${days.map(d => `
+          <div style="border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;padding:8px 10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><strong>${d.label}</strong> • ${fmt(new Date(d.date))}</div>
+              <div style="font-size:10px;color:#6b7280;">Source: ${d.source}</div>
+            </div>
+            ${which === "fms" ? `
+              <div style="font-size:10.5px;margin-top:4px;"><strong>Time In:</strong> ${d.start_time || "—"} &nbsp; <strong>Time Out:</strong> ${d.end_time || "—"} &nbsp; <strong>Hours:</strong> ${d.hours || "—"}</div>
+            ` : ``}
+            <div style="font-size:10.5px;margin-top:4px;"><strong>Location / Modality:</strong> ${d.modality || "—"}</div>
+            <div style="font-size:10.5px;margin-top:4px;"><strong>Service / Domain:</strong> ${d.domain || "—"}</div>
+            <div style="font-size:10.5px;margin-top:6px;"><strong>Description / Progress:</strong></div>
+            <div style="border:1px solid #e5e7eb;border-radius:6px;padding:5px 6px;white-space:pre-wrap;font-size:10.5px;min-height:40px;">
+              ${d.notes || "No note entered."}
+            </div>
+            <div style="display:flex;gap:20px;margin-top:8px;align-items:flex-end;">
+              <div>
+                <div style="font-size:10.5px;font-weight:600;">Staff Signature:</div>
+                ${d.staff_signature
+                  ? `<img src="${d.staff_signature}" style="width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;">`
+                  : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`}
+              </div>
+              <div>
+                <div style="font-size:10.5px;font-weight:600;">Participant / Parent:</div>
+                ${d.client_signature
+                  ? `<img src="${d.client_signature}" style="width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;">`
+                  : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`}
+              </div>
+            </div>
+          </div>
+        `).join("")}
+
+        <div style="margin-top:14px;font-size:9.5px;line-height:1.35;">
+          I certify that the services listed above were actually provided to the participant in accordance with the participant’s Individual Program Plan (IPP) and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
+        </div>
+
+        <div style="display:flex;gap:40px;margin-top:16px;">
+          <div>
+            <div style="width:210px;border-bottom:1px solid #000;height:46px;"></div>
+            <div style="font-size:9.5px;margin-top:3px;">Staff / Provider Signature &nbsp;&nbsp; Date: ___________</div>
+          </div>
+          <div>
+            <div style="width:210px;border-bottom:1px solid #000;height:46px;"></div>
+            <div style="font-size:9.5px;margin-top:3px;">Participant / Parent / Authorized Rep &nbsp;&nbsp; Date: ___________</div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;font-size:9px;color:#6b7280;">
+          ${businessName} • ${contactLine}
+        </div>
+      </div>
+    `;
+
+    const opt = {
+      margin: 0,
+      filename: `ESS_${clientId}_SDP_Week_of_${weekStart}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    await html2pdf().set(opt).from(printArea).save();
+  }
+
+  btnRC.addEventListener("click", () => exportWeek("rc"));
+  btnFMS.addEventListener("click", () => exportWeek("fms"));
+
+  // load initial week
+  await loadWeek();
+})();
+</script>
+</body>
+</html>
