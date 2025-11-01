@@ -17,13 +17,17 @@
     table{width:100%;border-collapse:collapse;}
     th,td{padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.75rem;}
     .flex{display:flex;gap:10px;flex-wrap:wrap;}
-    /* pdf container: keep it visible but off the flow, not fixed */
+
+    /* ✅ make PDF area renderable but invisible */
     #printArea{
-      position:absolute;
-      left:-9999px;
-      top:0;
+      position:fixed;
+      inset:0;
       width:8.5in;
+      max-width:8.5in;
       background:#fff;
+      opacity:0;
+      pointer-events:none;
+      z-index:-1;
     }
   </style>
 </head>
@@ -106,6 +110,7 @@
   </div>
 </div>
 
+<!-- PDF render target -->
 <div id="printArea"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -186,14 +191,13 @@
     const { data: officialRows } = await q;
     let official = Array.isArray(officialRows) && officialRows.length ? officialRows[0] : null;
 
-    // 2) if no official or missing hours, pull draft for SAME date
+    // 2) drafts
     let draft = null;
     const { data: draftRows } = await ess.from("daily_drafts").select("*").eq("client_id", clientId).eq("date", serviceDate).limit(10);
     if (Array.isArray(draftRows) && draftRows.length) {
       draft = draftRows[0];
     }
 
-    // build merged
     if (!official && !draft) {
       dayBody.innerHTML = `<tr><td colspan="11">No data for this date.</td></tr>`;
       currentDayData = null;
@@ -228,7 +232,6 @@
 
     currentDayData = merged;
 
-    // render
     dayBody.innerHTML = `
       <tr>
         <td>${new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(new Date(serviceDate))}</td>
@@ -264,6 +267,7 @@
 
     const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(new Date(d));
 
+    // 1) build HTML inside visible-but-hidden container
     printArea.innerHTML = `
       <div style="width:8.5in;min-height:11in;padding:0.6in 0.6in;background:#fff;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
@@ -328,6 +332,10 @@
       </div>
     `;
 
+    /* 2) let browser paint it once so html2canvas sees it */
+    await new Promise(res => requestAnimationFrame(res));
+
+    /* 3) export */
     const opt = {
       margin: 0,
       filename: `ESS_${clientLabel.replace(/\s+/g,"_")}_${date}.pdf`,
