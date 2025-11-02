@@ -367,6 +367,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderWeek(){
     const start=new Date(current), end=addDays(start,6);
+    // ⬇️ this is the ONLY change: make Sunday end-of-day so today (with time) is still in range
+    end.setHours(23,59,59,999);
     w_startTxt.textContent=fmt(start); w_endTxt.textContent=fmt(end);
     w_range.textContent=`Mon ${start.getDate()} — Sun ${end.getDate()}`;
     const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
