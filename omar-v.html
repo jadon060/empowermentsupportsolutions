@@ -8,7 +8,7 @@
     html,body{margin:0;padding:0;background:#f7f7fb;color:#0f172a}
     *,*::before,*::after{box-sizing:border-box}
 
-    /* ⬇️ NEW: staff reference card */
+    /* ⬇️ staff reference card (bigger) */
     .about-wrap{
       max-width:980px;
       margin:1.5rem auto 0.5rem;
@@ -21,7 +21,7 @@
       background:#fff;
       border:1px solid #e5e7eb;
       border-radius:14px;
-      padding:16px 18px;
+      padding:18px 20px 20px;
       display:flex;
       gap:16px;
       width:100%;
@@ -37,41 +37,36 @@
       flex:0 0 auto;
     }
     .about-body h3{
-      margin:0 0 4px;
-      font-size:1.05rem;
+      margin:0 0 6px;
+      font-size:1.25rem; /* bigger title */
     }
     .about-body small{
       display:block;
       color:#6b7280;
-      margin-bottom:8px;
+      margin-bottom:10px;
+      font-size:0.9rem;
     }
     .about-grid{
       display:flex;
       flex-wrap:wrap;
-      gap:14px;
-    }
-    .about-pill{
-      background:#f3f4f6;
-      border:1px solid #e5e7eb;
-      border-radius:10px;
-      padding:6px 10px;
-      font-size:12px;
+      gap:14px 32px;
     }
     .about-label{
-      font-weight:600;
-      font-size:12px;
-      margin-bottom:3px;
+      font-weight:650;
+      font-size:13px;
+      margin-bottom:4px;
       color:#0f172a;
     }
     .about-text{
-      font-size:13px;
-      line-height:1.35;
+      font-size:14px;
+      line-height:1.5;
     }
     @media (max-width:700px){
       .about-wrap{padding:0 1rem;}
       .about-card{flex-direction:column;align-items:flex-start;}
       .about-avatar{width:80px;height:80px;}
     }
+
     /* === existing styles (unchanged) === */
     .row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
     .row > *{min-width:240px;flex:1}
@@ -96,12 +91,12 @@
 </head>
 <body>
 
-<!-- ⬇️ NEW about section (staff reference) -->
+<!-- ⬇️ staff reference -->
 <div class="about-wrap">
   <div class="about-card">
     <img src="https://jadon060.github.io/empowermentsupportsolutions/unnamed.jpg" alt="Omar profile photo" class="about-avatar" loading="lazy" />
     <div class="about-body">
-      <h3>About Omar (staff quick view)</h3>
+      <h3>About Omar</h3>
       <small>Use this to connect before starting session — keep headphones/music available ✅</small>
       <div class="about-grid">
         <div style="min-width:180px;">
@@ -654,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // mirror into daily_drafts (this table DOES have hours in your setup)
+    // mirror into daily_drafts
     await ess.from("daily_drafts").upsert({
       client_id: getClientId(),
       staff_id: staffUuid,
