@@ -245,6 +245,23 @@
     .translate-toggle button:hover{background:#f1f5fb;}
     .translate-toggle button.active{ outline:2px solid var(--accent); background:#eef4ff; }
     #google_translate_element { display:none; }
+
+    /* === added to make the two team photos sit side by side and not be huge === */
+    #team .team-photo {
+      display:inline-block;
+      width:43%;
+      max-width:420px;
+      margin:10px 8px 16px 8px;
+      vertical-align:top;
+    }
+    @media (max-width:850px){
+      #team .team-photo{
+        width:88%;
+        max-width:520px;
+        display:block;
+        margin:10px auto 16px auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -310,6 +327,8 @@
 
   <section id="team" class="section" aria-label="ESS Team Photo & Testimonial" style="text-align:center;">
     <img src="ess_team.jpg" alt="ESS staff group photo" class="team-photo" loading="lazy">
+    <!-- NEW PHOTO ADDED HERE -->
+    <img src="unnamed%20(1).jpg" alt="ESS staff supporting the community" class="team-photo" loading="lazy">
     <p class="testimonial">
       “Our family finally feels understood. ESS listens, adapts, and genuinely puts our loved one first.”
       <cite>— A grateful parent</cite>
