@@ -17,6 +17,19 @@
     table{width:100%;border-collapse:collapse;}
     th,td{padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.75rem;}
     .flex{display:flex;gap:10px;flex-wrap:wrap;}
+    /* small delete button */
+    .trash-btn{
+      background:transparent;
+      border:none;
+      cursor:pointer;
+      font-size:14px;
+      line-height:1;
+      padding:2px 4px;
+      color:#ef4444;
+    }
+    .trash-btn:hover{
+      color:#b91c1c;
+    }
   </style>
 </head>
 <body>
@@ -89,10 +102,11 @@
           <th>Staff Sig</th>
           <th>Client Sig</th>
           <th>Source</th>
+          <th></th> <!-- delete -->
         </tr>
       </thead>
       <tbody id="dayBody">
-        <tr><td colspan="11">No day loaded.</td></tr>
+        <tr><td colspan="12">No day loaded.</td></tr>
       </tbody>
     </table>
   </div>
@@ -124,6 +138,7 @@
   const today = new Date();
   dateInput.value = today.toISOString().slice(0,10);
 
+  // will hold the currently loaded day so we know what to delete
   let currentDayData = null;
 
   async function loadClients() {
@@ -230,8 +245,6 @@
       .maybeSingle()
       .then(r => ({ data: r.data ? [r.data] : [] })); // normalize
 
-    // note: .maybeSingle() returned single, we wrapped
-
     let official = Array.isArray(officialRows) && officialRows.length ? officialRows[0] : null;
     if (official && staffIdFilter && official.staff_id !== staffIdFilter) {
       official = null;
@@ -244,10 +257,13 @@
       .eq("date", serviceDate)
       .limit(10);
 
-    const draft = Array.isArray(draftRows) && draftRows.length ? draftRows[0] : null;
+    let draft = Array.isArray(draftRows) && draftRows.length ? draftRows[0] : null;
+    if (draft && staffIdFilter && draft.staff_id && draft.staff_id !== staffIdFilter) {
+      draft = null;
+    }
 
     if (!official && !draft) {
-      dayBody.innerHTML = `<tr><td colspan="11">No data for this date.</td></tr>`;
+      dayBody.innerHTML = `<tr><td colspan="12">No data for this date.</td></tr>`;
       currentDayData = null;
       btnExport.disabled = true;
       return;
@@ -284,7 +300,9 @@
       regional_center: official?.regional_center || draft?.regional_center || (rcInput.value || ""),
       service_coordinator: official?.service_coordinator || draft?.service_coordinator || (scInput.value || ""),
       source: official ? "official" : "draft",
-      staffName: staffName
+      staffName: staffName,
+      // so delete knows what to match
+      staffId: official?.staff_id || draft?.staff_id || staffIdFilter || null
     };
 
     currentDayData = merged;
@@ -302,12 +320,44 @@
         <td>${merged.staff_signature ? "✅" : "—"}</td>
         <td>${merged.client_signature ? "✅" : "—"}</td>
         <td>${merged.source}</td>
+        <td><button class="trash-btn" title="Delete this day" onclick="window.__essDeleteDay && window.__essDeleteDay()">🗑️</button></td>
       </tr>
     `;
 
     btnExport.disabled = false;
   }
   btnLoad.addEventListener("click", loadDay);
+
+  // expose delete so the inline onclick can call it
+  window.__essDeleteDay = async function(){
+    if (!currentDayData) return;
+    const ok = confirm("Delete this day's entry for this client? This will remove both official and draft rows for this date.");
+    if (!ok) return;
+
+    const { clientId, date, staffId } = currentDayData;
+
+    // delete official
+    let delOfficial = ess.from("daily_entries")
+      .delete()
+      .eq("client_id", clientId)
+      .eq("service_date", date);
+    if (staffId) delOfficial = delOfficial.eq("staff_id", staffId);
+    await delOfficial;
+
+    // delete draft
+    let delDraft = ess.from("daily_drafts")
+      .delete()
+      .eq("client_id", clientId)
+      .eq("date", date);
+    if (staffId) delDraft = delDraft.eq("staff_id", staffId);
+    await delDraft;
+
+    // refresh view
+    dayBody.innerHTML = `<tr><td colspan="12">No data for this date.</td></tr>`;
+    currentDayData = null;
+    btnExport.disabled = true;
+    alert("Day deleted ✅");
+  };
 
   function exportDay() {
     if (!currentDayData) return;
