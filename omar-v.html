@@ -7,6 +7,72 @@
   <style>
     html,body{margin:0;padding:0;background:#f7f7fb;color:#0f172a}
     *,*::before,*::after{box-sizing:border-box}
+
+    /* ⬇️ NEW: staff reference card */
+    .about-wrap{
+      max-width:980px;
+      margin:1.5rem auto 0.5rem;
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      padding:0 1.5rem;
+    }
+    .about-card{
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:16px 18px;
+      display:flex;
+      gap:16px;
+      width:100%;
+      box-shadow:0 2px 10px rgba(0,0,0,0.04);
+    }
+    .about-avatar{
+      width:96px;
+      height:96px;
+      border-radius:999px;
+      object-fit:cover;
+      border:3px solid #eef2ff;
+      background:#e5e7eb;
+      flex:0 0 auto;
+    }
+    .about-body h3{
+      margin:0 0 4px;
+      font-size:1.05rem;
+    }
+    .about-body small{
+      display:block;
+      color:#6b7280;
+      margin-bottom:8px;
+    }
+    .about-grid{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+    }
+    .about-pill{
+      background:#f3f4f6;
+      border:1px solid #e5e7eb;
+      border-radius:10px;
+      padding:6px 10px;
+      font-size:12px;
+    }
+    .about-label{
+      font-weight:600;
+      font-size:12px;
+      margin-bottom:3px;
+      color:#0f172a;
+    }
+    .about-text{
+      font-size:13px;
+      line-height:1.35;
+    }
+    @media (max-width:700px){
+      .about-wrap{padding:0 1rem;}
+      .about-card{flex-direction:column;align-items:flex-start;}
+      .about-avatar{width:80px;height:80px;}
+    }
+    /* === existing styles (unchanged) === */
     .row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
     .row > *{min-width:240px;flex:1}
     .weekbar{display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;padding:10px;border-radius:10px;background:#f8fafc;flex-wrap:wrap}
@@ -29,6 +95,54 @@
   </style>
 </head>
 <body>
+
+<!-- ⬇️ NEW about section (staff reference) -->
+<div class="about-wrap">
+  <div class="about-card">
+    <img src="https://jadon060.github.io/empowermentsupportsolutions/unnamed.jpg" alt="Omar profile photo" class="about-avatar" loading="lazy" />
+    <div class="about-body">
+      <h3>About Omar (staff quick view)</h3>
+      <small>Use this to connect before starting session — keep headphones/music available ✅</small>
+      <div class="about-grid">
+        <div style="min-width:180px;">
+          <div class="about-label">Favorites</div>
+          <div class="about-text">
+            Movie: <strong>Toy Story</strong><br>
+            Food: <strong>Pastor tacos</strong><br>
+            Music: <strong>Banda</strong>
+          </div>
+        </div>
+        <div style="min-width:180px;">
+          <div class="about-label">Things he enjoys</div>
+          <div class="about-text">
+            Reading <em>Captain Underpants</em>, helping mom with chores, playing basketball (great shot 🏀)
+          </div>
+        </div>
+        <div style="min-width:180px;">
+          <div class="about-label">Keep in mind</div>
+          <div class="about-text">
+            Gets upset if he doesn’t have headphones/music on 🎧<br>
+            Doesn’t like staff on their phone / ignoring him
+          </div>
+        </div>
+        <div style="min-width:180px;">
+          <div class="about-label">Comfort tools</div>
+          <div class="about-text">
+            Headphones + music, positive attention, quick success tasks
+          </div>
+        </div>
+        <div style="min-width:180px;">
+          <div class="about-label">Quick notes for ESS</div>
+          <div class="about-text">
+            Loving/supportive family ✅<br>
+            Start with rapport → then SDP goals
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
     <h2 style="margin:0;">📅 Daily SDP Log – Omar</h2>
@@ -44,7 +158,7 @@
     </div>
     <div>
       <label for="staff_id" class="label">Staff (type your name)</label>
-      <input id="staff_id" type="text" class="input" placeholder="e.g., John Perez" required />
+      <input id="staff_id" type="text" class="input" placeholder="e.g., Maria Perez" required />
     </div>
   </div>
 
@@ -367,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderWeek(){
     const start=new Date(current), end=addDays(start,6);
-    // ⬇️ this is the ONLY change: make Sunday end-of-day so today (with time) is still in range
+    // keep Sunday inclusive so Sun 2 loads
     end.setHours(23,59,59,999);
     w_startTxt.textContent=fmt(start); w_endTxt.textContent=fmt(end);
     w_range.textContent=`Mon ${start.getDate()} — Sun ${end.getDate()}`;
