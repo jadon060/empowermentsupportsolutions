@@ -15,9 +15,8 @@
     button{border:none;border-radius:8px;padding:7px 12px;background:#111827;color:#fff;cursor:pointer;font-size:.78rem;}
     button.btn-muted{background:#e5e7eb;color:#111827;}
     table{width:100%;border-collapse:collapse;}
-    th,td{padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.75rem;}
+    th,td{padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.75rem;vertical-align:top;}
     .flex{display:flex;gap:10px;flex-wrap:wrap;}
-    /* small delete button */
     .trash-btn{
       background:transparent;
       border:none;
@@ -27,9 +26,7 @@
       padding:2px 4px;
       color:#ef4444;
     }
-    .trash-btn:hover{
-      color:#b91c1c;
-    }
+    .trash-btn:hover{color:#b91c1c;}
   </style>
 </head>
 <body>
@@ -42,6 +39,7 @@
 </header>
 
 <div class="wrap">
+  <!-- DAILY -->
   <div class="card">
     <h2 style="margin-top:0;">Daily export</h2>
     <div class="flex">
@@ -102,7 +100,7 @@
           <th>Staff Sig</th>
           <th>Client Sig</th>
           <th>Source</th>
-          <th></th> <!-- delete -->
+          <th></th>
         </tr>
       </thead>
       <tbody id="dayBody">
@@ -110,6 +108,59 @@
       </tbody>
     </table>
   </div>
+
+  <!-- WEEKLY (new) -->
+  <div class="card">
+    <h2 style="margin-top:0;">Weekly staff plans</h2>
+    <div class="flex">
+      <div>
+        <label for="wk_clientSelect">Client</label>
+        <select id="wk_clientSelect" style="min-width:220px;">
+          <option value="">— select client —</option>
+        </select>
+      </div>
+      <div>
+        <label for="wk_weekDate">Week of (pick any day)</label>
+        <input id="wk_weekDate" type="date">
+      </div>
+      <div>
+        <label for="wk_staffFilter">Staff (optional)</label>
+        <input id="wk_staffFilter" placeholder="e.g. John Perez">
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="wk_load">Load Weekly Plans</button>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="wk_export" class="btn-muted" disabled>Export Weekly Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="wk_resultsCard" style="display:none;">
+    <h3 style="margin-top:0;">Weekly plans for selected client</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Staff</th>
+          <th>Week start</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+          <th>Sun</th>
+          <th>Signature</th>
+        </tr>
+      </thead>
+      <tbody id="wk_body">
+        <tr><td colspan="10">No weekly plan loaded.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -131,15 +182,24 @@
   const btnLoad       = document.getElementById("loadDay");
   const btnExport     = document.getElementById("exportDay");
 
+  // weekly elems
+  const wk_clientSelect = document.getElementById("wk_clientSelect");
+  const wk_weekDate     = document.getElementById("wk_weekDate");
+  const wk_staffFilter  = document.getElementById("wk_staffFilter");
+  const wk_load         = document.getElementById("wk_load");
+  const wk_export       = document.getElementById("wk_export");
+  const wk_resultsCard  = document.getElementById("wk_resultsCard");
+  const wk_body         = document.getElementById("wk_body");
+
   const LOGO_URL = "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
   const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
 
-  // default date = today
   const today = new Date();
   dateInput.value = today.toISOString().slice(0,10);
+  wk_weekDate.value = today.toISOString().slice(0,10);
 
-  // will hold the currently loaded day so we know what to delete
   let currentDayData = null;
+  let currentWeeklyRows = [];
 
   async function loadClients() {
     let options = [];
@@ -148,7 +208,6 @@
       if (!error && Array.isArray(clients) && clients.length) {
         options = clients.map(c => ({ id: c.id, label: c.full_name || c.id }));
       } else {
-        // fallback to collecting from entries/drafts
         const collected = new Map();
         const { data: e1 } = await ess.from("daily_entries").select("client_id").limit(2000);
         (e1||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
@@ -160,75 +219,47 @@
       console.error("Client load error:", err);
     }
 
-    clientSelect.innerHTML = options.length
+    const html = options.length
       ? `<option value="">— select client —</option>` + options.map(o => `<option value="${o.id}">${o.label}</option>`).join("")
       : `<option value="">— no clients found —</option>`;
+
+    clientSelect.innerHTML = html;
+    wk_clientSelect.innerHTML = html;
   }
   await loadClients();
 
-  clientSelect.addEventListener("change", () => {
-    clientIdInput.value = clientSelect.value || "";
-  });
+  clientSelect.addEventListener("change", () => { clientIdInput.value = clientSelect.value || ""; });
 
   async function resolveStaffIdByName(name) {
     if (!name) return null;
-    const { data, error } = await ess.from("staff").select("id").eq("full_name", name).maybeSingle();
-    if (!error && data?.id) return data.id;
-    return null;
+    const { data } = await ess.from("staff").select("id").eq("full_name", name).maybeSingle();
+    return data?.id || null;
   }
 
   function splitNotes(raw) {
     if (!raw) return { progress: "", observation: "", action: "" };
-    const P = "## Progress Notes:";
-    const O = "## Observation:";
-    const A = "## Action Plan:";
-    let progress = "", observation = "", action = "";
-
+    const P = "## Progress Notes:", O = "## Observation:", A = "## Action Plan:";
+    let progress="", observation="", action="";
     if (raw.includes(P)) {
-      const pIdx = raw.indexOf(P) + P.length;
-      const oIdx = raw.indexOf(O, pIdx);
-      const aIdx = raw.indexOf(A, oIdx > -1 ? oIdx : pIdx);
-
-      progress   = raw.slice(pIdx, oIdx > -1 ? oIdx : (aIdx > -1 ? aIdx : raw.length)).trim();
-      if (oIdx > -1) {
-        observation = raw.slice(oIdx + O.length, aIdx > -1 ? aIdx : raw.length).trim();
-      }
-      if (aIdx > -1) {
-        action = raw.slice(aIdx + A.length).trim();
-      }
-    } else {
-      progress = raw.trim();
+      const pIdx = raw.indexOf(P)+P.length;
+      const oIdx = raw.indexOf(O,pIdx);
+      const aIdx = raw.indexOf(A,oIdx>-1?oIdx:pIdx);
+      progress = raw.slice(pIdx, oIdx>-1?oIdx:(aIdx>-1?aIdx:raw.length)).trim();
+      if (oIdx>-1) observation = raw.slice(oIdx+O.length, aIdx>-1?aIdx:raw.length).trim();
+      if (aIdx>-1) action = raw.slice(aIdx+A.length).trim();
+      return {progress,observation,action};
     }
-    return { progress, observation, action };
+    return {progress:raw.trim(),observation:"",action:""};
   }
 
-  function to12h(t) {
-    if (!t) return "—";
-    const parts = t.split(":");
-    let h = parseInt(parts[0], 10);
-    const m = parts[1] ?? "00";
-    const ampm = h >= 12 ? "PM" : "AM";
-    h = h % 12;
-    if (h === 0) h = 12;
-    return `${h}:${m.padStart(2,"0")} ${ampm}`;
-  }
-
-  function computeHours(start, end) {
-    if (!start || !end) return "";
-    const [sh, sm] = start.split(":").map(Number);
-    const [eh, em] = end.split(":").map(Number);
-    if (Number.isNaN(sh) || Number.isNaN(eh)) return "";
-    const startMins = sh*60 + (sm||0);
-    const endMins   = eh*60 + (em||0);
-    const diff = endMins - startMins;
-    if (diff <= 0) return "";
-    return (diff/60).toFixed(2);
-  }
+  function to12h(t){ if(!t) return "—"; const parts=t.split(":"); let h=parseInt(parts[0],10); const m=parts[1]??"00"; const ampm=h>=12?"PM":"AM"; h=h%12; if(h===0)h=12; return `${h}:${m.padStart(2,"0")} ${ampm}`; }
+  function computeHours(start,end){ if(!start||!end) return ""; const [sh,sm]=start.split(":").map(Number); const [eh,em]=end.split(":").map(Number); const diff=(eh*60+(em||0))-(sh*60+(sm||0)); if(diff<=0) return ""; return (diff/60).toFixed(2); }
+  function startOfWeekMonday(d){const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=nd.getDay();const diff=(day===0?-6:1-day);nd.setDate(nd.getDate()+diff);nd.setHours(0,0,0,0);return nd;}
+  const ymd = d => d.toISOString().slice(0,10);
 
   async function loadDay() {
     const clientId = clientIdInput.value.trim();
     if (!clientId) { alert("Select a client first."); return; }
-
     const serviceDate = dateInput.value;
     if (!serviceDate) { alert("Pick a service date."); return; }
 
@@ -236,31 +267,23 @@
     let staffIdFilter = null;
     if (staffName) staffIdFilter = await resolveStaffIdByName(staffName);
 
-    // 1) official
     let { data: officialRows } = await ess.from("daily_entries")
       .select("*")
       .eq("client_id", clientId)
       .eq("service_date", serviceDate)
-      .limit(10)
       .maybeSingle()
-      .then(r => ({ data: r.data ? [r.data] : [] })); // normalize
+      .then(r => ({ data: r.data ? [r.data] : [] }));
 
     let official = Array.isArray(officialRows) && officialRows.length ? officialRows[0] : null;
-    if (official && staffIdFilter && official.staff_id !== staffIdFilter) {
-      official = null;
-    }
+    if (official && staffIdFilter && official.staff_id !== staffIdFilter) official = null;
 
-    // 2) draft
     const { data: draftRows } = await ess.from("daily_drafts")
       .select("*")
       .eq("client_id", clientId)
-      .eq("date", serviceDate)
-      .limit(10);
+      .eq("date", serviceDate);
 
     let draft = Array.isArray(draftRows) && draftRows.length ? draftRows[0] : null;
-    if (draft && staffIdFilter && draft.staff_id && draft.staff_id !== staffIdFilter) {
-      draft = null;
-    }
+    if (draft && staffIdFilter && draft.staff_id && draft.staff_id !== staffIdFilter) draft = null;
 
     if (!official && !draft) {
       dayBody.innerHTML = `<tr><td colspan="12">No data for this date.</td></tr>`;
@@ -274,9 +297,8 @@
     let hours        = (official && official.hours != null) ? official.hours
                       : (draft && draft.hours != null) ? draft.hours
                       : "";
-
-    if (hours === "" || hours === null) {
-      const computed = computeHours(start_time, end_time);
+    if (!hours) {
+      const computed = computeHours(start_time,end_time);
       if (computed) hours = computed;
     }
 
@@ -288,20 +310,14 @@
       end_time,
       hours,
       modality: official?.modality || draft?.modality || "",
-      domain: (() => {
-        if (official?.activities) {
-          return Array.isArray(official.activities) ? official.activities.join(", ") : official.activities;
-        }
-        return draft?.activities || "";
-      })(),
+      domain: official?.activities ? (Array.isArray(official.activities)?official.activities.join(", "):official.activities) : (draft?.activities || ""),
       notes: official?.service_notes || draft?.notes || "",
       staff_signature: official?.staff_signature || draft?.staff_signature || "",
       client_signature: official?.client_signature || draft?.client_signature || "",
       regional_center: official?.regional_center || draft?.regional_center || (rcInput.value || ""),
       service_coordinator: official?.service_coordinator || draft?.service_coordinator || (scInput.value || ""),
       source: official ? "official" : "draft",
-      staffName: staffName,
-      // so delete knows what to match
+      staffName,
       staffId: official?.staff_id || draft?.staff_id || staffIdFilter || null
     };
 
@@ -320,46 +336,31 @@
         <td>${merged.staff_signature ? "✅" : "—"}</td>
         <td>${merged.client_signature ? "✅" : "—"}</td>
         <td>${merged.source}</td>
-        <td><button class="trash-btn" title="Delete this day" onclick="window.__essDeleteDay && window.__essDeleteDay()">🗑️</button></td>
+        <td><button class="trash-btn" onclick="window.__essDeleteDay && window.__essDeleteDay()">🗑️</button></td>
       </tr>
     `;
-
     btnExport.disabled = false;
   }
   btnLoad.addEventListener("click", loadDay);
 
-  // expose delete so the inline onclick can call it
   window.__essDeleteDay = async function(){
     if (!currentDayData) return;
-    const ok = confirm("Delete this day's entry for this client? This will remove both official and draft rows for this date.");
+    const ok = confirm("Delete this day's entry for this client?");
     if (!ok) return;
-
     const { clientId, date, staffId } = currentDayData;
-
-    // delete official
-    let delOfficial = ess.from("daily_entries")
-      .delete()
-      .eq("client_id", clientId)
-      .eq("service_date", date);
+    let delOfficial = ess.from("daily_entries").delete().eq("client_id", clientId).eq("service_date", date);
     if (staffId) delOfficial = delOfficial.eq("staff_id", staffId);
     await delOfficial;
-
-    // delete draft
-    let delDraft = ess.from("daily_drafts")
-      .delete()
-      .eq("client_id", clientId)
-      .eq("date", date);
+    let delDraft = ess.from("daily_drafts").delete().eq("client_id", clientId).eq("date", date);
     if (staffId) delDraft = delDraft.eq("staff_id", staffId);
     await delDraft;
-
-    // refresh view
     dayBody.innerHTML = `<tr><td colspan="12">No data for this date.</td></tr>`;
     currentDayData = null;
     btnExport.disabled = true;
     alert("Day deleted ✅");
   };
 
-  function exportDay() {
+  function exportDay(){
     if (!currentDayData) return;
     const {
       clientLabel, date, start_time, end_time, hours, modality,
@@ -371,9 +372,8 @@
     const serviceCode  = serviceInput.value || "SDP Service Code";
     const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(new Date(d));
     const { progress, observation, action } = splitNotes(notes);
-
-    const start12  = start_time ? to12h(start_time) : "—";
-    const end12    = end_time ? to12h(end_time)     : "—";
+    const start12 = start_time ? to12h(start_time) : "—";
+    const end12   = end_time ? to12h(end_time) : "—";
     const hoursStr = (hours !== "" && hours !== null) ? Number(hours).toFixed(2) : "—";
 
     const win = window.open("", "_blank", "width=900,height=1100");
@@ -383,7 +383,7 @@
         <title>ESS_${clientLabel.replace(/\s+/g,"_")}_${date}.pdf</title>
         <style>
           body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;background:#fff;}
-          .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in 0.5in 0.6in 0.5in;box-sizing:border-box;}
+          .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;box-sizing:border-box;}
           .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
           .header-left{max-width:70%;}
           .logo{height:90px;object-fit:contain;}
@@ -435,19 +435,15 @@
             <div style="display:flex;gap:20px;margin-top:10px;align-items:flex-end;">
               <div>
                 <div style="font-size:10.5px;font-weight:600;">Staff Signature:</div>
-                ${
-                  staff_signature
+                ${ staff_signature
                     ? `<img class="sig" src="${staff_signature}">`
-                    : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
-                }
+                    : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>` }
               </div>
               <div>
                 <div style="font-size:10.5px;font-weight:600;">Participant / Parent:</div>
-                ${
-                  client_signature
+                ${ client_signature
                     ? `<img class="sig" src="${client_signature}">`
-                    : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
-                }
+                    : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>` }
               </div>
             </div>
           </div>
@@ -468,6 +464,154 @@
     setTimeout(() => win.print(), 400);
   }
   btnExport.addEventListener("click", exportDay);
+
+  // ===== WEEKLY JS =====
+  async function staffNameById(id){
+    if (!id) return "";
+    const { data } = await ess.from("staff").select("full_name").eq("id", id).maybeSingle();
+    return data?.full_name || id;
+  }
+
+  async function loadWeekly(){
+    const clientId = wk_clientSelect.value;
+    if (!clientId){ alert("Pick a client first."); return; }
+
+    const picked = wk_weekDate.value ? new Date(wk_weekDate.value) : new Date();
+    const monday = startOfWeekMonday(picked);
+    const mondayStr = ymd(monday);
+
+    const staffNameFilter = wk_staffFilter.value.trim();
+    let staffIdFilter = null;
+    if (staffNameFilter){
+      const { data } = await ess.from("staff").select("id").eq("full_name", staffNameFilter).maybeSingle();
+      staffIdFilter = data?.id || null;
+    }
+
+    const { data, error } = await ess.from("weekly_staff_plans")
+      .select("*")
+      .eq("client_id", clientId)
+      .eq("week_start", mondayStr);
+
+    if (error){
+      alert(error.message);
+      return;
+    }
+
+    let rows = data || [];
+    if (staffIdFilter){
+      rows = rows.filter(r => r.staff_id === staffIdFilter);
+    }
+
+    if (!rows.length){
+      wk_resultsCard.style.display = "block";
+      wk_body.innerHTML = `<tr><td colspan="10">No weekly plans for this client and week.</td></tr>`;
+      currentWeeklyRows = [];
+      wk_export.disabled = true;
+      return;
+    }
+
+    for (const r of rows){
+      r.__staff_name = await staffNameById(r.staff_id);
+    }
+
+    wk_resultsCard.style.display = "block";
+    wk_body.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.__staff_name}</td>
+        <td>${r.week_start}</td>
+        <td>${r.mon_text || ""}</td>
+        <td>${r.tue_text || ""}</td>
+        <td>${r.wed_text || ""}</td>
+        <td>${r.thu_text || ""}</td>
+        <td>${r.fri_text || ""}</td>
+        <td>${r.sat_text || ""}</td>
+        <td>${r.sun_text || ""}</td>
+        <td>${r.staff_signature ? "✅" : "—"}</td>
+      </tr>
+    `).join("");
+
+    currentWeeklyRows = rows;
+    wk_export.disabled = false;
+  }
+  wk_load.addEventListener("click", loadWeekly);
+
+  function exportWeekly(){
+    if (!currentWeeklyRows.length) return;
+    const clientLabel = wk_clientSelect.options[wk_clientSelect.selectedIndex]?.text || "Client";
+    const weekStart = currentWeeklyRows[0].week_start;
+    const win = window.open("", "_blank", "width=900,height=1100");
+    win.document.write(`
+      <html>
+      <head>
+        <title>ESS_${clientLabel.replace(/\s+/g,"_")}_weekly_${weekStart}.pdf</title>
+        <style>
+          body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;}
+          .page{width:8.5in;margin:0 auto;padding:0.5in;box-sizing:border-box;}
+          table{width:100%;border-collapse:collapse;font-size:11px;}
+          th,td{border:1px solid #e5e7eb;padding:6px;vertical-align:top;}
+          .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+          .sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
+        </style>
+      </head>
+      <body>
+        <div class="page">
+          <div class="head">
+            <div>
+              <h2>Weekly Staff Plans</h2>
+              <div><strong>Client:</strong> ${clientLabel}</div>
+              <div><strong>Week start:</strong> ${weekStart}</div>
+            </div>
+            <div>
+              <img src="${LOGO_URL}" style="height:70px;" onerror="this.style.display='none'">
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Staff</th>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+                <th>Sun</th>
+                <th>Signature</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${
+                currentWeeklyRows.map(r => `
+                  <tr>
+                    <td>${r.__staff_name}</td>
+                    <td>${(r.mon_text||"").replace(/\n/g,"<br>")}</td>
+                    <td>${(r.tue_text||"").replace(/\n/g,"<br>")}</td>
+                    <td>${(r.wed_text||"").replace(/\n/g,"<br>")}</td>
+                    <td>${(r.thu_text||"").replace(/\n/g,"<br>")}</td>
+                    <td>${(r.fri_text||"").replace(/\n/g,"<br>")}</td>
+                    <td>${(r.sat_text||"").replace(/\n/g,"<br>")}</td>
+                    <td>${(r.sun_text||"").replace(/\n/g,"<br>")}</td>
+                    <td>${
+                      r.staff_signature
+                        ? `<img class="sig" src="${r.staff_signature}">`
+                        : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
+                    }</td>
+                  </tr>
+                `).join("")
+              }
+            </tbody>
+          </table>
+          <p style="margin-top:14px;font-size:10px;color:#6b7280;">${CONTACT_LINE}</p>
+        </div>
+      </body>
+      </html>
+    `);
+    win.document.close();
+    win.focus();
+    setTimeout(()=>win.print(), 400);
+  }
+  wk_export.addEventListener("click", exportWeekly);
+
 })();
 </script>
 </body>
