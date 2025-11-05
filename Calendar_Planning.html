@@ -37,11 +37,14 @@
     .btn{padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer;}
     .btn--icon{width:32px;height:32px;display:grid;place-items:center;}
     .btn--primary{background:var(--brand);color:#fff;border-color:var(--brand);}
-    /* 7-box calendar */
+
+    /* 7-box calendar - FIXED spacing */
     #wk_daysGrid{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
-      gap:12px;
+      column-gap:14px;
+      row-gap:14px;
+      margin-bottom:16px; /* so it doesn't touch signature */
     }
     .day-card{
       background:#fff;
@@ -52,6 +55,7 @@
       flex-direction:column;
       gap:6px;
       min-height:180px;
+      box-sizing:border-box;
     }
     .day-head{font-weight:600;display:flex;justify-content:space-between;align-items:center;}
     .day-date{font-size:12px;color:#6b7280;}
@@ -65,15 +69,19 @@
       font-family:inherit;
       font-size:13px;
       background:#f8fafc;
+      box-sizing:border-box;
     }
-    .sig-wrap{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin-top:16px;}
+
+    .sig-wrap{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin-top:0;}
     .sig-title{font-weight:600;margin-bottom:6px;}
     .sig-box{border:1px dashed #d1d5db;border-radius:10px;background:#fff;}
     canvas.sig{width:100%;height:140px;display:block;border-radius:10px;touch-action:none;cursor:crosshair;}
     #wk_toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s}
     #wk_error{display:none;margin-top:10px;padding:10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b}
+    @media (max-width:600px){
+      #wk_daysGrid{grid-template-columns:1fr;}
+    }
   </style>
-  <!-- important: load supabase first -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -83,7 +91,6 @@
       <span class="pill">For admin review</span>
     </div>
 
-    <!-- client + staff -->
     <div class="row">
       <input type="hidden" id="wk_client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" />
       <div>
@@ -96,7 +103,6 @@
       </div>
     </div>
 
-    <!-- week selector -->
     <div class="weekbar">
       <button id="wk_prevWeek" class="btn btn--icon">◀</button>
       <div>
@@ -107,10 +113,8 @@
       <div class="spacer"></div>
     </div>
 
-    <!-- calendar boxes -->
     <div id="wk_daysGrid"></div>
 
-    <!-- signature + buttons -->
     <div class="sig-wrap">
       <div class="sig-title">Staff Signature (for weekly plan)</div>
       <div class="sig-box">
@@ -120,7 +124,7 @@
     </div>
 
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
-      <button id="wk_saveDraft" class="btn">Save Draft</button>
+      <!-- removed Save Draft -->
       <button id="wk_submit" class="btn btn--primary">Submit Weekly Plan</button>
     </div>
 
@@ -130,13 +134,12 @@
 
 <script>
 (function(){
-  // supabase client
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const ess = sb.schema("ess");
 
-  const $ = (id)=>document.getElementById(id);
+  const $ = id => document.getElementById(id);
 
   const wk_client_id = $("wk_client_id");
   const wk_staff_name = $("wk_staff_name");
@@ -147,7 +150,6 @@
   const wk_endTxt = $("wk_endTxt");
   const wk_daysGrid = $("wk_daysGrid");
   const wk_submit = $("wk_submit");
-  const wk_saveDraft = $("wk_saveDraft");
   const wk_error = $("wk_error");
   const wk_toast = $("wk_toast");
 
@@ -155,7 +157,6 @@
   const clearSigBtn = $("wk_clearSig");
   let sigCtx, sigData = null;
 
-  // date helpers
   const fmt = d => new Intl.DateTimeFormat("en-US",{month:"short",day:"2-digit",year:"numeric"}).format(d);
   const ymd = d => d.toISOString().slice(0,10);
   function startOfWeekMonday(d){
@@ -168,20 +169,19 @@
   }
   function addDays(d,n){ const nd=new Date(d); nd.setDate(nd.getDate()+n); return nd; }
 
-  // signature
   function initSig(existing){
     const box = sigCanvas.getBoundingClientRect();
     const ratio = window.devicePixelRatio || 1;
-    const width = Math.max(1,box.width);
+    const width = Math.max(1, box.width);
     const height = 140;
     sigCanvas.width = width * ratio;
     sigCanvas.height = height * ratio;
     sigCtx = sigCanvas.getContext("2d");
     sigCtx.setTransform(1,0,0,1,0,0);
-    sigCtx.scale(ratio,ratio);
-    sigCtx.lineWidth=2;
-    sigCtx.lineCap="round";
-    sigCtx.strokeStyle="#000";
+    sigCtx.scale(ratio, ratio);
+    sigCtx.lineWidth = 2;
+    sigCtx.lineCap = "round";
+    sigCtx.strokeStyle = "#000";
     if (existing){
       const img=new Image();
       img.onload=()=>sigCtx.drawImage(img,0,0,width,height);
@@ -190,7 +190,7 @@
   }
   initSig(null);
 
-  function makeDrawable(canvas,ctx,onEnd){
+  function makeDrawable(canvas, ctx, onEnd){
     let drawing=false;
     function pos(e){
       const r=canvas.getBoundingClientRect();
@@ -208,15 +208,13 @@
     canvas.addEventListener("touchmove",move,{passive:false});
     canvas.addEventListener("touchend",up);
   }
-  makeDrawable(sigCanvas,sigCtx,(c)=>{ sigData = c.toDataURL("image/png"); });
-  clearSigBtn.addEventListener("click",()=>{ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); sigData=null; });
+  makeDrawable(sigCanvas, sigCtx, c => { sigData = c.toDataURL("image/png"); });
+  clearSigBtn.addEventListener("click", ()=>{ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); sigData=null; });
 
-  window.addEventListener("resize",()=>{ initSig(sigData); });
+  window.addEventListener("resize", ()=>{ initSig(sigData); });
 
-  // staff helper
   const staffUuidCache = new Map();
   function isUuid(s){ return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s); }
-
   async function getOrCreateStaffUuid(){
     const name = (wk_staff_name.value || "").trim();
     if (!name) return null;
@@ -239,7 +237,6 @@
     return resolved;
   }
 
-  // week UI
   let currentWeekStart = startOfWeekMonday(new Date());
   const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
@@ -267,13 +264,12 @@
       wk_daysGrid.appendChild(card);
     }
 
-    // try to load existing data for this week
     loadWeekFromServer();
   }
 
   async function loadWeekFromServer(){
     const name = (wk_staff_name.value || "").trim();
-    if (!name) return; // no staff, nothing to load
+    if (!name) return;
     const staffUuid = await getOrCreateStaffUuid();
     if (!staffUuid) return;
     const weekStartStr = ymd(currentWeekStart);
@@ -285,10 +281,7 @@
       .eq("week_start", weekStartStr)
       .maybeSingle();
 
-    if (error) {
-      console.warn(error);
-      return;
-    }
+    if (error) return;
     if (data){
       const map = {
         0: data.mon_text || "",
@@ -332,7 +325,7 @@
     setTimeout(()=>wk_toast.style.opacity="0",1800);
   }
 
-  async function saveWeeklyPlan(submit){
+  async function submitWeeklyPlan(){
     wk_error.style.display = "none";
 
     const staffName = (wk_staff_name.value || "").trim();
@@ -362,23 +355,22 @@
       sat_text: payload.sat_text || null,
       sun_text: payload.sun_text || null,
       staff_signature: sigData || null,
-      submitted: !!submit
+      submitted: true
     };
 
     const { error } = await ess.from("weekly_staff_plans").upsert(upsertBody, { onConflict: "client_id,staff_id,week_start" });
     if (error){
       wk_error.style.display="block";
-      wk_error.textContent="Save failed: "+error.message;
-      toast("Save failed ❌");
+      wk_error.textContent="Submit failed: "+error.message;
+      toast("Submit failed ❌");
       return;
     }
-    toast(submit ? "Weekly plan submitted ✅" : "Draft saved ✅");
+    toast("Weekly plan submitted ✅");
   }
 
   wk_prevWeek.addEventListener("click", ()=>{ currentWeekStart = addDays(currentWeekStart, -7); renderWeekUI(); });
   wk_nextWeek.addEventListener("click", ()=>{ currentWeekStart = addDays(currentWeekStart, 7); renderWeekUI(); });
-  wk_saveDraft.addEventListener("click", ()=> saveWeeklyPlan(false));
-  wk_submit.addEventListener("click", ()=> saveWeeklyPlan(true));
+  wk_submit.addEventListener("click", submitWeeklyPlan);
   wk_staff_name.addEventListener("blur", ()=> loadWeekFromServer());
 
   renderWeekUI();
