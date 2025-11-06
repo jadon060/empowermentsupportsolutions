@@ -2,678 +2,378 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>ESS • SDP Admin Export (Daily)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ESS • Weekly Staff Calendar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body{margin:0;background:#f3f4f6;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#0f172a;}
-    header{background:#111827;color:#fff;padding:14px 18px;display:flex;align-items:center;gap:14px;}
-    header img{height:40px;}
-    .wrap{max-width:1100px;margin:1.4rem auto;padding:0 1rem;}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;}
-    label{font-size:.75rem;font-weight:500;display:block;margin-bottom:3px;}
-    input,select{padding:6px 9px;border:1px solid #d1d5db;border-radius:8px;font-size:.78rem;}
-    button{border:none;border-radius:8px;padding:7px 12px;background:#111827;color:#fff;cursor:pointer;font-size:.78rem;}
-    button.btn-muted{background:#e5e7eb;color:#111827;}
-    table{width:100%;border-collapse:collapse;}
-    th,td{padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.75rem;vertical-align:top;}
-    .flex{display:flex;gap:10px;flex-wrap:wrap;}
-    .trash-btn{
-      background:transparent;
-      border:none;
-      cursor:pointer;
-      font-size:14px;
-      line-height:1;
-      padding:2px 4px;
-      color:#ef4444;
+    :root{
+      --bg:#f7f7fb;
+      --card:#fff;
+      --border:#e5e7eb;
+      --brand:#2c3e50;
     }
-    .trash-btn:hover{color:#b91c1c;}
+    body{
+      margin:0;
+      background:var(--bg);
+      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+      color:#0f172a;
+    }
+    .wrap{
+      max-width:980px;
+      margin:2rem auto;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:1.5rem 1.5rem 1.25rem;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    h2{margin:0;font-size:1.5rem;display:flex;gap:.4rem;align-items:center;}
+    .pill{font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a}
+    .row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
+    .row > div{min-width:200px;flex:1}
+    .label{display:block;color:#6b7280;font-size:12px;margin-bottom:4px;}
+    .input{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:10px;}
+    .weekbar{display:flex;align-items:center;gap:12px;border:1px solid var(--border);padding:9px 12px;border-radius:12px;background:#f8fafc;margin-bottom:14px;}
+    .spacer{flex:1}
+    .btn{padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer;}
+    .btn--icon{width:32px;height:32px;display:grid;place-items:center;}
+    .btn--primary{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+    /* 7-box calendar - FIXED spacing */
+    #wk_daysGrid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+      column-gap:14px;
+      row-gap:14px;
+      margin-bottom:16px; /* so it doesn't touch signature */
+    }
+    .day-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-height:180px;
+      box-sizing:border-box;
+    }
+    .day-head{font-weight:600;display:flex;justify-content:space-between;align-items:center;}
+    .day-date{font-size:12px;color:#6b7280;}
+    .textarea{
+      width:100%;
+      min-height:110px;
+      resize:vertical;
+      border:1px solid #e5e7eb;
+      border-radius:10px;
+      padding:8px 9px;
+      font-family:inherit;
+      font-size:13px;
+      background:#f8fafc;
+      box-sizing:border-box;
+    }
+
+    .sig-wrap{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin-top:0;}
+    .sig-title{font-weight:600;margin-bottom:6px;}
+    .sig-box{border:1px dashed #d1d5db;border-radius:10px;background:#fff;}
+    canvas.sig{width:100%;height:140px;display:block;border-radius:10px;touch-action:none;cursor:crosshair;}
+    #wk_toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s}
+    #wk_error{display:none;margin-top:10px;padding:10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b}
+    @media (max-width:600px){
+      #wk_daysGrid{grid-template-columns:1fr;}
+    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<header>
-  <img src="https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png" alt="ESS" onerror="this.style.display='none'">
-  <div>
-    <div style="font-weight:600;">Empowerment Support Solutions, LLC</div>
-    <div style="font-size:.72rem;opacity:.7;">SDP • Service Log Export (Daily – Unified)</div>
-  </div>
-</header>
+  <section class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+      <h2>📅 Weekly Staff Calendar – Planned Goals</h2>
+      <span class="pill">For admin review</span>
+    </div>
 
-<div class="wrap">
-  <!-- DAILY -->
-  <div class="card">
-    <h2 style="margin-top:0;">Daily export</h2>
-    <div class="flex">
+    <div class="row">
+      <input type="hidden" id="wk_client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" />
       <div>
-        <label for="clientSelect">Client</label>
-        <select id="clientSelect" style="min-width:220px;">
-          <option value="">— loading clients… —</option>
-        </select>
-      </div>
-      <div style="display:none;">
-        <label for="clientId">Client ID / UUID</label>
-        <input id="clientId" value="">
+        <label class="label">Client</label>
+        <input type="text" class="input" value="Omar V." readonly style="background:#e5e7eb;cursor:not-allowed;">
       </div>
       <div>
-        <label for="serviceDate">Service Date</label>
-        <input id="serviceDate" type="date">
-      </div>
-      <div>
-        <label for="staffFilter">Staff (optional)</label>
-        <input id="staffFilter" placeholder="e.g. John Perez">
-      </div>
-      <div>
-        <label for="serviceCode">Service Code (SDP)</label>
-        <input id="serviceCode" placeholder="e.g. 520 – ILS / CI">
-      </div>
-      <div>
-        <label for="rcName">Regional Center</label>
-        <input id="rcName" placeholder="">
-      </div>
-      <div>
-        <label for="scName">Service Coordinator</label>
-        <input id="scName" placeholder="">
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button id="loadDay">Load Day</button>
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button id="exportDay" class="btn-muted" disabled>Export Day (Unified)</button>
+        <label class="label" for="wk_staff_name">Staff (type your name)</label>
+        <input id="wk_staff_name" type="text" class="input" placeholder="e.g., John Perez">
       </div>
     </div>
-  </div>
 
-  <div class="card">
-    <h3 style="margin-top:0;">Day preview</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Start</th>
-          <th>End</th>
-          <th>Hours</th>
-          <th>Modality</th>
-          <th>Domains</th>
-          <th>RC</th>
-          <th>SC</th>
-          <th>Staff Sig</th>
-          <th>Client Sig</th>
-          <th>Source</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="dayBody">
-        <tr><td colspan="12">No day loaded.</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- WEEKLY (new) -->
-  <div class="card">
-    <h2 style="margin-top:0;">Weekly staff plans</h2>
-    <div class="flex">
+    <div class="weekbar">
+      <button id="wk_prevWeek" class="btn btn--icon">◀</button>
       <div>
-        <label for="wk_clientSelect">Client</label>
-        <select id="wk_clientSelect" style="min-width:220px;">
-          <option value="">— select client —</option>
-        </select>
+        <div id="wk_range" style="font-weight:700;color:#0f172a;">Mon — Sun</div>
+        <div style="color:#6b7280;font-size:13px;">Week of <span id="wk_startTxt"></span> to <span id="wk_endTxt"></span></div>
       </div>
-      <div>
-        <label for="wk_weekDate">Week of (pick any day)</label>
-        <input id="wk_weekDate" type="date">
-      </div>
-      <div>
-        <label for="wk_staffFilter">Staff (optional)</label>
-        <input id="wk_staffFilter" placeholder="e.g. John Perez">
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button id="wk_load">Load Weekly Plans</button>
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button id="wk_export" class="btn-muted" disabled>Export Weekly Plan</button>
-      </div>
+      <button id="wk_nextWeek" class="btn btn--icon">▶</button>
+      <div class="spacer"></div>
     </div>
-  </div>
 
-  <div class="card" id="wk_resultsCard" style="display:none;">
-    <h3 style="margin-top:0;">Weekly plans for selected client</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Staff</th>
-          <th>Week start</th>
-          <th>Mon</th>
-          <th>Tue</th>
-          <th>Wed</th>
-          <th>Thu</th>
-          <th>Fri</th>
-          <th>Sat</th>
-          <th>Sun</th>
-          <th>Signature</th>
-          <th></th> <!-- delete -->
-        </tr>
-      </thead>
-      <tbody id="wk_body">
-        <tr><td colspan="11">No weekly plan loaded.</td></tr>
-      </tbody>
-    </table>
-  </div>
+    <div id="wk_daysGrid"></div>
 
-</div>
+    <div class="sig-wrap">
+      <div class="sig-title">Staff Signature (for weekly plan)</div>
+      <div class="sig-box">
+        <canvas id="wk_staffSig" class="sig"></canvas>
+      </div>
+      <button id="wk_clearSig" class="btn" style="margin-top:8px;">Clear Signature</button>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
+      <!-- removed Save Draft -->
+      <button id="wk_submit" class="btn btn--primary">Submit Weekly Plan</button>
+    </div>
+
+    <div id="wk_error"></div>
+    <div id="wk_toast"></div>
+  </section>
+
 <script>
-(async () => {
+(function(){
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const ess = sb.schema("ess");
 
-  const clientSelect = document.getElementById("clientSelect");
-  const clientIdInput = document.getElementById("clientId");
-  const dateInput     = document.getElementById("serviceDate");
-  const staffInput    = document.getElementById("staffFilter");
-  const serviceInput  = document.getElementById("serviceCode");
-  const rcInput       = document.getElementById("rcName");
-  const scInput       = document.getElementById("scName");
-  const dayBody       = document.getElementById("dayBody");
-  const btnLoad       = document.getElementById("loadDay");
-  const btnExport     = document.getElementById("exportDay");
+  const $ = id => document.getElementById(id);
 
-  // weekly elems
-  const wk_clientSelect = document.getElementById("wk_clientSelect");
-  const wk_weekDate     = document.getElementById("wk_weekDate");
-  const wk_staffFilter  = document.getElementById("wk_staffFilter");
-  const wk_load         = document.getElementById("wk_load");
-  const wk_export       = document.getElementById("wk_export");
-  const wk_resultsCard  = document.getElementById("wk_resultsCard");
-  const wk_body         = document.getElementById("wk_body");
+  const wk_client_id = $("wk_client_id");
+  const wk_staff_name = $("wk_staff_name");
+  const wk_prevWeek = $("wk_prevWeek");
+  const wk_nextWeek = $("wk_nextWeek");
+  const wk_range = $("wk_range");
+  const wk_startTxt = $("wk_startTxt");
+  const wk_endTxt = $("wk_endTxt");
+  const wk_daysGrid = $("wk_daysGrid");
+  const wk_submit = $("wk_submit");
+  const wk_error = $("wk_error");
+  const wk_toast = $("wk_toast");
 
-  const LOGO_URL = "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
-  const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
+  const sigCanvas = $("wk_staffSig");
+  const clearSigBtn = $("wk_clearSig");
+  let sigCtx, sigData = null;
 
-  function todayLocalISO() {
-    const d = new Date();
-    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-    return d.toISOString().slice(0, 10);
-  }
-  function formatYMD(ymd) {
-    if (!ymd) return "—";
-    const [y,m,d] = ymd.split("-").map(Number);
-    const dt = new Date(y, m - 1, d);
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric"
-    }).format(dt);
-  }
-
-  dateInput.value = todayLocalISO();
-  wk_weekDate.value = todayLocalISO();
-
-  let currentDayData = null;
-  let currentWeeklyRows = [];
-
-  async function loadClients() {
-    let options = [];
-    try {
-      let { data: clients, error } = await ess.from("clients").select("id, full_name").order("full_name",{ascending:true});
-      if (!error && Array.isArray(clients) && clients.length) {
-        options = clients.map(c => ({ id: c.id, label: c.full_name || c.id }));
-      } else {
-        const collected = new Map();
-        const { data: e1 } = await ess.from("daily_entries").select("client_id").limit(2000);
-        (e1||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
-        const { data: e2 } = await ess.from("daily_drafts").select("client_id").limit(2000);
-        (e2||[]).forEach(r => { if (r.client_id) collected.set(r.client_id, true); });
-        options = Array.from(collected.keys()).map(id => ({ id, label: "Client – " + id.slice(0,8) }));
-      }
-    } catch (err) {
-      console.error("Client load error:", err);
-    }
-
-    const html = options.length
-      ? `<option value="">— select client —</option>` + options.map(o => `<option value="${o.id}">${o.label}</option>`).join("")
-      : `<option value="">— no clients found —</option>`;
-
-    clientSelect.innerHTML = html;
-    wk_clientSelect.innerHTML = html;
-  }
-  await loadClients();
-
-  clientSelect.addEventListener("change", () => { clientIdInput.value = clientSelect.value || ""; });
-
-  async function resolveStaffIdByName(name) {
-    if (!name) return null;
-    const { data } = await ess.from("staff").select("id").eq("full_name", name).maybeSingle();
-    return data?.id || null;
-  }
-
-  function splitNotes(raw) {
-    if (!raw) return { progress: "", observation: "", action: "" };
-    const P = "## Progress Notes:", O = "## Observation:", A = "## Action Plan:";
-    let progress="", observation="", action="";
-    if (raw.includes(P)) {
-      const pIdx = raw.indexOf(P)+P.length;
-      const oIdx = raw.indexOf(O,pIdx);
-      const aIdx = raw.indexOf(A,oIdx>-1?oIdx:pIdx);
-      progress = raw.slice(pIdx, oIdx>-1?oIdx:(aIdx>-1?aIdx:raw.length)).trim();
-      if (oIdx>-1) observation = raw.slice(oIdx+O.length, aIdx>-1?aIdx:raw.length).trim();
-      if (aIdx>-1) action = raw.slice(aIdx+A.length).trim();
-      return {progress,observation,action};
-    }
-    return {progress:raw.trim(),observation:"",action:""};
-  }
-
-  function to12h(t){ if(!t) return "—"; const parts=t.split(":"); let h=parseInt(parts[0],10); const m=parts[1]??"00"; const ampm=h>=12?"PM":"AM"; h=h%12; if(h===0)h=12; return `${h}:${m.padStart(2,"0")} ${ampm}`; }
-  function computeHours(start,end){ if(!start||!end) return ""; const [sh,sm]=start.split(":").map(Number); const [eh,em]=end.split(":").map(Number); const diff=(eh*60+(em||0))-(sh*60+(sm||0)); if(diff<=0) return ""; return (diff/60).toFixed(2); }
-  function startOfWeekMonday(d){const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=nd.getDay();const diff=(day===0?-6:1-day);nd.setDate(nd.getDate()+diff);nd.setHours(0,0,0,0);return nd;}
+  const fmt = d => new Intl.DateTimeFormat("en-US",{month:"short",day:"2-digit",year:"numeric"}).format(d);
   const ymd = d => d.toISOString().slice(0,10);
-
-  async function loadDay() {
-    const clientId = clientIdInput.value.trim();
-    if (!clientId) { alert("Select a client first."); return; }
-    const serviceDate = dateInput.value;
-    if (!serviceDate) { alert("Pick a service date."); return; }
-
-    const staffName = staffInput.value.trim();
-    let staffIdFilter = null;
-    if (staffName) staffIdFilter = await resolveStaffIdByName(staffName);
-
-    const { data: officialRows = [] } = await ess.from("daily_entries")
-      .select("*")
-      .eq("client_id", clientId)
-      .eq("service_date", serviceDate);
-
-    let official = officialRows;
-    if (staffIdFilter) {
-      official = official.filter(r => r.staff_id === staffIdFilter);
-    }
-    official = official.length ? official[0] : null;
-
-    const { data: draftRows = [] } = await ess.from("daily_drafts")
-      .select("*")
-      .eq("client_id", clientId)
-      .eq("date", serviceDate);
-
-    let draft = draftRows;
-    if (staffIdFilter) {
-      draft = draft.filter(r => !r.staff_id || r.staff_id === staffIdFilter);
-    }
-    draft = draft.length ? draft[0] : null;
-
-    if (!official && !draft) {
-      dayBody.innerHTML = `<tr><td colspan="12">No data for this date.</td></tr>`;
-      currentDayData = null;
-      btnExport.disabled = true;
-      return;
-    }
-
-    const start_time = official?.start_time || draft?.start_time || "";
-    const end_time   = official?.end_time   || draft?.end_time   || "";
-    let hours        = (official && official.hours != null) ? official.hours
-                      : (draft && draft.hours != null) ? draft.hours
-                      : "";
-    if (!hours) {
-      const computed = computeHours(start_time,end_time);
-      if (computed) hours = computed;
-    }
-
-    const merged = {
-      clientId,
-      clientLabel: clientSelect.options[clientSelect.selectedIndex]?.text || clientId,
-      date: serviceDate,
-      start_time,
-      end_time,
-      hours,
-      modality: official?.modality || draft?.modality || "",
-      domain: official?.activities ? (Array.isArray(official.activities)?official.activities.join(", "):official.activities) : (draft?.activities || ""),
-      notes: official?.service_notes || draft?.notes || "",
-      staff_signature: official?.staff_signature || draft?.staff_signature || "",
-      client_signature: official?.client_signature || draft?.client_signature || "",
-      regional_center: official?.regional_center || draft?.regional_center || (rcInput.value || ""),
-      service_coordinator: official?.service_coordinator || draft?.service_coordinator || (scInput.value || ""),
-      source: official ? "official" : "draft",
-      staffName,
-      staffId: official?.staff_id || draft?.staff_id || staffIdFilter || null
-    };
-
-    currentDayData = merged;
-
-    dayBody.innerHTML = `
-      <tr>
-        <td>${formatYMD(serviceDate)}</td>
-        <td>${merged.start_time ? to12h(merged.start_time) : "—"}</td>
-        <td>${merged.end_time ? to12h(merged.end_time) : "—"}</td>
-        <td>${merged.hours !== "" ? Number(merged.hours).toFixed(2) : "—"}</td>
-        <td>${merged.modality || "—"}</td>
-        <td>${merged.domain || "—"}</td>
-        <td>${merged.regional_center || "—"}</td>
-        <td>${merged.service_coordinator || "—"}</td>
-        <td>${merged.staff_signature ? "✅" : "—"}</td>
-        <td>${merged.client_signature ? "✅" : "—"}</td>
-        <td>${merged.source}</td>
-        <td><button class="trash-btn" onclick="window.__essDeleteDay && window.__essDeleteDay()">🗑️</button></td>
-      </tr>
-    `;
-    btnExport.disabled = false;
+  function startOfWeekMonday(d){
+    const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    const day=nd.getDay();
+    const diff=(day===0?-6:1-day);
+    nd.setDate(nd.getDate()+diff);
+    nd.setHours(0,0,0,0);
+    return nd;
   }
-  btnLoad.addEventListener("click", loadDay);
+  function addDays(d,n){ const nd=new Date(d); nd.setDate(nd.getDate()+n); return nd; }
 
-  window.__essDeleteDay = async function(){
-    if (!currentDayData) return;
-    const ok = confirm("Delete this day's entry for this client?");
-    if (!ok) return;
-    const { clientId, date, staffId } = currentDayData;
-    let delOfficial = ess.from("daily_entries").delete().eq("client_id", clientId).eq("service_date", date);
-    if (staffId) delOfficial = delOfficial.eq("staff_id", staffId);
-    await delOfficial;
-    let delDraft = ess.from("daily_drafts").delete().eq("client_id", clientId).eq("date", date);
-    if (staffId) delDraft = delDraft.eq("staff_id", staffId);
-    await delDraft;
-    dayBody.innerHTML = `<tr><td colspan="12">No data for this date.</td></tr>`;
-    currentDayData = null;
-    btnExport.disabled = true;
-    alert("Day deleted ✅");
-  };
+  function initSig(existing){
+    const box = sigCanvas.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    const width = Math.max(1, box.width);
+    const height = 140;
+    sigCanvas.width = width * ratio;
+    sigCanvas.height = height * ratio;
+    sigCtx = sigCanvas.getContext("2d");
+    sigCtx.setTransform(1,0,0,1,0,0);
+    sigCtx.scale(ratio, ratio);
+    sigCtx.lineWidth = 2;
+    sigCtx.lineCap = "round";
+    sigCtx.strokeStyle = "#000";
+    if (existing){
+      const img=new Image();
+      img.onload=()=>sigCtx.drawImage(img,0,0,width,height);
+      img.src=existing;
+    }
+  }
+  initSig(null);
 
-  function exportDay(){
-    if (!currentDayData) return;
-    const {
-      clientLabel, date, start_time, end_time, hours, modality,
-      domain, notes, staff_signature, client_signature,
-      regional_center, service_coordinator, staffName, source
-    } = currentDayData;
+  function makeDrawable(canvas, ctx, onEnd){
+    let drawing=false;
+    function pos(e){
+      const r=canvas.getBoundingClientRect();
+      const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+      const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+      return {x,y};
+    }
+    function down(e){ e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+    function move(e){ if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }
+    function up(){ if(!drawing) return; drawing=false; if(onEnd) onEnd(canvas); }
+    canvas.addEventListener("pointerdown",down);
+    canvas.addEventListener("pointermove",move);
+    window.addEventListener("pointerup",up);
+    canvas.addEventListener("touchstart",down,{passive:false});
+    canvas.addEventListener("touchmove",move,{passive:false});
+    canvas.addEventListener("touchend",up);
+  }
+  makeDrawable(sigCanvas, sigCtx, c => { sigData = c.toDataURL("image/png"); });
+  clearSigBtn.addEventListener("click", ()=>{ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); sigData=null; });
 
-    const businessName = "Empowerment Support Solutions, LLC";
-    const serviceCode  = serviceInput.value || "SDP Service Code";
-    const { progress, observation, action } = splitNotes(notes);
-    const start12 = start_time ? to12h(start_time) : "—";
-    const end12   = end_time ? to12h(end_time) : "—";
-    const hoursStr = (hours !== "" && hours !== null) ? Number(hours).toFixed(2) : "—";
+  window.addEventListener("resize", ()=>{ initSig(sigData); });
 
-    const win = window.open("", "_blank", "width=900,height=1100");
-    win.document.write(`
-      <html>
-      <head>
-        <title>ESS_${clientLabel.replace(/\\s+/g,"_")}_${date}.pdf</title>
-        <style>
-          body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;background:#fff;}
-          .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;box-sizing:border-box;}
-          .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-          .header-left{max-width:70%;}
-          .logo{height:90px;object-fit:contain;}
-          .box{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:10px;}
-          img.sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
-          .section-title{font-weight:600;font-size:11px;margin-top:6px;margin-bottom:3px;}
-          .note-box{
-            border:1px solid #e5e7eb;
-            border-radius:6px;
-            padding:4px 6px;
-            min-height:40px;
-            font-size:11px;
-            white-space:pre-wrap;
-            word-break:break-word;
-            overflow-wrap:anywhere;
-            max-width:100%;
-          }
-          @media print { body{background:#fff;} .page{margin:0;} }
-        </style>
-      </head>
-      <body>
-        <div class="page">
-          <div class="header">
-            <div class="header-left">
-              <div style="font-size:15px;font-weight:700;">${businessName}</div>
-              <div style="font-size:11px;">SDP – Daily Service Log (Unified: RC / SC / FMS)</div>
-              <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${clientLabel}</div>
-              <div style="font-size:11px;"><strong>Service Date:</strong> ${formatYMD(date)}</div>
-              <div style="font-size:11px;"><strong>Staff:</strong> ${staffName || "—"}</div>
-              <div style="font-size:11px;"><strong>Service Code:</strong> ${serviceCode}</div>
-              <div style="font-size:11px;"><strong>Regional Center:</strong> ${regional_center || "—"}</div>
-              <div style="font-size:11px;"><strong>Service Coordinator:</strong> ${service_coordinator || "—"}</div>
-            </div>
-            <div>
-              <img src="${LOGO_URL}" class="logo" onerror="this.style.display='none'">
-              <div style="font-size:10px;color:#94a3b8;text-align:right;margin-top:4px;">ESS • Daily export</div>
-            </div>
-          </div>
+  const staffUuidCache = new Map();
+  function isUuid(s){ return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s); }
+  async function getOrCreateStaffUuid(){
+    const name = (wk_staff_name.value || "").trim();
+    if (!name) return null;
+    if (isUuid(name)) return name;
+    if (staffUuidCache.has(name)) return staffUuidCache.get(name);
 
-          <div class="box">
-            <div style="font-size:11.5px;margin-bottom:4px;">
-              <strong>Time In:</strong> ${start12} &nbsp;
-              <strong>Time Out:</strong> ${end12} &nbsp;
-              <strong>Hours:</strong> ${hoursStr}
-            </div>
-            <div style="font-size:11.5px;margin-bottom:4px;"><strong>Location / Modality:</strong> ${modality || "—"}</div>
-            <div style="font-size:11.5px;margin-bottom:4px;"><strong>Service / Domain:</strong> ${domain || "—"}</div>
-            <div style="font-size:11.5px;margin-bottom:6px;"><strong>Source:</strong> ${source}</div>
+    let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", name).maybeSingle();
+    if (!error && data?.id){
+      staffUuidCache.set(name, data.id);
+      return data.id;
+    }
 
-            <div class="section-title">Description / Progress:</div>
-            <div class="note-box">${progress || "—"}</div>
+    const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID()
+      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+          const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16);
+        });
+    const ins = await ess.from("staff").insert([{ id:newId, full_name:name }]).select("id").maybeSingle();
+    const resolved = ins.data?.id || newId;
+    staffUuidCache.set(name, resolved);
+    return resolved;
+  }
 
-            <div class="section-title">Observation:</div>
-            <div class="note-box">${observation || "—"}</div>
+  let currentWeekStart = startOfWeekMonday(new Date());
+  const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
-            <div class="section-title">Action Plan:</div>
-            <div class="note-box">${action || "—"}</div>
+  function renderWeekUI(){
+    const start = new Date(currentWeekStart);
+    const end = addDays(start,6);
+    wk_range.textContent = `Mon ${start.getDate()} — Sun ${end.getDate()}`;
+    wk_startTxt.textContent = fmt(start);
+    wk_endTxt.textContent = fmt(end);
 
-            <div style="display:flex;gap:20px;margin-top:10px;align-items:flex-end;">
-              <div>
-                <div style="font-size:10.5px;font-weight:600;">Staff Signature:</div>
-                ${
-                  staff_signature
-                    ? `<img class="sig" src="${staff_signature}">`
-                    : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
-                }
-              </div>
-              <div>
-                <div style="font-size:10.5px;font-weight:600;">Participant / Parent:</div>
-                ${
-                  client_signature
-                    ? `<img class="sig" src="${client_signature}">`
-                    : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
-                }
-              </div>
-            </div>
-          </div>
-
-          <div style="margin-top:12px;font-size:9.5px;line-height:1.35;">
-            I certify that the services listed above were actually provided to the participant in accordance with the participant’s Individual Program Plan (IPP) and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
-          </div>
-
-          <div style="margin-top:14px;font-size:9px;color:#6b7280;">
-            ${businessName} • ${CONTACT_LINE}
-          </div>
+    wk_daysGrid.innerHTML = "";
+    for (let i=0;i<7;i++){
+      const d = addDays(start,i);
+      const card = document.createElement("div");
+      card.className = "day-card";
+      card.innerHTML = `
+        <div class="day-head">
+          <span>${dayNames[i]}</span>
+          <span class="day-date">${fmt(d)}</span>
         </div>
-      </body>
-      </html>
-    `);
-    win.document.close();
-    win.focus();
-    setTimeout(() => win.print(), 400);
-  }
-  btnExport.addEventListener("click", exportDay);
-
-  // ===== WEEKLY JS =====
-  async function staffNameById(id){
-    if (!id) return "";
-    const { data } = await ess.from("staff").select("full_name").eq("id", id).maybeSingle();
-    return data?.full_name || id;
-  }
-
-  async function loadWeekly(){
-    const clientId = wk_clientSelect.value;
-    if (!clientId){ alert("Pick a client first."); return; }
-
-    const picked = wk_weekDate.value ? new Date(wk_weekDate.value) : new Date();
-    const monday = startOfWeekMonday(picked);
-    const mondayStr = ymd(monday);
-
-    const staffNameFilter = wk_staffFilter.value.trim();
-    let staffIdFilter = null;
-    if (staffNameFilter){
-      const { data } = await ess.from("staff").select("id").eq("full_name", staffNameFilter).maybeSingle();
-      staffIdFilter = data?.id || null;
+        <textarea class="textarea" data-day="${i}" placeholder="• goal / activity
+• location
+• domain"></textarea>
+      `;
+      wk_daysGrid.appendChild(card);
     }
+
+    loadWeekFromServer();
+  }
+
+  async function loadWeekFromServer(){
+    const name = (wk_staff_name.value || "").trim();
+    if (!name) return;
+    const staffUuid = await getOrCreateStaffUuid();
+    if (!staffUuid) return;
+    const weekStartStr = ymd(currentWeekStart);
 
     const { data, error } = await ess.from("weekly_staff_plans")
       .select("*")
-      .eq("client_id", clientId)
-      .eq("week_start", mondayStr);
+      .eq("client_id", wk_client_id.value)
+      .eq("staff_id", staffUuid)
+      .eq("week_start", weekStartStr)
+      .maybeSingle();
 
+    if (error) return;
+    if (data){
+      const map = {
+        0: data.mon_text || "",
+        1: data.tue_text || "",
+        2: data.wed_text || "",
+        3: data.thu_text || "",
+        4: data.fri_text || "",
+        5: data.sat_text || "",
+        6: data.sun_text || "",
+      };
+      wk_daysGrid.querySelectorAll("textarea[data-day]").forEach(t=>{
+        const idx = Number(t.dataset.day);
+        t.value = map[idx] || "";
+      });
+      if (data.staff_signature){
+        sigData = data.staff_signature;
+        initSig(sigData);
+      }
+    }
+  }
+
+  function gatherForm(){
+    const out = {};
+    wk_daysGrid.querySelectorAll("textarea[data-day]").forEach(t=>{
+      const idx = Number(t.dataset.day);
+      const val = t.value || "";
+      if (idx === 0) out.mon_text = val;
+      if (idx === 1) out.tue_text = val;
+      if (idx === 2) out.wed_text = val;
+      if (idx === 3) out.thu_text = val;
+      if (idx === 4) out.fri_text = val;
+      if (idx === 5) out.sat_text = val;
+      if (idx === 6) out.sun_text = val;
+    });
+    return out;
+  }
+
+  function toast(msg){
+    wk_toast.textContent = msg;
+    wk_toast.style.opacity = "1";
+    setTimeout(()=>wk_toast.style.opacity="0",1800);
+  }
+
+  async function submitWeeklyPlan(){
+    wk_error.style.display = "none";
+
+    const staffName = (wk_staff_name.value || "").trim();
+    if (!staffName){
+      toast("Type staff name first");
+      return;
+    }
+    const staffUuid = await getOrCreateStaffUuid();
+    if (!staffUuid){
+      wk_error.style.display="block";
+      wk_error.textContent="Could not resolve staff.";
+      return;
+    }
+
+    const payload = gatherForm();
+    const weekStartStr = ymd(currentWeekStart);
+
+    const upsertBody = {
+      client_id: wk_client_id.value,
+      staff_id: staffUuid,
+      week_start: weekStartStr,
+      mon_text: payload.mon_text || null,
+      tue_text: payload.tue_text || null,
+      wed_text: payload.wed_text || null,
+      thu_text: payload.thu_text || null,
+      fri_text: payload.fri_text || null,
+      sat_text: payload.sat_text || null,
+      sun_text: payload.sun_text || null,
+      staff_signature: sigData || null,
+      submitted: true
+    };
+
+    const { error } = await ess.from("weekly_staff_plans").upsert(upsertBody, { onConflict: "client_id,staff_id,week_start" });
     if (error){
-      alert(error.message);
+      wk_error.style.display="block";
+      wk_error.textContent="Submit failed: "+error.message;
+      toast("Submit failed ❌");
       return;
     }
-
-    let rows = data || [];
-    if (staffIdFilter){
-      rows = rows.filter(r => r.staff_id === staffIdFilter);
-    }
-
-    if (!rows.length){
-      wk_resultsCard.style.display = "block";
-      wk_body.innerHTML = `<tr><td colspan="11">No weekly plans for this client and week.</td></tr>`;
-      currentWeeklyRows = [];
-      wk_export.disabled = true;
-      return;
-    }
-
-    for (const r of rows){
-      r.__staff_name = await staffNameById(r.staff_id);
-    }
-
-    wk_resultsCard.style.display = "block";
-    wk_body.innerHTML = rows.map((r,idx) => `
-      <tr>
-        <td>${r.__staff_name}</td>
-        <td>${r.week_start}</td>
-        <td>${r.mon_text || ""}</td>
-        <td>${r.tue_text || ""}</td>
-        <td>${r.wed_text || ""}</td>
-        <td>${r.thu_text || ""}</td>
-        <td>${r.fri_text || ""}</td>
-        <td>${r.sat_text || ""}</td>
-        <td>${r.sun_text || ""}</td>
-        <td>${r.staff_signature ? "✅" : "—"}</td>
-        <td><button class="trash-btn" onclick="window.__essDeleteWeekly(${idx})">🗑️</button></td>
-      </tr>
-    `).join("");
-
-    currentWeeklyRows = rows;
-    wk_export.disabled = false;
+    toast("Weekly plan submitted ✅");
   }
-  wk_load.addEventListener("click", loadWeekly);
 
-  // delete a weekly plan row
-  window.__essDeleteWeekly = async function(index){
-    const row = currentWeeklyRows[index];
-    if (!row) return;
-    const ok = confirm("Delete this weekly staff plan?");
-    if (!ok) return;
+  wk_prevWeek.addEventListener("click", ()=>{ currentWeekStart = addDays(currentWeekStart, -7); renderWeekUI(); });
+  wk_nextWeek.addEventListener("click", ()=>{ currentWeekStart = addDays(currentWeekStart, 7); renderWeekUI(); });
+  wk_submit.addEventListener("click", submitWeeklyPlan);
+  wk_staff_name.addEventListener("blur", ()=> loadWeekFromServer());
 
-    // we delete by client_id + week_start + staff_id
-    let del = ess.from("weekly_staff_plans")
-      .delete()
-      .eq("client_id", row.client_id)
-      .eq("week_start", row.week_start);
-
-    if (row.staff_id) {
-      del = del.eq("staff_id", row.staff_id);
-    }
-
-    const { error } = await del;
-    if (error) {
-      alert("Could not delete: " + error.message);
-      return;
-    }
-
-    // reload current selection to refresh table
-    await loadWeekly();
-    alert("Weekly plan deleted ✅");
-  };
-
-  function exportWeekly(){
-    if (!currentWeeklyRows.length) return;
-    const clientLabel = wk_clientSelect.options[wk_clientSelect.selectedIndex]?.text || "Client";
-    const weekStart = currentWeeklyRows[0].week_start;
-    const win = window.open("", "_blank", "width=900,height=1100");
-    win.document.write(`
-      <html>
-      <head>
-        <title>ESS_${clientLabel.replace(/\\s+/g,"_")}_weekly_${weekStart}.pdf</title>
-        <style>
-          body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;}
-          .page{width:8.5in;margin:0 auto;padding:0.5in;box-sizing:border-box;}
-          table{width:100%;border-collapse:collapse;font-size:11px;}
-          th,td{border:1px solid #e5e7eb;padding:6px;vertical-align:top;}
-          .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-          .sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
-        </style>
-      </head>
-      <body>
-        <div class="page">
-          <div class="head">
-            <div>
-              <h2>Weekly Staff Plans</h2>
-              <div><strong>Client:</strong> ${clientLabel}</div>
-              <div><strong>Week start:</strong> ${weekStart}</div>
-            </div>
-            <div>
-              <img src="${LOGO_URL}" style="height:70px;" onerror="this.style.display='none'">
-            </div>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Staff</th>
-                <th>Mon</th>
-                <th>Tue</th>
-                <th>Wed</th>
-                <th>Thu</th>
-                <th>Fri</th>
-                <th>Sat</th>
-                <th>Sun</th>
-                <th>Signature</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${
-                currentWeeklyRows.map(r => `
-                  <tr>
-                    <td>${r.__staff_name}</td>
-                    <td>${(r.mon_text||"").replace(/\\n/g,"<br>")}</td>
-                    <td>${(r.tue_text||"").replace(/\\n/g,"<br>")}</td>
-                    <td>${(r.wed_text||"").replace(/\\n/g,"<br>")}</td>
-                    <td>${(r.thu_text||"").replace(/\\n/g,"<br>")}</td>
-                    <td>${(r.fri_text||"").replace(/\\n/g,"<br>")}</td>
-                    <td>${(r.sat_text||"").replace(/\\n/g,"<br>")}</td>
-                    <td>${(r.sun_text||"").replace(/\\n/g,"<br>")}</td>
-                    <td>${
-                      r.staff_signature
-                        ? `<img class="sig" src="${r.staff_signature}">`
-                        : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
-                    }</td>
-                  </tr>
-                `).join("")
-              }
-            </tbody>
-          </table>
-          <p style="margin-top:14px;font-size:10px;color:#6b7280;">${CONTACT_LINE}</p>
-        </div>
-      </body>
-      </html>
-    `);
-    win.document.close();
-    win.focus();
-    setTimeout(()=>win.print(), 400);
-  }
-  wk_export.addEventListener("click", exportWeekly);
-
+  renderWeekUI();
 })();
 </script>
 </body>
