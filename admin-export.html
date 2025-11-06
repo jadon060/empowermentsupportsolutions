@@ -169,8 +169,6 @@
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // you ARE using schema "ess", so keep this 👇
   const ess = sb.schema("ess");
 
   const clientSelect = document.getElementById("clientSelect");
@@ -196,9 +194,15 @@
   const LOGO_URL = "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
   const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
 
-  const today = new Date();
-  dateInput.value = today.toISOString().slice(0,10);
-  wk_weekDate.value = today.toISOString().slice(0,10);
+  // --- local date helper (fixes UTC shifting to next day) ---
+  function todayLocalISO() {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 10);
+  }
+  // set default dates
+  dateInput.value = todayLocalISO();
+  wk_weekDate.value = todayLocalISO();
 
   let currentDayData = null;
   let currentWeeklyRows = [];
@@ -269,7 +273,6 @@
     let staffIdFilter = null;
     if (staffName) staffIdFilter = await resolveStaffIdByName(staffName);
 
-    // get ALL entries for that client/date (because you can have multiple!)
     const { data: officialRows = [] } = await ess.from("daily_entries")
       .select("*")
       .eq("client_id", clientId)
@@ -281,7 +284,6 @@
     }
     official = official.length ? official[0] : null;
 
-    // drafts – also get all, then filter
     const { data: draftRows = [] } = await ess.from("daily_drafts")
       .select("*")
       .eq("client_id", clientId)
