@@ -153,10 +153,11 @@
           <th>Sat</th>
           <th>Sun</th>
           <th>Signature</th>
+          <th></th> <!-- ✅ new column for trash -->
         </tr>
       </thead>
       <tbody id="wk_body">
-        <tr><td colspan="10">No weekly plan loaded.</td></tr>
+        <tr><td colspan="11">No weekly plan loaded.</td></tr>
       </tbody>
     </table>
   </div>
@@ -194,13 +195,11 @@
   const LOGO_URL = "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
   const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
 
-  // --- local date helper (fixes UTC shifting to next day) ---
   function todayLocalISO() {
     const d = new Date();
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     return d.toISOString().slice(0, 10);
   }
-  // format YYYY-MM-DD → local readable
   function formatYMD(ymd) {
     if (!ymd) return "—";
     const [y,m,d] = ymd.split("-").map(Number);
@@ -212,7 +211,6 @@
     }).format(dt);
   }
 
-  // set default dates
   dateInput.value = todayLocalISO();
   wk_weekDate.value = todayLocalISO();
 
@@ -539,7 +537,7 @@
 
     if (!rows.length){
       wk_resultsCard.style.display = "block";
-      wk_body.innerHTML = `<tr><td colspan="10">No weekly plans for this client and week.</td></tr>`;
+      wk_body.innerHTML = `<tr><td colspan="11">No weekly plans for this client and week.</td></tr>`;
       currentWeeklyRows = [];
       wk_export.disabled = true;
       return;
@@ -550,7 +548,7 @@
     }
 
     wk_resultsCard.style.display = "block";
-    wk_body.innerHTML = rows.map(r => `
+    wk_body.innerHTML = rows.map((r,idx) => `
       <tr>
         <td>${r.__staff_name}</td>
         <td>${r.week_start}</td>
@@ -562,6 +560,7 @@
         <td>${r.sat_text || ""}</td>
         <td>${r.sun_text || ""}</td>
         <td>${r.staff_signature ? "✅" : "—"}</td>
+        <td><button class="trash-btn" onclick="window.__essDeleteWeekly && window.__essDeleteWeekly(${idx})">🗑️</button></td>
       </tr>
     `).join("");
 
@@ -569,6 +568,21 @@
     wk_export.disabled = false;
   }
   wk_load.addEventListener("click", loadWeekly);
+
+  window.__essDeleteWeekly = async function(idx){
+    const row = currentWeeklyRows[idx];
+    if (!row) return;
+    const ok = confirm(`Delete weekly plan for ${row.__staff_name || "this staff"} starting ${row.week_start}?`);
+    if (!ok) return;
+    await ess.from("weekly_staff_plans")
+      .delete()
+      .eq("client_id", wk_clientSelect.value)
+      .eq("staff_id", row.staff_id)
+      .eq("week_start", row.week_start);
+    // reload list
+    loadWeekly();
+    alert("Weekly plan deleted ✅");
+  };
 
   function exportWeekly(){
     if (!currentWeeklyRows.length) return;
