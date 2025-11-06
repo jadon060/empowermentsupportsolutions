@@ -200,7 +200,7 @@
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     return d.toISOString().slice(0, 10);
   }
-  // format YYYY-MM-DD → "Nov 05, 2025" using local date, not UTC
+  // format YYYY-MM-DD → "Nov 05, 2025" using local date
   function formatYMD(ymd) {
     if (!ymd) return "—";
     const [y,m,d] = ymd.split("-").map(Number);
@@ -411,7 +411,16 @@
           .box{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:10px;}
           img.sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
           .section-title{font-weight:600;font-size:11px;margin-top:6px;margin-bottom:3px;}
-          .note-box{border:1px solid #e5e7eb;border-radius:6px;padding:4px 6px;min-height:40px;font-size:11px;white-space:pre-wrap;}
+          .note-box{
+            border:1px solid #e5e7eb;
+            border-radius:6px;
+            padding:4px 6px;
+            min-height:40px;
+            font-size:11px;
+            white-space:pre-wrap;
+            overflow-wrap:break-word;
+            word-break:break-word;
+          }
           @media print { body{background:#fff;} .page{margin:0;} }
         </style>
       </head>
