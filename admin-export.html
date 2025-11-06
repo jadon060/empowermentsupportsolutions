@@ -169,6 +169,8 @@
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // you ARE using schema "ess", so keep this 👇
   const ess = sb.schema("ess");
 
   const clientSelect = document.getElementById("clientSelect");
@@ -267,23 +269,29 @@
     let staffIdFilter = null;
     if (staffName) staffIdFilter = await resolveStaffIdByName(staffName);
 
-    let { data: officialRows } = await ess.from("daily_entries")
+    // get ALL entries for that client/date (because you can have multiple!)
+    const { data: officialRows = [] } = await ess.from("daily_entries")
       .select("*")
       .eq("client_id", clientId)
-      .eq("service_date", serviceDate)
-      .maybeSingle()
-      .then(r => ({ data: r.data ? [r.data] : [] }));
+      .eq("service_date", serviceDate);
 
-    let official = Array.isArray(officialRows) && officialRows.length ? officialRows[0] : null;
-    if (official && staffIdFilter && official.staff_id !== staffIdFilter) official = null;
+    let official = officialRows;
+    if (staffIdFilter) {
+      official = official.filter(r => r.staff_id === staffIdFilter);
+    }
+    official = official.length ? official[0] : null;
 
-    const { data: draftRows } = await ess.from("daily_drafts")
+    // drafts – also get all, then filter
+    const { data: draftRows = [] } = await ess.from("daily_drafts")
       .select("*")
       .eq("client_id", clientId)
       .eq("date", serviceDate);
 
-    let draft = Array.isArray(draftRows) && draftRows.length ? draftRows[0] : null;
-    if (draft && staffIdFilter && draft.staff_id && draft.staff_id !== staffIdFilter) draft = null;
+    let draft = draftRows;
+    if (staffIdFilter) {
+      draft = draft.filter(r => !r.staff_id || r.staff_id === staffIdFilter);
+    }
+    draft = draft.length ? draft[0] : null;
 
     if (!official && !draft) {
       dayBody.innerHTML = `<tr><td colspan="12">No data for this date.</td></tr>`;
