@@ -109,7 +109,7 @@
     </table>
   </div>
 
-  <!-- WEEKLY (new) -->
+  <!-- WEEKLY -->
   <div class="card">
     <h2 style="margin-top:0;">Weekly staff plans</h2>
     <div class="flex">
@@ -194,12 +194,24 @@
   const LOGO_URL = "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
   const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
 
-  // --- local date helper (fixes UTC shifting to next day) ---
+  // local-date helper
   function todayLocalISO() {
     const d = new Date();
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     return d.toISOString().slice(0, 10);
   }
+  // format YYYY-MM-DD → "Nov 05, 2025" using local date, not UTC
+  function formatYMD(ymd) {
+    if (!ymd) return "—";
+    const [y,m,d] = ymd.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric"
+    }).format(dt);
+  }
+
   // set default dates
   dateInput.value = todayLocalISO();
   wk_weekDate.value = todayLocalISO();
@@ -335,7 +347,7 @@
 
     dayBody.innerHTML = `
       <tr>
-        <td>${new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(new Date(serviceDate))}</td>
+        <td>${formatYMD(serviceDate)}</td>
         <td>${merged.start_time ? to12h(merged.start_time) : "—"}</td>
         <td>${merged.end_time ? to12h(merged.end_time) : "—"}</td>
         <td>${merged.hours !== "" ? Number(merged.hours).toFixed(2) : "—"}</td>
@@ -380,7 +392,6 @@
 
     const businessName = "Empowerment Support Solutions, LLC";
     const serviceCode  = serviceInput.value || "SDP Service Code";
-    const fmt = (d)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'2-digit',year:'numeric'}).format(new Date(d));
     const { progress, observation, action } = splitNotes(notes);
     const start12 = start_time ? to12h(start_time) : "—";
     const end12   = end_time ? to12h(end_time) : "—";
@@ -411,7 +422,7 @@
               <div style="font-size:15px;font-weight:700;">${businessName}</div>
               <div style="font-size:11px;">SDP – Daily Service Log (Unified: RC / SC / FMS)</div>
               <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${clientLabel}</div>
-              <div style="font-size:11px;"><strong>Service Date:</strong> ${fmt(date)}</div>
+              <div style="font-size:11px;"><strong>Service Date:</strong> ${formatYMD(date)}</div>
               <div style="font-size:11px;"><strong>Staff:</strong> ${staffName || "—"}</div>
               <div style="font-size:11px;"><strong>Service Code:</strong> ${serviceCode}</div>
               <div style="font-size:11px;"><strong>Regional Center:</strong> ${regional_center || "—"}</div>
@@ -475,7 +486,7 @@
   }
   btnExport.addEventListener("click", exportDay);
 
-  // ===== WEEKLY JS =====
+  // ===== WEEKLY =====
   async function staffNameById(id){
     if (!id) return "";
     const { data } = await ess.from("staff").select("full_name").eq("id", id).maybeSingle();
