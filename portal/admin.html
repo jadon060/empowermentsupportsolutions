@@ -32,14 +32,26 @@
     @media (min-width:920px){ .grid{grid-template-columns:1fr 1fr;} }
     .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
     .card h2{margin:2px 0 12px;font-size:18px;display:flex;align-items:center;gap:8px}
-    .slot{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+    .slot{display:flex;flex-direction:column;gap:10px;align-items:stretch} /* ✅ buttons fill equally */
     .link{
-      display:inline-flex;align-items:center;gap:10px;justify-content:flex-start;
-      background:#1f2f3f;color:#fff;text-decoration:none;border-radius:14px;
-      padding:10px 14px;font-weight:800;border:1px solid #0f1f2f; box-shadow:0 6px 20px rgba(0,0,0,.12);
-      width:auto; max-width:100%; align-self:flex-start;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:#1f2f3f;
+      color:#fff;
+      text-decoration:none;
+      border-radius:14px;
+      padding:12px 16px;
+      font-weight:800;
+      border:1px solid #0f1f2f;
+      box-shadow:0 6px 20px rgba(0,0,0,.12);
+      width:100%;                /* ✅ same width for all */
+      min-height:48px;           /* ✅ consistent height */
+      box-sizing:border-box;
+      transition:background .2s, transform .1s;
     }
-    .small{font-size:13px;color:#cbd5e1;font-weight:600;margin-left:auto}
+    .link:hover{background:#24384c;transform:translateY(-1px);}
+    .small{font-size:13px;color:#cbd5e1;font-weight:600}
     .notes-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 10px}
     .notes-controls input[type="text"]{flex:1 1 260px;padding:8px 10px;border:1px solid var(--line);border-radius:10px}
     .btn{
@@ -95,75 +107,47 @@
             </a>
           </div>
 
-          <!-- Connect = only meeting -->
           <h2 style="margin-top:18px">🔗 Connect</h2>
           <div class="slot">
-            <a
-              class="link"
-              href="https://meet.jit.si/EmpowermentSupportSolutions"
-              target="_blank"
-              rel="noopener"
-              aria-label="Start Virtual Meeting in new tab"
-            >
+            <a class="link" href="https://meet.jit.si/EmpowermentSupportSolutions" target="_blank" rel="noopener">
               ▶️ Start Virtual Meeting
               <span class="small">opens new tab</span>
             </a>
           </div>
 
-          <!-- New section for the rest -->
           <h2 style="margin-top:18px">🛠️ Admin tools</h2>
           <div class="slot">
-            <a
-              class="link"
-              href="https://app.clockify.me/reports/summary"
-              target="_blank"
-              rel="noopener"
-            >
+            <a class="link" href="https://app.clockify.me/reports/summary" target="_blank" rel="noopener">
               📊 Clockify Reports
               <span class="small">opens new tab</span>
             </a>
 
-            <a
-              class="link"
-              href="/omar-v.html"
-            >
+            <a class="link" href="/omar-v.html">
               👦 Omar daily SDP log
               <span class="small">opens page</span>
             </a>
 
-            <a
-              class="link"
-              href="/admin-export.html"
-            >
+            <a class="link" href="/admin-export.html">
               🧾 SDP daily export
               <span class="small">opens page</span>
             </a>
 
-            <!-- NEW BUTTON: weekly staff calendar -->
-            <a
-              class="link"
-              href="/Calendar_Planning.html"
-            >
+            <a class="link" href="/Calendar_Planning.html">
               📅 Weekly staff calendar
               <span class="small">opens page</span>
             </a>
 
-            <a
-              class="link"
-              href="https://supabase.com/dashboard/project/bqanjupmcgydvmfgvutx"
-              target="_blank"
-              rel="noopener"
-            >
+            <a class="link" href="https://supabase.com/dashboard/project/bqanjupmcgydvmfgvutx" target="_blank" rel="noopener">
               🗄️ Supabase (ESS)
               <span class="small">opens new tab</span>
             </a>
           </div>
         </div>
 
-        <!-- RIGHT CARD: notes (unchanged) -->
+        <!-- RIGHT CARD: notes -->
         <div class="card">
           <h2>🗒️ My Notes</h2>
-          <p class="muted" style="margin-top:-6px">Organize yourself before you try to organize anything else. </p>
+          <p class="muted" style="margin-top:-6px">Organize yourself before you try to organize anything else.</p>
 
           <div class="notes-controls">
             <input id="search" type="text" placeholder="Search notes (client, date, keyword)…" />
@@ -173,9 +157,12 @@
             <button class="btn warn" id="clearAll">Clear All</button>
           </div>
 
-          <div class="chip"><input id="prependTs" type="checkbox" checked style="margin:0" /> <label for="prependTs" style="cursor:pointer">Prepend timestamp</label></div>
+          <div class="chip">
+            <input id="prependTs" type="checkbox" checked style="margin:0" />
+            <label for="prependTs" style="cursor:pointer">Prepend timestamp</label>
+          </div>
 
-          <textarea id="noteText" placeholder="Example: 10/23 4:00pm — Spoke with Imani (SG/PRC). Family completed orientation; awaiting budget worksheet." ></textarea>
+          <textarea id="noteText" placeholder="Example: 10/23 4:00pm — Spoke with Imani (SG/PRC). Family completed orientation; awaiting budget worksheet."></textarea>
           <div style="display:flex;gap:10px;margin-top:10px">
             <button class="btn" id="saveNote">Save (Ctrl+Enter)</button>
             <span class="muted" id="saveStatus" aria-live="polite"></span>
@@ -198,13 +185,8 @@
     const searchBox = $("#search");
     const statusEl = $("#saveStatus");
 
-    function loadNotes(){
-      try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
-      catch { return []; }
-    }
-    function persist(notes){
-      localStorage.setItem(LS_KEY, JSON.stringify(notes));
-    }
+    function loadNotes(){ try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; } }
+    function persist(notes){ localStorage.setItem(LS_KEY, JSON.stringify(notes)); }
     function nowStamp(){
       const d = new Date();
       return d.toLocaleString(undefined, { year:'2-digit', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
@@ -215,26 +197,16 @@
       const notes = loadNotes();
       const body = $("#prependTs").checked ? `${nowStamp()} — ${txt}` : txt;
       notes.unshift({ id: crypto.randomUUID(), ts: new Date().toISOString(), body });
-      persist(notes);
-      $("#noteText").value = "";
-      flash("Saved");
-      render();
+      persist(notes); $("#noteText").value = ""; flash("Saved"); render();
     }
-    function deleteNote(id){
-      const notes = loadNotes().filter(n => n.id !== id);
-      persist(notes); render();
-    }
-    async function copyNote(text){
-      try { await navigator.clipboard.writeText(text); flash("Copied"); }
-      catch { flash("Copy failed"); }
-    }
+    function deleteNote(id){ const notes = loadNotes().filter(n => n.id !== id); persist(notes); render(); }
+    async function copyNote(text){ try { await navigator.clipboard.writeText(text); flash("Copied"); } catch { flash("Copy failed"); } }
     function exportJson(){
       const blob = new Blob([JSON.stringify(loadNotes(), null, 2)], {type:"application/json"});
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = `ESS_PrivateNotes_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-      URL.revokeObjectURL(a.href);
+      a.click(); URL.revokeObjectURL(a.href);
     }
     function importJson(file){
       const reader = new FileReader();
@@ -250,28 +222,17 @@
       };
       reader.readAsText(file);
     }
-    function clearAll(){
-      if(confirm("Delete ALL private notes on this device?")){ persist([]); render(); }
-    }
-    function flash(msg){
-      statusEl.textContent = msg;
-      setTimeout(()=> statusEl.textContent = "", 1200);
-    }
+    function clearAll(){ if(confirm("Delete ALL private notes on this device?")){ persist([]); render(); } }
+    function flash(msg){ statusEl.textContent = msg; setTimeout(()=> statusEl.textContent = "", 1200); }
     function render(){
       const q = (searchBox.value || "").toLowerCase();
       const notes = loadNotes().filter(n => n.body.toLowerCase().includes(q));
-      if(notes.length === 0){
-        notesList.innerHTML = `<p class="muted">No notes yet.</p>`;
-        return;
-      }
+      if(notes.length === 0){ notesList.innerHTML = `<p class="muted">No notes yet.</p>`; return; }
       notesList.innerHTML = notes.map(n => {
         const when = new Date(n.ts).toLocaleString();
         return `
           <div class="note-row">
-            <div>
-              <div class="note-meta">${when}</div>
-              <div style="white-space:pre-wrap">${escapeHtml(n.body)}</div>
-            </div>
+            <div><div class="note-meta">${when}</div><div style="white-space:pre-wrap">${escapeHtml(n.body)}</div></div>
             <div class="note-actions">
               <button class="btn ghost" onclick='(${copyNote}).call(null, ${JSON.stringify(n.body)})'>Copy</button>
               <button class="btn warn" onclick='(${deleteNote}).call(null, "${n.id}")'>Delete</button>
@@ -280,12 +241,10 @@
         `;
       }).join("");
     }
-    function escapeHtml(s){
-      return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-    }
+    function escapeHtml(s){ return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
     $("#saveNote").addEventListener("click", saveNote);
-    $("#noteText").addEventListener("keydown", (e)=>{ if(e.ctrlKey && e.key==='Enter'){ saveNote(); }});
+    $("#noteText").addEventListener("keydown", e=>{ if(e.ctrlKey && e.key==='Enter'){ saveNote(); }});
     $("#exportJson").addEventListener("click", exportJson);
     $("#importFile").addEventListener("change", e => e.target.files[0] && importJson(e.target.files[0]));
     $("#clearAll").addEventListener("click", clearAll);
