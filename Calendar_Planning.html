@@ -2,379 +2,293 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>ESS • Weekly Staff Calendar</title>
+  <title>ESS • Admin Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="ESS Admin Portal — quick access to internal guides and tools." />
   <style>
     :root{
-      --bg:#f7f7fb;
-      --card:#fff;
-      --border:#e5e7eb;
-      --brand:#2c3e50;
+      --brand:#2c3e50; --brand-2:#0f4c81;
+      --bg:#f6f8fc; --card:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e5e7eb;
+      --accent:#3b82f6; --radius:16px;
+      --shadow:0 18px 60px rgba(0,0,0,.12), 0 2px 10px rgba(0,0,0,.04);
     }
-    body{
-      margin:0;
-      background:var(--bg);
-      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-      color:#0f172a;
-    }
-    .wrap{
-      max-width:980px;
-      margin:2rem auto;
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:1.5rem 1.5rem 1.25rem;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
-    }
-    h2{margin:0;font-size:1.5rem;display:flex;gap:.4rem;align-items:center;}
-    .pill{font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a}
-    .row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
-    .row > div{min-width:200px;flex:1}
-    .label{display:block;color:#6b7280;font-size:12px;margin-bottom:4px;}
-    .input{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:10px;}
-    .weekbar{display:flex;align-items:center;gap:12px;border:1px solid var(--border);padding:9px 12px;border-radius:12px;background:#f8fafc;margin-bottom:14px;}
-    .spacer{flex:1}
-    .btn{padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer;}
-    .btn--icon{width:32px;height:32px;display:grid;place-items:center;}
-    .btn--primary{background:var(--brand);color:#fff;border-color:var(--brand);}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
 
-    /* 7-box calendar - FIXED spacing */
-    #wk_daysGrid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
-      column-gap:14px;
-      row-gap:14px;
-      margin-bottom:16px; /* so it doesn't touch signature */
+    header{
+      position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);
+      display:flex;align-items:center;justify-content:flex-start;gap:12px;padding:12px 16px;
     }
-    .day-card{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:10px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      min-height:180px;
-      box-sizing:border-box;
+    .brand{font-weight:800;letter-spacing:.2px}
+    .brand small{font-weight:600;color:var(--muted)}
+    .container{max-width:1100px;margin:18px auto;padding:0 16px}
+    .hero{
+      background:linear-gradient(135deg, rgba(15,76,129,.10), rgba(60,120,200,.08));
+      border:1px solid var(--line); border-radius:20px; padding:18px; box-shadow:var(--shadow);
     }
-    .day-head{font-weight:600;display:flex;justify-content:space-between;align-items:center;}
-    .day-date{font-size:12px;color:#6b7280;}
-    .textarea{
-      width:100%;
-      min-height:110px;
-      resize:vertical;
-      border:1px solid #e5e7eb;
-      border-radius:10px;
-      padding:8px 9px;
-      font-family:inherit;
-      font-size:13px;
-      background:#f8fafc;
-      box-sizing:border-box;
+    .hero h1{margin:0 0 4px;font-size:28px}
+    .hero .tagline{color:var(--muted);margin:0 0 12px}
+    .grid{display:grid;gap:16px;margin-top:16px}
+    @media (min-width:920px){ .grid{grid-template-columns:1fr 1fr;} }
+    .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
+    .card h2{margin:2px 0 12px;font-size:18px;display:flex;align-items:center;gap:8px}
+    .slot{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+    .link{
+      display:inline-flex;align-items:center;gap:10px;justify-content:flex-start;
+      background:#1f2f3f;color:#fff;text-decoration:none;border-radius:14px;
+      padding:10px 14px;font-weight:800;border:1px solid #0f1f2f; box-shadow:0 6px 20px rgba(0,0,0,.12);
+      width:auto; max-width:100%; align-self:flex-start;
     }
-
-    .sig-wrap{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin-top:0;}
-    .sig-title{font-weight:600;margin-bottom:6px;}
-    .sig-box{border:1px dashed #d1d5db;border-radius:10px;background:#fff;}
-    canvas.sig{width:100%;height:140px;display:block;border-radius:10px;touch-action:none;cursor:crosshair;}
-    #wk_toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s}
-    #wk_error{display:none;margin-top:10px;padding:10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b}
-    @media (max-width:600px){
-      #wk_daysGrid{grid-template-columns:1fr;}
+    .small{font-size:13px;color:#cbd5e1;font-weight:600;margin-left:auto}
+    .notes-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 10px}
+    .notes-controls input[type="text"]{flex:1 1 260px;padding:8px 10px;border:1px solid var(--line);border-radius:10px}
+    .btn{
+      appearance:none;border:1px solid var(--line);background:#0f1f2f;color:#fff;border-radius:12px;
+      padding:8px 12px;font-weight:700;box-shadow:0 6px 16px rgba(0,0,0,.12);cursor:pointer;
+      text-decoration:none;display:inline-block;
     }
+    .btn.ghost{background:#fff;color:#0f172a}
+    .btn.warn{background:#b91c1c;border-color:#7f1d1d}
+    textarea#noteText{
+      width:100%;min-height:120px;padding:12px;border:1px solid var(--line);border-radius:12px;resize:vertical
+    }
+    .note-row{
+      display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;padding:10px;border:1px solid var(--line);
+      border-radius:12px;background:#fafcff
+    }
+    .note-meta{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .note-actions{display:flex;gap:6px}
+    .chip{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;border:1px solid #dbeafe;color:#1e3a8a;
+      padding:4px 8px;border-radius:999px;font-size:12px}
+    .muted{color:var(--muted)}
+    footer{color:var(--muted);font-size:13px;text-align:center;padding:24px 0 36px}
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    (function(){
+      try{
+        if(localStorage.getItem("ESS_Admin_Login")!=="true"){
+          const next = encodeURIComponent(location.pathname + location.search + location.hash);
+          location.replace("/portal/login.html?next=" + next);
+        }
+      }catch(e){ location.replace("/portal/login.html"); }
+    })();
+  </script>
 </head>
 <body>
-  <section class="wrap">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
-      <h2>📅 Weekly Staff Calendar – Planned Goals</h2>
-      <span class="pill">For admin review</span>
-    </div>
+  <header class="container">
+    <div class="brand">ESS • <small>Admin Portal</small></div>
+  </header>
 
-    <div class="row">
-      <input type="hidden" id="wk_client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" />
-      <div>
-        <label class="label">Client</label>
-        <input type="text" class="input" value="Omar V." readonly style="background:#e5e7eb;cursor:not-allowed;">
-      </div>
-      <div>
-        <label class="label" for="wk_staff_name">Staff (type your name)</label>
-        <input id="wk_staff_name" type="text" class="input" placeholder="e.g., John Perez">
-      </div>
-    </div>
+  <main class="container">
+    <section class="hero">
+      <h1>Welcome, J</h1>
+      <p class="tagline">No luck, only lessons. Fail Forward, learn and adapt.</p>
 
-    <div class="weekbar">
-      <button id="wk_prevWeek" class="btn btn--icon">◀</button>
-      <div>
-        <div id="wk_range" style="font-weight:700;color:#0f172a;">Mon — Sun</div>
-        <div style="color:#6b7280;font-size:13px;">Week of <span id="wk_startTxt"></span> to <span id="wk_endTxt"></span></div>
-      </div>
-      <button id="wk_nextWeek" class="btn btn--icon">▶</button>
-      <div class="spacer"></div>
-    </div>
+      <div class="grid">
+        <!-- LEFT CARD -->
+        <div class="card">
+          <h2>🧠 Your Guide </h2>
+          <div class="slot">
+            <a class="link" href="/portal/admin-sdp-coordination.html">
+              🧭 Admin SDP Coordination Guide
+              <span class="small">opens page</span>
+            </a>
+          </div>
 
-    <div id="wk_daysGrid"></div>
+          <!-- Connect = only meeting -->
+          <h2 style="margin-top:18px">🔗 Connect</h2>
+          <div class="slot">
+            <a
+              class="link"
+              href="https://meet.jit.si/EmpowermentSupportSolutions"
+              target="_blank"
+              rel="noopener"
+              aria-label="Start Virtual Meeting in new tab"
+            >
+              ▶️ Start Virtual Meeting
+              <span class="small">opens new tab</span>
+            </a>
+          </div>
 
-    <div class="sig-wrap">
-      <div class="sig-title">Staff Signature (for weekly plan)</div>
-      <div class="sig-box">
-        <canvas id="wk_staffSig" class="sig"></canvas>
-      </div>
-      <button id="wk_clearSig" class="btn" style="margin-top:8px;">Clear Signature</button>
-    </div>
+          <!-- New section for the rest -->
+          <h2 style="margin-top:18px">🛠️ Admin tools</h2>
+          <div class="slot">
+            <a
+              class="link"
+              href="https://app.clockify.me/reports/summary"
+              target="_blank"
+              rel="noopener"
+            >
+              📊 Clockify Reports
+              <span class="small">opens new tab</span>
+            </a>
 
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
-      <!-- removed Save Draft -->
-      <button id="wk_submit" class="btn btn--primary">Submit Weekly Plan</button>
-    </div>
+            <a
+              class="link"
+              href="/omar-v.html"
+            >
+              👦 Omar daily SDP log
+              <span class="small">opens page</span>
+            </a>
 
-    <div id="wk_error"></div>
-    <div id="wk_toast"></div>
-  </section>
+            <a
+              class="link"
+              href="/admin-export.html"
+            >
+              🧾 SDP daily export
+              <span class="small">opens page</span>
+            </a>
 
-<script>
-(function(){
-  const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const ess = sb.schema("ess");
+            <a
+              class="link"
+              href="https://supabase.com/dashboard/project/bqanjupmcgydvmfgvutx"
+              target="_blank"
+              rel="noopener"
+            >
+              🗄️ Supabase (ESS)
+              <span class="small">opens new tab</span>
+            </a>
 
-  const $ = id => document.getElementById(id);
-
-  const wk_client_id = $("wk_client_id");
-  const wk_staff_name = $("wk_staff_name");
-  const wk_prevWeek = $("wk_prevWeek");
-  const wk_nextWeek = $("wk_nextWeek");
-  const wk_range = $("wk_range");
-  const wk_startTxt = $("wk_startTxt");
-  const wk_endTxt = $("wk_endTxt");
-  const wk_daysGrid = $("wk_daysGrid");
-  const wk_submit = $("wk_submit");
-  const wk_error = $("wk_error");
-  const wk_toast = $("wk_toast");
-
-  const sigCanvas = $("wk_staffSig");
-  const clearSigBtn = $("wk_clearSig");
-  let sigCtx, sigData = null;
-
-  const fmt = d => new Intl.DateTimeFormat("en-US",{month:"short",day:"2-digit",year:"numeric"}).format(d);
-  const ymd = d => d.toISOString().slice(0,10);
-  function startOfWeekMonday(d){
-    const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());
-    const day=nd.getDay();
-    const diff=(day===0?-6:1-day);
-    nd.setDate(nd.getDate()+diff);
-    nd.setHours(0,0,0,0);
-    return nd;
-  }
-  function addDays(d,n){ const nd=new Date(d); nd.setDate(nd.getDate()+n); return nd; }
-
-  function initSig(existing){
-    const box = sigCanvas.getBoundingClientRect();
-    const ratio = window.devicePixelRatio || 1;
-    const width = Math.max(1, box.width);
-    const height = 140;
-    sigCanvas.width = width * ratio;
-    sigCanvas.height = height * ratio;
-    sigCtx = sigCanvas.getContext("2d");
-    sigCtx.setTransform(1,0,0,1,0,0);
-    sigCtx.scale(ratio, ratio);
-    sigCtx.lineWidth = 2;
-    sigCtx.lineCap = "round";
-    sigCtx.strokeStyle = "#000";
-    if (existing){
-      const img=new Image();
-      img.onload=()=>sigCtx.drawImage(img,0,0,width,height);
-      img.src=existing;
-    }
-  }
-  initSig(null);
-
-  function makeDrawable(canvas, ctx, onEnd){
-    let drawing=false;
-    function pos(e){
-      const r=canvas.getBoundingClientRect();
-      const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
-      const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
-      return {x,y};
-    }
-    function down(e){ e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
-    function move(e){ if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }
-    function up(){ if(!drawing) return; drawing=false; if(onEnd) onEnd(canvas); }
-    canvas.addEventListener("pointerdown",down);
-    canvas.addEventListener("pointermove",move);
-    window.addEventListener("pointerup",up);
-    canvas.addEventListener("touchstart",down,{passive:false});
-    canvas.addEventListener("touchmove",move,{passive:false});
-    canvas.addEventListener("touchend",up);
-  }
-  makeDrawable(sigCanvas, sigCtx, c => { sigData = c.toDataURL("image/png"); });
-  clearSigBtn.addEventListener("click", ()=>{ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); sigData=null; });
-
-  window.addEventListener("resize", ()=>{ initSig(sigData); });
-
-  const staffUuidCache = new Map();
-  function isUuid(s){ return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s); }
-  async function getOrCreateStaffUuid(){
-    const name = (wk_staff_name.value || "").trim();
-    if (!name) return null;
-    if (isUuid(name)) return name;
-    if (staffUuidCache.has(name)) return staffUuidCache.get(name);
-
-    let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", name).maybeSingle();
-    if (!error && data?.id){
-      staffUuidCache.set(name, data.id);
-      return data.id;
-    }
-
-    const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID()
-      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
-          const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16);
-        });
-    const ins = await ess.from("staff").insert([{ id:newId, full_name:name }]).select("id").maybeSingle();
-    const resolved = ins.data?.id || newId;
-    staffUuidCache.set(name, resolved);
-    return resolved;
-  }
-
-  let currentWeekStart = startOfWeekMonday(new Date());
-  const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-
-  function renderWeekUI(){
-    const start = new Date(currentWeekStart);
-    const end = addDays(start,6);
-    wk_range.textContent = `Mon ${start.getDate()} — Sun ${end.getDate()}`;
-    wk_startTxt.textContent = fmt(start);
-    wk_endTxt.textContent = fmt(end);
-
-    wk_daysGrid.innerHTML = "";
-    for (let i=0;i<7;i++){
-      const d = addDays(start,i);
-      const card = document.createElement("div");
-      card.className = "day-card";
-      card.innerHTML = `
-        <div class="day-head">
-          <span>${dayNames[i]}</span>
-          <span class="day-date">${fmt(d)}</span>
+            <!-- NEW CALENDAR PLANNING BUTTON -->
+            <div style="margin-top:12px;">
+              <a class="btn" href="/Calendar_Planning.html">📅 Staff Calendar Planning</a>
+            </div>
+          </div>
         </div>
-        <textarea class="textarea" data-day="${i}" placeholder="• goal / activity
-• location
-• domain"></textarea>
-      `;
-      wk_daysGrid.appendChild(card);
+
+        <!-- RIGHT CARD: notes -->
+        <div class="card">
+          <h2>🗒️ My Notes</h2>
+          <p class="muted" style="margin-top:-6px">Organize yourself before you try to organize anything else. </p>
+
+          <div class="notes-controls">
+            <input id="search" type="text" placeholder="Search notes (client, date, keyword)…" />
+            <button class="btn ghost" id="exportJson">Export</button>
+            <label class="btn ghost" for="importFile" style="cursor:pointer">Import</label>
+            <input id="importFile" type="file" accept=".json" style="display:none" />
+            <button class="btn warn" id="clearAll">Clear All</button>
+          </div>
+
+          <div class="chip"><input id="prependTs" type="checkbox" checked style="margin:0" /> <label for="prependTs" style="cursor:pointer">Prepend timestamp</label></div>
+
+          <textarea id="noteText" placeholder="Example: 10/23 4:00pm — Spoke with Imani (SG/PRC). Family completed orientation; awaiting budget worksheet." ></textarea>
+          <div style="display:flex;gap:10px;margin-top:10px">
+            <button class="btn" id="saveNote">Save (Ctrl+Enter)</button>
+            <span class="muted" id="saveStatus" aria-live="polite"></span>
+          </div>
+
+          <div style="margin-top:16px" id="notesList"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>© <span id="y"></span> Empowerment Support Solutions • Admin Portal</footer>
+  </main>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    const LS_KEY = "ESS_Admin_PrivateNotes_v1";
+    const $ = sel => document.querySelector(sel);
+    const notesList = $("#notesList");
+    const searchBox = $("#search");
+    const statusEl = $("#saveStatus");
+
+    function loadNotes(){
+      try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+      catch { return []; }
     }
-
-    loadWeekFromServer();
-  }
-
-  async function loadWeekFromServer(){
-    const name = (wk_staff_name.value || "").trim();
-    if (!name) return;
-    const staffUuid = await getOrCreateStaffUuid();
-    if (!staffUuid) return;
-    const weekStartStr = ymd(currentWeekStart);
-
-    const { data, error } = await ess.from("weekly_staff_plans")
-      .select("*")
-      .eq("client_id", wk_client_id.value)
-      .eq("staff_id", staffUuid)
-      .eq("week_start", weekStartStr)
-      .maybeSingle();
-
-    if (error) return;
-    if (data){
-      const map = {
-        0: data.mon_text || "",
-        1: data.tue_text || "",
-        2: data.wed_text || "",
-        3: data.thu_text || "",
-        4: data.fri_text || "",
-        5: data.sat_text || "",
-        6: data.sun_text || "",
+    function persist(notes){
+      localStorage.setItem(LS_KEY, JSON.stringify(notes));
+    }
+    function nowStamp(){
+      const d = new Date();
+      return d.toLocaleString(undefined, { year:'2-digit', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+    }
+    function saveNote(){
+      const txt = $("#noteText").value.trim();
+      if(!txt) return;
+      const notes = loadNotes();
+      const body = $("#prependTs").checked ? `${nowStamp()} — ${txt}` : txt;
+      notes.unshift({ id: crypto.randomUUID(), ts: new Date().toISOString(), body });
+      persist(notes);
+      $("#noteText").value = "";
+      flash("Saved");
+      render();
+    }
+    function deleteNote(id){
+      const notes = loadNotes().filter(n => n.id !== id);
+      persist(notes); render();
+    }
+    async function copyNote(text){
+      try { await navigator.clipboard.writeText(text); flash("Copied"); }
+      catch { flash("Copy failed"); }
+    }
+    function exportJson(){
+      const blob = new Blob([JSON.stringify(loadNotes(), null, 2)], {type:"application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `ESS_PrivateNotes_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    function importJson(file){
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          const imported = JSON.parse(reader.result);
+          if(!Array.isArray(imported)) throw new Error("Invalid file");
+          const map = new Map();
+          [...imported, ...loadNotes()].forEach(n => map.set(n.id || crypto.randomUUID(), { id:n.id || crypto.randomUUID(), ts:n.ts || new Date().toISOString(), body:String(n.body||"") }));
+          const merged = [...map.values()].sort((a,b)=> (b.ts||"").localeCompare(a.ts||""));
+          persist(merged); render(); flash("Imported");
+        }catch(e){ flash("Import failed"); }
       };
-      wk_daysGrid.querySelectorAll("textarea[data-day]").forEach(t=>{
-        const idx = Number(t.dataset.day);
-        t.value = map[idx] || "";
-      });
-      if (data.staff_signature){
-        sigData = data.staff_signature;
-        initSig(sigData);
+      reader.readAsText(file);
+    }
+    function clearAll(){
+      if(confirm("Delete ALL private notes on this device?")){ persist([]); render(); }
+    }
+    function flash(msg){
+      statusEl.textContent = msg;
+      setTimeout(()=> statusEl.textContent = "", 1200);
+    }
+    function render(){
+      const q = (searchBox.value || "").toLowerCase();
+      const notes = loadNotes().filter(n => n.body.toLowerCase().includes(q));
+      if(notes.length === 0){
+        notesList.innerHTML = `<p class="muted">No notes yet.</p>`;
+        return;
       }
+      notesList.innerHTML = notes.map(n => {
+        const when = new Date(n.ts).toLocaleString();
+        return `
+          <div class="note-row">
+            <div>
+              <div class="note-meta">${when}</div>
+              <div style="white-space:pre-wrap">${escapeHtml(n.body)}</div>
+            </div>
+            <div class="note-actions">
+              <button class="btn ghost" onclick='(${copyNote}).call(null, ${JSON.stringify(n.body)})'>Copy</button>
+              <button class="btn warn" onclick='(${deleteNote}).call(null, "${n.id}")'>Delete</button>
+            </div>
+          </div>
+        `;
+      }).join("");
     }
-  }
-
-  function gatherForm(){
-    const out = {};
-    wk_daysGrid.querySelectorAll("textarea[data-day]").forEach(t=>{
-      const idx = Number(t.dataset.day);
-      const val = t.value || "";
-      if (idx === 0) out.mon_text = val;
-      if (idx === 1) out.tue_text = val;
-      if (idx === 2) out.wed_text = val;
-      if (idx === 3) out.thu_text = val;
-      if (idx === 4) out.fri_text = val;
-      if (idx === 5) out.sat_text = val;
-      if (idx === 6) out.sun_text = val;
-    });
-    return out;
-  }
-
-  function toast(msg){
-    wk_toast.textContent = msg;
-    wk_toast.style.opacity = "1";
-    setTimeout(()=>wk_toast.style.opacity="0",1800);
-  }
-
-  async function submitWeeklyPlan(){
-    wk_error.style.display = "none";
-
-    const staffName = (wk_staff_name.value || "").trim();
-    if (!staffName){
-      toast("Type staff name first");
-      return;
-    }
-    const staffUuid = await getOrCreateStaffUuid();
-    if (!staffUuid){
-      wk_error.style.display="block";
-      wk_error.textContent="Could not resolve staff.";
-      return;
+    function escapeHtml(s){
+      return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
-    const payload = gatherForm();
-    const weekStartStr = ymd(currentWeekStart);
+    $("#saveNote").addEventListener("click", saveNote);
+    $("#noteText").addEventListener("keydown", (e)=>{ if(e.ctrlKey && e.key==='Enter'){ saveNote(); }});
+    $("#exportJson").addEventListener("click", exportJson);
+    $("#importFile").addEventListener("change", e => e.target.files[0] && importJson(e.target.files[0]));
+    $("#clearAll").addEventListener("click", clearAll);
+    searchBox.addEventListener("input", render);
 
-    const upsertBody = {
-      client_id: wk_client_id.value,
-      staff_id: staffUuid,
-      week_start: weekStartStr,
-      mon_text: payload.mon_text || null,
-      tue_text: payload.tue_text || null,
-      wed_text: payload.wed_text || null,
-      thu_text: payload.thu_text || null,
-      fri_text: payload.fri_text || null,
-      sat_text: payload.sat_text || null,
-      sun_text: payload.sun_text || null,
-      staff_signature: sigData || null,
-      submitted: true
-    };
-
-    const { error } = await ess.from("weekly_staff_plans").upsert(upsertBody, { onConflict: "client_id,staff_id,week_start" });
-    if (error){
-      wk_error.style.display="block";
-      wk_error.textContent="Submit failed: "+error.message;
-      toast("Submit failed ❌");
-      return;
-    }
-    toast("Weekly plan submitted ✅");
-  }
-
-  wk_prevWeek.addEventListener("click", ()=>{ currentWeekStart = addDays(currentWeekStart, -7); renderWeekUI(); });
-  wk_nextWeek.addEventListener("click", ()=>{ currentWeekStart = addDays(currentWeekStart, 7); renderWeekUI(); });
-  wk_submit.addEventListener("click", submitWeeklyPlan);
-  wk_staff_name.addEventListener("blur", ()=> loadWeekFromServer());
-
-  renderWeekUI();
-})();
-</script>
+    render();
+  </script>
 </body>
 </html>
