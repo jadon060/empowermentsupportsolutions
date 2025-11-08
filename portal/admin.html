@@ -78,19 +78,19 @@
     .muted{color:var(--muted)}
     footer{color:var(--muted);font-size:13px;text-align:center;padding:24px 0 36px}
 
-    /* cyberworld box */
-    .cyberworld-box{
-      background:#040711;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.04);
-      padding:10px;
-      min-height:180px;
+    /* just a container so it sits nice under the client link */
+    .cyberworld-wrap{
+      border-radius:16px;
+      overflow:hidden;
+      height:180px;
+      background:transparent;
+      border:1px solid rgba(11,40,70,0.04);
     }
     #cyberworldCanvas{
       width:100%;
-      height:160px;
+      height:100%;
       display:block;
-      border-radius:10px;
+      background:transparent;
     }
   </style>
 
@@ -164,11 +164,10 @@
               😀 Omar daily SDP log
               <span class="small">opens page</span>
             </a>
-            <!-- fun cyberworld animation, sits at the bottom of last client -->
-            <div class="cyberworld-box">
+            <!-- animation lives right under last client -->
+            <div class="cyberworld-wrap">
               <canvas id="cyberworldCanvas"></canvas>
             </div>
-            <!-- add more client-specific links here later -->
           </div>
         </div>
 
@@ -280,53 +279,82 @@
 
     render();
 
-    // ===== cyberworld animation (canvas, lightweight) =====
+    /* ===== CYBERWORLD ANIMATION (transparent) ===== */
     (function(){
       const canvas = document.getElementById("cyberworldCanvas");
       if(!canvas) return;
       const ctx = canvas.getContext("2d");
-      let w, h, dots = [], tick = 0;
-      const DOT_COUNT = 420;
-      const DEPTH = 280;
+      let w,h;
+      const DOTS = 420;
+      const sphere = [];
+      const DEPTH = 260;
+      let t = 0;
+
       function resize(){
         const rect = canvas.getBoundingClientRect();
-        w = canvas.width = rect.width * window.devicePixelRatio;
-        h = canvas.height = rect.height * window.devicePixelRatio;
+        canvas.width = rect.width * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
         ctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
+        w = rect.width; h = rect.height;
       }
-      function makeDots(){
-        dots = [];
-        for(let i=0;i<DOT_COUNT;i++){
-          const phi = Math.acos(2*Math.random()-1);   // 0..pi
-          const theta = Math.random()*Math.PI*2;      // 0..2pi
-          const r = 65 + Math.random()*8;
-          dots.push({phi,theta,r});
+
+      function makeSphere(){
+        sphere.length = 0;
+        for(let i=0;i<DOTS;i++){
+          const u = Math.random();
+          const v = Math.random();
+          const phi = Math.acos(2*u - 1);
+          const theta = 2*Math.PI*v;
+          const r = 65 + Math.random()*6;
+          sphere.push({phi,theta,r});
         }
       }
+
       function draw(){
-        ctx.clearRect(0,0,w,h);
-        const cx = w/2, cy = h/2+5;
-        tick += 0.006; // rotation speed
-        for(const d of dots){
-          const t = d.theta + tick*3;
-          const p = d.phi + Math.sin(tick)*0.15;
-          const x = d.r * Math.sin(p) * Math.cos(t);
-          const y = d.r * Math.cos(p);
-          const z = d.r * Math.sin(p) * Math.sin(t);
+        ctx.clearRect(0,0,w,h);  // transparent clear
+        const cx = w/2;
+        const cy = h/2;
+        t += 0.0075;
+
+        // draw two orbit rings first
+        drawRing(cx,cy,78, t*1.4, 'hsla(225,90%,35%,0.55)');
+        drawRing(cx,cy,54, -t*1.8, 'hsla(285,90%,45%,0.55)');
+
+        for(const p of sphere){
+          const theta = p.theta + t*3;
+          const phi = p.phi + Math.sin(t*0.6)*0.12;
+          const x = p.r * Math.sin(phi) * Math.cos(theta);
+          const y = p.r * Math.cos(phi);
+          const z = p.r * Math.sin(phi) * Math.sin(theta);
+
           const scale = DEPTH/(DEPTH - z);
           const sx = cx + x*scale;
           const sy = cy + y*scale;
-          const size = 2.1*scale;
-          const hue = 200 + z; // bluish -> cyan
+          const size = 2.2*scale;
+          const hue = 190 + (z*0.4);
           ctx.beginPath();
-          ctx.fillStyle = `hsla(${hue},80%,60%,${0.35+0.65*scale})`;
+          ctx.fillStyle = `hsla(${hue},95%,55%,${0.25 + scale*0.9})`;
           ctx.arc(sx, sy, size, 0, Math.PI*2);
           ctx.fill();
         }
+
         requestAnimationFrame(draw);
       }
+
+      function drawRing(cx,cy,radius,rot,color){
+        ctx.save();
+        ctx.translate(cx,cy);
+        ctx.rotate(rot);
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.4;
+        ctx.ellipse(0,0,radius,radius*0.35,0,0,Math.PI*2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
       resize();
-      makeDots();
+      makeSphere();
       draw();
       window.addEventListener("resize", resize);
     })();
