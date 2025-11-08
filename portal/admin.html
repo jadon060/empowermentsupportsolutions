@@ -78,13 +78,18 @@
     .muted{color:var(--muted)}
     footer{color:var(--muted);font-size:13px;text-align:center;padding:24px 0 36px}
 
-    /* just a container so it sits nice under the client link */
-    .cyberworld-wrap{
-      border-radius:16px;
+    /* animation box now sits inside notes card, top right */
+    .notes-with-orb{
+      position:relative;
       overflow:hidden;
-      height:180px;
-      background:transparent;
-      border:1px solid rgba(11,40,70,0.04);
+    }
+    .orb-canvas-wrap{
+      position:absolute;
+      top:6px;
+      right:6px;
+      width:130px;
+      height:130px;
+      pointer-events:none;
     }
     #cyberworldCanvas{
       width:100%;
@@ -164,15 +169,16 @@
               😀 Omar daily SDP log
               <span class="small">opens page</span>
             </a>
-            <!-- animation lives right under last client -->
-            <div class="cyberworld-wrap">
-              <canvas id="cyberworldCanvas"></canvas>
-            </div>
+            <!-- no animation here anymore -->
           </div>
         </div>
 
         <!-- RIGHT CARD: notes -->
-        <div class="card">
+        <div class="card notes-with-orb">
+          <div class="orb-canvas-wrap">
+            <canvas id="cyberworldCanvas"></canvas>
+          </div>
+
           <h2>🗒️ My Notes</h2>
           <p class="muted" style="margin-top:-6px">Organize yourself before you try to organize anything else.</p>
 
@@ -311,12 +317,11 @@
       }
 
       function draw(){
-        ctx.clearRect(0,0,w,h);  // transparent clear
+        ctx.clearRect(0,0,w,h);
         const cx = w/2;
         const cy = h/2;
         t += 0.0075;
 
-        // draw two orbit rings first
         drawRing(cx,cy,78, t*1.4, 'hsla(225,90%,35%,0.55)');
         drawRing(cx,cy,54, -t*1.8, 'hsla(285,90%,45%,0.55)');
 
