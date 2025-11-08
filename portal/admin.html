@@ -77,6 +77,21 @@
       padding:4px 8px;border-radius:999px;font-size:12px}
     .muted{color:var(--muted)}
     footer{color:var(--muted);font-size:13px;text-align:center;padding:24px 0 36px}
+
+    /* cyberworld box */
+    .cyberworld-box{
+      background:#040711;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.04);
+      padding:10px;
+      min-height:180px;
+    }
+    #cyberworldCanvas{
+      width:100%;
+      height:160px;
+      display:block;
+      border-radius:10px;
+    }
   </style>
 
   <script>
@@ -149,6 +164,10 @@
               😀 Omar daily SDP log
               <span class="small">opens page</span>
             </a>
+            <!-- fun cyberworld animation, sits at the bottom of last client -->
+            <div class="cyberworld-box">
+              <canvas id="cyberworldCanvas"></canvas>
+            </div>
             <!-- add more client-specific links here later -->
           </div>
         </div>
@@ -260,6 +279,57 @@
     searchBox.addEventListener("input", render);
 
     render();
+
+    // ===== cyberworld animation (canvas, lightweight) =====
+    (function(){
+      const canvas = document.getElementById("cyberworldCanvas");
+      if(!canvas) return;
+      const ctx = canvas.getContext("2d");
+      let w, h, dots = [], tick = 0;
+      const DOT_COUNT = 420;
+      const DEPTH = 280;
+      function resize(){
+        const rect = canvas.getBoundingClientRect();
+        w = canvas.width = rect.width * window.devicePixelRatio;
+        h = canvas.height = rect.height * window.devicePixelRatio;
+        ctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
+      }
+      function makeDots(){
+        dots = [];
+        for(let i=0;i<DOT_COUNT;i++){
+          const phi = Math.acos(2*Math.random()-1);   // 0..pi
+          const theta = Math.random()*Math.PI*2;      // 0..2pi
+          const r = 65 + Math.random()*8;
+          dots.push({phi,theta,r});
+        }
+      }
+      function draw(){
+        ctx.clearRect(0,0,w,h);
+        const cx = w/2, cy = h/2+5;
+        tick += 0.006; // rotation speed
+        for(const d of dots){
+          const t = d.theta + tick*3;
+          const p = d.phi + Math.sin(tick)*0.15;
+          const x = d.r * Math.sin(p) * Math.cos(t);
+          const y = d.r * Math.cos(p);
+          const z = d.r * Math.sin(p) * Math.sin(t);
+          const scale = DEPTH/(DEPTH - z);
+          const sx = cx + x*scale;
+          const sy = cy + y*scale;
+          const size = 2.1*scale;
+          const hue = 200 + z; // bluish -> cyan
+          ctx.beginPath();
+          ctx.fillStyle = `hsla(${hue},80%,60%,${0.35+0.65*scale})`;
+          ctx.arc(sx, sy, size, 0, Math.PI*2);
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+      resize();
+      makeDots();
+      draw();
+      window.addEventListener("resize", resize);
+    })();
   </script>
 </body>
 </html>
