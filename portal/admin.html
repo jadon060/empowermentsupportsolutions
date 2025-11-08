@@ -23,6 +23,7 @@
     .brand small{font-weight:600;color:var(--muted)}
     .container{max-width:1100px;margin:18px auto;padding:0 16px}
     .hero{
+      position:relative; /* so the orb can sit in the corner */
       background:linear-gradient(135deg, rgba(15,76,129,.10), rgba(60,120,200,.08));
       border:1px solid var(--line); border-radius:20px; padding:18px; box-shadow:var(--shadow);
     }
@@ -78,17 +79,13 @@
     .muted{color:var(--muted)}
     footer{color:var(--muted);font-size:13px;text-align:center;padding:24px 0 36px}
 
-    /* animation box now sits inside notes card, top right */
-    .notes-with-orb{
-      position:relative;
-      overflow:hidden;
-    }
-    .orb-canvas-wrap{
+    /* orb in hero top-right */
+    .hero-orb{
       position:absolute;
-      top:6px;
-      right:6px;
-      width:130px;
-      height:130px;
+      top:14px;
+      right:16px;
+      width:90px;
+      height:90px;
       pointer-events:none;
     }
     #cyberworldCanvas{
@@ -117,6 +114,11 @@
 
   <main class="container">
     <section class="hero">
+      <!-- floating orb inside hero -->
+      <div class="hero-orb">
+        <canvas id="cyberworldCanvas"></canvas>
+      </div>
+
       <h1>Welcome, J</h1>
       <p class="tagline">No luck, only lessons. Fail Forward, learn and adapt.</p>
 
@@ -169,16 +171,11 @@
               😀 Omar daily SDP log
               <span class="small">opens page</span>
             </a>
-            <!-- no animation here anymore -->
           </div>
         </div>
 
         <!-- RIGHT CARD: notes -->
-        <div class="card notes-with-orb">
-          <div class="orb-canvas-wrap">
-            <canvas id="cyberworldCanvas"></canvas>
-          </div>
-
+        <div class="card">
           <h2>🗒️ My Notes</h2>
           <p class="muted" style="margin-top:-6px">Organize yourself before you try to organize anything else.</p>
 
