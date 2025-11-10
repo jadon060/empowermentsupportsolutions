@@ -96,6 +96,22 @@
       display:block;
       background:transparent;
     }
+    .show-more-wrap{
+      display:flex;
+      justify-content:center;
+      margin-top:10px;
+    }
+    .show-more-btn{
+      background:#fff;
+      border:1px solid #d1d5db;
+      border-radius:999px;
+      padding:4px 10px;
+      font-size:12px;
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      cursor:pointer;
+    }
   </style>
 
   <script>
@@ -165,7 +181,6 @@
             </a>
           </div>
 
-          <!-- NEW SECTION -->
           <h2 style="margin-top:18px">👥 ESS Clients</h2>
           <div class="slot">
             <a class="link" href="/omar-v.html">
@@ -216,6 +231,10 @@
     const searchBox = $("#search");
     const statusEl = $("#saveStatus");
 
+    // how many notes to show at a time
+    let visibleNotes = 3;
+    const CHUNK = 3;
+
     function loadNotes(){ try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; } }
     function persist(notes){ localStorage.setItem(LS_KEY, JSON.stringify(notes)); }
     function nowStamp(){
@@ -232,6 +251,8 @@
       persist(notes);
       $("#noteText").value = "";
       flash("Saved");
+      // after saving, show it right away
+      visibleNotes = 3;
       render();
     }
 
@@ -250,7 +271,6 @@
       }
     }
 
-    // EDIT function
     function editNote(id){
       const notes = loadNotes();
       const idx = notes.findIndex(n => n.id === id);
@@ -286,6 +306,7 @@
           });
           const merged = [...map.values()].sort((a,b)=> (b.ts||"").localeCompare(a.ts||""));
           persist(merged);
+          visibleNotes = 3;
           render();
           flash("Imported");
         }catch(e){
@@ -298,6 +319,7 @@
     function clearAll(){
       if(confirm("Delete ALL private notes on this device?")){
         persist([]);
+        visibleNotes = 3;
         render();
       }
     }
@@ -307,14 +329,23 @@
       setTimeout(()=> statusEl.textContent = "", 1200);
     }
 
+    function showMore(){
+      visibleNotes += CHUNK;
+      render();
+    }
+
     function render(){
       const q = (searchBox.value || "").toLowerCase();
-      const notes = loadNotes().filter(n => n.body.toLowerCase().includes(q));
-      if(notes.length === 0){
+      const allNotes = loadNotes().filter(n => n.body.toLowerCase().includes(q));
+      if(allNotes.length === 0){
         notesList.innerHTML = `<p class="muted">No notes yet.</p>`;
         return;
       }
-      notesList.innerHTML = notes.map(n => {
+
+      const toShow = allNotes.slice(0, visibleNotes);
+      const remaining = allNotes.length - toShow.length;
+
+      notesList.innerHTML = toShow.map(n => {
         const when = new Date(n.ts).toLocaleString();
         return `
           <div class="note-row">
@@ -330,6 +361,17 @@
           </div>
         `;
       }).join("");
+
+      if(remaining > 0){
+        notesList.innerHTML += `
+          <div class="show-more-wrap">
+            <button class="show-more-btn" onclick="showMore()">
+              <span>Show ${Math.min(remaining, CHUNK)} more</span>
+              <span aria-hidden="true">▼</span>
+            </button>
+          </div>
+        `;
+      }
     }
 
     function escapeHtml(s){
@@ -341,7 +383,11 @@
     $("#exportJson").addEventListener("click", exportJson);
     $("#importFile").addEventListener("change", e => e.target.files[0] && importJson(e.target.files[0]));
     $("#clearAll").addEventListener("click", clearAll);
-    searchBox.addEventListener("input", render);
+    searchBox.addEventListener("input", () => {
+      // when searching, reset to first chunk
+      visibleNotes = 3;
+      render();
+    });
 
     render();
 
