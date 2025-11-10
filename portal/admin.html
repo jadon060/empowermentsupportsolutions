@@ -23,7 +23,7 @@
     .brand small{font-weight:600;color:var(--muted)}
     .container{max-width:1100px;margin:18px auto;padding:0 16px}
     .hero{
-      position:relative; /* orb lives here */
+      position:relative;
       background:linear-gradient(135deg, rgba(15,76,129,.10), rgba(60,120,200,.08));
       border:1px solid var(--line); border-radius:20px; padding:18px; box-shadow:var(--shadow);
     }
@@ -73,13 +73,13 @@
       border-radius:12px;background:#fafcff
     }
     .note-meta{font-size:12px;color:var(--muted);margin-bottom:6px}
-    .note-actions{display:flex;gap:6px}
+    .note-actions{display:flex;gap:6px;flex-direction:column}
+    .note-actions .btn{padding:5px 10px;font-size:12px;border-radius:8px}
     .chip{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;border:1px solid #dbeafe;color:#1e3a8a;
       padding:4px 8px;border-radius:999px;font-size:12px}
     .muted{color:var(--muted)}
     footer{color:var(--muted);font-size:13px;text-align:center;padding:24px 0 36px}
 
-    /* orb in hero top-right, circular */
     .hero-orb{
       position:absolute;
       top:14px;
@@ -116,7 +116,6 @@
 
   <main class="container">
     <section class="hero">
-      <!-- floating orb inside hero -->
       <div class="hero-orb">
         <canvas id="cyberworldCanvas"></canvas>
       </div>
@@ -223,23 +222,58 @@
       const d = new Date();
       return d.toLocaleString(undefined, { year:'2-digit', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
     }
+
     function saveNote(){
       const txt = $("#noteText").value.trim();
       if(!txt) return;
       const notes = loadNotes();
       const body = $("#prependTs").checked ? `${nowStamp()} — ${txt}` : txt;
       notes.unshift({ id: crypto.randomUUID(), ts: new Date().toISOString(), body });
-      persist(notes); $("#noteText").value = ""; flash("Saved"); render();
+      persist(notes);
+      $("#noteText").value = "";
+      flash("Saved");
+      render();
     }
-    function deleteNote(id){ const notes = loadNotes().filter(n => n.id !== id); persist(notes); render(); }
-    async function copyNote(text){ try { await navigator.clipboard.writeText(text); flash("Copied"); } catch { flash("Copy failed"); } }
+
+    function deleteNote(id){
+      const notes = loadNotes().filter(n => n.id !== id);
+      persist(notes);
+      render();
+    }
+
+    async function copyNote(text){
+      try {
+        await navigator.clipboard.writeText(text);
+        flash("Copied");
+      } catch {
+        flash("Copy failed");
+      }
+    }
+
+    // NEW: edit note
+    function editNote(id){
+      const notes = loadNotes();
+      const idx = notes.findIndex(n => n.id === id);
+      if(idx === -1) return;
+      const current = notes[idx].body;
+      const updated = prompt("Edit note:", current);
+      if(updated === null) return; // cancelled
+      notes[idx].body = updated.trim();
+      // keep original ts so order doesn't break
+      persist(notes);
+      flash("Updated");
+      render();
+    }
+
     function exportJson(){
       const blob = new Blob([JSON.stringify(loadNotes(), null, 2)], {type:"application/json"});
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = `ESS_PrivateNotes_${new Date().toISOString().slice(0,10)}.json`;
-      a.click(); URL.revokeObjectURL(a.href);
+      a.click();
+      URL.revokeObjectURL(a.href);
     }
+
     function importJson(file){
       const reader = new FileReader();
       reader.onload = () => {
@@ -247,25 +281,50 @@
           const imported = JSON.parse(reader.result);
           if(!Array.isArray(imported)) throw new Error("Invalid file");
           const map = new Map();
-          [...imported, ...loadNotes()].forEach(n => map.set(n.id || crypto.randomUUID(), { id:n.id || crypto.randomUUID(), ts:n.ts || new Date().toISOString(), body:String(n.body||"") }));
+          [...imported, ...loadNotes()].forEach(n => {
+            const id = n.id || crypto.randomUUID();
+            map.set(id, { id, ts: n.ts || new Date().toISOString(), body: String(n.body||"") });
+          });
           const merged = [...map.values()].sort((a,b)=> (b.ts||"").localeCompare(a.ts||""));
-          persist(merged); render(); flash("Imported");
-        }catch(e){ flash("Import failed"); }
+          persist(merged);
+          render();
+          flash("Imported");
+        }catch(e){
+          flash("Import failed");
+        }
       };
       reader.readAsText(file);
     }
-    function clearAll(){ if(confirm("Delete ALL private notes on this device?")){ persist([]); render(); } }
-    function flash(msg){ statusEl.textContent = msg; setTimeout(()=> statusEl.textContent = "", 1200); }
+
+    function clearAll(){
+      if(confirm("Delete ALL private notes on this device?")){
+        persist([]);
+        render();
+      }
+    }
+
+    function flash(msg){
+      statusEl.textContent = msg;
+      setTimeout(()=> statusEl.textContent = "", 1200);
+    }
+
     function render(){
       const q = (searchBox.value || "").toLowerCase();
       const notes = loadNotes().filter(n => n.body.toLowerCase().includes(q));
-      if(notes.length === 0){ notesList.innerHTML = `<p class="muted">No notes yet.</p>`; return; }
+      if(notes.length === 0){
+        notesList.innerHTML = `<p class="muted">No notes yet.</p>`;
+        return;
+      }
       notesList.innerHTML = notes.map(n => {
         const when = new Date(n.ts).toLocaleString();
         return `
           <div class="note-row">
-            <div><div class="note-meta">${when}</div><div style="white-space:pre-wrap">${escapeHtml(n.body)}</div></div>
+            <div>
+              <div class="note-meta">${when}</div>
+              <div style="white-space:pre-wrap">${escapeHtml(n.body)}</div>
+            </div>
             <div class="note-actions">
+              <button class="btn ghost" onclick='(${editNote}).call(null, "${n.id}")'>Edit</button>
               <button class="btn ghost" onclick='(${copyNote}).call(null, ${JSON.stringify(n.body)})'>Copy</button>
               <button class="btn warn" onclick='(${deleteNote}).call(null, "${n.id}")'>Delete</button>
             </div>
@@ -273,7 +332,10 @@
         `;
       }).join("");
     }
-    function escapeHtml(s){ return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    function escapeHtml(s){
+      return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
 
     $("#saveNote").addEventListener("click", saveNote);
     $("#noteText").addEventListener("keydown", e=>{ if(e.ctrlKey && e.key==='Enter'){ saveNote(); }});
