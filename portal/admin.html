@@ -54,9 +54,10 @@
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      gap:10px;
     }
     .link:hover{background:#24384c;transform:translateY(-1px);}
-    .small{font-size:13px;color:#cbd5e1;font-weight:600}
+    .small{font-size:13px;color:#cbd5e1;font-weight:600;flex:0 0 auto}
     .notes-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 10px}
     .notes-controls input[type="text"]{flex:1 1 260px;padding:8px 10px;border:1px solid var(--line);border-radius:10px}
     .btn{
@@ -111,6 +112,17 @@
       gap:6px;
       align-items:center;
       cursor:pointer;
+    }
+
+    /* 📱 mobile fixes */
+    @media (max-width: 600px){
+      .link{
+        white-space:normal;          /* allow wrapping */
+        align-items:flex-start;      /* top-align icon/text */
+      }
+      .card{padding:14px}
+      .note-row{grid-template-columns:1fr;} /* actions under note on tiny screens */
+      .note-actions{flex-direction:row;flex-wrap:wrap;}
     }
   </style>
 
@@ -231,7 +243,6 @@
     const searchBox = $("#search");
     const statusEl = $("#saveStatus");
 
-    // how many notes to show at a time
     let visibleNotes = 3;
     const CHUNK = 3;
 
@@ -251,7 +262,6 @@
       persist(notes);
       $("#noteText").value = "";
       flash("Saved");
-      // after saving, show it right away
       visibleNotes = 3;
       render();
     }
@@ -384,14 +394,13 @@
     $("#importFile").addEventListener("change", e => e.target.files[0] && importJson(e.target.files[0]));
     $("#clearAll").addEventListener("click", clearAll);
     searchBox.addEventListener("input", () => {
-      // when searching, reset to first chunk
       visibleNotes = 3;
       render();
     });
 
     render();
 
-    /* ===== CYBERWORLD ANIMATION (transparent) ===== */
+    /* ===== CYBERWORLD ANIMATION ===== */
     (function(){
       const canvas = document.getElementById("cyberworldCanvas");
       if(!canvas) return;
