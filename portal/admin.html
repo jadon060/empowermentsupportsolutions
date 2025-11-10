@@ -250,16 +250,15 @@
       }
     }
 
-    // NEW: edit note
+    // EDIT function
     function editNote(id){
       const notes = loadNotes();
       const idx = notes.findIndex(n => n.id === id);
       if(idx === -1) return;
       const current = notes[idx].body;
       const updated = prompt("Edit note:", current);
-      if(updated === null) return; // cancelled
+      if(updated === null) return;
       notes[idx].body = updated.trim();
-      // keep original ts so order doesn't break
       persist(notes);
       flash("Updated");
       render();
@@ -324,9 +323,9 @@
               <div style="white-space:pre-wrap">${escapeHtml(n.body)}</div>
             </div>
             <div class="note-actions">
-              <button class="btn ghost" onclick='(${editNote}).call(null, "${n.id}")'>Edit</button>
-              <button class="btn ghost" onclick='(${copyNote}).call(null, ${JSON.stringify(n.body)})'>Copy</button>
-              <button class="btn warn" onclick='(${deleteNote}).call(null, "${n.id}")'>Delete</button>
+              <button class="btn ghost" onclick="editNote('${n.id}')">Edit</button>
+              <button class="btn ghost" onclick="copyNote(${JSON.stringify(n.body)})">Copy</button>
+              <button class="btn warn" onclick="deleteNote('${n.id}')">Delete</button>
             </div>
           </div>
         `;
