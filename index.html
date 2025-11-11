@@ -262,6 +262,13 @@
         margin:10px auto 16px auto;
       }
     }
+
+    /* Last updated styling */
+    #last-updated {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #d6d6d6;
+    }
   </style>
 </head>
 <body>
@@ -351,6 +358,9 @@
       <img src="newforms/DDS_Cover.png" alt="Partner Logo 2" loading="lazy">
     </div>
 
+    <!-- NEW: Last Updated -->
+    <p id="last-updated">Last updated: <span id="lu-text"></span></p>
+
     <p class="copyright">© 2025 Empowerment Support Solutions LLC. All rights reserved.</p>
   </footer>
 
@@ -391,6 +401,11 @@
       s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
       document.head.appendChild(s);
     })();
+
+    /* Auto Last Updated */
+    const d = new Date(document.lastModified);
+    const opts = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('lu-text').textContent = d.toLocaleDateString('en-US', opts);
   </script>
 
 </body>
