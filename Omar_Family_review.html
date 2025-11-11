@@ -179,12 +179,10 @@
       margin-bottom:4px;
     }
   </style>
-  <!-- Supabase client -->
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
-  <!-- password overlay -->
   <div class="locked-screen" id="lock">
     <div class="locked-card">
       <h2>Omar’s Portal</h2>
@@ -208,7 +206,6 @@
     </div>
 
     <div class="grid">
-      <!-- left: logs -->
       <div>
         <div class="card" id="latestCard">
           <h2>Today’s / Most Recent Entry</h2>
@@ -223,7 +220,6 @@
         </div>
       </div>
 
-      <!-- right: charts / notes -->
       <div>
         <div class="card">
           <h2>Weekly Snapshot</h2>
@@ -246,8 +242,7 @@
   </main>
 
   <script>
-    // 1) simple client-side password
-    const ACCESS_CODE = "Omar2025"; // change this & give to family
+    const ACCESS_CODE = "Omar2025";
     const lockEl = document.getElementById('lock');
     const errEl = document.getElementById('err');
     document.getElementById('pinBtn').addEventListener('click', checkPin);
@@ -263,18 +258,16 @@
       }
     }
 
-    // 2) Supabase setup (safe-to-commit version)
-    // keep your real anon key OUT of GitHub. Put the real key in a local copy.
-    const SUPABASE_URL = "https://bqanjupmcgydmfgvutx.supabase.co";
-    const SUPABASE_KEY = "YOUR_PUBLIC_ANON_KEY"; // <-- replace locally, not on GitHub
+    // ✅ correct URL
+    const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
+    // ⬇️ put your real anon key back here on your host
+    const SUPABASE_KEY = "YOUR_PUBLIC_ANON_KEY";
 
-    // tell supabase to use the 'ess' schema by default
     const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       db: { schema: 'ess' }
     });
 
     async function loadOmarLogs(){
-      // table you created: ess.omar_family_review
       const { data, error } = await _sb
         .from('omar_family_review')
         .select('*')
@@ -282,12 +275,14 @@
         .limit(14);
 
       if(error){
-        document.getElementById('logList').innerHTML = "<p style='color:#dc2626;font-size:.8rem;'>Error loading logs.</p>";
+        document.getElementById('logList').innerHTML =
+          "<p style='color:#dc2626;font-size:.8rem;'>Error loading logs.</p>";
         console.error(error);
         return;
       }
       if(!data || data.length === 0){
-        document.getElementById('logList').innerHTML = "<p style='color:#94a3b8;font-size:.8rem;'>No entries yet.</p>";
+        document.getElementById('logList').innerHTML =
+          "<p style='color:#94a3b8;font-size:.8rem;'>No entries yet.</p>";
         return;
       }
 
@@ -320,7 +315,7 @@
     function renderList(entries){
       const list = document.getElementById('logList');
       list.innerHTML = '';
-      entries.forEach((e) => {
+      entries.forEach(e => {
         const div = document.createElement('div');
         div.className = 'log-entry';
         div.innerHTML = `
@@ -338,18 +333,19 @@
     }
 
     function renderLastUpdated(d){
-      const el = document.getElementById('lastUpdated');
-      el.textContent = "Last updated: " + formatDate(d);
+      document.getElementById('lastUpdated').textContent =
+        "Last updated: " + formatDate(d);
     }
 
     function formatDate(d){
       if(!d) return '—';
       const dt = new Date(d);
       if(isNaN(dt)) return d;
-      return dt.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+      return dt.toLocaleDateString('en-US', {
+        month:'short', day:'numeric', year:'numeric'
+      });
     }
 
-    // chart placeholder
     function renderChartPlaceholder(entries){
       const box = document.getElementById('chartBox');
       const total = entries.length;
@@ -357,17 +353,17 @@
       box.innerHTML = `
         <div>
           <p style="margin:0;font-weight:600;">Service Activity</p>
-          <p style="margin:3px 0 8px;font-size:.75rem;color:#94a3b8;">Last 7–14 submitted logs</p>
+          <p style="margin:3px 0 8px;font-size:.75rem;color:#94a3b8;">
+            Last 7–14 submitted logs
+          </p>
           <p style="margin:0;font-size:.9rem;">
             <strong>${last7}</strong> recent visits<br>
             <strong>${total}</strong> total shown here
           </p>
-          <p style="margin-top:8px;font-size:.7rem;color:#94a3b8;">(We can swap this for a real chart later.)</p>
         </div>
       `;
     }
 
-    // feedback optional — this will only work once you create 'family_feedback'
     document.getElementById('fbBtn').addEventListener('click', async () => {
       const text = document.getElementById('fbText').value.trim();
       const msgEl = document.getElementById('fbMsg');
@@ -386,7 +382,6 @@
       }
     });
 
-    // load data
     loadOmarLogs();
   </script>
 </body>
