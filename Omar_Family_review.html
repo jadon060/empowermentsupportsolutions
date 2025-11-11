@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ESS • Omar's Daily Progress</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --brand:#2c3e50;
+      --brand-2:#0f4c81;
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --line:#e5e7eb;
+      --accent:#3b82f6;
+      --radius:16px;
+      --shadow:0 12px 35px rgba(0,0,0,.05);
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    header{
+      background:linear-gradient(135deg,var(--brand),var(--brand-2));
+      color:#fff;
+      padding:16px 18px 18px;
+      text-align:center;
+      position:sticky;
+      top:0;
+      z-index:10;
+      box-shadow:0 3px 18px rgba(0,0,0,.1);
+    }
+    header h1{margin:4px 0 2px;font-size:1.35rem;}
+    header p{margin:0;font-size:.85rem;color:rgba(255,255,255,.85);}
+    main{
+      max-width:1100px;
+      margin:20px auto;
+      padding:0 16px 30px;
+    }
+    .meta-row{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+    .badge{
+      background:rgba(59,130,246,.12);
+      color:var(--brand-2);
+      padding:4px 12px;
+      border-radius:999px;
+      font-size:.72rem;
+      font-weight:600;
+    }
+    .last-updated{
+      font-size:.8rem;
+      color:var(--muted);
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:18px;
+    }
+    @media(max-width:900px){
+      .grid{grid-template-columns:1fr;}
+    }
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(15,23,42,.03);
+      padding:14px 16px 14px;
+    }
+    .card h2{
+      margin-top:0;
+      font-size:1.02rem;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .log-entry{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px 8px;
+      margin-bottom:10px;
+      background:#fff;
+    }
+    .log-entry h3{
+      margin:0 0 6px;
+      font-size:.9rem;
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .log-entry small{color:var(--muted);font-weight:400;}
+    .label{
+      font-size:.7rem;
+      font-weight:600;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      margin-top:4px;
+    }
+    .notes{
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      padding:6px 8px;
+      border-radius:8px;
+      font-size:.82rem;
+      margin-top:4px;
+    }
+    .chart-box{
+      height:210px;
+      background:repeating-linear-gradient(180deg, #f8fafc 0, #f8fafc 39px, #ffffff 40px);
+      border:1px dashed #d1d9e6;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#94a3b8;
+      font-size:.8rem;
+      text-align:center;
+      padding:0 16px;
+    }
+    .feedback-box textarea{
+      width:100%;
+      min-height:90px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:7px 8px;
+      font-family:inherit;
+      resize:vertical;
+    }
+    .btn{
+      background:var(--accent);
+      color:#fff;
+      border:none;
+      border-radius:8px;
+      padding:7px 12px;
+      font-size:.8rem;
+      cursor:pointer;
+    }
+    .locked-screen{
+      position:fixed;
+      inset:0;
+      background:rgba(12,15,22,.9);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    }
+    .locked-card{
+      background:#fff;
+      padding:18px 18px 16px;
+      border-radius:12px;
+      width:92%;
+      max-width:360px;
+      text-align:center;
+      box-shadow:0 10px 40px rgba(0,0,0,.28);
+    }
+    .locked-card h2{margin:0 0 6px;}
+    .locked-card input{
+      width:100%;
+      padding:7px 8px;
+      border:1px solid #d5dce7;
+      border-radius:8px;
+      margin-bottom:10px;
+      font-size:.9rem;
+      text-align:center;
+    }
+    .error-msg{
+      color:#dc2626;
+      font-size:.75rem;
+      min-height:16px;
+      margin-bottom:4px;
+    }
+  </style>
+  <!-- Supabase client -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+  <!-- password overlay -->
+  <div class="locked-screen" id="lock">
+    <div class="locked-card">
+      <h2>Omar’s Portal</h2>
+      <p style="font-size:.8rem;color:#475569;">Enter the family access code provided by ESS.</p>
+      <div class="error-msg" id="err"></div>
+      <input type="password" id="pin" placeholder="Access code">
+      <button class="btn" id="pinBtn">Enter</button>
+      <p style="margin-top:9px;font-size:.7rem;color:#94a3b8;">For support, contact empowermentess@gmail.com</p>
+    </div>
+  </div>
+
+  <header>
+    <h1>Omar’s Daily Progress</h1>
+    <p>Read-only view for family & circle of support</p>
+  </header>
+
+  <main>
+    <div class="meta-row">
+      <span class="badge">ESS • Family View</span>
+      <span class="last-updated" id="lastUpdated">Last updated: —</span>
+    </div>
+
+    <div class="grid">
+      <!-- left: logs -->
+      <div>
+        <div class="card" id="latestCard">
+          <h2>Today’s / Most Recent Entry</h2>
+          <p style="color:var(--muted);font-size:.8rem;">Loading latest entry…</p>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <h2>Recent Activity</h2>
+          <div id="logList">
+            <p style="color:var(--muted);font-size:.8rem;">Loading recent logs…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- right: charts / notes -->
+      <div>
+        <div class="card">
+          <h2>Weekly Snapshot</h2>
+          <div class="chart-box" id="chartBox">
+            Chart coming soon (attendance / goals). Data will render from Supabase.
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <h2>Send a note to ESS</h2>
+          <p style="font-size:.78rem;color:var(--muted);">This note is private to ESS admin (not public).</p>
+          <div class="feedback-box">
+            <textarea id="fbText" placeholder="Ex: Omar didn’t sleep well last night, please focus on calm day."></textarea>
+            <button class="btn" style="margin-top:6px;" id="fbBtn">Submit note</button>
+            <p id="fbMsg" style="font-size:.7rem;color:var(--muted);margin-top:5px;"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // 1) simple client-side password
+    const ACCESS_CODE = "Omar2025"; // change this & give to family
+    const lockEl = document.getElementById('lock');
+    const errEl = document.getElementById('err');
+    document.getElementById('pinBtn').addEventListener('click', checkPin);
+    document.getElementById('pin').addEventListener('keyup', e => {
+      if(e.key === 'Enter') checkPin();
+    });
+    function checkPin(){
+      const val = document.getElementById('pin').value.trim();
+      if(val === ACCESS_CODE){
+        lockEl.style.display = 'none';
+      } else {
+        errEl.textContent = "Invalid code. Try again.";
+      }
+    }
+
+    // 2) Supabase setup (safe-to-commit version)
+    // keep your real anon key OUT of GitHub. Put the real key in a local copy.
+    const SUPABASE_URL = "https://bqanjupmcgydmfgvutx.supabase.co";
+    const SUPABASE_KEY = "YOUR_PUBLIC_ANON_KEY"; // <-- replace locally, not on GitHub
+
+    // tell supabase to use the 'ess' schema by default
+    const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      db: { schema: 'ess' }
+    });
+
+    async function loadOmarLogs(){
+      // table you created: ess.omar_family_review
+      const { data, error } = await _sb
+        .from('omar_family_review')
+        .select('*')
+        .order('entry_date', { ascending: false })
+        .limit(14);
+
+      if(error){
+        document.getElementById('logList').innerHTML = "<p style='color:#dc2626;font-size:.8rem;'>Error loading logs.</p>";
+        console.error(error);
+        return;
+      }
+      if(!data || data.length === 0){
+        document.getElementById('logList').innerHTML = "<p style='color:#94a3b8;font-size:.8rem;'>No entries yet.</p>";
+        return;
+      }
+
+      const latest = data[0];
+      renderLatest(latest);
+      renderList(data);
+      renderLastUpdated(latest.entry_date || latest.created_at);
+      renderChartPlaceholder(data);
+    }
+
+    function renderLatest(entry){
+      const wrap = document.getElementById('latestCard');
+      wrap.innerHTML = `
+        <h2>Today’s / Most Recent Entry</h2>
+        <p class="label">Date</p>
+        <p>${formatDate(entry.entry_date || entry.created_at)}</p>
+        <p class="label">Staff</p>
+        <p>${entry.staff_name || '—'}</p>
+        <p class="label">Goals worked on</p>
+        <p>${entry.goals_worked_on || '—'}</p>
+        <p class="label">Progress summary</p>
+        <div class="notes">${entry.progress_summary || '—'}</div>
+        ${(entry.evv_start || entry.evv_end) ? `
+          <p class="label">Service Time</p>
+          <p>${entry.evv_start || ''} – ${entry.evv_end || ''}</p>
+        ` : ``}
+      `;
+    }
+
+    function renderList(entries){
+      const list = document.getElementById('logList');
+      list.innerHTML = '';
+      entries.forEach((e) => {
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        div.innerHTML = `
+          <h3>
+            <span>${formatDate(e.entry_date || e.created_at)}</span>
+            <small>${e.staff_name || ''}</small>
+          </h3>
+          <p class="label">Goals</p>
+          <p>${e.goals_worked_on || '—'}</p>
+          <p class="label">Notes</p>
+          <div class="notes">${e.progress_summary || 'No notes added.'}</div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function renderLastUpdated(d){
+      const el = document.getElementById('lastUpdated');
+      el.textContent = "Last updated: " + formatDate(d);
+    }
+
+    function formatDate(d){
+      if(!d) return '—';
+      const dt = new Date(d);
+      if(isNaN(dt)) return d;
+      return dt.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    }
+
+    // chart placeholder
+    function renderChartPlaceholder(entries){
+      const box = document.getElementById('chartBox');
+      const total = entries.length;
+      const last7 = entries.slice(0,7).length;
+      box.innerHTML = `
+        <div>
+          <p style="margin:0;font-weight:600;">Service Activity</p>
+          <p style="margin:3px 0 8px;font-size:.75rem;color:#94a3b8;">Last 7–14 submitted logs</p>
+          <p style="margin:0;font-size:.9rem;">
+            <strong>${last7}</strong> recent visits<br>
+            <strong>${total}</strong> total shown here
+          </p>
+          <p style="margin-top:8px;font-size:.7rem;color:#94a3b8;">(We can swap this for a real chart later.)</p>
+        </div>
+      `;
+    }
+
+    // feedback optional — this will only work once you create 'family_feedback'
+    document.getElementById('fbBtn').addEventListener('click', async () => {
+      const text = document.getElementById('fbText').value.trim();
+      const msgEl = document.getElementById('fbMsg');
+      if(!text){
+        msgEl.textContent = "Please enter a note before submitting.";
+        return;
+      }
+      const { error } = await _sb
+        .from('family_feedback')
+        .insert([{ consumer_name:'Omar A', note:text }]);
+      if(error){
+        msgEl.textContent = "Could not submit right now.";
+      } else {
+        msgEl.textContent = "Note sent to ESS. Thank you.";
+        document.getElementById('fbText').value = '';
+      }
+    });
+
+    // load data
+    loadOmarLogs();
+  </script>
+</body>
+</html>
