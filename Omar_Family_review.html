@@ -179,10 +179,12 @@
       margin-bottom:4px;
     }
   </style>
-  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.min.js"></script>
+  <!-- load supabase from jsdelivr -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.0/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
+  <!-- password overlay -->
   <div class="locked-screen" id="lock">
     <div class="locked-card">
       <h2>Omar’s Portal</h2>
@@ -206,6 +208,7 @@
     </div>
 
     <div class="grid">
+      <!-- left -->
       <div>
         <div class="card" id="latestCard">
           <h2>Today’s / Most Recent Entry</h2>
@@ -220,6 +223,7 @@
         </div>
       </div>
 
+      <!-- right -->
       <div>
         <div class="card">
           <h2>Weekly Snapshot</h2>
@@ -241,148 +245,155 @@
     </div>
   </main>
 
+  <!-- your app script -->
   <script>
-    const ACCESS_CODE = "Omar2025";
-    const lockEl = document.getElementById('lock');
-    const errEl = document.getElementById('err');
-    document.getElementById('pinBtn').addEventListener('click', checkPin);
-    document.getElementById('pin').addEventListener('keyup', e => {
-      if(e.key === 'Enter') checkPin();
-    });
-    function checkPin(){
-      const val = document.getElementById('pin').value.trim();
-      if(val === ACCESS_CODE){
-        lockEl.style.display = 'none';
-      } else {
-        errEl.textContent = "Invalid code. Try again.";
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1) password gate
+      const ACCESS_CODE = "Omar2025";
+      const lockEl = document.getElementById('lock');
+      const errEl = document.getElementById('err');
+      document.getElementById('pinBtn').addEventListener('click', checkPin);
+      document.getElementById('pin').addEventListener('keyup', e => {
+        if(e.key === 'Enter') checkPin();
+      });
+      function checkPin(){
+        const val = document.getElementById('pin').value.trim();
+        if(val === ACCESS_CODE){
+          lockEl.style.display = 'none';
+        } else {
+          errEl.textContent = "Invalid code. Try again.";
+        }
       }
-    }
 
-    // ✅ correct URL
-    const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
-    // ⬇️ put your real anon key back here on your host
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
+      // 2) supabase client (your real values)
+      const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
 
-    const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-      db: { schema: 'ess' }
-    });
-
-    async function loadOmarLogs(){
-      const { data, error } = await _sb
-        .from('omar_family_review')
-        .select('*')
-        .order('entry_date', { ascending: false })
-        .limit(14);
-
-      if(error){
-        document.getElementById('logList').innerHTML =
-          "<p style='color:#dc2626;font-size:.8rem;'>Error loading logs.</p>";
-        console.error(error);
-        return;
-      }
-      if(!data || data.length === 0){
-        document.getElementById('logList').innerHTML =
-          "<p style='color:#94a3b8;font-size:.8rem;'>No entries yet.</p>";
+      // make sure library exists
+      if (!window.supabase) {
+        console.error("Supabase library did not load.");
         return;
       }
 
-      const latest = data[0];
-      renderLatest(latest);
-      renderList(data);
-      renderLastUpdated(latest.entry_date || latest.created_at);
-      renderChartPlaceholder(data);
-    }
+      const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        db: { schema: 'ess' }
+      });
 
-    function renderLatest(entry){
-      const wrap = document.getElementById('latestCard');
-      wrap.innerHTML = `
-        <h2>Today’s / Most Recent Entry</h2>
-        <p class="label">Date</p>
-        <p>${formatDate(entry.entry_date || entry.created_at)}</p>
-        <p class="label">Staff</p>
-        <p>${entry.staff_name || '—'}</p>
-        <p class="label">Goals worked on</p>
-        <p>${entry.goals_worked_on || '—'}</p>
-        <p class="label">Progress summary</p>
-        <div class="notes">${entry.progress_summary || '—'}</div>
-        ${(entry.evv_start || entry.evv_end) ? `
-          <p class="label">Service Time</p>
-          <p>${entry.evv_start || ''} – ${entry.evv_end || ''}</p>
-        ` : ``}
-      `;
-    }
+      // 3) load data
+      loadOmarLogs();
 
-    function renderList(entries){
-      const list = document.getElementById('logList');
-      list.innerHTML = '';
-      entries.forEach(e => {
-        const div = document.createElement('div');
-        div.className = 'log-entry';
-        div.innerHTML = `
-          <h3>
-            <span>${formatDate(e.entry_date || e.created_at)}</span>
-            <small>${e.staff_name || ''}</small>
-          </h3>
-          <p class="label">Goals</p>
-          <p>${e.goals_worked_on || '—'}</p>
-          <p class="label">Notes</p>
-          <div class="notes">${e.progress_summary || 'No notes added.'}</div>
+      async function loadOmarLogs(){
+        const { data, error } = await _sb
+          .from('omar_family_review')
+          .select('*')
+          .order('entry_date', { ascending: false })
+          .limit(14);
+
+        if(error){
+          console.error(error);
+          document.getElementById('logList').innerHTML =
+            "<p style='color:#dc2626;font-size:.8rem;'>Error loading logs.</p>";
+          return;
+        }
+        if(!data || data.length === 0){
+          document.getElementById('logList').innerHTML =
+            "<p style='color:#94a3b8;font-size:.8rem;'>No entries yet.</p>";
+          return;
+        }
+
+        const latest = data[0];
+        renderLatest(latest);
+        renderList(data);
+        renderLastUpdated(latest.entry_date || latest.created_at);
+        renderChartPlaceholder(data);
+      }
+
+      function renderLatest(entry){
+        const wrap = document.getElementById('latestCard');
+        wrap.innerHTML = `
+          <h2>Today’s / Most Recent Entry</h2>
+          <p class="label">Date</p>
+          <p>${formatDate(entry.entry_date || entry.created_at)}</p>
+          <p class="label">Staff</p>
+          <p>${entry.staff_name || '—'}</p>
+          <p class="label">Goals worked on</p>
+          <p>${entry.goals_worked_on || '—'}</p>
+          <p class="label">Progress summary</p>
+          <div class="notes">${entry.progress_summary || '—'}</div>
+          ${(entry.evv_start || entry.evv_end) ? `
+            <p class="label">Service Time</p>
+            <p>${entry.evv_start || ''} – ${entry.evv_end || ''}</p>
+          ` : ``}
         `;
-        list.appendChild(div);
-      });
-    }
-
-    function renderLastUpdated(d){
-      document.getElementById('lastUpdated').textContent =
-        "Last updated: " + formatDate(d);
-    }
-
-    function formatDate(d){
-      if(!d) return '—';
-      const dt = new Date(d);
-      if(isNaN(dt)) return d;
-      return dt.toLocaleDateString('en-US', {
-        month:'short', day:'numeric', year:'numeric'
-      });
-    }
-
-    function renderChartPlaceholder(entries){
-      const box = document.getElementById('chartBox');
-      const total = entries.length;
-      const last7 = entries.slice(0,7).length;
-      box.innerHTML = `
-        <div>
-          <p style="margin:0;font-weight:600;">Service Activity</p>
-          <p style="margin:3px 0 8px;font-size:.75rem;color:#94a3b8;">
-            Last 7–14 submitted logs
-          </p>
-          <p style="margin:0;font-size:.9rem;">
-            <strong>${last7}</strong> recent visits<br>
-            <strong>${total}</strong> total shown here
-          </p>
-        </div>
-      `;
-    }
-
-    document.getElementById('fbBtn').addEventListener('click', async () => {
-      const text = document.getElementById('fbText').value.trim();
-      const msgEl = document.getElementById('fbMsg');
-      if(!text){
-        msgEl.textContent = "Please enter a note before submitting.";
-        return;
       }
-      const { error } = await _sb
-        .from('family_feedback')
-        .insert([{ consumer_name:'Omar A', note:text }]);
-      if(error){
-        msgEl.textContent = "Could not submit right now.";
-      } else {
-        msgEl.textContent = "Note sent to ESS. Thank you.";
-        document.getElementById('fbText').value = '';
+
+      function renderList(entries){
+        const list = document.getElementById('logList');
+        list.innerHTML = '';
+        entries.forEach(e => {
+          const div = document.createElement('div');
+          div.className = 'log-entry';
+          div.innerHTML = `
+            <h3>
+              <span>${formatDate(e.entry_date || e.created_at)}</span>
+              <small>${e.staff_name || ''}</small>
+            </h3>
+            <p class="label">Goals</p>
+            <p>${e.goals_worked_on || '—'}</p>
+            <p class="label">Notes</p>
+            <div class="notes">${e.progress_summary || 'No notes added.'}</div>
+          `;
+          list.appendChild(div);
+        });
       }
+
+      function renderLastUpdated(d){
+        document.getElementById('lastUpdated').textContent =
+          "Last updated: " + formatDate(d);
+      }
+
+      function formatDate(d){
+        if(!d) return '—';
+        const dt = new Date(d);
+        if(isNaN(dt)) return d;
+        return dt.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+      }
+
+      function renderChartPlaceholder(entries){
+        const box = document.getElementById('chartBox');
+        const total = entries.length;
+        const last7 = entries.slice(0,7).length;
+        box.innerHTML = `
+          <div>
+            <p style="margin:0;font-weight:600;">Service Activity</p>
+            <p style="margin:3px 0 8px;font-size:.75rem;color:#94a3b8;">Last 7–14 submitted logs</p>
+            <p style="margin:0;font-size:.9rem;">
+              <strong>${last7}</strong> recent visits<br>
+              <strong>${total}</strong> total shown here
+            </p>
+          </div>
+        `;
+      }
+
+      // feedback (optional)
+      document.getElementById('fbBtn').addEventListener('click', async () => {
+        const text = document.getElementById('fbText').value.trim();
+        const msgEl = document.getElementById('fbMsg');
+        if(!text){
+          msgEl.textContent = "Please enter a note before submitting.";
+          return;
+        }
+        const { error } = await _sb
+          .from('family_feedback')
+          .insert([{ consumer_name:'Omar A', note:text }]);
+        if(error){
+          msgEl.textContent = "Could not submit right now.";
+        } else {
+          msgEl.textContent = "Note sent to ESS. Thank you.";
+          document.getElementById('fbText').value = '';
+        }
+      });
     });
-
-    loadOmarLogs();
   </script>
 </body>
 </html>
