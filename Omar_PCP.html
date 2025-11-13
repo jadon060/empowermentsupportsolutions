@@ -1,1 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ESS • Omar – Person-Centered Plan (PCP)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --brand:#2c3e50;
+      --brand-2:#0f4c81;
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --accent:#111827;
+      --radius:14px;
+      --shadow:0 16px 40px rgba(15,23,42,.16);
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+      line-height:1.5;
+    }
+    header{
+      background:var(--brand);
+      color:#fff;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    header img{
+      height:44px;
+      object-fit:contain;
+    }
+    header-title{
+      display:block;
+    }
+    header h1{
+      margin:0;
+      font-size:1.15rem;
+      font-weight:600;
+    }
+    header p{
+      margin:2px 0 0;
+      font-size:.8rem;
+      opacity:.85;
+    }
+    .wrap{
+      max-width:1100px;
+      margin:1.4rem auto 2.5rem;
+      padding:0 1rem;
+    }
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:1.25rem 1.4rem 1.6rem;
+      border:1px solid rgba(15,23,42,.05);
+    }
+    h2{
+      margin-top:0;
+      font-size:1.05rem;
+      letter-spacing:.01em;
+    }
+    .lede{
+      font-size:.8rem;
+      color:var(--muted);
+      margin-top:2px;
+      margin-bottom:.8rem;
+    }
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.6rem;
+      margin-bottom:1rem;
+    }
+    button{
+      border:none;
+      border-radius:999px;
+      padding:.5rem .9rem;
+      font-size:.8rem;
+      font-weight:500;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:.3rem;
+    }
+    .btn-primary{
+      background:var(--accent);
+      color:#fff;
+    }
+    .btn-ghost{
+      background:#e5e7eb;
+      color:#111827;
+    }
+    .btn-primary:active,
+    .btn-ghost:active{
+      transform:translateY(1px);
+    }
 
+    form{
+      margin-top:.4rem;
+    }
+    .pcp-section{
+      border-top:1px solid var(--line);
+      padding-top:1rem;
+      margin-top:1rem;
+    }
+    .pcp-section:first-of-type{
+      border-top:none;
+      padding-top:0;
+      margin-top:0;
+    }
+    .pcp-section h3{
+      margin:.1rem 0 .4rem;
+      font-size:.9rem;
+    }
+    .pcp-section p.hint{
+      margin:0 0 .6rem;
+      font-size:.75rem;
+      color:var(--muted);
+    }
+    .grid-2{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:.75rem .9rem;
+    }
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:.75rem .9rem;
+    }
+    @media (max-width:720px){
+      .grid-2,
+      .grid-3{grid-template-columns:1fr;}
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    label{
+      font-size:.75rem;
+      font-weight:600;
+      color:#0f172a;
+    }
+    .sub-label{
+      font-size:.7rem;
+      color:var(--muted);
+      font-weight:400;
+    }
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    textarea,
+    select{
+      border-radius:9px;
+      border:1px solid #d1d5db;
+      padding:6px 9px;
+      font-size:.8rem;
+      font-family:inherit;
+      resize:vertical;
+      min-height:34px;
+      background:#fff;
+    }
+    textarea{
+      min-height:70px;
+    }
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.35rem;
+      margin-top:.15rem;
+    }
+    .pill{
+      font-size:.7rem;
+      padding:.2rem .5rem;
+      border-radius:999px;
+      background:#e5e7eb;
+      color:#374151;
+    }
+
+    .sig-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:1.5rem;
+      margin-top:1rem;
+    }
+    .sig-block{
+      flex:1 1 220px;
+      font-size:.78rem;
+    }
+    .sig-line{
+      border-bottom:1px solid #111827;
+      height:34px;
+      margin-bottom:3px;
+    }
+    .sig-label{
+      font-size:.72rem;
+      color:var(--muted);
+    }
+    .footer-note{
+      margin-top:1rem;
+      font-size:.7rem;
+      color:var(--muted);
+    }
+
+    /* Print styles: make it look like a clean report */
+    @media print{
+      body{
+        background:#fff;
+      }
+      header{
+        position:static;
+      }
+      .wrap{
+        margin:0 auto;
+        padding:0.4in;
+        max-width:8.5in;
+      }
+      .card{
+        box-shadow:none;
+        border:none;
+        padding:0;
+      }
+      .actions{
+        display:none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <img src="https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png"
+       alt="ESS logo"
+       onerror="this.style.display='none'">
+  <div>
+    <h1>Empowerment Support Solutions, LLC</h1>
+    <p>Self-Determination Program • Person-Centered Plan (PCP)</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div class="actions">
+      <button type="button" class="btn-primary" onclick="printPCP()">
+        🖨️ Print / Export PCP (PDF)
+      </button>
+      <button type="button" class="btn-ghost" onclick="clearPCP()">
+        ♻️ Clear form
+      </button>
+    </div>
+
+    <h2>Omar – Person-Centered Plan</h2>
+    <p class="lede">
+      This PCP captures Omar’s vision for a meaningful life in the Self-Determination Program (SDP),
+      and guides services funded through his Individual Program Plan (IPP) and Spending Plan.
+    </p>
+
+    <form id="pcpForm">
+      <!-- 1. IDENTIFYING INFO -->
+      <section class="pcp-section">
+        <h3>1. Identifying Information</h3>
+        <p class="hint">
+          Basic information required by Regional Centers and FMS agencies so this PCP can be linked to Omar’s IPP and Spending Plan.
+        </p>
+        <div class="grid-2">
+          <div class="field">
+            <label for="clientName">Client name</label>
+            <input id="clientName" type="text" value="Omar V.">
+          </div>
+          <div class="field">
+            <label for="dob">Date of birth</label>
+            <input id="dob" type="date">
+          </div>
+          <div class="field">
+            <label for="uci">Regional Center client number / UCI</label>
+            <input id="uci" type="text" placeholder="e.g. 00-00000-0">
+          </div>
+          <div class="field">
+            <label for="rcName">Regional Center</label>
+            <input id="rcName" type="text" placeholder="e.g. San Gabriel / Pomona Regional Center">
+          </div>
+          <div class="field">
+            <label for="scName">Service Coordinator</label>
+            <input id="scName" type="text" placeholder="SC full name">
+          </div>
+          <div class="field">
+            <label for="fmsName">FMS Agency / Type</label>
+            <input id="fmsName" type="text" placeholder="e.g. XYZ FMS – F/EA">
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:.8rem;">
+          <div class="field">
+            <label for="meetingDate">PCP meeting date</label>
+            <input id="meetingDate" type="date">
+          </div>
+          <div class="field">
+            <label for="pcpPeriod">PCP period (effective dates)</label>
+            <input id="pcpPeriod" type="text" placeholder="e.g. 07/01/2025 – 06/30/2026">
+          </div>
+          <div class="field">
+            <label for="pcpFacilitator">Independent Facilitator / PCP facilitator</label>
+            <input id="pcpFacilitator" type="text" placeholder="Name (if applicable)">
+          </div>
+          <div class="field">
+            <label for="essRep">ESS representative responsible for this PCP</label>
+            <input id="essRep" type="text" placeholder="e.g. Jadon Ruiz – ESS Director">
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. WHAT IS IMPORTANT TO OMAR -->
+      <section class="pcp-section">
+        <h3>2. What is important to Omar (who he is as a person)</h3>
+        <p class="hint">
+          Focus on Omar’s identity, preferences, and what makes his day feel like a “good day.” This guides how ESS staff show up for him.
+        </p>
+        <div class="field">
+          <label for="importantTo">
+            In Omar’s own words (or best representation): what matters most day-to-day?
+            <span class="sub-label">(favorite people, routines, interests, sensory needs, spiritual/cultural practices)</span>
+          </label>
+          <textarea id="importantTo" placeholder="Describe what makes Omar feel safe, happy, and motivated."></textarea>
+        </div>
+        <div class="field">
+          <label for="strengths">
+            Strengths &amp; gifts
+            <span class="sub-label">(skills, personality traits, things he is proud of, how he contributes at home / school / community)</span>
+          </label>
+          <textarea id="strengths"></textarea>
+        </div>
+        <div class="field">
+          <label for="preferences">
+            Preferences &amp; non-negotiables
+            <span class="sub-label">(what Omar definitely likes / does not like, environments that work vs. do not work for him)</span>
+          </label>
+          <textarea id="preferences"></textarea>
+        </div>
+      </section>
+
+      <!-- 3. WHAT IS IMPORTANT FOR OMAR (HEALTH & SAFETY) -->
+      <section class="pcp-section">
+        <h3>3. What is important for Omar (health, safety, and stability)</h3>
+        <p class="hint">
+          Capture any health, behavioral, or safety considerations that must be honored while still respecting Omar’s dignity and independence.
+        </p>
+        <div class="grid-2">
+          <div class="field">
+            <label for="healthNeeds">
+              Health &amp; medical needs
+              <span class="sub-label">(diagnoses, medication supports, therapy, mobility, communication systems, etc.)</span>
+            </label>
+            <textarea id="healthNeeds"></textarea>
+          </div>
+          <div class="field">
+            <label for="behaviorSupport">
+              Behavioral / emotional supports
+              <span class="sub-label">(triggers, calming strategies that work, crisis steps, how staff should respond)</span>
+            </label>
+            <textarea id="behaviorSupport"></textarea>
+          </div>
+        </div>
+        <div class="field" style="margin-top:.8rem;">
+          <label for="riskAreas">
+            Known risk areas &amp; protections
+            <span class="sub-label">(elopement, stranger safety, financial exploitation, internet use, emergency response, etc.)</span>
+          </label>
+          <textarea id="riskAreas"></textarea>
+        </div>
+      </section>
+
+      <!-- 4. VISION & LONG-TERM GOALS -->
+      <section class="pcp-section">
+        <h3>4. Omar’s vision for his life</h3>
+        <p class="hint">
+          This section links directly to the IPP and Spending Plan. Write from Omar’s perspective whenever possible.
+        </p>
+        <div class="field">
+          <label for="goodLife">
+            “What a good life looks like for me…”
+            <span class="sub-label">(1–3 year vision: where he lives, who is in his life, how he spends his days, independence, community life)</span>
+          </label>
+          <textarea id="goodLife"></textarea>
+        </div>
+        <div class="grid-3" style="margin-top:.6rem;">
+          <div class="field">
+            <label for="goalHome">
+              Home &amp; daily living goals
+              <span class="sub-label">(where and with whom Omar wants to live, independence in self-care and home routines)</span>
+            </label>
+            <textarea id="goalHome"></textarea>
+          </div>
+          <div class="field">
+            <label for="goalWorkSchool">
+              Work / school / day-time goals
+              <span class="sub-label">(education, employment, day program, volunteering, skill building)</span>
+            </label>
+            <textarea id="goalWorkSchool"></textarea>
+          </div>
+          <div class="field">
+            <label for="goalCommunity">
+              Community &amp; relationships goals
+              <span class="sub-label">(friends, social life, faith community, recreation, family connections)</span>
+            </label>
+            <textarea id="goalCommunity"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. CIRCLE OF SUPPORT -->
+      <section class="pcp-section">
+        <h3>5. Circle of support</h3>
+        <p class="hint">
+          People and roles who support Omar to be successful in SDP. Include natural supports, paid supports, and key contacts.
+        </p>
+        <div class="grid-2">
+          <div class="field">
+            <label for="naturalSupports">
+              Family &amp; natural supports
+              <span class="sub-label">(names, relationship to Omar, how they help, best way to communicate)</span>
+            </label>
+            <textarea id="naturalSupports"></textarea>
+          </div>
+          <div class="field">
+            <label for="paidSupports">
+              Paid supports
+              <span class="sub-label">(ESS staff, therapists, nursing, day program, respite, others)</span>
+            </label>
+            <textarea id="paidSupports"></textarea>
+          </div>
+        </div>
+        <div class="field" style="margin-top:.8rem;">
+          <label for="teamCommunication">
+            How the team will communicate &amp; collaborate
+            <span class="sub-label">(preferred apps, meeting frequency, how Omar is kept at the center of decisions)</span>
+          </label>
+          <textarea id="teamCommunication"></textarea>
+        </div>
+      </section>
+
+      <!-- 6. SDP SERVICE DOMAINS & BUDGET FOCUS -->
+      <section class="pcp-section">
+        <h3>6. SDP service domains &amp; budget priorities</h3>
+        <p class="hint">
+          Connect Omar’s goals to the SDP service domains that his individual budget will be used for. This helps RC and FMS see the logic of ESS services.
+        </p>
+        <div class="field">
+          <label for="sdpDomains">
+            Priority SDP domains for this PCP
+            <span class="sub-label">(e.g., Independent Living Skills, Community Inclusion, Employment, Health &amp; Safety, Social / Relationship building)</span>
+          </label>
+          <textarea id="sdpDomains"></textarea>
+          <div class="pill-row">
+            <span class="pill">Independent Living Skills</span>
+            <span class="pill">Community Inclusion</span>
+            <span class="pill">Employment / Education</span>
+            <span class="pill">Health &amp; Wellness</span>
+            <span class="pill">Social Skills &amp; Relationships</span>
+          </div>
+        </div>
+        <div class="field" style="margin-top:.8rem;">
+          <label for="budgetNotes">
+            How the SDP budget will be used to support these goals
+            <span class="sub-label">(do not list amounts; describe supports and outcomes so RC can justify the Spending Plan)</span>
+          </label>
+          <textarea id="budgetNotes"></textarea>
+        </div>
+      </section>
+
+      <!-- 7. DAILY ROUTINES & SUPPORT STRATEGIES -->
+      <section class="pcp-section">
+        <h3>7. Daily routines &amp; support strategies for ESS staff</h3>
+        <p class="hint">
+          Concrete guidance for ESS staff so daily services are truly person-centered and consistent with the IPP.
+        </p>
+        <div class="grid-2">
+          <div class="field">
+            <label for="typicalDay">
+              Typical day / week for Omar
+              <span class="sub-label">(morning, afternoon, evening; when ESS staff will be most helpful)</span>
+            </label>
+            <textarea id="typicalDay"></textarea>
+          </div>
+          <div class="field">
+            <label for="staffActions">
+              “Best support for me looks like…”
+              <span class="sub-label">(how staff should talk to Omar, prompt level, wait time, visual / verbal supports, boundaries)</span>
+            </label>
+            <textarea id="staffActions"></textarea>
+          </div>
+        </div>
+        <div class="field" style="margin-top:.8rem;">
+          <label for="backupPlan">
+            Backup &amp; contingency plan
+            <span class="sub-label">(what happens if staff are absent, if Omar has a crisis, or if the plan is not working)</span>
+          </label>
+          <textarea id="backupPlan"></textarea>
+        </div>
+      </section>
+
+      <!-- 8. RIGHTS, CHOICE, AND RISK AGREEMENTS -->
+      <section class="pcp-section">
+        <h3>8. Rights, choice, and dignity of risk</h3>
+        <p class="hint">
+          SDP emphasizes choice and control. This section documents how Omar’s rights will be respected while still addressing health and safety.
+        </p>
+        <div class="field">
+          <label for="rightsChoice">
+            How Omar will exercise choice and control
+            <span class="sub-label">(spending decisions, picking staff, deciding daily activities, communication about changes)</span>
+          </label>
+          <textarea id="rightsChoice"></textarea>
+        </div>
+        <div class="field" style="margin-top:.8rem;">
+          <label for="dignityRisk">
+            Dignity of risk agreements
+            <span class="sub-label">(reasonable risks Omar wants to take, how the team will balance learning with safety)</span>
+          </label>
+          <textarea id="dignityRisk"></textarea>
+        </div>
+      </section>
+
+      <!-- 9. CULTURE, LANGUAGE & ACCESS -->
+      <section class="pcp-section">
+        <h3>9. Culture, language, and access</h3>
+        <p class="hint">
+          Document any cultural, linguistic, or accessibility needs that RC, FMS, and ESS staff must honor.
+        </p>
+        <div class="grid-2">
+          <div class="field">
+            <label for="culture">
+              Culture, identity, and values to honor
+              <span class="sub-label">(family traditions, holidays, beliefs, identity preferences, gender / pronoun use)</span>
+            </label>
+            <textarea id="culture"></textarea>
+          </div>
+          <div class="field">
+            <label for="languageAccess">
+              Language &amp; communication access
+              <span class="sub-label">(primary language, interpreters, communication devices, plain-language needs)</span>
+            </label>
+            <textarea id="languageAccess"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. EMERGENCY & SAFETY PLAN -->
+      <section class="pcp-section">
+        <h3>10. Emergency &amp; safety plan</h3>
+        <p class="hint">
+          Clear steps for medical, behavioral, and environmental emergencies. This can be attached to Omar’s IPP if needed.
+        </p>
+        <div class="grid-2">
+          <div class="field">
+            <label for="emergencySteps">
+              Emergency response steps
+              <span class="sub-label">(who to call first, when to call 911, when to contact RC / SC, when to contact ESS supervisor)</span>
+            </label>
+            <textarea id="emergencySteps"></textarea>
+          </div>
+          <div class="field">
+            <label for="safetyNotes">
+              Safety notes specific to Omar
+              <span class="sub-label">(wandering, water safety, choking risk, allergies, transportation safety, etc.)</span>
+            </label>
+            <textarea id="safetyNotes"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- SIGNATURES -->
+      <section class="pcp-section">
+        <h3>11. PCP agreement &amp; signatures</h3>
+        <p class="hint">
+          Signatures indicate that the team participated in developing this Person-Centered Plan and agrees it reflects Omar’s goals and preferences.
+        </p>
+        <div class="sig-row">
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div class="sig-label">Client / Participant signature &nbsp;&nbsp; Date: ____________</div>
+          </div>
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div class="sig-label">Parent / Conservator / Authorized representative</div>
+          </div>
+        </div>
+        <div class="sig-row">
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div class="sig-label">Independent Facilitator / PCP facilitator</div>
+          </div>
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div class="sig-label">ESS representative</div>
+          </div>
+        </div>
+        <div class="sig-row">
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div class="sig-label">Regional Center Service Coordinator (optional)</div>
+          </div>
+        </div>
+
+        <p class="footer-note">
+          This Person-Centered Plan is intended to guide services and supports authorized through the Self-Determination Program.
+          The information above should align with Omar’s Individual Program Plan (IPP) and the approved SDP Spending Plan.
+          Any significant changes to goals, risks, or supports will be discussed with Omar, his circle of support, and the Regional Center.
+        </p>
+        <p class="footer-note">
+          Empowerment Support Solutions, LLC • (626) 596-6155 • empowermentess@gmail.com
+        </p>
+      </section>
+    </form>
+  </div>
+</div>
+
+<script>
+  function printPCP(){
+    window.print();
+  }
+  function clearPCP(){
+    if(confirm("Clear all entries on this PCP form for Omar?")){
+      document.getElementById("pcpForm").reset();
+    }
+  }
+</script>
+</body>
+</html>
