@@ -59,6 +59,31 @@
       color:#9ca3af;
     }
 
+    /* PRINT / EXPORT BUTTON ROW */
+    .top-actions{
+      max-width:1000px;
+      margin:10px auto 0;
+      padding:0 16px 4px;
+      display:flex;
+      justify-content:flex-end;
+    }
+    .print-btn{
+      background:#111827;
+      color:#f9fafb;
+      border:none;
+      border-radius:999px;
+      padding:8px 16px;
+      font-size:13px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      box-shadow:0 6px 18px rgba(15,23,42,.25);
+    }
+    .print-btn:active{
+      transform:translateY(1px);
+    }
+
     .wrap{
       max-width:1000px;
       margin:20px auto 40px;
@@ -213,7 +238,10 @@
 
     @media print{
       body{background:#fff;}
-      .top-band, #submitPCP, .clear-btn{display:none !important;}
+      .top-band,
+      .top-actions,
+      #submitPCP,
+      .clear-btn{display:none !important;}
       .wrap{max-width:8.5in;margin:0 auto;padding:0.4in;}
       .card{box-shadow:none;margin-bottom:10px;}
       footer{border-top:1px solid #d4d4d8; background:#fff; color:#4b5563;}
@@ -239,6 +267,13 @@
   <div class="top-right">
     <div id="todayDate"></div>
   </div>
+</div>
+
+<!-- PRINT / EXPORT BUTTON -->
+<div class="top-actions">
+  <button type="button" class="print-btn" onclick="window.print()">
+    🖨 <span>Print / Export PCP (PDF)</span>
+  </button>
 </div>
 
 <div class="wrap">
