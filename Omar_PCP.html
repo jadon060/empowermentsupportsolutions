@@ -582,7 +582,11 @@
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUkE";
 
   const { createClient } = supabase;
-  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // 🔹 Set default schema to "ess" so we can use table name only
+  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    db: { schema: "ess" }
+  });
 
   // Omar's client_id from the "clients" table
   const CLIENT_ID = "521dd725-2fa6-4d78-9fcc-e5447dc727cb";
@@ -718,8 +722,9 @@
         })
       };
 
+      // 🔹 Use "pcp_entries" in the "ess" schema
       const { data, error } = await db
-        .from("ess.pcp_entries")
+        .from("pcp_entries")
         .insert(record);
 
       if(error){
