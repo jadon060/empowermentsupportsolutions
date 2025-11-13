@@ -179,7 +179,21 @@
       border:none;
     }
 
-    /* SUBMIT BUTTON */
+    /* EXPORT + SUBMIT BUTTONS */
+    #exportPCP{
+      background:#e5e7eb;
+      border:none;
+      border-radius:999px;
+      padding:12px 20px;
+      color:#111827;
+      font-size:15px;
+      cursor:pointer;
+      display:block;
+      width:100%;
+      margin:24px 0 6px;
+      font-weight:600;
+    }
+
     #submitPCP{
       background:#0b1120;
       border:none;
@@ -190,7 +204,7 @@
       cursor:pointer;
       display:block;
       width:100%;
-      margin:26px 0 6px;
+      margin:8px 0 6px;
       font-weight:600;
     }
     #submitPCP:disabled{
@@ -213,8 +227,8 @@
 
     @media print{
       body{background:#fff;}
-      /* hide buttons but KEEP header for logo/title */
-      #submitPCP, .clear-btn{display:none !important;}
+      /* hide buttons & clear buttons but KEEP header for logo/title */
+      #submitPCP, #exportPCP, .clear-btn{display:none !important;}
       .wrap{
         max-width:8.5in;
         margin:0 auto;
@@ -546,7 +560,8 @@
     </div>
   </div>
 
-  <!-- SUBMIT -->
+  <!-- EXPORT + SUBMIT -->
+  <button id="exportPCP" type="button">Export PCP as PDF</button>
   <button id="submitPCP" type="button">Submit PCP</button>
 </div>
 
@@ -724,6 +739,13 @@
       btn.disabled = false;
       btn.textContent = "Submit PCP";
     }
+  });
+
+  // ==========================
+  // 5. EXPORT PCP AS PDF
+  // ==========================
+  document.getElementById("exportPCP").addEventListener("click", () => {
+    window.print();
   });
 </script>
 
