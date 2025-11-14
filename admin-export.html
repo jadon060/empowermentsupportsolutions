@@ -109,7 +109,7 @@
     </table>
   </div>
 
-  <!-- WEEKLY (new) -->
+  <!-- WEEKLY -->
   <div class="card">
     <h2 style="margin-top:0;">Weekly staff plans</h2>
     <div class="flex">
@@ -153,11 +153,49 @@
           <th>Sat</th>
           <th>Sun</th>
           <th>Signature</th>
-          <th></th> <!-- ✅ new column for trash -->
+          <th></th>
         </tr>
       </thead>
       <tbody id="wk_body">
         <tr><td colspan="11">No weekly plan loaded.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PCP (new) -->
+  <div class="card">
+    <h2 style="margin-top:0;">Person-Centered Plans</h2>
+    <div class="flex">
+      <div>
+        <label for="pcp_clientSelect">Client</label>
+        <select id="pcp_clientSelect" style="min-width:220px;">
+          <option value="">— select client —</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="pcp_load">Load PCP</button>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="pcp_export" class="btn-muted" disabled>Export PCP</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="pcp_resultsCard" style="display:none;">
+    <h3 style="margin-top:0;">Most recent PCP for selected client</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Created</th>
+          <th>Summary</th>
+          <th>Omar Sig</th>
+          <th>Staff Sig</th>
+        </tr>
+      </thead>
+      <tbody id="pcp_body">
+        <tr><td colspan="4">No PCP loaded.</td></tr>
       </tbody>
     </table>
   </div>
@@ -192,6 +230,13 @@
   const wk_resultsCard  = document.getElementById("wk_resultsCard");
   const wk_body         = document.getElementById("wk_body");
 
+  // PCP elems
+  const pcp_clientSelect = document.getElementById("pcp_clientSelect");
+  const pcp_load         = document.getElementById("pcp_load");
+  const pcp_export       = document.getElementById("pcp_export");
+  const pcp_resultsCard  = document.getElementById("pcp_resultsCard");
+  const pcp_body         = document.getElementById("pcp_body");
+
   const LOGO_URL = "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
   const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
 
@@ -216,6 +261,7 @@
 
   let currentDayData = null;
   let currentWeeklyRows = [];
+  let currentPCP = null;
 
   async function loadClients() {
     let options = [];
@@ -241,6 +287,7 @@
 
     clientSelect.innerHTML = html;
     wk_clientSelect.innerHTML = html;
+    pcp_clientSelect.innerHTML = html;
   }
   await loadClients();
 
@@ -268,11 +315,34 @@
     return {progress:raw.trim(),observation:"",action:""};
   }
 
-  function to12h(t){ if(!t) return "—"; const parts=t.split(":"); let h=parseInt(parts[0],10); const m=parts[1]??"00"; const ampm=h>=12?"PM":"AM"; h=h%12; if(h===0)h=12; return `${h}:${m.padStart(2,"0")} ${ampm}`; }
-  function computeHours(start,end){ if(!start||!end) return ""; const [sh,sm]=start.split(":").map(Number); const [eh,em]=end.split(":").map(Number); const diff=(eh*60+(em||0))-(sh*60+(sm||0)); if(diff<=0) return ""; return (diff/60).toFixed(2); }
-  function startOfWeekMonday(d){const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=nd.getDay();const diff=(day===0?-6:1-day);nd.setDate(nd.getDate()+diff);nd.setHours(0,0,0,0);return nd;}
+  function to12h(t){
+    if(!t) return "—";
+    const parts=t.split(":");
+    let h=parseInt(parts[0],10);
+    const m=parts[1]??"00";
+    const ampm=h>=12?"PM":"AM";
+    h=h%12; if(h===0)h=12;
+    return `${h}:${m.padStart(2,"0")} ${ampm}`;
+  }
+  function computeHours(start,end){
+    if(!start||!end) return "";
+    const [sh,sm]=start.split(":").map(Number);
+    const [eh,em]=end.split(":").map(Number);
+    const diff=(eh*60+(em||0))-(sh*60+(sm||0));
+    if(diff<=0) return "";
+    return (diff/60).toFixed(2);
+  }
+  function startOfWeekMonday(d){
+    const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    const day=nd.getDay();
+    const diff=(day===0?-6:1-day);
+    nd.setDate(nd.getDate()+diff);
+    nd.setHours(0,0,0,0);
+    return nd;
+  }
   const ymd = d => d.toISOString().slice(0,10);
 
+  // ===== DAILY =====
   async function loadDay() {
     const clientId = clientIdInput.value.trim();
     if (!clientId) { alert("Select a client first."); return; }
@@ -498,7 +568,7 @@
   }
   btnExport.addEventListener("click", exportDay);
 
-  // ===== WEEKLY JS =====
+  // ===== WEEKLY =====
   async function staffNameById(id){
     if (!id) return "";
     const { data } = await ess.from("staff").select("full_name").eq("id", id).maybeSingle();
@@ -579,7 +649,6 @@
       .eq("client_id", wk_clientSelect.value)
       .eq("staff_id", row.staff_id)
       .eq("week_start", row.week_start);
-    // reload list
     loadWeekly();
     alert("Weekly plan deleted ✅");
   };
@@ -660,6 +729,210 @@
     setTimeout(()=>win.print(), 400);
   }
   wk_export.addEventListener("click", exportWeekly);
+
+  // ===== PCP =====
+  async function loadPCP(){
+    const clientId = pcp_clientSelect.value;
+    if (!clientId){ alert("Select a client first."); return; }
+
+    const { data, error } = await ess.from("pcp_entries")
+      .select("id, client_id, pcp_data, signature_base64, created_at")
+      .eq("client_id", clientId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error){
+      console.error("PCP load error:", error);
+      alert("Error loading PCP from database.");
+      return;
+    }
+
+    if (!data || !data.length){
+      pcp_resultsCard.style.display = "block";
+      pcp_body.innerHTML = `<tr><td colspan="4">No PCP found for this client.</td></tr>`;
+      currentPCP = null;
+      pcp_export.disabled = true;
+      return;
+    }
+
+    const rec = data[0];
+    currentPCP = rec;
+    const p = rec.pcp_data || {};
+    let sigs = {};
+    try { sigs = rec.signature_base64 ? JSON.parse(rec.signature_base64) : {}; } catch(e){}
+
+    pcp_resultsCard.style.display = "block";
+    pcp_body.innerHTML = `
+      <tr>
+        <td>${rec.created_at ? formatYMD(rec.created_at.slice(0,10)) : "—"}</td>
+        <td>${(p.pcp_summary || "").slice(0,160) || "—"}</td>
+        <td>${sigs.omar_signature ? "✅" : "—"}</td>
+        <td>${sigs.staff_signature ? "✅" : "—"}</td>
+      </tr>
+    `;
+    pcp_export.disabled = false;
+  }
+  pcp_load.addEventListener("click", loadPCP);
+
+  function exportPCP(){
+    if (!currentPCP) return;
+    const rec = currentPCP;
+    const data = rec.pcp_data || {};
+    let sigs = {};
+    try{ sigs = rec.signature_base64 ? JSON.parse(rec.signature_base64) : {}; }catch(e){}
+    const clientLabel = pcp_clientSelect.options[pcp_clientSelect.selectedIndex]?.text || "Client";
+    const pcpDate = rec.created_at ? formatYMD(rec.created_at.slice(0,10)) : "—";
+
+    const v = key => (data && data[key]) ? String(data[key]) : "";
+
+    const win = window.open("", "_blank", "width=900,height=1100");
+    win.document.write(`
+      <html>
+      <head>
+        <title>ESS_${clientLabel.replace(/\\s+/g,"_")}_PCP_${rec.id}.pdf</title>
+        <style>
+          body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;background:#fff;}
+          .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;box-sizing:border-box;}
+          h1{font-size:18px;margin:0 0 4px;}
+          h2{font-size:14px;margin:14px 0 6px;}
+          .section{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:10px;}
+          .label{font-weight:600;font-size:11px;margin-top:4px;}
+          .value{font-size:11px;white-space:pre-wrap;word-break:break-word;}
+          .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+          .logo{height:70px;object-fit:contain;}
+          .sig{width:200px;height:60px;object-fit:contain;border-bottom:1px solid #000;}
+        </style>
+      </head>
+      <body>
+        <div class="page">
+          <div class="top-row">
+            <div>
+              <h1>Person-Centered Plan (PCP)</h1>
+              <div style="font-size:11px;">Empowerment Support Solutions, LLC</div>
+              <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${clientLabel}</div>
+              <div style="font-size:11px;"><strong>PCP Date:</strong> ${pcpDate}</div>
+            </div>
+            <div>
+              <img src="${LOGO_URL}" class="logo" onerror="this.style.display='none'">
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>Section 1 — Overview</h2>
+            <div class="label">PCP conducted by</div>
+            <div class="value">${v("pcp_conducted_by")}</div>
+            <div class="label">Format</div>
+            <div class="value">${v("pcp_format")}</div>
+            <div class="label">Meeting date(s)</div>
+            <div class="value">${v("pcp_date")}</div>
+            <div class="label">Location(s)</div>
+            <div class="value">${v("pcp_location")}</div>
+            <div class="label">Participants</div>
+            <div class="value">${v("pcp_participants")}</div>
+            <div class="label">Summary statement</div>
+            <div class="value">${v("pcp_summary")}</div>
+          </div>
+
+          <div class="section">
+            <h2>Section 2 — Personal Profile</h2>
+            <div class="label">What people like & admire</div>
+            <div class="value">${v("like_admire")}</div>
+            <div class="label">Strengths</div>
+            <div class="value">${v("strengths")}</div>
+            <div class="label">Communication style</div>
+            <div class="value">${v("communication")}</div>
+            <div class="label">Important TO Omar</div>
+            <div class="value">${v("important_to")}</div>
+            <div class="label">Important FOR Omar</div>
+            <div class="value">${v("important_for")}</div>
+            <div class="label">Sensory needs</div>
+            <div class="value">${v("sensory")}</div>
+            <div class="label">Behavioral & emotional considerations</div>
+            <div class="value">${v("behavioral")}</div>
+            <div class="label">Health & safety considerations</div>
+            <div class="value">${v("health_safety")}</div>
+            <div class="label">Cultural / identity notes</div>
+            <div class="value">${v("cultural")}</div>
+          </div>
+
+          <div class="section">
+            <h2>Section 4 — Individual Outcomes (Summary)</h2>
+            <div class="label">Outcome 1 — Community Engagement</div>
+            <div class="value"><strong>Goal:</strong> ${v("outcome1_goal")}</div>
+            <div class="value"><strong>Why it matters:</strong> ${v("outcome1_why")}</div>
+
+            <div class="label" style="margin-top:8px;">Outcome 2 — Independent Living Skills</div>
+            <div class="value"><strong>Goal:</strong> ${v("outcome2_goal")}</div>
+            <div class="value"><strong>Why it matters:</strong> ${v("outcome2_why")}</div>
+
+            <div class="label" style="margin-top:8px;">Outcome 3 — Health & Safety</div>
+            <div class="value"><strong>Goal:</strong> ${v("outcome3_goal")}</div>
+
+            <div class="label" style="margin-top:8px;">Outcome 4 — Behavioral / Emotional Regulation</div>
+            <div class="value"><strong>Goal:</strong> ${v("outcome4_goal")}</div>
+
+            <div class="label" style="margin-top:8px;">Outcome 5 — Communication & Self-Advocacy</div>
+            <div class="value"><strong>Goal:</strong> ${v("outcome5_goal")}</div>
+          </div>
+
+          <div class="section">
+            <h2>Section 5 — Supports & Risk</h2>
+            <div class="label">Natural supports</div>
+            <div class="value">${v("natural_supports")}</div>
+            <div class="label">Paid supports (ESS)</div>
+            <div class="value">${v("paid_supports")}</div>
+            <div class="label">Justification for paid supports</div>
+            <div class="value">${v("justification")}</div>
+            <div class="label">Hours needed per month</div>
+            <div class="value">${v("hours_needed")}</div>
+          </div>
+
+          <div class="section">
+            <h2>Section 7 — Future Vision</h2>
+            <div class="label">Preferred future</div>
+            <div class="value">${v("future_pref")}</div>
+            <div class="label">Goals for independence</div>
+            <div class="value">${v("future_goals")}</div>
+            <div class="label">Community involvement</div>
+            <div class="value">${v("future_comm")}</div>
+            <div class="label">Long-term direction</div>
+            <div class="value">${v("future_long")}</div>
+          </div>
+
+          <div class="section">
+            <h2>Signatures</h2>
+            <div style="display:flex;gap:24px;align-items:flex-end;">
+              <div>
+                <div class="label">Omar Signature</div>
+                ${
+                  sigs.omar_signature
+                    ? `<img class="sig" src="${sigs.omar_signature}">`
+                    : `<div class="sig"></div>`
+                }
+              </div>
+              <div>
+                <div class="label">ESS Staff Signature</div>
+                ${
+                  sigs.staff_signature
+                    ? `<img class="sig" src="${sigs.staff_signature}">`
+                    : `<div class="sig"></div>`
+                }
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;font-size:9.5px;color:#6b7280;">
+            ${CONTACT_LINE}
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+    win.document.close();
+    win.focus();
+    setTimeout(()=>win.print(),400);
+  }
+  pcp_export.addEventListener("click", exportPCP);
 
 })();
 </script>
