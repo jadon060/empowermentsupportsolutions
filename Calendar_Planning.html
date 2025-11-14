@@ -47,17 +47,13 @@
       border-radius:10px;
     }
 
-    /* 🔧 HARD OVERRIDE: make labels behave like daily chart */
-    .wrap .row label.label{
-      position:static !important;
-      top:auto !important;
-      left:auto !important;
-      transform:none !important;
-      display:block !important;
-      margin:0 0 6px 0 !important;
-      text-align:left !important;
+    /* ✅ custom labels JUST for this page so globals can't touch them */
+    .wk-label{
+      display:block;
       color:#6b7280;
       font-size:12px;
+      margin-bottom:6px;
+      text-align:left;
     }
 
     .weekbar{display:flex;align-items:center;gap:12px;border:1px solid var(--border);padding:9px 12px;border-radius:12px;background:#f8fafc;margin-bottom:14px;}
@@ -116,7 +112,6 @@
       border:1px solid #fecaca;background:#fef2f2;color:#991b1b
     }
 
-    /* quick-link styles (no buttons used here) */
     .quick-links{
       max-width:980px;
       margin:0.5rem auto 0.9rem;
@@ -182,11 +177,11 @@
       <!-- fixed client -->
       <input type="hidden" id="wk_client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" />
       <div>
-        <label class="label">Client</label>
+        <label class="wk-label">Client</label>
         <input type="text" class="input" value="Omar V." readonly style="background:#e5e7eb;cursor:not-allowed;">
       </div>
       <div>
-        <label class="label" for="wk_staff_name">Staff (type your name)</label>
+        <label class="wk-label" for="wk_staff_name">Staff (type your name)</label>
         <input id="wk_staff_name" type="text" class="input" placeholder="e.g., John Perez">
       </div>
     </div>
