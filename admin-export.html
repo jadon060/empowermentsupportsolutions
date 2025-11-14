@@ -192,10 +192,11 @@
           <th>Summary</th>
           <th>Omar Sig</th>
           <th>Staff Sig</th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="pcp_body">
-        <tr><td colspan="4">No PCP loaded.</td></tr>
+        <tr><td colspan="5">No PCP loaded.</td></tr>
       </tbody>
     </table>
   </div>
@@ -749,7 +750,7 @@
 
     if (!data || !data.length){
       pcp_resultsCard.style.display = "block";
-      pcp_body.innerHTML = `<tr><td colspan="4">No PCP found for this client.</td></tr>`;
+      pcp_body.innerHTML = `<tr><td colspan="5">No PCP found for this client.</td></tr>`;
       currentPCP = null;
       pcp_export.disabled = true;
       return;
@@ -768,11 +769,24 @@
         <td>${(p.pcp_summary || "").slice(0,160) || "—"}</td>
         <td>${sigs.omar_signature ? "✅" : "—"}</td>
         <td>${sigs.staff_signature ? "✅" : "—"}</td>
+        <td><button class="trash-btn" onclick="window.__essDeletePCP && window.__essDeletePCP()">🗑️</button></td>
       </tr>
     `;
     pcp_export.disabled = false;
   }
   pcp_load.addEventListener("click", loadPCP);
+
+  window.__essDeletePCP = async function(){
+    if (!currentPCP) return;
+    const clientLabel = pcp_clientSelect.options[pcp_clientSelect.selectedIndex]?.text || "this client";
+    const ok = confirm(`Delete the most recent PCP for ${clientLabel}?`);
+    if (!ok) return;
+    await ess.from("pcp_entries").delete().eq("id", currentPCP.id);
+    currentPCP = null;
+    pcp_body.innerHTML = `<tr><td colspan="5">No PCP loaded.</td></tr>`;
+    pcp_export.disabled = true;
+    alert("PCP deleted ✅");
+  };
 
   function exportPCP(){
     if (!currentPCP) return;
