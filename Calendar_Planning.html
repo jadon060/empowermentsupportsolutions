@@ -88,6 +88,51 @@
       border:1px solid #fecaca;background:#fef2f2;color:#991b1b
     }
 
+    /* 🔗 Omar quick-link buttons */
+    .quick-links{
+      max-width:980px;
+      margin:0.5rem auto 0.9rem;
+      padding:0;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .quick-link-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:9px 14px;
+      border-radius:999px;
+      border:1px solid #1f2937;
+      background:#111827;
+      color:#f9fafb;
+      font-size:.9rem;
+      text-decoration:none;
+      box-shadow:0 2px 6px rgba(15,23,42,.18);
+      white-space:nowrap;
+    }
+    .quick-link-btn--secondary{
+      background:#ffffff;
+      color:#111827;
+      border-color:#e5e7eb;
+      box-shadow:0 1px 4px rgba(15,23,42,.10);
+    }
+    .quick-link-btn span:first-child{
+      font-size:1rem;
+    }
+
+    @media (max-width:700px){
+      .quick-links{
+        padding:0;
+      }
+      .quick-link-btn{
+        flex:1 1 100%;
+        justify-content:center;
+        white-space:normal;
+        text-align:center;
+      }
+    }
+
     @media (max-width:600px){
       #wk_daysGrid{grid-template-columns:1fr;}
     }
@@ -99,6 +144,18 @@
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
       <h2>📅 Weekly Staff Calendar – Planned Goals</h2>
       <span class="pill">For admin review</span>
+    </div>
+
+    <!-- 🔗 Omar navigation buttons -->
+    <div class="quick-links">
+      <a href="omar-v.html" class="quick-link-btn quick-link-btn--secondary">
+        <span>📅</span>
+        <span>Daily SDP Log – Omar</span>
+      </a>
+      <a href="Omar_PCP.html" class="quick-link-btn">
+        <span>🧠</span>
+        <span>Omar PCP (Person-Centered Plan)</span>
+      </a>
     </div>
 
     <div class="row">
