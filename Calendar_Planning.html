@@ -37,14 +37,19 @@
     .row > div{
       min-width:200px;
       flex:1;
-      display:flex;           /* 🔧 make field group a vertical flex column */
+      display:flex;
       flex-direction:column;
     }
+    /* 🔧 FORCE label to be normal block, not floating */
     .label{
+      position:static !important;
+      top:auto !important;
+      left:auto !important;
+      transform:none !important;
       display:block;
       color:#6b7280;
       font-size:12px;
-      margin-bottom:8px;      /* 🔧 a bit more space above the input */
+      margin-bottom:8px;
       line-height:1.4;
       text-align:left;
     }
@@ -148,7 +153,6 @@
         white-space:normal;
         text-align:center;
       }
-      /* ✅ stack client & staff so they never overlap on smaller screens */
       .row{
         flex-direction:column;
       }
@@ -166,8 +170,6 @@
       <h2>📅 Weekly Staff Calendar – Planned Goals</h2>
       <span class="pill">For admin review</span>
     </div>
-
-    <!-- 🔗 Omar navigation buttons REMOVED as requested -->
 
     <div class="row">
       <!-- fixed client -->
