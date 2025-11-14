@@ -88,7 +88,7 @@
       border:1px solid #fecaca;background:#fef2f2;color:#991b1b
     }
 
-    /* 🔗 Omar quick-link buttons */
+    /* 🔗 Omar quick-link buttons (styles kept but buttons removed in HTML) */
     .quick-links{
       max-width:980px;
       margin:0.5rem auto 0.9rem;
@@ -131,6 +131,10 @@
         white-space:normal;
         text-align:center;
       }
+      /* ✅ stack client & staff so they never overlap on smaller screens */
+      .row{
+        flex-direction:column;
+      }
     }
 
     @media (max-width:600px){
@@ -146,17 +150,7 @@
       <span class="pill">For admin review</span>
     </div>
 
-    <!-- 🔗 Omar navigation buttons -->
-    <div class="quick-links">
-      <a href="omar-v.html" class="quick-link-btn quick-link-btn--secondary">
-        <span>📅</span>
-        <span>Daily SDP Log – Omar</span>
-      </a>
-      <a href="Omar_PCP.html" class="quick-link-btn">
-        <span>🧠</span>
-        <span>Omar PCP (Person-Centered Plan)</span>
-      </a>
-    </div>
+    <!-- 🔗 Omar navigation buttons REMOVED as requested -->
 
     <div class="row">
       <!-- fixed client -->
