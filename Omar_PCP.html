@@ -579,11 +579,13 @@
   // 1. SUPABASE CLIENT SETUP
   // ==========================
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
+
+  // Use your publishable key here
   const SUPABASE_ANON_KEY = "sb_publishable_J6Y49EQarV5pAzhOdokl7w_GVlPoPSb";
 
   const { createClient } = supabase;
 
-  // 🔹 Set default schema to "ess" so we can use table name only
+  // Default schema to "ess" so .from("pcp_entries") hits ess.pcp_entries
   const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     db: { schema: "ess" }
   });
@@ -722,14 +724,14 @@
         })
       };
 
-      // 🔹 Use "pcp_entries" in the "ess" schema
       const { data, error } = await db
         .from("pcp_entries")
-        .insert(record);
+        .insert(record)
+        .select();
 
       if(error){
-        console.error(error);
-        alert("Error saving PCP. Please check connection and try again.");
+        console.error("Supabase insert error:", error);
+        alert("Error saving PCP: " + (error.message || "Unknown error"));
         btn.disabled = false;
         btn.textContent = "Submit PCP";
         return;
@@ -739,7 +741,7 @@
       btn.textContent = "Submitted ✔";
 
     }catch(err){
-      console.error(err);
+      console.error("Unexpected submit error:", err);
       alert("Unexpected error submitting PCP.");
       btn.disabled = false;
       btn.textContent = "Submit PCP";
