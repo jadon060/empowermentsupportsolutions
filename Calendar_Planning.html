@@ -28,14 +28,23 @@
     }
     h2{margin:0;font-size:1.5rem;display:flex;gap:.4rem;align-items:center;}
     .pill{font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a}
-    .row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
-    .row > div{min-width:200px;flex:1}
-    /* 🔧 label spacing + left align so it doesn’t overlap the input */
+    .row{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .row > div{
+      min-width:200px;
+      flex:1;
+      display:flex;           /* 🔧 make field group a vertical flex column */
+      flex-direction:column;
+    }
     .label{
       display:block;
       color:#6b7280;
       font-size:12px;
-      margin-bottom:6px;
+      margin-bottom:8px;      /* 🔧 a bit more space above the input */
       line-height:1.4;
       text-align:left;
     }
