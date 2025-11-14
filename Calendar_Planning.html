@@ -163,7 +163,14 @@
       #wk_daysGrid{grid-template-columns:1fr;}
     }
 
-    /* 🚨 NUCLEAR OVERRIDE: kill global absolute-label styles just for this row */
+    /* 🚨 NUCLEAR OVERRIDE: force header row to behave like Daily SDP page */
+    .wrap .row > div{
+      position:static !important;
+      top:auto !important;
+      left:auto !important;
+      transform:none !important;
+      width:auto !important;
+    }
     .wrap .row > div > label{
       position:static !important;
       top:auto !important;
@@ -332,7 +339,7 @@
     return resolved;
   }
 
-  let currentWeekStart = startOfWeekMonday(new Date());
+  let currentWeekStart = startOfWeekMonday(new Date()));
   const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
   function renderWeekUI(){
