@@ -67,6 +67,48 @@
       .about-avatar{width:80px;height:80px;}
     }
 
+    /* 🔗 Omar quick-link buttons (new) */
+    .quick-links{
+      max-width:980px;
+      margin:0 auto 0.75rem;
+      padding:0 1.5rem;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .quick-link-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:9px 14px;
+      border-radius:999px;
+      border:1px solid #1f2937;
+      background:#111827;
+      color:#f9fafb;
+      font-size:.9rem;
+      text-decoration:none;
+      box-shadow:0 2px 6px rgba(15,23,42,.18);
+      white-space:nowrap;
+    }
+    .quick-link-btn--secondary{
+      background:#ffffff;
+      color:#111827;
+      border-color:#e5e7eb;
+      box-shadow:0 1px 4px rgba(15,23,42,.10);
+    }
+    .quick-link-btn span:first-child{
+      font-size:1rem;
+    }
+    @media (max-width:700px){
+      .quick-links{padding:0 1rem;}
+      .quick-link-btn{
+        flex:1 1 100%;
+        justify-content:center;
+        white-space:normal;
+        text-align:center;
+      }
+    }
+
     /* === existing styles (unchanged) === */
     .row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
     .row > *{min-width:240px;flex:1}
@@ -136,6 +178,18 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- 🔗 Omar quick-links bar (new) -->
+<div class="quick-links">
+  <a href="weekly-staff-calendar.html" class="quick-link-btn">
+    <span>📆</span>
+    <span>Weekly staff calendar</span>
+  </a>
+  <a href="Omar_PCP.html" class="quick-link-btn quick-link-btn--secondary">
+    <span>🧠</span>
+    <span>Omar PCP (Person-Centered Plan)</span>
+  </a>
 </div>
 
 <section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
