@@ -190,7 +190,7 @@
         <tr>
           <th>Created</th>
           <th>Summary</th>
-          <th>Omar Sig</th>
+          <th>Client Sig</th>
           <th>Staff Sig</th>
           <th></th>
         </tr>
@@ -264,11 +264,10 @@
   let currentWeeklyRows = [];
   let currentPCP = null;
 
-  // 🔹 REVISED: make sure dropdown shows proper names (Omar V., Jeremy N., etc.)
+  // 🔹 Load clients with proper labels (Omar V., Jeremy N., etc.)
   async function loadClients() {
     let options = [];
     try {
-      // pull id + all name fields
       let { data: clients, error } = await ess
         .from("clients")
         .select("id, full_name, first_name, last_initial")
@@ -462,7 +461,6 @@
     await delOfficial;
     let delDraft = ess.from("daily_drafts").delete().eq("client_id", clientId).eq("date", date);
     if (staffId) delDraft = delDraft.eq("staff_id", staffId);
-    await delDraft;
     dayBody.innerHTML = `<tr><td colspan="12">No data for this date.</td></tr>`;
     currentDayData = null;
     btnExport.disabled = true;
@@ -785,7 +783,7 @@
       <tr>
         <td>${rec.created_at ? formatYMD(rec.created_at.slice(0,10)) : "—"}</td>
         <td>${(p.pcp_summary || "").slice(0,160) || "—"}</td>
-        <td>${sigs.omar_signature ? "✅" : "—"}</td>
+        <td>${sigs.omar_signature || sigs.client_signature ? "✅" : "—"}</td>
         <td>${sigs.staff_signature ? "✅" : "—"}</td>
         <td><button class="trash-btn" onclick="window.__essDeletePCP && window.__essDeletePCP()">🗑️</button></td>
       </tr>
@@ -873,9 +871,9 @@
             <div class="value">${v("strengths")}</div>
             <div class="label">Communication style</div>
             <div class="value">${v("communication")}</div>
-            <div class="label">Important TO Omar</div>
+            <div class="label">Important TO client</div>
             <div class="value">${v("important_to")}</div>
-            <div class="label">Important FOR Omar</div>
+            <div class="label">Important FOR client</div>
             <div class="value">${v("important_for")}</div>
             <div class="label">Sensory needs</div>
             <div class="value">${v("sensory")}</div>
@@ -935,10 +933,10 @@
             <h2>Signatures</h2>
             <div style="display:flex;gap:24px;align-items:flex-end;">
               <div>
-                <div class="label">Omar Signature</div>
+                <div class="label">Client / Parent Signature</div>
                 ${
-                  sigs.omar_signature
-                    ? `<img class="sig" src="${sigs.omar_signature}">`
+                  sigs.omar_signature || sigs.client_signature
+                    ? `<img class="sig" src="${sigs.omar_signature || sigs.client_signature}">`
                     : `<div class="sig"></div>`
                 }
               </div>
