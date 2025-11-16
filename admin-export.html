@@ -264,12 +264,30 @@
   let currentWeeklyRows = [];
   let currentPCP = null;
 
+  // 🔹 REVISED: make sure dropdown shows proper names (Omar V., Jeremy N., etc.)
   async function loadClients() {
     let options = [];
     try {
-      let { data: clients, error } = await ess.from("clients").select("id, full_name").order("full_name",{ascending:true});
+      // pull id + all name fields
+      let { data: clients, error } = await ess
+        .from("clients")
+        .select("id, full_name, first_name, last_initial")
+        .order("full_name", { ascending: true });
+
       if (!error && Array.isArray(clients) && clients.length) {
-        options = clients.map(c => ({ id: c.id, label: c.full_name || c.id }));
+        options = clients.map(c => {
+          let label = c.full_name;
+          if (!label) {
+            if (c.first_name && c.last_initial) {
+              label = `${c.first_name} ${c.last_initial}.`;
+            } else if (c.first_name) {
+              label = c.first_name;
+            } else {
+              label = c.id;
+            }
+          }
+          return { id: c.id, label };
+        });
       } else {
         const collected = new Map();
         const { data: e1 } = await ess.from("daily_entries").select("client_id").limit(2000);
