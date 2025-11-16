@@ -122,7 +122,6 @@
       background:#fff;
     }
 
-    /* slight visual “depth” by varying heights */
     .tall   { min-height:120px; }
     .short  { min-height:55px; }
 
@@ -212,7 +211,6 @@
       cursor:default;
     }
 
-    /* FOOTER — dark bar like export */
     footer{
       background:#020617;
       color:#e5e7eb;
@@ -227,7 +225,6 @@
 
     @media print{
       body{background:#fff;}
-      /* hide buttons & clear buttons but KEEP header for logo/title */
       #submitPCP, #exportPCP, .clear-btn{display:none !important;}
       .wrap{
         max-width:8.5in;
@@ -246,13 +243,11 @@
     }
   </style>
 
-  <!-- Supabase CDN (global "supabase") -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
-<!-- TOP BANNER -->
 <div class="top-band">
   <div class="top-left">
     <img src="https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png"
@@ -560,7 +555,6 @@
     </div>
   </div>
 
-  <!-- EXPORT + SUBMIT -->
   <button id="exportPCP" type="button">Export PCP as PDF</button>
   <button id="submitPCP" type="button">Submit PCP</button>
 </div>
@@ -571,41 +565,28 @@
 </footer>
 
 <script>
-  // Show today's date in the top-right
   document.getElementById("todayDate").textContent =
     "Date: " + new Date().toLocaleDateString();
 
-  // ==========================
-  // 1. SUPABASE CLIENT SETUP
-  // ==========================
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
-
-  // Use your publishable key here
   const SUPABASE_ANON_KEY = "sb_publishable_J6Y49EQarV5pAzhOdokl7w_GVlPoPSb";
-
   const { createClient } = supabase;
 
-  // Jeremy's client_id from the "clients" table (update when ready)
-  const CLIENT_ID = "521dd725-2fa6-4d78-9fcc-e5447dc727cb";
+  // 🔹 Jeremy's UUID (from ess.clients)
+  const CLIENT_ID = "e083501e-86d5-41e8-b840-c3ba5b6dc9c9";
 
-  // Default schema to "ess" so .from("pcp_entries") hits ess.pcp_entries
   const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     db: { schema: "ess" }
   });
 
-  // ==========================
-  // 2. SIGNATURE CANVAS LOGIC
-  // ==========================
   function setupSignatureCanvas(canvasId, clearBtnId){
     const canvas = document.getElementById(canvasId);
     const clearBtn = document.getElementById(clearBtnId);
     const ctx = canvas.getContext("2d");
 
-    // Match drawing resolution to CSS size
     function resizeCanvas(){
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width;
-      // height attribute already set in HTML (180)
     }
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
@@ -668,9 +649,6 @@
     return canvas.toDataURL("image/png");
   }
 
-  // ==========================
-  // 3. COLLECT ALL PCP DATA
-  // ==========================
   function collectPCPData(){
     const ids = [
       "pcp_conducted_by","pcp_format","pcp_date","pcp_location",
@@ -701,9 +679,6 @@
     return data;
   }
 
-  // ==========================
-  // 4. SUBMIT HANDLER
-  // ==========================
   document.getElementById("submitPCP").addEventListener("click", async () => {
     const btn = document.getElementById("submitPCP");
 
@@ -719,7 +694,8 @@
         client_id: CLIENT_ID,
         pcp_data: pcpData,
         signature_base64: JSON.stringify({
-          jeremy_signature: sigOmar,
+          // 🔹 keep same keys admin expects (omar_signature / staff_signature)
+          omar_signature: sigOmar,
           staff_signature: sigStaff
         })
       };
@@ -748,9 +724,6 @@
     }
   });
 
-  // ==========================
-  // 5. EXPORT PCP AS PDF
-  // ==========================
   document.getElementById("exportPCP").addEventListener("click", () => {
     window.print();
   });
