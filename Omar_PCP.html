@@ -25,7 +25,7 @@
       font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;
     }
 
-    /* TOP BANNER */
+    /* TOP BANNER — match unified export look */
     .top-band{
       background:#020617;
       color:#e5e7eb;
@@ -122,6 +122,7 @@
       background:#fff;
     }
 
+    /* slight visual “depth” by varying heights */
     .tall   { min-height:120px; }
     .short  { min-height:55px; }
 
@@ -139,6 +140,7 @@
       .grid-2,.grid-3{grid-template-columns:1fr;}
     }
 
+    /* SIGNATURES */
     .sig-row{
       display:flex;
       flex-wrap:wrap;
@@ -177,6 +179,7 @@
       border:none;
     }
 
+    /* EXPORT + SUBMIT BUTTONS */
     #exportPCP{
       background:#e5e7eb;
       border:none;
@@ -209,6 +212,7 @@
       cursor:default;
     }
 
+    /* FOOTER — dark bar like export */
     footer{
       background:#020617;
       color:#e5e7eb;
@@ -223,6 +227,7 @@
 
     @media print{
       body{background:#fff;}
+      /* hide buttons & clear buttons but KEEP header for logo/title */
       #submitPCP, #exportPCP, .clear-btn{display:none !important;}
       .wrap{
         max-width:8.5in;
@@ -241,15 +246,17 @@
     }
   </style>
 
+  <!-- Supabase CDN (global "supabase") -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
-<!-- TOP -->
+<!-- TOP BANNER -->
 <div class="top-band">
   <div class="top-left">
-    <img src="https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png" alt="ESS Logo">
+    <img src="https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png"
+         alt="ESS Logo">
     <div>
       <div class="top-title">Empowerment Support Solutions, LLC</div>
       <div class="top-sub">SDP • Person-Centered Plan (PCP) for Jeremy</div>
@@ -261,8 +268,7 @@
 </div>
 
 <div class="wrap">
-
-  <!-- SECTION 1 -->
+  <!-- SECTION 1 – PCP OVERVIEW / WHO WAS INVOLVED -->
   <h2 class="section-heading">Section 1 — PCP Overview</h2>
   <div class="card">
     <div class="card-header">
@@ -299,7 +305,7 @@
     <textarea id="pcp_summary" class="tall"></textarea>
   </div>
 
-  <!-- SECTION 2 -->
+  <!-- SECTION 2 – PERSONAL PROFILE -->
   <h2 class="section-heading">Section 2 — Personal Profile</h2>
   <div class="card">
     <div class="card-header">
@@ -350,7 +356,7 @@
     <textarea id="cultural"></textarea>
   </div>
 
-  <!-- SECTION 3 -->
+  <!-- SECTION 3 – DAILY ROUTINES -->
   <h2 class="section-heading">Section 3 — Daily Routines & Life</h2>
   <div class="card">
     <div class="card-header">
@@ -388,7 +394,7 @@
     </div>
   </div>
 
-  <!-- SECTION 4 -->
+  <!-- SECTION 4 – INDIVIDUAL OUTCOMES -->
   <h2 class="section-heading">Section 4 — Individual Outcomes</h2>
 
   <div class="card">
@@ -461,7 +467,7 @@
     <label>Timeline / expected progress</label><textarea id="outcome5_timeline" class="short"></textarea>
   </div>
 
-  <!-- SECTION 5 -->
+  <!-- SECTION 5 – SUPPORTS -->
   <h2 class="section-heading">Section 5 — Natural & Paid Supports</h2>
   <div class="card">
     <div class="card-header">
@@ -487,7 +493,7 @@
     </div>
   </div>
 
-  <!-- SECTION 6 -->
+  <!-- SECTION 6 – RISK -->
   <h2 class="section-heading">Section 6 — Risk & Mitigation</h2>
   <div class="card">
     <div class="card-header">
@@ -517,7 +523,7 @@
     <label>Mitigation strategies</label><textarea id="mitigation" class="tall"></textarea>
   </div>
 
-  <!-- SECTION 7 -->
+  <!-- SECTION 7 – FUTURE VISION -->
   <h2 class="section-heading">Section 7 — Future Vision</h2>
   <div class="card">
     <div class="card-header">
@@ -531,7 +537,7 @@
     <label>Long-term direction</label><textarea id="future_long"></textarea>
   </div>
 
-  <!-- SECTION 8 -->
+  <!-- SECTION 8 – SIGNATURES -->
   <h2 class="section-heading">Section 8 — PCP Agreement & Signatures</h2>
   <div class="card">
     <div class="card-header">
@@ -554,6 +560,7 @@
     </div>
   </div>
 
+  <!-- EXPORT + SUBMIT -->
   <button id="exportPCP" type="button">Export PCP as PDF</button>
   <button id="submitPCP" type="button">Submit PCP</button>
 </div>
@@ -564,28 +571,41 @@
 </footer>
 
 <script>
+  // Show today's date in the top-right
   document.getElementById("todayDate").textContent =
     "Date: " + new Date().toLocaleDateString();
 
+  // ==========================
+  // 1. SUPABASE CLIENT SETUP
+  // ==========================
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
+
+  // Use your publishable key here
   const SUPABASE_ANON_KEY = "sb_publishable_J6Y49EQarV5pAzhOdokl7w_GVlPoPSb";
+
   const { createClient } = supabase;
 
+  // Jeremy's client_id from the "clients" table (update when ready)
+  const CLIENT_ID = "521dd725-2fa6-4d78-9fcc-e5447dc727cb";
+
+  // Default schema to "ess" so .from("pcp_entries") hits ess.pcp_entries
   const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     db: { schema: "ess" }
   });
 
-  // ❗ REPLACE THIS WITH JEREMY'S CLIENT ID
-  const CLIENT_ID = "521dd725-2fa6-4d78-9fcc-e5447dc727cb";
-
+  // ==========================
+  // 2. SIGNATURE CANVAS LOGIC
+  // ==========================
   function setupSignatureCanvas(canvasId, clearBtnId){
     const canvas = document.getElementById(canvasId);
     const clearBtn = document.getElementById(clearBtnId);
     const ctx = canvas.getContext("2d");
 
+    // Match drawing resolution to CSS size
     function resizeCanvas(){
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width;
+      // height attribute already set in HTML (180)
     }
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
@@ -648,6 +668,9 @@
     return canvas.toDataURL("image/png");
   }
 
+  // ==========================
+  // 3. COLLECT ALL PCP DATA
+  // ==========================
   function collectPCPData(){
     const ids = [
       "pcp_conducted_by","pcp_format","pcp_date","pcp_location",
@@ -678,6 +701,9 @@
     return data;
   }
 
+  // ==========================
+  // 4. SUBMIT HANDLER
+  // ==========================
   document.getElementById("submitPCP").addEventListener("click", async () => {
     const btn = document.getElementById("submitPCP");
 
@@ -704,6 +730,7 @@
         .select();
 
       if(error){
+        console.error("Supabase insert error:", error);
         alert("Error saving PCP: " + (error.message || "Unknown error"));
         btn.disabled = false;
         btn.textContent = "Submit PCP";
@@ -714,12 +741,16 @@
       btn.textContent = "Submitted ✔";
 
     }catch(err){
+      console.error("Unexpected submit error:", err);
       alert("Unexpected error submitting PCP.");
       btn.disabled = false;
       btn.textContent = "Submit PCP";
     }
   });
 
+  // ==========================
+  // 5. EXPORT PCP AS PDF
+  // ==========================
   document.getElementById("exportPCP").addEventListener("click", () => {
     window.print();
   });
