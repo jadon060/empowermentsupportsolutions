@@ -1,1 +1,733 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ESS • Hayden – Person-Centered Plan (PCP)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <style>
+    :root{
+      --brand:#0b1220;
+      --brand-2:#0f4c81;
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --line:#e5e7eb;
+      --radius:16px;
+      --shadow:0 14px 40px rgba(15,23,42,.16);
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;
+    }
+
+    /* TOP BANNER — match unified export look */
+    .top-band{
+      background:#020617;
+      color:#e5e7eb;
+      padding:14px 24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+    .top-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .top-left img{
+      height:42px;
+      object-fit:contain;
+    }
+    .top-title{
+      font-weight:700;
+      font-size:18px;
+      color:#f9fafb;
+    }
+    .top-sub{
+      font-size:13px;
+      color:#cbd5f5;
+    }
+    .top-right{
+      text-align:right;
+      font-size:12px;
+      color:#9ca3af;
+    }
+
+    .wrap{
+      max-width:1000px;
+      margin:20px auto 40px;
+      padding:0 16px;
+    }
+
+    h2.section-heading{
+      margin:28px 0 10px;
+      font-size:20px;
+      font-weight:700;
+      color:var(--brand-2);
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:18px 20px;
+      margin-bottom:18px;
+      box-shadow:var(--shadow);
+    }
+
+    .card-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      margin-bottom:10px;
+      gap:10px;
+    }
+    .card-title{
+      font-size:16px;
+      font-weight:700;
+      color:var(--brand);
+    }
+    .card-sub{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    label{
+      font-size:13px;
+      font-weight:600;
+      color:var(--ink);
+      display:block;
+      margin:8px 0 4px;
+    }
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+
+    textarea{
+      width:100%;
+      min-height:80px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:9px 10px;
+      font-size:14px;
+      resize:vertical;
+      background:#fff;
+    }
+
+    .tall   { min-height:120px; }
+    .short  { min-height:55px; }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px 18px;
+    }
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px 18px;
+    }
+    @media (max-width:800px){
+      .grid-2,.grid-3{grid-template-columns:1fr;}
+    }
+
+    /* SIGNATURES */
+    .sig-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:24px;
+      margin-top:10px;
+    }
+    .sig-box{
+      flex:1 1 260px;
+      background:#f9fafb;
+      border:1px dashed #cbd5e1;
+      border-radius:12px;
+      padding:10px 10px 14px;
+    }
+    .sig-label{
+      font-weight:600;
+      font-size:13px;
+      margin-bottom:6px;
+      color:var(--brand);
+    }
+    canvas.sig-canvas{
+      width:100%;
+      border-radius:10px;
+      border:1px solid #d4d4d8;
+      background:#fff;
+      touch-action:none;
+      display:block;
+    }
+    .clear-btn{
+      background:#e5e7eb;
+      color:#111827;
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:13px;
+      cursor:pointer;
+      margin-top:8px;
+      border:none;
+    }
+
+    /* EXPORT + SUBMIT BUTTONS */
+    #exportPCP{
+      background:#e5e7eb;
+      border:none;
+      border-radius:999px;
+      padding:12px 20px;
+      color:#111827;
+      font-size:15px;
+      cursor:pointer;
+      display:block;
+      width:100%;
+      margin:24px 0 6px;
+      font-weight:600;
+    }
+
+    #submitPCP{
+      background:#0b1120;
+      border:none;
+      border-radius:999px;
+      padding:14px 22px;
+      color:#f9fafb;
+      font-size:16px;
+      cursor:pointer;
+      display:block;
+      width:100%;
+      margin:8px 0 6px;
+      font-weight:600;
+    }
+    #submitPCP:disabled{
+      opacity:0.7;
+      cursor:default;
+    }
+
+    footer{
+      background:#020617;
+      color:#e5e7eb;
+      padding:14px 20px;
+      font-size:12px;
+      text-align:center;
+    }
+    footer span{
+      display:block;
+      line-height:1.5;
+    }
+
+    @media print{
+      body{background:#fff;}
+      #submitPCP, #exportPCP, .clear-btn{display:none !important;}
+      .wrap{
+        max-width:8.5in;
+        margin:0 auto;
+        padding:0.4in;
+      }
+      .card{
+        box-shadow:none;
+        margin-bottom:10px;
+      }
+      footer{
+        border-top:1px solid #d4d4d8;
+        background:#fff;
+        color:#4b5563;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<div class="top-band">
+  <div class="top-left">
+    <img src="https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png"
+         alt="ESS Logo">
+    <div>
+      <div class="top-title">Empowerment Support Solutions, LLC</div>
+      <div class="top-sub">SDP • Person-Centered Plan (PCP) for Hayden</div>
+    </div>
+  </div>
+  <div class="top-right">
+    <div id="todayDate"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- SECTION 1 – PCP OVERVIEW / WHO WAS INVOLVED -->
+  <h2 class="section-heading">Section 1 — PCP Overview</h2>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Meeting details & participants</div>
+      <div class="card-sub">This page mirrors what Regional Centers expect to see on a formal PCP cover sheet.</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label for="pcp_conducted_by">PCP conducted by (John Doe)</label>
+        <textarea id="pcp_conducted_by" class="short"></textarea>
+      </div>
+      <div>
+        <label for="pcp_format">Format (in-person / virtual / hybrid)</label>
+        <textarea id="pcp_format" class="short"></textarea>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label for="pcp_date">PCP meeting date(s)</label>
+        <textarea id="pcp_date" class="short"></textarea>
+      </div>
+      <div>
+        <label for="pcp_location">Location(s)</label>
+        <textarea id="pcp_location" class="short"></textarea>
+      </div>
+    </div>
+
+    <label for="pcp_participants">People who participated (family, Hayden, ESS staff, Regional Center, others)</label>
+    <textarea id="pcp_participants" class="tall"></textarea>
+
+    <label for="pcp_summary">Summary statement (brief overview of what this PCP focuses on)</label>
+    <textarea id="pcp_summary" class="tall"></textarea>
+  </div>
+
+  <!-- SECTION 2 – PERSONAL PROFILE -->
+  <h2 class="section-heading">Section 2 — Personal Profile</h2>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Who Hayden is as a person</div>
+      <div class="card-sub">Keeps Hayden’s voice and preferences at the center of all services.</div>
+    </div>
+
+    <label>What people like & admire about Hayden</label>
+    <textarea id="like_admire" class="tall"></textarea>
+
+    <div class="grid-2">
+      <div>
+        <label>Hayden’s strengths</label>
+        <textarea id="strengths"></textarea>
+      </div>
+      <div>
+        <label>Communication style</label>
+        <textarea id="communication"></textarea>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>Important TO Hayden</label>
+        <textarea id="important_to" class="tall"></textarea>
+      </div>
+      <div>
+        <label>Important FOR Hayden</label>
+        <textarea id="important_for" class="tall"></textarea>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>Sensory needs</label>
+        <textarea id="sensory"></textarea>
+      </div>
+      <div>
+        <label>Behavioral & emotional considerations</label>
+        <textarea id="behavioral"></textarea>
+      </div>
+    </div>
+
+    <label>Health & safety considerations</label>
+    <textarea id="health_safety"></textarea>
+
+    <label>Cultural or personal identity notes</label>
+    <textarea id="cultural"></textarea>
+  </div>
+
+  <!-- SECTION 3 – DAILY ROUTINES -->
+  <h2 class="section-heading">Section 3 — Daily Routines & Life</h2>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">How Hayden spends his days</div>
+      <div class="card-sub">Supports Regional Center to see where ESS fits into daily life.</div>
+    </div>
+
+    <div class="grid-3">
+      <div>
+        <label>Morning routine</label>
+        <textarea id="morning" class="short"></textarea>
+      </div>
+      <div>
+        <label>Afternoon routine</label>
+        <textarea id="afternoon" class="short"></textarea>
+      </div>
+      <div>
+        <label>Evening routine</label>
+        <textarea id="evening" class="short"></textarea>
+      </div>
+    </div>
+
+    <label>Community routines</label>
+    <textarea id="community"></textarea>
+
+    <div class="grid-2">
+      <div>
+        <label>What helps Hayden during stress</label>
+        <textarea id="stress_help"></textarea>
+      </div>
+      <div>
+        <label>Known triggers</label>
+        <textarea id="triggers"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 – INDIVIDUAL OUTCOMES -->
+  <h2 class="section-heading">Section 4 — Individual Outcomes</h2>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Outcome 1 — Community Engagement</div>
+      <div class="card-sub">Ties directly to IPP goals and SDP service domains.</div>
+    </div>
+    <label>Goal</label><textarea id="outcome1_goal"></textarea>
+    <label>Why this matters</label><textarea id="outcome1_why"></textarea>
+    <label>Current barriers</label><textarea id="outcome1_barriers" class="short"></textarea>
+    <label>Teaching & support strategies</label><textarea id="outcome1_strategies"></textarea>
+    <label>Progress measurement</label><textarea id="outcome1_measure" class="short"></textarea>
+    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome1_staff"></textarea>
+    <label>Timeline / expected progress</label><textarea id="outcome1_timeline" class="short"></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Outcome 2 — Independent Living Skills</div>
+      <div class="card-sub">Daily living & functional independence.</div>
+    </div>
+    <label>Goal</label><textarea id="outcome2_goal"></textarea>
+    <label>Why this matters</label><textarea id="outcome2_why"></textarea>
+    <label>Current barriers</label><textarea id="outcome2_barriers" class="short"></textarea>
+    <label>Teaching & support strategies</label><textarea id="outcome2_strategies"></textarea>
+    <label>Progress measurement</label><textarea id="outcome2_measure" class="short"></textarea>
+    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome2_staff"></textarea>
+    <label>Timeline / expected progress</label><textarea id="outcome2_timeline" class="short"></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Outcome 3 — Health & Safety</div>
+      <div class="card-sub">Medical, behavioral, and general safety stability.</div>
+    </div>
+    <label>Goal</label><textarea id="outcome3_goal"></textarea>
+    <label>Why this matters</label><textarea id="outcome3_why"></textarea>
+    <label>Current barriers</label><textarea id="outcome3_barriers" class="short"></textarea>
+    <label>Teaching & support strategies</label><textarea id="outcome3_strategies"></textarea>
+    <label>Progress measurement</label><textarea id="outcome3_measure" class="short"></textarea>
+    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome3_staff"></textarea>
+    <label>Timeline / expected progress</label><textarea id="outcome3_timeline" class="short"></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Outcome 4 — Behavioral / Emotional Regulation</div>
+      <div class="card-sub">Helps RC see the behavioral support structure clearly.</div>
+    </div>
+    <label>Goal</label><textarea id="outcome4_goal"></textarea>
+    <label>Why this matters</label><textarea id="outcome4_why"></textarea>
+    <label>Current barriers</label><textarea id="outcome4_barriers" class="short"></textarea>
+    <label>Teaching & support strategies</label><textarea id="outcome4_strategies"></textarea>
+    <label>Progress measurement</label><textarea id="outcome4_measure" class="short"></textarea>
+    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome4_staff"></textarea>
+    <label>Timeline / expected progress</label><textarea id="outcome4_timeline" class="short"></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Outcome 5 — Communication & Self-Advocacy</div>
+      <div class="card-sub">Supports Hayden to speak up, request, refuse, and direct his life.</div>
+    </div>
+    <label>Goal</label><textarea id="outcome5_goal"></textarea>
+    <label>Why this matters</label><textarea id="outcome5_why"></textarea>
+    <label>Current barriers</label><textarea id="outcome5_barriers" class="short"></textarea>
+    <label>Teaching & support strategies</label><textarea id="outcome5_strategies"></textarea>
+    <label>Progress measurement</label><textarea id="outcome5_measure" class="short"></textarea>
+    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome5_staff"></textarea>
+    <label>Timeline / expected progress</label><textarea id="outcome5_timeline" class="short"></textarea>
+  </div>
+
+  <!-- SECTION 5 – SUPPORTS -->
+  <h2 class="section-heading">Section 5 — Natural & Paid Supports</h2>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Circle of support</div>
+      <div class="card-sub">Shows why ESS is needed alongside family and community.</div>
+    </div>
+
+    <label>Natural supports (e.g., John Doe)</label>
+    <textarea id="natural_supports"></textarea>
+
+    <label>Paid supports (ESS Staff)</label>
+    <textarea id="paid_supports"></textarea>
+
+    <div class="grid-2">
+      <div>
+        <label>Justification for paid supports</label>
+        <textarea id="justification" class="tall"></textarea>
+      </div>
+      <div>
+        <label>Hours needed per month</label>
+        <textarea id="hours_needed" class="tall"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 – RISK -->
+  <h2 class="section-heading">Section 6 — Risk & Mitigation</h2>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Risks and protection plan</div>
+      <div class="card-sub">Supports dignity of risk while keeping Hayden safe.</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>Behavioral risks</label><textarea id="risk_behavior"></textarea>
+      </div>
+      <div>
+        <label>Medical risks</label><textarea id="risk_medical"></textarea>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>Environmental risks</label><textarea id="risk_env"></textarea>
+      </div>
+      <div>
+        <label>Community risks</label><textarea id="risk_comm"></textarea>
+      </div>
+    </div>
+
+    <label>Crisis plan</label><textarea id="crisis_plan" class="tall"></textarea>
+    <label>Mitigation strategies</label><textarea id="mitigation" class="tall"></textarea>
+  </div>
+
+  <!-- SECTION 7 – FUTURE VISION -->
+  <h2 class="section-heading">Section 7 — Future Vision</h2>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Hayden’s future direction</div>
+      <div class="card-sub">Connects today’s supports with long-term outcomes.</div>
+    </div>
+
+    <label>Hayden’s preferred future</label><textarea id="future_pref"></textarea>
+    <label>Goals for independence</label><textarea id="future_goals"></textarea>
+    <label>Community involvement</label><textarea id="future_comm"></textarea>
+    <label>Long-term direction</label><textarea id="future_long"></textarea>
+  </div>
+
+  <!-- SECTION 8 – SIGNATURES -->
+  <h2 class="section-heading">Section 8 — PCP Agreement & Signatures</h2>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Hayden + ESS Staff</div>
+      <div class="card-sub">Signatures show the team participated and agrees this plan reflects Hayden’s goals.</div>
+    </div>
+
+    <div class="sig-row">
+      <div class="sig-box">
+        <div class="sig-label">Hayden Signature</div>
+        <canvas id="sig_omar" class="sig-canvas" height="180"></canvas>
+        <button class="clear-btn" type="button" id="clearOmar">Clear</button>
+      </div>
+
+      <div class="sig-box">
+        <div class="sig-label">ESS Staff Signature (John Doe)</div>
+        <canvas id="sig_staff" class="sig-canvas" height="180"></canvas>
+        <button class="clear-btn" type="button" id="clearStaff">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <button id="exportPCP" type="button">Export PCP as PDF</button>
+  <button id="submitPCP" type="button">Submit PCP</button>
+</div>
+
+<footer>
+  <span>Empowerment Support Solutions, LLC</span>
+  <span>Self-Determination Program • Person-Centered Planning (PCP Compliant)</span>
+</footer>
+
+<script>
+  document.getElementById("todayDate").textContent =
+    "Date: " + new Date().toLocaleDateString();
+
+  const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_J6Y49EQarV5pAzhOdokl7w_GVlPoPSb";
+  const { createClient } = supabase;
+
+  // 🔹 Hayden's UUID (from ess.clients) – REPLACE with real value before use
+  const CLIENT_ID = "REPLACE_WITH_HAYDEN_CLIENT_UUID";
+
+  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    db: { schema: "ess" }
+  });
+
+  function setupSignatureCanvas(canvasId, clearBtnId){
+    const canvas = document.getElementById(canvasId);
+    const clearBtn = document.getElementById(clearBtnId);
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas(){
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+    }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    let drawing = false;
+    let rect = canvas.getBoundingClientRect();
+
+    function getPos(e){
+      const point = e.touches ? e.touches[0] : e;
+      return {
+        x: point.clientX - rect.left,
+        y: point.clientY - rect.top
+      };
+    }
+
+    function start(e){
+      e.preventDefault();
+      drawing = true;
+      rect = canvas.getBoundingClientRect();
+      ctx.beginPath();
+      const pos = getPos(e);
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function move(e){
+      if(!drawing) return;
+      e.preventDefault();
+      const pos = getPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.stroke();
+    }
+
+    function end(){
+      drawing = false;
+    }
+
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mousemove", move);
+    canvas.addEventListener("mouseup", end);
+    canvas.addEventListener("mouseleave", end);
+
+    canvas.addEventListener("touchstart", start, { passive:false });
+    canvas.addEventListener("touchmove", move, { passive:false });
+    canvas.addEventListener("touchend", end);
+
+    clearBtn.addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    return canvas;
+  }
+
+  const canvasOmar  = setupSignatureCanvas("sig_omar",  "clearOmar");
+  const canvasStaff = setupSignatureCanvas("sig_staff", "clearStaff");
+
+  function getSignatureBase64(canvas){
+    return canvas.toDataURL("image/png");
+  }
+
+  function collectPCPData(){
+    const ids = [
+      "pcp_conducted_by","pcp_format","pcp_date","pcp_location",
+      "pcp_participants","pcp_summary",
+      "like_admire","strengths","communication","important_to","important_for",
+      "sensory","behavioral","health_safety","cultural",
+      "morning","afternoon","evening","community","stress_help","triggers",
+      "outcome1_goal","outcome1_why","outcome1_barriers","outcome1_strategies",
+      "outcome1_measure","outcome1_staff","outcome1_timeline",
+      "outcome2_goal","outcome2_why","outcome2_barriers","outcome2_strategies",
+      "outcome2_measure","outcome2_staff","outcome2_timeline",
+      "outcome3_goal","outcome3_why","outcome3_barriers","outcome3_strategies",
+      "outcome3_measure","outcome3_staff","outcome3_timeline",
+      "outcome4_goal","outcome4_why","outcome4_barriers","outcome4_strategies",
+      "outcome4_measure","outcome4_staff","outcome4_timeline",
+      "outcome5_goal","outcome5_why","outcome5_barriers","outcome5_strategies",
+      "outcome5_measure","outcome5_staff","outcome5_timeline",
+      "natural_supports","paid_supports","justification","hours_needed",
+      "risk_behavior","risk_medical","risk_env","risk_comm","crisis_plan",
+      "mitigation","future_pref","future_goals","future_comm","future_long"
+    ];
+
+    const data = {};
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      data[id] = el ? el.value.trim() : "";
+    });
+    return data;
+  }
+
+  document.getElementById("submitPCP").addEventListener("click", async () => {
+    const btn = document.getElementById("submitPCP");
+
+    try{
+      btn.disabled = true;
+      btn.textContent = "Submitting…";
+
+      const pcpData = collectPCPData();
+      const sigOmar  = getSignatureBase64(canvasOmar);
+      const sigStaff = getSignatureBase64(canvasStaff);
+
+      const record = {
+        client_id: CLIENT_ID,
+        pcp_data: pcpData,
+        signature_base64: JSON.stringify({
+          // 🔹 keep same keys admin expects (omar_signature / staff_signature)
+          omar_signature: sigOmar,
+          staff_signature: sigStaff
+        })
+      };
+
+      const { data, error } = await db
+        .from("pcp_entries")
+        .insert(record)
+        .select();
+
+      if(error){
+        console.error("Supabase insert error:", error);
+        alert("Error saving PCP: " + (error.message || "Unknown error"));
+        btn.disabled = false;
+        btn.textContent = "Submit PCP";
+        return;
+      }
+
+      alert("PCP successfully submitted.");
+      btn.textContent = "Submitted ✔";
+
+    }catch(err){
+      console.error("Unexpected submit error:", err);
+      alert("Unexpected error submitting PCP.");
+      btn.disabled = false;
+      btn.textContent = "Submit PCP";
+    }
+  });
+
+  document.getElementById("exportPCP").addEventListener("click", () => {
+    window.print();
+  });
+</script>
+
+</body>
+</html>
