@@ -804,6 +804,7 @@
     alert("PCP deleted ✅");
   };
 
+  // 🔹 UPDATED PCP EXPORT TO MATCH FULL NEW STRUCTURE
   function exportPCP(){
     if (!currentPCP) return;
     const rec = currentPCP;
@@ -811,7 +812,9 @@
     let sigs = {};
     try{ sigs = rec.signature_base64 ? JSON.parse(rec.signature_base64) : {}; }catch(e){}
     const clientLabel = pcp_clientSelect.options[pcp_clientSelect.selectedIndex]?.text || "Client";
-    const pcpDate = rec.created_at ? formatYMD(rec.created_at.slice(0,10)) : "—";
+
+    const rawDate = (data && data["pcp_date"]) ? String(data["pcp_date"]) : (rec.created_at ? rec.created_at.slice(0,10) : "");
+    const pcpDate = rawDate ? formatYMD(rawDate.slice(0,10)) : "—";
 
     const v = key => (data && data[key]) ? String(data[key]) : "";
 
@@ -847,93 +850,170 @@
             </div>
           </div>
 
+          <!-- SECTION 1 -->
           <div class="section">
-            <h2>Section 1 — Overview</h2>
+            <h2>Section 1 — Meeting Details & Participants</h2>
             <div class="label">PCP conducted by</div>
             <div class="value">${v("pcp_conducted_by")}</div>
-            <div class="label">Format</div>
+
+            <div class="label">Format (in-person / virtual / hybrid)</div>
             <div class="value">${v("pcp_format")}</div>
+
             <div class="label">Meeting date(s)</div>
             <div class="value">${v("pcp_date")}</div>
+
             <div class="label">Location(s)</div>
             <div class="value">${v("pcp_location")}</div>
-            <div class="label">Participants</div>
+
+            <div class="label">People who participated</div>
             <div class="value">${v("pcp_participants")}</div>
+
             <div class="label">Summary statement</div>
             <div class="value">${v("pcp_summary")}</div>
           </div>
 
+          <!-- SECTION 2 -->
           <div class="section">
             <h2>Section 2 — Personal Profile</h2>
-            <div class="label">What people like & admire</div>
+            <div class="label">Who ${clientLabel} is as a person</div>
+            <div class="value">${v("profile_who")}</div>
+
+            <div class="label">What people like & admire about ${clientLabel}</div>
             <div class="value">${v("like_admire")}</div>
+
             <div class="label">Strengths</div>
             <div class="value">${v("strengths")}</div>
+
             <div class="label">Communication style</div>
             <div class="value">${v("communication")}</div>
+
             <div class="label">Important TO ${clientLabel}</div>
             <div class="value">${v("important_to")}</div>
+
             <div class="label">Important FOR ${clientLabel}</div>
             <div class="value">${v("important_for")}</div>
+
             <div class="label">Sensory needs</div>
             <div class="value">${v("sensory")}</div>
+
             <div class="label">Behavioral & emotional considerations</div>
             <div class="value">${v("behavioral")}</div>
+
             <div class="label">Health & safety considerations</div>
             <div class="value">${v("health_safety")}</div>
-            <div class="label">Cultural / identity notes</div>
+
+            <div class="label">Cultural or personal identity notes</div>
             <div class="value">${v("cultural")}</div>
           </div>
 
+          <!-- SECTION 3 -->
           <div class="section">
-            <h2>Section 4 — Individual Outcomes (Summary)</h2>
-            <div class="label">Outcome 1 — Community Engagement</div>
-            <div class="value"><strong>Goal:</strong> ${v("outcome1_goal")}</div>
-            <div class="value"><strong>Why it matters:</strong> ${v("outcome1_why")}</div>
+            <h2>Section 3 — Daily Routines & Life</h2>
+            <div class="label">Morning routine</div>
+            <div class="value">${v("routine_morning")}</div>
 
-            <div class="label" style="margin-top:8px;">Outcome 2 — Independent Living Skills</div>
-            <div class="value"><strong>Goal:</strong> ${v("outcome2_goal")}</div>
-            <div class="value"><strong>Why it matters:</strong> ${v("outcome2_why")}</div>
+            <div class="label">Afternoon routine</div>
+            <div class="value">${v("routine_afternoon")}</div>
 
-            <div class="label" style="margin-top:8px;">Outcome 3 — Health & Safety</div>
-            <div class="value"><strong>Goal:</strong> ${v("outcome3_goal")}</div>
+            <div class="label">Evening routine</div>
+            <div class="value">${v("routine_evening")}</div>
 
-            <div class="label" style="margin-top:8px;">Outcome 4 — Behavioral / Emotional Regulation</div>
-            <div class="value"><strong>Goal:</strong> ${v("outcome4_goal")}</div>
+            <div class="label">Community routines</div>
+            <div class="value">${v("routine_community")}</div>
 
-            <div class="label" style="margin-top:8px;">Outcome 5 — Communication & Self-Advocacy</div>
-            <div class="value"><strong>Goal:</strong> ${v("outcome5_goal")}</div>
+            <div class="label">What helps ${clientLabel} during stress</div>
+            <div class="value">${v("routine_stress_help")}</div>
+
+            <div class="label">Known triggers</div>
+            <div class="value">${v("routine_triggers")}</div>
           </div>
 
+          <!-- SECTION 4 -->
+          <div class="section">
+            <h2>Section 4 — Individual Outcomes</h2>
+
+            <div class="label">Outcome 1 — Community Engagement</div>
+            <div class="value"><strong>Goal:</strong> ${v("outcome1_goal")}</div>
+            <div class="value"><strong>Why this matters:</strong> ${v("outcome1_why")}</div>
+            <div class="value"><strong>Current barriers:</strong> ${v("outcome1_barriers")}</div>
+            <div class="value"><strong>Teaching & support strategies:</strong> ${v("outcome1_teaching")}</div>
+            <div class="value"><strong>Progress measurement:</strong> ${v("outcome1_progress")}</div>
+            <div class="value"><strong>ESS staff responsibilities:</strong> ${v("outcome1_staff")}</div>
+
+            <div class="label" style="margin-top:10px;">Outcome 2 — Independent Living / Daily Skills</div>
+            <div class="value"><strong>Goal:</strong> ${v("outcome2_goal")}</div>
+            <div class="value"><strong>Why this matters:</strong> ${v("outcome2_why")}</div>
+            <div class="value"><strong>Current barriers:</strong> ${v("outcome2_barriers")}</div>
+            <div class="value"><strong>Teaching & support strategies:</strong> ${v("outcome2_teaching")}</div>
+            <div class="value"><strong>Progress measurement:</strong> ${v("outcome2_progress")}</div>
+            <div class="value"><strong>ESS staff responsibilities:</strong> ${v("outcome2_staff")}</div>
+
+            <div class="label" style="margin-top:10px;">Outcome 3 — Health & Safety</div>
+            <div class="value"><strong>Goal:</strong> ${v("outcome3_goal")}</div>
+            <div class="value"><strong>Why this matters:</strong> ${v("outcome3_why")}</div>
+            <div class="value"><strong>Current barriers:</strong> ${v("outcome3_barriers")}</div>
+            <div class="value"><strong>Teaching & support strategies:</strong> ${v("outcome3_teaching")}</div>
+            <div class="value"><strong>Progress measurement:</strong> ${v("outcome3_progress")}</div>
+            <div class="value"><strong>ESS staff responsibilities:</strong> ${v("outcome3_staff")}</div>
+
+            <div class="label" style="margin-top:10px;">Outcome 4 — Behavioral / Emotional Regulation</div>
+            <div class="value"><strong>Goal:</strong> ${v("outcome4_goal")}</div>
+            <div class="value"><strong>Why this matters:</strong> ${v("outcome4_why")}</div>
+            <div class="value"><strong>Current barriers:</strong> ${v("outcome4_barriers")}</div>
+            <div class="value"><strong>Teaching & support strategies:</strong> ${v("outcome4_teaching")}</div>
+            <div class="value"><strong>Progress measurement:</strong> ${v("outcome4_progress")}</div>
+            <div class="value"><strong>ESS staff responsibilities:</strong> ${v("outcome4_staff")}</div>
+
+            <div class="label" style="margin-top:10px;">Outcome 5 — Communication & Self-Advocacy</div>
+            <div class="value"><strong>Goal:</strong> ${v("outcome5_goal")}</div>
+            <div class="value"><strong>Why this matters:</strong> ${v("outcome5_why")}</div>
+            <div class="value"><strong>Current barriers:</strong> ${v("outcome5_barriers")}</div>
+            <div class="value"><strong>Teaching & support strategies:</strong> ${v("outcome5_teaching")}</div>
+            <div class="value"><strong>Progress measurement:</strong> ${v("outcome5_progress")}</div>
+            <div class="value"><strong>ESS staff responsibilities:</strong> ${v("outcome5_staff")}</div>
+          </div>
+
+          <!-- SECTION 5 -->
           <div class="section">
             <h2>Section 5 — Supports & Risk</h2>
             <div class="label">Natural supports</div>
             <div class="value">${v("natural_supports")}</div>
+
             <div class="label">Paid supports (ESS)</div>
             <div class="value">${v("paid_supports")}</div>
+
             <div class="label">Justification for paid supports</div>
             <div class="value">${v("justification")}</div>
+
             <div class="label">Hours needed per month</div>
             <div class="value">${v("hours_needed")}</div>
+
+            <div class="label">Risk considerations / mitigation (if documented)</div>
+            <div class="value">${v("risk_mitigation")}</div>
           </div>
 
+          <!-- SECTION 7 -->
           <div class="section">
             <h2>Section 7 — Future Vision</h2>
             <div class="label">Preferred future</div>
             <div class="value">${v("future_pref")}</div>
+
             <div class="label">Goals for independence</div>
             <div class="value">${v("future_goals")}</div>
+
             <div class="label">Community involvement</div>
             <div class="value">${v("future_comm")}</div>
+
             <div class="label">Long-term direction</div>
             <div class="value">${v("future_long")}</div>
           </div>
 
+          <!-- SIGNATURES -->
           <div class="section">
             <h2>Signatures</h2>
             <div style="display:flex;gap:24px;align-items:flex-end;">
               <div>
-                <div class="label">Client / Parent Signature</div>
+                <div class="label">Client / Parent / Responsible Party</div>
                 ${
                   sigs.omar_signature || sigs.client_signature
                     ? `<img class="sig" src="${sigs.omar_signature || sigs.client_signature}">`
