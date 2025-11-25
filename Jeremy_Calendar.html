@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ESS • Weekly Staff Calendar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f7f7fb;
+      --card:#fff;
+      --border:#e5e7eb;
+      --brand:#2c3e50;
+    }
+    body{
+      margin:0;
+      background:var(--bg);
+      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+      color:#0f172a;
+    }
+    .wrap{
+      max-width:980px;
+      margin:2rem auto;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:1.5rem 1.5rem 1.25rem;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    h2{margin:0;font-size:1.5rem;display:flex;gap:.4rem;align-items:center;}
+    .pill{font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a}
+
+    /* 🔁 MATCH DAILY CHART LAYOUT */
+    .row{
+      display:flex;
+      gap:12px;
+      align-items:flex-end;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .row > *{
+      min-width:240px;
+      flex:1;
+    }
+    .input,.select,.textarea{
+      width:100%;
+      padding:10px;
+      border:1px solid var(--border);
+      border-radius:10px;
+    }
+    .textarea{
+      min-height:110px;
+      resize:vertical;
+      background:#f8fafc;
+      box-sizing:border-box;
+      font-family:inherit;
+      font-size:13px;
+    }
+    .label{
+      display:block;
+      color:#6b7280;
+      font-size:12px;
+      margin-bottom:6px;
+      text-align:left;
+    }
+
+    .weekbar{display:flex;align-items:center;gap:12px;border:1px solid var(--border);padding:9px 12px;border-radius:12px;background:#f8fafc;margin-bottom:14px;}
+    .spacer{flex:1}
+    .btn{padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer;}
+    .btn--icon{width:32px;height:32px;display:grid;place-items:center;}
+    .btn--primary{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+    /* 7-day grid */
+    #wk_daysGrid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+      column-gap:14px;
+      row-gap:14px;
+      margin-bottom:16px;
+    }
+    .day-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-height:180px;
+      box-sizing:border-box;
+    }
+    .day-head{font-weight:600;display:flex;justify-content:space-between;align-items:center;}
+    .day-date{font-size:12px;color:#6b7280;}
+
+    .sig-wrap{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin-top:0;}
+    .sig-title{font-weight:600;margin-bottom:6px;}
+    .sig-box{border:1px dashed #d1d5db;border-radius:10px;background:#fff;}
+    canvas.sig{width:100%;height:140px;display:block;border-radius:10px;touch-action:none;cursor:crosshair;}
+
+    #wk_toast{
+      position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+      background:#111827;color:#fff;padding:10px 14px;border-radius:12px;
+      box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;
+      opacity:0;transition:opacity .25s
+    }
+    #wk_error{
+      display:none;margin-top:10px;padding:10px;border-radius:8px;
+      border:1px solid #fecaca;background:#fef2f2;color:#991b1b
+    }
+
+    /* 🔗 retained styles */
+    .quick-links{
+      max-width:980px;
+      margin:0.5rem auto 0.9rem;
+      padding:0;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .quick-link-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:9px 14px;
+      border-radius:999px;
+      border:1px solid #1f2937;
+      background:#111827;
+      color:#f9fafb;
+      font-size:.9rem;
+      text-decoration:none;
+      box-shadow:0 2px 6px rgba(15,23,42,.18);
+      white-space:nowrap;
+    }
+    .quick-link-btn--secondary{
+      background:#ffffff;
+      color:#111827;
+      border-color:#e5e7eb;
+      box-shadow:0 1px 4px rgba(15,23,42,.10);
+    }
+    .quick-link-btn span:first-child{
+      font-size:1rem;
+    }
+
+    @media (max-width:700px){
+      .quick-links{
+        padding:0;
+      }
+      .quick-link-btn{
+        flex:1 1 100%;
+        justify-content:center;
+        white-space:normal;
+        text-align:center;
+      }
+      .row{
+        flex-direction:column;
+        align-items:stretch;
+      }
+    }
+
+    @media (max-width:600px){
+      #wk_daysGrid{grid-template-columns:1fr;}
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <section class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+      <h2>📅 Weekly Staff Calendar – Planned Goals</h2>
+      <span class="pill">For admin review</span>
+    </div>
+
+    <div class="row">
+      <!-- updated client -->
+      <input type="hidden" id="wk_client_id" value="e083501e-86d5-41e8-b840-c3ba5b6dc9c9" />
+      <div>
+        <label class="label">Client</label>
+        <input type="text" class="input" value="Jeremy N." readonly style="background:#e5e7eb;cursor:not-allowed;">
+      </div>
+      <div>
+        <label class="label" for="wk_staff_name">Staff (type your name)</label>
+        <input id="wk_staff_name" type="text" class="input" placeholder="e.g., John Perez">
+      </div>
+    </div>
+
+    <div class="weekbar">
+      <button id="wk_prevWeek" class="btn btn--icon">◀</button>
+      <div>
+        <div id="wk_range" style="font-weight:700;color:#0f172a;">Mon — Sun</div>
+        <div style="color:#6b7280;font-size:13px;">Week of <span id="wk_startTxt"></span> to <span id="wk_endTxt"></span></div>
+      </div>
+      <button id="wk_nextWeek" class="btn btn--icon">▶</button>
+      <div class="spacer"></div>
+    </div>
+
+    <div id="wk_daysGrid"></div>
+
+    <div class="sig-wrap">
+      <div class="sig-title">Staff Signature (for weekly plan)</div>
+      <div class="sig-box">
+        <canvas id="wk_staffSig" class="sig"></canvas>
+      </div>
+      <button id="wk_clearSig" class="btn" style="margin-top:8px;">Clear Signature</button>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
+      <button id="wk_submit" class="btn btn--primary">Submit Weekly Plan</button>
+    </div>
+
+    <div id="wk_error"></div>
+    <div id="wk_toast"></div>
+  </section>
+
+<script>
+(function(){
+  const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const ess = sb.schema("ess");
+
+  const $ = id => document.getElementById(id);
+
+  const wk_client_id = $("wk_client_id");
+  const wk_staff_name = $("wk_staff_name");
+  const wk_prevWeek = $("wk_prevWeek");
+  const wk_nextWeek = $("wk_nextWeek");
+  const wk_range = $("wk_range");
+  const wk_startTxt = $("wk_startTxt");
+  const wk_endTxt = $("wk_endTxt");
+  const wk_daysGrid = $("wk_daysGrid");
+  const wk_submit = $("wk_submit");
+  const wk_error = $("wk_error");
+  const wk_toast = $("wk_toast");
+
+  const sigCanvas = $("wk_staffSig");
+  const clearSigBtn = $("wk_clearSig");
+  let sigCtx, sigData = null;
+
+  const fmt = d => new Intl.DateTimeFormat("en-US",{month:"short",day:"2-digit",year:"numeric"}).format(d);
+  const ymd = d => d.toISOString().slice(0,10);
+
+  function startOfWeekMonday(d){
+    const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    const day=nd.getDay();
+    const diff=(day===0?-6:1-day);
+    nd.setDate(nd.getDate()+diff);
+    nd.setHours(0,0,0,0);
+    return nd;
+  }
+  function addDays(d,n){ const nd=new Date(d); nd.setDate(nd.getDate()+n); return nd; }
+
+  function initSig(existing){
+    const box = sigCanvas.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    const width = Math.max(1, box.width);
+    const height = 140;
+    sigCanvas.width = width * ratio;
+    sigCanvas.height = height * ratio;
+    sigCtx = sigCanvas.getContext("2d");
+    sigCtx.setTransform(1,0,0,1,0,0);
+    sigCtx.scale(ratio, ratio);
+    sigCtx.lineWidth = 2;
+    sigCtx.lineCap = "round";
+    sigCtx.strokeStyle = "#000";
+    if (existing){
+      const img=new Image();
+      img.onload=()=>sigCtx.drawImage(img,0,0,width,height);
+      img.src=existing;
+    }
+  }
+  initSig(null);
+
+  function makeDrawable(canvas, ctx, onEnd){
+    let drawing=false;
+    function pos(e){
+      const r=canvas.getBoundingClientRect();
+      const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+      const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+      return {x,y};
+    }
+    function down(e){ e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+    function move(e){ if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }
+    function up(){ if(!drawing) return; drawing=false; if(onEnd) onEnd(canvas); }
+    canvas.addEventListener("pointerdown",down);
+    canvas.addEventListener("pointermove",move);
+    window.addEventListener("pointerup",up);
+    canvas.addEventListener("touchstart",down,{passive:false});
+    canvas.addEventListener("touchmove",move,{passive:false});
+    canvas.addEventListener("touchend",up);
+  }
+  makeDrawable(sigCanvas, sigCtx, c => { sigData = c.toDataURL("image/png"); });
+  clearSigBtn.addEventListener("click", ()=>{ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); sigData=null; });
+
+  window.addEventListener("resize", ()=>{ initSig(sigData); });
+
+  const staffUuidCache = new Map();
+  function isUuid(s){ return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s); }
+
+  async function getOrCreateStaffUuid(){
+    const name = (wk_staff_name.value || "").trim();
+    if (!name) return null;
+    if (isUuid(name)) return name;
+    if (staffUuidCache.has(name)) return staffUuidCache.get(name);
+
+    let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", name).maybeSingle();
+    if (!error && data?.id){
+      staffUuidCache.set(name, data.id);
+      return data.id;
+    }
+
+    const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID()
+      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+          const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16);
+        });
+    const ins = await ess.from("staff").insert([{ id:newId, full_name:name }]).select("id").maybeSingle();
+    const resolved = ins.data?.id || newId;
+    staffUuidCache.set(name, resolved);
+    return resolved;
+  }
+
+  let currentWeekStart = startOfWeekMonday(new Date());
+  const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+  function renderWeekUI(){
+    const start = new Date(currentWeekStart);
+    const end = addDays(start,6);
+    wk_range.textContent = `Mon ${start.getDate()} — Sun ${end.getDate()}`;
+    wk_startTxt.textContent = fmt(start);
+    wk_endTxt.textContent = fmt(end);
+
+    wk_daysGrid.innerHTML = "";
+    for (let i=0;i<7;i++){
+      const d = addDays(start,i);
+      const card = document.createElement("div");
+      card.className = "day-card";
+      card.innerHTML = `
+        <div class="day-head">
+          <span>${dayNames[i]}</span>
+          <span class="day-date">${fmt(d)}</span>
+        </div>
+        <textarea class="textarea" data-day="${i}" placeholder="• goal / activity
+• location
+• domain"></textarea>
+      `;
+      wk_daysGrid.appendChild(card);
+    }
+
+    loadWeekFromServer();
+  }
+
+  async function loadWeekFromServer(){
+    const name = (wk_staff_name.value || "").trim();
+    if (!name) return;
+    const staffUuid = await getOrCreateStaffUuid();
+    if (!staffUuid) return;
+    const weekStartStr = ymd(currentWeekStart);
+
+    const { data, error } = await ess.from("weekly_staff_plans")
+      .select("*")
+      .eq("client_id", wk_client_id.value)
+      .eq("staff_id", staffUuid)
+      .eq("week_start", weekStartStr)
+      .maybeSingle();
+
+    if (error) return;
+    if (data){
+      const map = {
+        0: data.mon_text || "",
+        1: data.tue_text || "",
+        2: data.wed_text || "",
+        3: data.thu_text || "",
+        4: data.fri_text || "",
+        5: data.sat_text || "",
+        6: data.sun_text || "",
+      };
+      wk_daysGrid.querySelectorAll("textarea[data-day]").forEach(t=>{
+        const idx = Number(t.dataset.day);
+        t.value = map[idx] || "";
+      });
+      if (data.staff_signature){
+        sigData = data.staff_signature;
+        initSig(sigData);
+      }
+    }
+  }
+
+  function gatherForm(){
+    const out = {};
+    wk_daysGrid.querySelectorAll("textarea[data-day]").forEach(t=>{
+      const idx = Number(t.dataset.day);
+      const val = t.value || "";
+      if (idx === 0) out.mon_text = val;
+      if (idx === 1) out.tue_text = val;
+      if (idx === 2) out.wed_text = val;
+      if (idx === 3) out.thu_text = val;
+      if (idx === 4) out.fri_text = val;
+      if (idx === 5) out.sat_text = val;
+      if (idx === 6) out.sun_text = val;
+    });
+    return out;
+  }
+
+  function toast(msg){
+    wk_toast.textContent = msg;
+    wk_toast.style.opacity = "1";
+    setTimeout(()=>wk_toast.style.opacity="0",1800);
+  }
+
+  async function submitWeeklyPlan(){
+    wk_error.style.display = "none";
+
+    const staffName = (wk_staff_name.value || "").trim();
+    if (!staffName){
+      toast("Type staff name first");
+      return;
+    }
+    const staffUuid = await getOrCreateStaffUuid();
+    if (!staffUuid){
+      wk_error.style.display="block";
+      wk_error.textContent="Could not resolve staff.";
+      return;
+    }
+
+    const payload = gatherForm();
+    const weekStartStr = ymd(currentWeekStart);
+
+    const upsertBody = {
+      client_id: wk_client_id.value,
+      staff_id: staffUuid,
+      week_start: weekStartStr,
+      mon_text: payload.mon_text || null,
+      tue_text: payload.mon_text || null,
+      wed_text: payload.wed_text || null,
+      thu_text: payload.thu_text || null,
+      fri_text: payload.fri_text || null,
+      sat_text: payload.sat_text || null,
+      sun_text: payload.sun_text || null,
+      staff_signature: sigData || null,
+      submitted: true
+    };
+
+    const { error } = await ess.from("weekly_staff_plans").upsert(upsertBody, { onConflict: "client_id,staff_id,week_start" });
+    if (error){
+      wk_error.style.display="block";
+      wk_error.textContent="Submit failed: "+error.message;
+      toast("Submit failed ❌");
+      return;
+    }
+    toast("Weekly plan submitted ✅");
+  }
+
+  wk_prevWeek.addEventListener("click", ()=>{ currentWeekStart = addDays(currentWeekStart, -7); renderWeekUI(); });
+  wk_nextWeek.addEventListener("click", ()=>{ currentWeekStart = addDays(currentWeekStart, 7); renderWeekUI(); });
+  wk_submit.addEventListener("click", submitWeeklyPlan);
+  wk_staff_name.addEventListener("blur", ()=> loadWeekFromServer());
+
+  renderWeekUI();
+})();
+</script>
+</body>
+</html>
