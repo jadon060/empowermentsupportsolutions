@@ -136,7 +136,6 @@
 <!-- ⬇️ staff reference -->
 <div class="about-wrap">
   <div class="about-card">
-    <!-- ✅ ONLY CHANGE PREVIOUSLY DONE: src now points to Jeremy.jpg -->
     <img src="https://jadon060.github.io/empowermentsupportsolutions/Jeremy.jpg" alt="Jeremy profile photo" class="about-avatar" loading="lazy" />
     <div class="about-body">
       <h3>About Jeremy</h3>
@@ -183,11 +182,11 @@
 
 <!-- 🔗 Jeremy quick-links bar -->
 <div class="quick-links">
-  <a href="Calendar_Planning.html" class="quick-link-btn">
+  <!-- 🔁 FIXED: Now correctly links to Jeremy's calendar -->
+  <a href="Jeremy_Calendar.html" class="quick-link-btn">
     <span>📆</span>
     <span>Weekly staff calendar</span>
   </a>
-  <!-- 🔁 CHANGE: link directly to the PCP PDF in the repo -->
   <a href="ESS%20%E2%80%A2%20Jeremy%20%E2%80%93%20Person-Centered%20Plan%20(PCP).pdf" class="quick-link-btn quick-link-btn--secondary">
     <span>🧠</span>
     <span>Jeremy PCP (Person-Centered Plan)</span>
@@ -532,7 +531,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderWeek(){
     const start=new Date(current), end=addDays(start,6);
-    // keep Sunday inclusive so Sun 2 loads
     end.setHours(23,59,59,999);
     w_startTxt.textContent=fmt(start); w_endTxt.textContent=fmt(end);
     w_range.textContent=`Mon ${start.getDate()} — Sun ${end.getDate()}`;
@@ -674,7 +672,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let { error } = await ess.from("daily_entries").insert(baseEntry);
 
-    // if the error is exactly what you got, retry without hours
     if (error && (error.message || '').toLowerCase().includes("could not find the 'hours' column")) {
       const { error: e2 } = await ess.from("daily_entries").insert({
         ...baseEntry,
@@ -687,7 +684,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
     } else if (error && String(error.message||'').includes('activities_allowed')) {
-      // old constraint for activities
       const { error: e3 } = await ess.from("daily_entries").insert({
         ...baseEntry,
         activities: null
@@ -705,7 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // mirror into daily_drafts
     await ess.from("daily_drafts").upsert({
       client_id: getClientId(),
       staff_id: staffUuid,
