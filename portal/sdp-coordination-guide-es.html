@@ -74,7 +74,7 @@
     footer{color:var(--muted);font-size:13px;padding:24px 0 40px;text-align:center}
     .contact{margin-top:8px}
 
-    /* UI de Códigos de Servicio (igual que EN) */
+    /* UI de Códigos de Servicio */
     .sc-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 14px}
     .sc-select{min-width:280px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600}
     .sc-note{font-size:13px;color:var(--muted)}
@@ -87,6 +87,7 @@
     .sc-cite{font-size:12px;color:var(--muted);margin-top:6px}
   </style>
 </head>
+
 <body>
   <div class="banner">
     <div class="wrap">
@@ -111,6 +112,8 @@
   </div>
 
   <main class="container">
+
+    <!-- INTRO -->
     <section class="card">
       <h1>Guía de Coordinación del SDP</h1>
       <p class="lead">Resumen simple de cómo ESS coordina apoyos dentro del Programa de Autodeterminación en California (SDP). Hecho para participantes, familias, Coordinadores de Servicios y socios FMS.</p>
@@ -124,6 +127,7 @@
       <p>Queremos que todos salgan de la reunión con el mismo entendimiento: metas, quién hace qué y para cuándo. No es un guion interno y no tiene tarifas ni datos privados.</p>
     </section>
 
+    <!-- HOW ESS FITS -->
     <section class="card">
       <h2><span class="emoji">🧩</span>Cómo encaja ESS en el SDP</h2>
       <div class="callout">
@@ -137,6 +141,7 @@
       </ul>
     </section>
 
+    <!-- MEETING OBJECTIVES -->
     <section class="card">
       <h2><span class="emoji">🗂️</span>Objetivos de la reunión</h2>
       <ul class="list-tight">
@@ -148,38 +153,39 @@
       </ul>
     </section>
 
+    <!-- COORDINATION FRAMEWORK -->
     <section class="card">
       <h2><span class="emoji">🧭</span>Marco de coordinación</h2>
       <details open>
-        <summary><span class="sumicon">📌</span> Alineación del plan</summary>
+        <summary><span class="sumicon">📌</span>Alineación del plan</summary>
         <ul class="list-tight">
           <li>Vincular metas del IPP con áreas de apoyo de ESS.</li>
           <li>Decidir qué metas empiezan ahora y cuáles después.</li>
         </ul>
       </details>
       <details>
-        <summary><span class="sumicon">⏱️</span> Horas autorizadas y presupuesto</summary>
+        <summary><span class="sumicon">⏱️</span>Horas autorizadas y presupuesto</summary>
         <ul class="list-tight">
           <li>Anotar horas por mes por meta o área.</li>
           <li>Registrar límites de horario, topes y fecha tentativa de inicio.</li>
         </ul>
       </details>
       <details>
-        <summary><span class="sumicon">🏦</span> Coordinación con FMS</summary>
+        <summary><span class="sumicon">🏦</span>Coordinación con FMS</summary>
         <ul class="list-tight">
           <li>Nombre del FMS, modelo y contacto de onboarding.</li>
           <li>Lista de documentos que pide el FMS.</li>
         </ul>
       </details>
       <details>
-        <summary><span class="sumicon">🎓</span> Orientación y cumplimiento</summary>
+        <summary><span class="sumicon">🎓</span>Orientación y cumplimiento</summary>
         <ul class="list-tight">
           <li>Links de cursos/orientaciones y cómo mandar comprobantes.</li>
           <li>Requisitos del caso (por ejemplo: antecedentes, RCP).</li>
         </ul>
       </details>
       <details>
-        <summary><span class="sumicon">✅</span> Autorización e inicio</summary>
+        <summary><span class="sumicon">✅</span>Autorización e inicio</summary>
         <ul class="list-tight">
           <li>Quién entrega qué (ESS, SC, FMS).</li>
           <li>Confirmar fecha de inicio, ritmo de documentación y ventana de facturación.</li>
@@ -187,18 +193,19 @@
       </details>
     </section>
 
-    <!-- NUEVO: Códigos de Servicio (misma UI que EN) -->
+    <!-- SERVICE CODES -->
     <section class="card" id="service-codes">
       <h2><span class="emoji">🧩</span>Códigos de Servicio (SDP)</h2>
       <div class="sc-toolbar">
-        <select id="scSelect" class="sc-select" aria-label="Elegir un código de servicio">
+        <select id="scSelect" class="sc-select">
           <option value="">— Selecciona un código de servicio —</option>
         </select>
-        <span class="sc-note">Escribe para buscar por código o nombre. Solo se muestran apoyos relevantes del SDP (no vendorizados/ no clínicos).</span>
+        <span class="sc-note">Escribe para buscar por código o nombre. Solo se muestran apoyos relevantes del SDP (no vendorizados / no clínicos).</span>
       </div>
       <div id="scResult" class="sc-card" style="display:none"></div>
     </section>
 
+    <!-- DOCUMENTS ESS PROVIDES -->
     <section class="card grid grid-2">
       <div>
         <h2><span class="emoji">📎</span>Documentos que entrega ESS</h2>
@@ -211,6 +218,34 @@
       </div>
     </section>
 
+    <!-- RATE JUSTIFICATION -->
+    <section class="card">
+      <h2><span class="emoji">💵</span>Justificación de la Tarifa de ESS</h2>
+      <p>La tarifa de ESS refleja los costos reales de operar un servicio especializado y completo dentro del SDP. Incluye:</p>
+      <ul class="list-tight">
+        <li><strong>Compensación competitiva</strong> para personal calificado (prevención de rotación).</li>
+        <li><strong>Capacitación continua</strong> en seguridad, conducta, comunicación y habilidades comunitarias.</li>
+        <li><strong>Supervisión profesional</strong> y revisión constante del plan.</li>
+        <li><strong>Documentación detallada</strong> (notas diarias, progreso y cumplimiento del IPP).</li>
+        <li><strong>Costos administrativos</strong> (seguro de responsabilidad, comp, impuestos, cumplimiento regulatorio, software).</li>
+      </ul>
+      <p>La tarifa asegura que el participante reciba un servicio estable, responsable y alineado con metas del IPP.</p>
+    </section>
+
+    <!-- OFFICIAL SOURCES -->
+    <section class="card">
+      <h2><span class="emoji">📖</span>Fuentes Oficiales</h2>
+      <ul class="list-tight">
+        <li><a href="https://www.dds.ca.gov/wp-content/uploads/2019/03/SDP_FactSheet.pdf" target="_blank">DDS — SDP Fact Sheet</a></li>
+        <li><a href="https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=WIC&sectionNum=4685.8" target="_blank">WIC 4685.8 — Derechos del Programa de Autodeterminación</a></li>
+        <li><a href="https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=WIC&sectionNum=4689.8" target="_blank">WIC 4689.8 — Tarifas y negociación basada en costo real</a></li>
+        <li><a href="https://www.dir.ca.gov/dwc/dwc_home_page.htm" target="_blank">California DIR — Requisitos de empleador y Compensación</a></li>
+        <li><a href="https://www.irs.gov/businesses/small-businesses-self-employed/employment-taxes-at-a-glance" target="_blank">IRS — Costos de impuestos patronales</a></li>
+        <li><a href="https://www.dds.ca.gov/wp-content/uploads/2021/03/DSP_Workforce_Report.pdf" target="_blank">DDS — Crisis de fuerza laboral DSP</a></li>
+      </ul>
+    </section>
+
+    <!-- RESOURCES -->
     <section class="card">
       <h2><span class="emoji">📚</span>Recursos y descargas</h2>
       <div style="display:flex;flex-wrap:wrap;gap:10px">
@@ -226,66 +261,62 @@
       <div class="contact">📧 empowermentess@gmail.com • 🌐 empowermentss.com</div>
       <div style="margin-top:6px;color:var(--muted)">Esta página es informativa y puede actualizarse si cambian procesos del Centro Regional o del FMS.</div>
     </footer>
+
   </main>
 
   <script>
-    // Año
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // --------- Códigos de Servicio (idéntico a EN, traducido) ---------
     const SERVICE_CODES = [
       {
         code:'062',
         name:'Entrenamiento de Habilidades Individuales y Apoyo (Personal Assistance)',
         budget:'Vida Comunitaria',
-        desc:'Apoyo 1:1 para desarrollar o mantener habilidades de vida diaria, seguridad y participación en el hogar y la comunidad. Incluye entrenamiento, modelado, refuerzo y plan de desvanecimiento hacia independencia.',
+        desc:'Apoyo 1:1 para desarrollar o mantener habilidades de vida diaria, seguridad y participación en el hogar y la comunidad.',
         examples:'Rutinas diarias, acceso a la comunidad, recordatorios de salud/seguridad, apoyo en citas.'
       },
       {
         code:'331',
         name:'Integración Comunitaria',
         budget:'Integración Comunitaria',
-        desc:'Apoyos individualizados en la comunidad para participar en actividades significativas según metas e intereses; no es un programa en instalaciones.',
-        examples:'Clases, voluntariado, actividades recreativas con entrenamiento de habilidades y creación de apoyos naturales.'
+        desc:'Apoyos individualizados en la comunidad para participar en actividades significativas.',
+        examples:'Clases, voluntariado, actividades recreativas con entrenamiento de habilidades.'
       },
       {
         code:'338',
         name:'Transporte No Médico (1)',
         budget:'Transporte',
-        desc:'Transporte necesario para llegar a actividades autorizadas del plan SDP cuando no hay apoyos naturales disponibles.',
-        examples:'Reembolso de millas, tarifas de transporte público, viajes puerta a puerta a clases/actividades.'
+        desc:'Transporte necesario para actividades autorizadas.',
+        examples:'Reembolso de millas, transporte público, viajes puerta a puerta.'
       },
       {
         code:'360',
         name:'Apoyo de Comunicación / Integración',
         budget:'Vida Comunitaria',
-        desc:'Entrenamiento y apoyos que mejoran el acceso a la comunicación funcional (no incluye la compra del dispositivo).',
-        examples:'Entrenamiento a compañeros de comunicación, uso de AAC en contextos reales, apoyos visuales.'
+        desc:'Entrenamiento y apoyos que mejoran el acceso a la comunicación funcional.',
+        examples:'Entrenamiento AAC, apoyos visuales, coaching de comunicación.'
       },
       {
         code:'366',
-        name:'Capacitación para Familia/Participante (Vida Independiente)',
+        name:'Capacitación para Familia/Participante',
         budget:'Vida Comunitaria',
-        desc:'Capacitación para la persona y/o su círculo para implementar estrategias que aumenten independencia y seguridad.',
-        examples:'Coaching a cuidadores para generalizar habilidades en el hogar; rutinas alineadas al plan.'
+        desc:'Capacitación para implementar estrategias que aumenten independencia y seguridad.',
+        examples:'Coaching a cuidadores, rutinas alineadas al plan.'
       }
     ];
 
     const scSelect = document.getElementById('scSelect');
     const scResult = document.getElementById('scResult');
 
-    SERVICE_CODES
-      .sort((a,b)=>a.code.localeCompare(b.code))
-      .forEach(item=>{
-        const opt = document.createElement('option');
-        opt.value = item.code;
-        opt.textContent = `${item.code} — ${item.name}`;
-        scSelect.appendChild(opt);
-      });
+    SERVICE_CODES.forEach(item=>{
+      const opt = document.createElement('option');
+      opt.value = item.code;
+      opt.textContent = `${item.code} — ${item.name}`;
+      scSelect.appendChild(opt);
+    });
 
     scSelect.addEventListener('change', () => {
-      const val = scSelect.value;
-      const item = SERVICE_CODES.find(x=>x.code === val);
+      const item = SERVICE_CODES.find(x=>x.code === scSelect.value);
       if (!item){ scResult.style.display='none'; return; }
       scResult.innerHTML = `
         <div class="sc-title">${item.code} — ${item.name}</div>
@@ -294,11 +325,11 @@
         </div>
         <div class="sc-desc">${item.desc}</div>
         <div class="sc-ex"><strong>Ejemplos:</strong> ${item.examples}</div>
-        <div class="sc-cite">Nota: En el SDP, estos apoyos los elige la persona y se pagan por medio del FMS. Se excluyen servicios clínicos o que requieren proveedor vendorizado.</div>
+        <div class="sc-cite">Nota: En el SDP estos apoyos se pagan por medio del FMS.</div>
       `;
       scResult.style.display='block';
-      scResult.scrollIntoView({behavior:'smooth', block:'start'});
     });
   </script>
+
 </body>
 </html>
