@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <title>ESS • Guía de Coordinación del SDP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Vista sencilla de cómo Empowerment Support Solutions coordina servicios del Programa de Autodeterminación (SDP) con participantes, familias, Coordinadores de Servicios y socios FMS." />
+  <meta name="description" content="Guía pública de cómo Empowerment Support Solutions coordina servicios dentro del Programa de Autodeterminación (SDP) con participantes, familias, coordinadores de servicios y socios FMS." />
   <style>
     :root{
       --brand:#2c3e50; --brand-2:#0f4c81;
@@ -14,12 +14,10 @@
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
 
-    /* Banner */
     .banner{
       background:linear-gradient(135deg,var(--brand) 0%, var(--brand-2) 60%, #1b2a38 100%);
       color:#fff; padding:18px 16px 22px;
       box-shadow:0 2px 12px rgba(0,0,0,.15);
-      position:relative;
     }
     .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
     .brand{display:flex;align-items:center;gap:12px}
@@ -28,11 +26,6 @@
     .brand-title .top{font-size:16px;opacity:.95}
     .brand-title .bottom{font-size:18px;font-weight:800}
 
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
-    .btn:hover{background:rgba(255,255,255,.22)}
-
-    /* Idiomas */
     .lang{display:flex;gap:10px;margin-right:6px}
     .lang button{
       appearance:none;border:1px solid #e6e8ee;background:#fff;color:#1f2937;
@@ -40,10 +33,12 @@
       box-shadow:0 4px 14px rgba(0,0,0,.08);
       cursor:pointer
     }
-    .lang button:hover{filter:brightness(.98)}
     .lang button.active{outline:2px solid #cfd7ff}
 
-    /* Main */
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
+    .btn:hover{background:rgba(255,255,255,.22)}
+
     .container{max-width:1000px;margin:22px auto;padding:0 16px}
     .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin:16px 0;border:1px solid var(--line)}
     h1{font-size:30px;margin:6px 0 4px}
@@ -69,12 +64,10 @@
     .callout{border-left:4px solid var(--accent);padding:12px 14px;background:linear-gradient(0deg,#f0f7ff,#ffffff);border-radius:10px;color:#0f172a}
 
     a.file{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;text-decoration:none;color:var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.04)}
-    a.file:hover{border-color:#d1d5db}
 
     footer{color:var(--muted);font-size:13px;padding:24px 0 40px;text-align:center}
-    .contact{margin-top:8px}
 
-    /* UI de Códigos de Servicio */
+    /* SERVICE CODES UI */
     .sc-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 14px}
     .sc-select{min-width:280px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600}
     .sc-note{font-size:13px;color:var(--muted)}
@@ -99,14 +92,13 @@
         </div>
       </div>
 
-      <div class="lang" aria-label="Cambiar idioma">
-        <button id="btn-en" type="button" onclick="location.href='/portal/sdp-coordination-guide.html'">EN</button>
-        <button id="btn-es" type="button" class="active">ES</button>
+      <div class="lang">
+        <button id="btn-en" onclick="location.href='/portal/sdp-coordination-guide.html'">EN</button>
+        <button id="btn-es" class="active">ES</button>
       </div>
 
       <div class="toolbar">
         <button class="btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
-        <a class="btn" href="/families.html">↩️ Volver al Portal</a>
       </div>
     </div>
   </div>
@@ -116,28 +108,29 @@
     <!-- INTRO -->
     <section class="card">
       <h1>Guía de Coordinación del SDP</h1>
-      <p class="lead">Resumen simple de cómo ESS coordina apoyos dentro del Programa de Autodeterminación en California (SDP). Hecho para participantes, familias, Coordinadores de Servicios y socios FMS.</p>
+      <p class="lead">Resumen claro de cómo ESS coordina apoyos dentro del Programa de Autodeterminación en California (SDP). Diseñado para participantes, familias, SCs y FMS.</p>
       <div class="pillrow">
         <span class="pill">🎯 Con Propósito</span>
         <span class="pill">🤝 Enfocado en la Familia</span>
-        <span class="pill">📑 Listo para FMS</span>
+        <span class="pill">📑 Compatible con FMS</span>
       </div>
       <div class="divider"></div>
+
       <h2><span class="emoji">📌</span>Propósito de esta guía</h2>
-      <p>Queremos que todos salgan de la reunión con el mismo entendimiento: metas, quién hace qué y para cuándo. No es un guion interno y no tiene tarifas ni datos privados.</p>
+      <p>Que todos entren y salgan con el mismo entendimiento: metas, responsabilidades y pasos siguientes.</p>
     </section>
 
     <!-- HOW ESS FITS -->
     <section class="card">
       <h2><span class="emoji">🧩</span>Cómo encaja ESS en el SDP</h2>
       <div class="callout">
-        ESS trabaja como <strong>proveedor no “vendorizado”</strong> en el SDP. La familia y el participante eligen a ESS; el pago va por medio del <strong>FMS</strong> del participante. El Coordinador/a de Servicios (SC) apoya con el plan y las autorizaciones.
+        ESS trabaja como <strong>proveedor no-vendorizado</strong>. La familia elige ESS; el FMS procesa pagos; el SC apoya con autorizaciones y alineación al IPP.
       </div>
       <ul class="list-tight">
-        <li><strong>Participante y Familia:</strong> Lideran el plan y eligen proveedores.</li>
-        <li><strong>Coordinador/a de Servicios (SC):</strong> Alinea metas del IPP y registra autorizaciones.</li>
-        <li><strong>FMS:</strong> Maneja presupuesto, acuerdos y pagos a proveedores.</li>
-        <li><strong>ESS:</strong> Da personal y apoyo de habilidades según el PCP/IPP, con notas claras por cada hora de servicio.</li>
+        <li><strong>Participante/Familia:</strong> Lideran el plan.</li>
+        <li><strong>Coordinador/a de Servicios:</strong> Alinea metas y autoriza horas.</li>
+        <li><strong>FMS:</strong> Maneja acuerdos, presupuesto y pagos.</li>
+        <li><strong>ESS:</strong> Provee personal, entrenamiento y documentación clara por cada hora.</li>
       </ul>
     </section>
 
@@ -145,75 +138,83 @@
     <section class="card">
       <h2><span class="emoji">🗂️</span>Objetivos de la reunión</h2>
       <ul class="list-tight">
-        <li>Revisar las metas actuales del IPP y notas del PCP si aplica.</li>
-        <li>Confirmar horas autorizadas y categorías de presupuesto.</li>
-        <li>Identificar el FMS y el modelo (Bill-Payer, Co-Employer o Sole-Employer).</li>
-        <li>Confirmar orientaciones/capacitaciones y documentos necesarios.</li>
-        <li>Anotar responsables y fechas objetivo para cada siguiente paso.</li>
+        <li>Revisar metas actuales del IPP.</li>
+        <li>Confirmar horas y categorías del presupuesto.</li>
+        <li>Identificar el modelo del FMS.</li>
+        <li>Revisar requisitos (antecedentes, capacitaciones, etc.).</li>
+        <li>Acordar responsables y fechas objetivo.</li>
       </ul>
     </section>
 
-    <!-- COORDINATION FRAMEWORK -->
+    <!-- FRAMEWORK -->
     <section class="card">
-      <h2><span class="emoji">🧭</span>Marco de coordinación</h2>
+      <h2><span class="emoji">🧭</span>Marco de Coordinación</h2>
+
       <details open>
         <summary><span class="sumicon">📌</span>Alineación del plan</summary>
         <ul class="list-tight">
-          <li>Vincular metas del IPP con áreas de apoyo de ESS.</li>
-          <li>Decidir qué metas empiezan ahora y cuáles después.</li>
+          <li>Vincular metas del IPP con apoyos de ESS.</li>
+          <li>Priorizar metas según urgencia y viabilidad.</li>
         </ul>
       </details>
+
       <details>
-        <summary><span class="sumicon">⏱️</span>Horas autorizadas y presupuesto</summary>
+        <summary><span class="sumicon">⏱️</span>Horas autorizadas</summary>
         <ul class="list-tight">
-          <li>Anotar horas por mes por meta o área.</li>
-          <li>Registrar límites de horario, topes y fecha tentativa de inicio.</li>
+          <li>Dividir horas por meta.</li>
+          <li>Registrar límites y fecha de inicio.</li>
         </ul>
       </details>
+
       <details>
         <summary><span class="sumicon">🏦</span>Coordinación con FMS</summary>
         <ul class="list-tight">
-          <li>Nombre del FMS, modelo y contacto de onboarding.</li>
-          <li>Lista de documentos que pide el FMS.</li>
+          <li>Confirmar modelo (Bill-Payer / Co-Employer / Sole-Employer).</li>
+          <li>Enviar documentos requeridos por el FMS.</li>
         </ul>
       </details>
+
       <details>
-        <summary><span class="sumicon">🎓</span>Orientación y cumplimiento</summary>
+        <summary><span class="sumicon">🎓</span>Capacitaciones</summary>
         <ul class="list-tight">
-          <li>Links de cursos/orientaciones y cómo mandar comprobantes.</li>
-          <li>Requisitos del caso (por ejemplo: antecedentes, RCP).</li>
+          <li>Enlaces a cursos de seguridad, conducta y documentación.</li>
+          <li>Procedimiento para mandar comprobantes.</li>
         </ul>
       </details>
+
       <details>
-        <summary><span class="sumicon">✅</span>Autorización e inicio</summary>
+        <summary><span class="sumicon">✅</span>Inicio de servicios</summary>
         <ul class="list-tight">
-          <li>Quién entrega qué (ESS, SC, FMS).</li>
-          <li>Confirmar fecha de inicio, ritmo de documentación y ventana de facturación.</li>
+          <li>Confirmar quién entrega qué documento.</li>
+          <li>Establecer fecha de inicio y ritmo de notas.</li>
         </ul>
       </details>
     </section>
 
     <!-- SERVICE CODES -->
     <section class="card" id="service-codes">
-      <h2><span class="emoji">🧩</span>Códigos de Servicio (SDP)</h2>
+      <h2><span class="emoji">🧩</span>Códigos de Servicio (SDP — No Vendorizados)</h2>
+
       <div class="sc-toolbar">
         <select id="scSelect" class="sc-select">
           <option value="">— Selecciona un código de servicio —</option>
         </select>
-        <span class="sc-note">Escribe para buscar por código o nombre. Solo se muestran apoyos relevantes del SDP (no vendorizados / no clínicos).</span>
+        <span class="sc-note">Escriba para buscar por número o nombre.</span>
       </div>
+
       <div id="scResult" class="sc-card" style="display:none"></div>
     </section>
 
     <!-- DOCUMENTS ESS PROVIDES -->
     <section class="card grid grid-2">
       <div>
-        <h2><span class="emoji">📎</span>Documentos que entrega ESS</h2>
+        <h2><span class="emoji">📎</span>Documentos que provee ESS</h2>
         <ul class="list-tight">
-          <li>W-9 y acuerdo de servicios (para el FMS)</li>
+          <li>W-9 para FMS</li>
+          <li>Acuerdo SDP</li>
           <li>Plan de personal alineado al IPP</li>
-          <li>Plantillas de timesheet y notas diarias</li>
-          <li>Fecha de inicio estimada y horario</li>
+          <li>Plantillas de notas y timesheets</li>
+          <li>Fecha estimada de inicio</li>
         </ul>
       </div>
     </section>
@@ -221,88 +222,70 @@
     <!-- RATE JUSTIFICATION -->
     <section class="card">
       <h2><span class="emoji">💵</span>Justificación de la Tarifa de ESS</h2>
-      <p>La tarifa de ESS refleja los costos reales de operar un servicio especializado y completo dentro del SDP. Incluye:</p>
+      <p>La tarifa refleja los costos reales de proveer apoyo especializado, supervisado y documentado dentro del SDP. Incluye:</p>
       <ul class="list-tight">
-        <li><strong>Compensación competitiva</strong> para personal calificado (prevención de rotación).</li>
-        <li><strong>Capacitación continua</strong> en seguridad, conducta, comunicación y habilidades comunitarias.</li>
+        <li><strong>Salarios competitivos</strong> para reducir rotación.</li>
+        <li><strong>Capacitación continua</strong> (seguridad, conducta, comunicación).</li>
         <li><strong>Supervisión profesional</strong> y revisión constante del plan.</li>
-        <li><strong>Documentación detallada</strong> (notas diarias, progreso y cumplimiento del IPP).</li>
-        <li><strong>Costos administrativos</strong> (seguro de responsabilidad, comp, impuestos, cumplimiento regulatorio, software).</li>
+        <li><strong>Documentación y cumplimiento</strong> (notas diarias detalladas).</li>
+        <li><strong>Costos administrativos</strong>: seguro de responsabilidad, impuestos, trabajadores, software, coordinación continua.</li>
       </ul>
-      <p>La tarifa asegura que el participante reciba un servicio estable, responsable y alineado con metas del IPP.</p>
+
+      <p>El objetivo es asegurar un servicio estable, seguro y consistente para el participante.</p>
+
+      <h3>📊 Ejemplo de desglose de costos (tarifa estándar de $60/hr)</h3>
+      <ul class="list-tight">
+        <li>Compensación directa al personal: <strong>$23.00</strong></li>
+        <li>Impuestos + Workers’ Comp: <strong>$3.50</strong></li>
+        <li>Supervisión y administración: <strong>$6.00</strong></li>
+        <li>Seguro de responsabilidad: <strong>$2.00</strong></li>
+        <li>Transporte/materiales: <strong>$2.50</strong></li>
+        <li>Capacitación & cumplimiento: <strong>$3.00</strong></li>
+        <li>Sostenibilidad/operación: <strong>$20.00</strong></li>
+      </ul>
     </section>
 
     <!-- OFFICIAL SOURCES -->
     <section class="card">
       <h2><span class="emoji">📖</span>Fuentes Oficiales</h2>
       <ul class="list-tight">
-        <li><a href="https://www.dds.ca.gov/wp-content/uploads/2019/03/SDP_FactSheet.pdf" target="_blank">DDS — SDP Fact Sheet</a></li>
-        <li><a href="https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=WIC&sectionNum=4685.8" target="_blank">WIC 4685.8 — Derechos del Programa de Autodeterminación</a></li>
-        <li><a href="https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=WIC&sectionNum=4689.8" target="_blank">WIC 4689.8 — Tarifas y negociación basada en costo real</a></li>
-        <li><a href="https://www.dir.ca.gov/dwc/dwc_home_page.htm" target="_blank">California DIR — Requisitos de empleador y Compensación</a></li>
-        <li><a href="https://www.irs.gov/businesses/small-businesses-self-employed/employment-taxes-at-a-glance" target="_blank">IRS — Costos de impuestos patronales</a></li>
-        <li><a href="https://www.dds.ca.gov/wp-content/uploads/2021/03/DSP_Workforce_Report.pdf" target="_blank">DDS — Crisis de fuerza laboral DSP</a></li>
+        <li><a target="_blank" href="https://www.dds.ca.gov/wp-content/uploads/2019/03/SDP_FactSheet.pdf">DDS – SDP Fact Sheet</a></li>
+        <li><a target="_blank" href="https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=WIC&sectionNum=4685.8">WIC 4685.8 – Derechos del SDP</a></li>
+        <li><a target="_blank" href="https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=WIC&sectionNum=4689.8">WIC 4689.8 – Tarifas basadas en costo real</a></li>
+        <li><a target="_blank" href="https://www.dir.ca.gov/dwc/dwc_home_page.htm">California DIR – Requisitos del empleador</a></li>
+        <li><a target="_blank" href="https://www.irs.gov/businesses/small-businesses-self-employed/employment-taxes-at-a-glance">IRS – Impuestos patronales</a></li>
+        <li><a target="_blank" href="https://www.dds.ca.gov/wp-content/uploads/2021/03/DSP_Workforce_Report.pdf">DDS – Informe sobre Crisis de Fuerza Laboral DSP</a></li>
       </ul>
     </section>
 
     <!-- RESOURCES -->
     <section class="card">
-      <h2><span class="emoji">📚</span>Recursos y descargas</h2>
+      <h2><span class="emoji">📚</span>Recursos y Descargas</h2>
       <div style="display:flex;flex-wrap:wrap;gap:10px">
         <a class="file" href="/ESS_Service_Menu_(EN).pdf" target="_blank">Menú de Servicios (EN)</a>
-        <a class="file" href="/ESS Service Menu (ES).pdf" target="_blank">Menú de Servicios (ES)</a>
+        <a class="file" href="/ESS_Service_Menu_(ES).pdf" target="_blank">Menú de Servicios (ES)</a>
         <a class="file" href="/ESS_SDP_Agreement_(EN).pdf" target="_blank">Acuerdo SDP (EN)</a>
         <a class="file" href="/ESS_SDP_Agreement_(ES).pdf" target="_blank">Acuerdo SDP (ES)</a>
       </div>
     </section>
 
     <footer class="container">
-      <div>© <span id="y"></span> Empowerment Support Solutions • Guía de Coordinación del SDP</div>
+      <div>© <span id="year"></span> Empowerment Support Solutions • Programa de Autodeterminación</div>
       <div class="contact">📧 empowermentess@gmail.com • 🌐 empowermentss.com</div>
-      <div style="margin-top:6px;color:var(--muted)">Esta página es informativa y puede actualizarse si cambian procesos del Centro Regional o del FMS.</div>
+      <div style="margin-top:6px;color:var(--muted)">Esta página puede actualizarse si cambian procesos del Centro Regional o del FMS.</div>
     </footer>
 
   </main>
 
   <script>
-    document.getElementById('y').textContent = new Date().getFullYear();
+    document.getElementById('year').textContent = new Date().getFullYear();
 
     const SERVICE_CODES = [
-      {
-        code:'062',
-        name:'Entrenamiento de Habilidades Individuales y Apoyo (Personal Assistance)',
-        budget:'Vida Comunitaria',
-        desc:'Apoyo 1:1 para desarrollar o mantener habilidades de vida diaria, seguridad y participación en el hogar y la comunidad.',
-        examples:'Rutinas diarias, acceso a la comunidad, recordatorios de salud/seguridad, apoyo en citas.'
-      },
-      {
-        code:'331',
-        name:'Integración Comunitaria',
-        budget:'Integración Comunitaria',
-        desc:'Apoyos individualizados en la comunidad para participar en actividades significativas.',
-        examples:'Clases, voluntariado, actividades recreativas con entrenamiento de habilidades.'
-      },
-      {
-        code:'338',
-        name:'Transporte No Médico (1)',
-        budget:'Transporte',
-        desc:'Transporte necesario para actividades autorizadas.',
-        examples:'Reembolso de millas, transporte público, viajes puerta a puerta.'
-      },
-      {
-        code:'360',
-        name:'Apoyo de Comunicación / Integración',
-        budget:'Vida Comunitaria',
-        desc:'Entrenamiento y apoyos que mejoran el acceso a la comunicación funcional.',
-        examples:'Entrenamiento AAC, apoyos visuales, coaching de comunicación.'
-      },
-      {
-        code:'366',
-        name:'Capacitación para Familia/Participante',
-        budget:'Vida Comunitaria',
-        desc:'Capacitación para implementar estrategias que aumenten independencia y seguridad.',
-        examples:'Coaching a cuidadores, rutinas alineadas al plan.'
-      }
+      { code:'062', name:'Entrenamiento de Habilidades Individuales', budget:'Vida Comunitaria', desc:'Apoyo 1:1 para habilidades de vida diaria y seguridad.', examples:'Rutinas, citas, comunidad.' },
+      { code:'331', name:'Integración Comunitaria', budget:'Integración Comunitaria', desc:'Participación significativa en actividades comunitarias.', examples:'Clases, recreación, voluntariado.' },
+      { code:'338', name:'Transporte No Médico', budget:'Transporte', desc:'Transporte para actividades autorizadas.', examples:'Millaje, transporte público.' },
+      { code:'360', name:'Apoyo de Comunicación', budget:'Vida Comunitaria', desc:'Apoyos para mejorar acceso a comunicación funcional.', examples:'AAC, apoyos visuales.' },
+      { code:'366', name:'Capacitación de Familia / Participante', budget:'Vida Comunitaria', desc:'Entrenamiento para cuidadores y participante.', examples:'Estrategias del IPP.' }
     ];
 
     const scSelect = document.getElementById('scSelect');
@@ -310,19 +293,17 @@
 
     SERVICE_CODES.forEach(item=>{
       const opt = document.createElement('option');
-      opt.value = item.code;
-      opt.textContent = `${item.code} — ${item.name}`;
+      opt.value=item.code;
+      opt.textContent=`${item.code} — ${item.name}`;
       scSelect.appendChild(opt);
     });
 
-    scSelect.addEventListener('change', () => {
-      const item = SERVICE_CODES.find(x=>x.code === scSelect.value);
-      if (!item){ scResult.style.display='none'; return; }
+    scSelect.addEventListener('change',()=>{
+      const item = SERVICE_CODES.find(x=>x.code===scSelect.value);
+      if(!item){ scResult.style.display='none'; return; }
       scResult.innerHTML = `
         <div class="sc-title">${item.code} — ${item.name}</div>
-        <div class="sc-badges">
-          <span class="badge">Presupuesto: ${item.budget}</span>
-        </div>
+        <div class="sc-badges"><span class="badge">Presupuesto: ${item.budget}</span></div>
         <div class="sc-desc">${item.desc}</div>
         <div class="sc-ex"><strong>Ejemplos:</strong> ${item.examples}</div>
         <div class="sc-cite">Nota: En el SDP estos apoyos se pagan por medio del FMS.</div>
