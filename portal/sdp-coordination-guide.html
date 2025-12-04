@@ -31,7 +31,7 @@
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);cursor:pointer;font-weight:700;backdrop-filter:blur(4px)}
     .btn:hover{background:rgba(255,255,255,.22)}
 
-    /* Language buttons (custom) */
+    /* Language buttons */
     .lang{display:flex;gap:10px;margin-right:6px}
     .lang button{
       appearance:none;border:1px solid #e6e8ee;background:#fff;color:#1f2937;
@@ -73,7 +73,7 @@
 
     .callout{border-left:4px solid var(--accent);padding:12px 14px;background:linear-gradient(0deg,#f0f7ff,#ffffff);border-radius:10px;color:#0f172a}
 
-    a.file{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;text-decoration:none;color:var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    a.file{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;text-decoration:none;color:#2c3e50;box-shadow:0 2px 8px rgba(0,0,0,.04)}
     a.file:hover{border-color:#d1d5db}
 
     footer{color:var(--muted);font-size:13px;padding:24px 0 40px;text-align:center}
@@ -92,6 +92,7 @@
     .sc-cite{font-size:12px;color:var(--muted);margin-top:6px}
   </style>
 </head>
+
 <body>
   <div class="banner">
     <div class="wrap">
@@ -103,7 +104,6 @@
         </div>
       </div>
 
-      <!-- Language toggle -->
       <div class="lang" aria-label="Language toggle">
         <button id="lang-en" type="button">EN</button>
         <button id="lang-es" type="button" onclick="window.location.href='/portal/sdp-coordination-guide-es.html'">ES</button>
@@ -116,10 +116,11 @@
     </div>
   </div>
 
-  <!-- Hidden Google widget -->
   <div id="google_translate_element"></div>
 
   <main class="container">
+
+    <!-- Existing content preserved -->
     <section class="card">
       <h1>SDP Coordination Guide</h1>
       <p class="lead">Public overview of how Empowerment Support Solutions (ESS) coordinates services within California’s Self-Determination Program (SDP). Designed for participants, families, Service Coordinators, and FMS partners.</p>
@@ -218,7 +219,7 @@
       </div>
     </section>
 
-    <!-- UPDATED: Service Codes Reference (SDP-friendly, non-vendor) -->
+    <!-- Service Codes -->
     <section class="card" id="service-codes">
       <h2><span class="emoji">🧩</span>Service Codes (SDP-Friendly)</h2>
       <div class="sc-toolbar">
@@ -230,6 +231,7 @@
       <div id="scResult" class="sc-card" style="display:none"></div>
     </section>
 
+    <!-- AFTER THE MEETING -->
     <section class="card">
       <h2><span class="emoji">📅</span>After the Meeting</h2>
       <ul class="list-tight">
@@ -240,6 +242,69 @@
       </ul>
     </section>
 
+
+    <!-- NEW SECTION 1: RATE JUSTIFICATION -->
+    <section class="card">
+      <h2><span class="emoji">💼</span>Rate Justification (ESS)</h2>
+      <p>ESS provides structured, agency-level support under SDP. Our rate reflects the comprehensive costs required to deliver safe, compliant, well-trained, fully documented support in homes and communities.</p>
+
+      <div class="divider"></div>
+      <h3>What the Rate Includes</h3>
+      <ul class="list-tight">
+        <li><strong>Direct Support Professional compensation</strong> (competitive wage to recruit/retain qualified staff)</li>
+        <li><strong>Employer payroll taxes</strong> (federal/state, UI/SDI, Medicare, Social Security)</li>
+        <li><strong>Workers’ compensation insurance</strong> (required for in-home/community DSPs)</li>
+        <li><strong>General liability insurance</strong> (required for agencies providing in-home support)</li>
+        <li><strong>Training & onboarding</strong> (safety training, documentation training, skill-development coaching)</li>
+        <li><strong>Documentation systems</strong> (daily notes, progress tracking, timesheets, FMS communication)</li>
+        <li><strong>Program oversight</strong> (quality, scheduling, compliance, communication, plan coordination)</li>
+      </ul>
+
+      <p>This structure aligns with statewide workforce realities and the regulatory expectations for non-vendored providers delivering individualized support under SDP.</p>
+    </section>
+
+
+    <!-- NEW SECTION 2: OFFICIAL SOURCES -->
+    <section class="card">
+      <h2><span class="emoji">📘</span>Official State Sources Supporting Rate Structure</h2>
+      <p>These public, government-verified sources outline the legal, financial, and programmatic requirements for providers under the Self-Determination Program. They support the cost structure included in ESS’s hourly rate.</p>
+
+      <div class="divider"></div>
+
+      <h3>DDS Self-Determination Program</h3>
+      <ul class="list-tight">
+        <li><a href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank">DDS SDP Regulations & Overview</a> — SDP providers must meet individualized, flexible support expectations.</li>
+      </ul>
+
+      <h3>Lanterman Act Requirements</h3>
+      <ul class="list-tight">
+        <li><strong>WIC §4685.8(b)</strong> — Supports under SDP must be person-centered, flexible, and individualized.</li>
+        <li><strong>WIC §4689.8</strong> — Regional Centers may negotiate provider rates based on actual, reasonable provider costs.</li>
+      </ul>
+
+      <h3>California Title 17 Requirements</h3>
+      <ul class="list-tight">
+        <li><strong>17 CCR §57332</strong> — Reimbursement may be “usual & customary” or “negotiated rate” based on provider cost structure.</li>
+      </ul>
+
+      <h3>Employer Cost & Compliance Requirements</h3>
+      <ul class="list-tight">
+        <li><a href="https://www.irs.gov/businesses/small-businesses-self-employed/employment-taxes" target="_blank">IRS Employer Tax Obligations</a> — Federal employer responsibilities (FICA, FUTA, Medicare).</li>
+        <li><a href="https://www.dir.ca.gov/dwc/Employer.htm" target="_blank">CA Workers’ Compensation Requirements</a> — Mandatory coverage for DSPs working in homes and communities.</li>
+        <li><a href="https://www.dir.ca.gov" target="_blank">California DIR</a> — Minimum wage, overtime, and employer labor obligations.</li>
+      </ul>
+
+      <h3>Statewide DSP Workforce Data</h3>
+      <ul class="list-tight">
+        <li><a href="https://www.thearcca.org" target="_blank">The Arc of California</a> — DSP workforce shortage & retention data supporting competitive wage requirements.</li>
+        <li>DDS statewide workforce reports emphasizing turnover, recruitment difficulty, and the need for sustainable DSP rates.</li>
+      </ul>
+
+      <p>These sources collectively demonstrate that individualized support under SDP requires comprehensive provider responsibilities — including wage, insurance, training, compliance, and oversight — which are reflected in ESS’s standard rate.</p>
+    </section>
+
+
+    <!-- RESOURCES -->
     <section class="card">
       <h2><span class="emoji">📚</span>Resources & Downloads</h2>
       <div style="display:flex;flex-wrap:wrap;gap:10px">
@@ -258,10 +323,8 @@
   </main>
 
   <script>
-    // Footer year
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ---------- Google Translate (hidden widget + custom buttons) ----------
     let resolveCombo;
     const comboReady = new Promise(res => (resolveCombo = res));
 
@@ -309,8 +372,6 @@
       document.getElementById('lang-en').classList.add('active');
     });
 
-    // ---------- SDP-Friendly Service Codes ----------
-    // Only codes relevant to ESS in SDP (non-vendored/non-clinical).
     const SERVICE_CODES = [
       {
         code:'062',
@@ -352,7 +413,6 @@
     const scSelect = document.getElementById('scSelect');
     const scResult = document.getElementById('scResult');
 
-    // Populate dropdown
     SERVICE_CODES
       .sort((a,b)=>a.code.localeCompare(b.code))
       .forEach(item=>{
@@ -362,7 +422,6 @@
         scSelect.appendChild(opt);
       });
 
-    // On select -> show details
     scSelect.addEventListener('change', () => {
       const val = scSelect.value;
       const item = SERVICE_CODES.find(x=>x.code === val);
@@ -382,5 +441,6 @@
   </script>
 
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 </body>
 </html>
