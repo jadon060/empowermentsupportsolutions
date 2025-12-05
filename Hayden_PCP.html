@@ -2,885 +2,738 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>ESS • Hayden – Person-Centered Plan (PCP)</title>
+  <title>ESS • Daily SDP Log (Hayden)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <style>
-    :root{
-      --brand:#0b1220;
-      --brand-2:#0f4c81;
-      --bg:#f3f4f6;
-      --card:#ffffff;
-      --ink:#0f172a;
-      --muted:#64748b;
-      --line:#e5e7eb;
-      --radius:16px;
-      --shadow:0 14px 40px rgba(15,23,42,.16);
-    }
-    *{box-sizing:border-box;}
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--ink);
-      font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;
-    }
+    html,body{margin:0;padding:0;background:#f7f7fb;color:#0f172a}
+    *,*::before,*::after{box-sizing:border-box}
 
-    /* TOP BANNER — match unified export look */
-    .top-band{
-      background:#020617;
-      color:#e5e7eb;
-      padding:14px 24px;
+    /* ⬇️ staff reference card (bigger) */
+    .about-wrap{
+      max-width:980px;
+      margin:1.5rem auto 0.5rem;
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:18px;
-    }
-    .top-left{
-      display:flex;
-      align-items:center;
       gap:14px;
+      align-items:flex-start;
+      padding:0 1.5rem;
     }
-    .top-left img{
-      height:42px;
-      object-fit:contain;
-    }
-    .top-title{
-      font-weight:700;
-      font-size:18px;
-      color:#f9fafb;
-    }
-    .top-sub{
-      font-size:13px;
-      color:#cbd5f5;
-    }
-    .top-right{
-      text-align:right;
-      font-size:12px;
-      color:#9ca3af;
-    }
-
-    .wrap{
-      max-width:1000px;
-      margin:20px auto 40px;
-      padding:0 16px;
-    }
-
-    h2.section-heading{
-      margin:28px 0 10px;
-      font-size:20px;
-      font-weight:700;
-      color:var(--brand-2);
-    }
-
-    .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      padding:18px 20px;
-      margin-bottom:18px;
-      box-shadow:var(--shadow);
-    }
-
-    .card-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      margin-bottom:10px;
-      gap:10px;
-    }
-    .card-title{
-      font-size:16px;
-      font-weight:700;
-      color:var(--brand);
-    }
-    .card-sub{
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    label{
-      font-size:13px;
-      font-weight:600;
-      color:var(--ink);
-      display:block;
-      margin:8px 0 4px;
-    }
-    .hint{
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:8px;
-    }
-
-    textarea{
-      width:100%;
-      min-height:80px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:9px 10px;
-      font-size:14px;
-      resize:vertical;
+    .about-card{
       background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:18px 20px 20px;
+      display:flex;
+      gap:16px;
+      width:100%;
+      box-shadow:0 2px 10px rgba(0,0,0,0.04);
     }
-
-    .tall   { min-height:120px; }
-    .short  { min-height:55px; }
-
-    .grid-2{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:14px 18px;
+    .about-avatar{
+      width:96px;
+      height:96px;
+      border-radius:999px;
+      object-fit:cover;
+      border:3px solid #eef2ff;
+      background:#e5e7eb;
+      flex:0 0 auto;
     }
-    .grid-3{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:14px 18px;
+    .about-body h3{
+      margin:0 0 6px;
+      font-size:1.25rem;
     }
-    @media (max-width:800px){
-      .grid-2,.grid-3{grid-template-columns:1fr;}
+    .about-body small{
+      display:block;
+      color:#6b7280;
+      margin-bottom:10px;
+      font-size:0.9rem;
     }
-
-    /* SIGNATURES */
-    .sig-row{
+    .about-grid{
       display:flex;
       flex-wrap:wrap;
-      gap:24px;
-      margin-top:10px;
+      gap:14px 32px;
     }
-    .sig-box{
-      flex:1 1 260px;
-      background:#f9fafb;
-      border:1px dashed #cbd5e1;
-      border-radius:12px;
-      padding:10px 10px 14px;
-    }
-    .sig-label{
-      font-weight:600;
+    .about-label{
+      font-weight:650;
       font-size:13px;
-      margin-bottom:6px;
-      color:var(--brand);
+      margin-bottom:4px;
+      color:#0f172a;
     }
-    canvas.sig-canvas{
-      width:100%;
-      border-radius:10px;
-      border:1px solid #d4d4d8;
-      background:#fff;
-      touch-action:none;
-      display:block;
-    }
-    .clear-btn{
-      background:#e5e7eb;
-      color:#111827;
-      padding:6px 12px;
-      border-radius:999px;
-      font-size:13px;
-      cursor:pointer;
-      margin-top:8px;
-      border:none;
-    }
-
-    /* EXPORT + SUBMIT BUTTONS */
-    #exportPCP{
-      background:#e5e7eb;
-      border:none;
-      border-radius:999px;
-      padding:12px 20px;
-      color:#111827;
-      font-size:15px;
-      cursor:pointer;
-      display:block;
-      width:100%;
-      margin:24px 0 6px;
-      font-weight:600;
-    }
-
-    #submitPCP{
-      background:#0b1120;
-      border:none;
-      border-radius:999px;
-      padding:14px 22px;
-      color:#f9fafb;
-      font-size:16px;
-      cursor:pointer;
-      display:block;
-      width:100%;
-      margin:8px 0 6px;
-      font-weight:600;
-    }
-    #submitPCP:disabled{
-      opacity:0.7;
-      cursor:default;
-    }
-
-    footer{
-      background:#020617;
-      color:#e5e7eb;
-      padding:14px 20px;
-      font-size:12px;
-      text-align:center;
-    }
-    footer span{
-      display:block;
+    .about-text{
+      font-size:14px;
       line-height:1.5;
     }
+    @media (max-width:700px){
+      .about-wrap{padding:0 1rem;}
+      .about-card{flex-direction:column;align-items:flex-start;}
+      .about-avatar{width:80px;height:80px;}
+    }
 
-    @media print{
-      body{background:#fff;}
-      #submitPCP, #exportPCP, .clear-btn{display:none !important;}
-      .wrap{
-        max-width:8.5in;
-        margin:0 auto;
-        padding:0.4in;
-      }
-      .card{
-        box-shadow:none;
-        margin-bottom:10px;
-      }
-      footer{
-        border-top:1px solid #d4d4d8;
-        background:#fff;
-        color:#4b5563;
+    /* 🔗 quick-link buttons */
+    .quick-links{
+      max-width:980px;
+      margin:0 auto 0.75rem;
+      padding:0 1.5rem;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .quick-link-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:9px 14px;
+      border-radius:999px;
+      border:1px solid #1f2937;
+      background:#111827;
+      color:#f9fafb;
+      font-size:.9rem;
+      text-decoration:none;
+      box-shadow:0 2px 6px rgba(15,23,42,.18);
+      white-space:nowrap;
+    }
+    .quick-link-btn--secondary{
+      background:#ffffff;
+      color:#111827;
+      border-color:#e5e7eb;
+      box-shadow:0 1px 4px rgba(15,23,42,.10);
+    }
+    .quick-link-btn span:first-child{
+      font-size:1rem;
+    }
+    @media (max-width:700px){
+      .quick-links{padding:0 1rem;}
+      .quick-link-btn{
+        flex:1 1 100%;
+        justify-content:center;
+        white-space:normal;
+        text-align:center;
       }
     }
+
+    /* === existing styles (unchanged) === */
+    .row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+    .row > *{min-width:240px;flex:1}
+    .weekbar{display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;padding:10px;border-radius:10px;background:#f8fafc;flex-wrap:wrap}
+    .weekbar .spacer{flex:1 1 auto;min-width:60px}
+    .btn{padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
+    .btn--primary{border-color:#2c3e50;background:#2c3e50;color:#fff}
+    .btn--icon{width:36px;height:36px}
+    .daybtn{position:relative;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;cursor:pointer;width:100%;text-align:left}
+    .dot{position:absolute;right:10px;top:10px;width:8px;height:8px;border-radius:999px;background:#e5e7eb}
+    .input,.select,.textarea{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px}
+    .textarea{min-height:120px;resize:vertical}
+    .label{display:block;color:#6b7280;font-size:12px;margin-bottom:6px}
+    .pill{font-size:12px;background:#eef2ff;border:1px solid #e5e7eb;padding:6px 10px;border-radius:999px;color:#0f172a}
+    #w_toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:1000;font-size:14px;opacity:0;transition:opacity .25s}
+    #w_error{display:none;margin-top:12px;padding:10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b}
+    .sig-wrap{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:14px;padding:18px;margin-top:14px;}
+    .sig-title{font-weight:600;margin-bottom:8px;}
+    .sig-box{border:1px dashed #d1d5db;border-radius:10px;background:#fff;}
+    canvas.sig{width:100%;height:140px;display:block;border-radius:10px;touch-action:none;cursor:crosshair;}
   </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
 
-<div class="top-band">
-  <div class="top-left">
-    <img src="https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png"
-         alt="ESS Logo">
+<!-- ⬇️ staff reference -->
+<div class="about-wrap">
+  <div class="about-card">
+    <img src="https://jadon060.github.io/empowermentsupportsolutions/Hayden_Profile_Pic.jpg" alt="Hayden profile photo" class="about-avatar" loading="lazy" />
+    <div class="about-body">
+      <h3>About Hayden</h3>
+      <small>Use this to connect before starting session — keep tasks structured, supportive, and confidence-building.</small>
+      <div class="about-grid">
+
+        <div style="min-width:180px;">
+          <div class="about-label">Favorites & Interests</div>
+          <div class="about-text">
+            Loves geology, museums, history, and waffles in the morning.<br>
+            Fun fact: wants to become a <strong>paleontologist</strong> and dig up dinosaur fossils. 🦖
+          </div>
+        </div>
+
+        <div style="min-width:180px;">
+          <div class="about-label">Things he enjoys</div>
+          <div class="about-text">
+            Staying home, reading about history and geology, gaming, learning about prehistoric animals.
+          </div>
+        </div>
+
+        <div style="min-width:180px;">
+          <div class="about-label">Keep in mind</div>
+          <div class="about-text">
+            Shy with communication; needs extra time to respond.<br>
+            Slight speech impediment — may answer with nods or smiles first.<br>
+            Prefers English; understands some Spanish but does not want to speak it.
+          </div>
+        </div>
+
+        <div style="min-width:180px;">
+          <div class="about-label">Comfort tools</div>
+          <div class="about-text">
+            Clear step-by-step instructions.<br>
+            Encouragement and patience.<br>
+            Predictable structure and slow pacing.
+          </div>
+        </div>
+
+        <div style="min-width:180px;">
+          <div class="about-label">Quick notes for ESS</div>
+          <div class="about-text">
+            Needs support building independence before parents’ travel.<br>
+            Focus on cooking basics, laundry, budgeting & ACCESS practice.<br>
+            Confidence-building and gentle encouragement recommended.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔗 Hayden quick-links bar -->
+<div class="quick-links">
+  <a href="Hayden_Calendar.html" class="quick-link-btn">
+    <span>📆</span>
+    <span>Weekly staff calendar</span>
+  </a>
+  <a href="Hayden_PCP.html" class="quick-link-btn quick-link-btn--secondary">
+    <span>🧠</span>
+    <span>Hayden PCP (Person-Centered Plan)</span>
+  </a>
+</div>
+
+<section style="max-width:980px;margin:2rem auto;padding:1.5rem;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);font-family:sans-serif;border:1px solid #e5e7eb;">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+    <h2 style="margin:0;">📅 Daily SDP Log – Hayden</h2>
+    <span class="pill">Daily submissions → Admin export</span>
+  </div>
+
+  <!-- fixed client -->
+  <div class="row" style="margin-bottom:10px;">
+    <input type="hidden" id="client_id" value="6778cce6-c1e6-4384-a6c5-5a1f8c5d481f" />
     <div>
-      <div class="top-title">Empowerment Support Solutions, LLC</div>
-      <div class="top-sub">SDP • Person-Centered Plan (PCP) for Hayden</div>
+      <label class="label">Client</label>
+      <input type="text" class="input" value="Hayden H." readonly style="background:#e5e7eb;cursor:not-allowed;">
+    </div>
+    <div>
+      <label for="staff_id" class="label">Staff (type your name)</label>
+      <input id="staff_id" type="text" class="input" placeholder="e.g., John Perez" required />
     </div>
   </div>
-  <div class="top-right">
-    <div id="todayDate"></div>
+
+  <!-- week select -->
+  <div class="weekbar">
+    <button id="w_prevWeek" class="btn btn--icon">◀</button>
+    <div>
+      <div id="w_range" style="font-weight:700;color:#0f172a;">Mon — Sun</div>
+      <div style="color:#6b7280;font-size:13px;">Week of <span id="w_startTxt"></span> to <span id="w_endTxt"></span></div>
+    </div>
+    <button id="w_nextWeek" class="btn btn--icon">▶</button>
+    <div class="spacer"></div>
   </div>
-</div>
 
-<div class="wrap">
-  <!-- SECTION 1 – PCP OVERVIEW / WHO WAS INVOLVED -->
-  <h2 class="section-heading">Section 1 — PCP Overview</h2>
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Meeting details & participants</div>
-      <div class="card-sub">This page mirrors what Regional Centers expect to see on a formal PCP cover sheet.</div>
-    </div>
+  <!-- days -->
+  <div id="w_days" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:14px;"></div>
 
-    <div class="grid-2">
-      <div>
-        <label for="pcp_conducted_by">PCP conducted by (John Doe)</label>
-        <textarea id="pcp_conducted_by" class="short"></textarea>
-      </div>
-      <div>
-        <label for="pcp_format">Format (in-person / virtual / hybrid)</label>
-        <textarea id="pcp_format" class="short"></textarea>
-      </div>
-    </div>
+  <!-- day panel -->
+  <div id="w_panel" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px;">
+    <div id="w_panelDate" style="color:#6b7280;margin-bottom:10px;"></div>
 
-    <div class="grid-2">
+    <div class="row">
       <div>
-        <label for="pcp_date">PCP meeting date(s)</label>
-        <textarea id="pcp_date" class="short"></textarea>
+        <label for="w_start" class="label">Start Time</label>
+        <input id="w_start" type="time" class="input">
       </div>
       <div>
-        <label for="pcp_location">Location(s)</label>
-        <textarea id="pcp_location" class="short"></textarea>
-      </div>
-    </div>
-
-    <label for="pcp_participants">People who participated (family, Hayden, ESS staff, Regional Center, others)</label>
-    <textarea id="pcp_participants" class="tall"></textarea>
-
-    <label for="pcp_summary">Summary statement (brief overview of what this PCP focuses on)</label>
-    <textarea id="pcp_summary" class="tall"></textarea>
-  </div>
-
-  <!-- SECTION 2 – PERSONAL PROFILE -->
-  <h2 class="section-heading">Section 2 — Personal Profile</h2>
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Who Hayden is as a person</div>
-      <div class="card-sub">Keeps Hayden’s voice and preferences at the center of all services.</div>
-    </div>
-
-    <label>What people like & admire about Hayden</label>
-    <textarea id="like_admire" class="tall"></textarea>
-
-    <div class="grid-2">
-      <div>
-        <label>Hayden’s strengths</label>
-        <textarea id="strengths"></textarea>
+        <label for="w_end" class="label">End Time</label>
+        <input id="w_end" type="time" class="input">
       </div>
       <div>
-        <label>Communication style</label>
-        <textarea id="communication"></textarea>
+        <label for="w_modality" class="label">Modality / Location</label>
+        <select id="w_modality" class="select">
+          <option value="Home">Home</option>
+          <option value="Community">Community</option>
+          <option value="Remote" selected>Remote</option>
+        </select>
       </div>
     </div>
 
-    <div class="grid-2">
+    <div class="row" style="margin-top:12px;">
       <div>
-        <label>Important TO Hayden</label>
-        <textarea id="important_to" class="tall"></textarea>
-      </div>
-      <div>
-        <label>Important FOR Hayden</label>
-        <textarea id="important_for" class="tall"></textarea>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div>
-        <label>Sensory needs</label>
-        <textarea id="sensory"></textarea>
+        <label for="w_hours" class="label">Hours Worked</label>
+        <input id="w_hours" type="number" min="0" step="0.25" placeholder="e.g., 3.5" class="input">
       </div>
       <div>
-        <label>Behavioral & emotional considerations</label>
-        <textarea id="behavioral"></textarea>
+        <label for="w_domain" class="label">Domain (service codes worked on)</label>
+        <input id="w_domain" type="text" placeholder="e.g., Money Mgmt, Hygiene, Safety…" class="input">
       </div>
     </div>
 
-    <label>Health & safety considerations</label>
-    <textarea id="health_safety"></textarea>
-
-    <label>Cultural or personal identity notes</label>
-    <textarea id="cultural"></textarea>
-  </div>
-
-  <!-- SECTION 3 – DAILY ROUTINES -->
-  <h2 class="section-heading">Section 3 — Daily Routines & Life</h2>
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">How Hayden spends his days</div>
-      <div class="card-sub">Supports Regional Center to see where ESS fits into daily life.</div>
-    </div>
-
-    <div class="grid-3">
+    <div class="row" style="margin-top:12px;">
       <div>
-        <label>Morning routine</label>
-        <textarea id="morning" class="short"></textarea>
+        <label for="w_rc" class="label">Regional Center</label>
+        <input id="w_rc" type="text" class="input" placeholder="e.g., ELARC">
       </div>
       <div>
-        <label>Afternoon routine</label>
-        <textarea id="afternoon" class="short"></textarea>
-      </div>
-      <div>
-        <label>Evening routine</label>
-        <textarea id="evening" class="short"></textarea>
+        <label for="w_sc" class="label">Service Coordinator</label>
+        <input id="w_sc" type="text" class="input" placeholder="e.g., Jose Reyes Jr.">
       </div>
     </div>
 
-    <label>Community routines</label>
-    <textarea id="community"></textarea>
-
-    <div class="grid-2">
-      <div>
-        <label>What helps Hayden during stress</label>
-        <textarea id="stress_help"></textarea>
-      </div>
-      <div>
-        <label>Known triggers</label>
-        <textarea id="triggers"></textarea>
-      </div>
-    </div>
-  </div>
-
-  <!-- NEW SECTION 4 – ELARC LIFE AREAS -->
-  <h2 class="section-heading">Section 4 — ELARC Life Areas & Outcomes</h2>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Life Area 1 — Choice / Advocacy</div>
-      <div class="card-sub">Hayden’s choices, decision-making, and self-advocacy (including supported decision-making).</div>
-    </div>
-    <label>Goal in this life area</label><textarea id="choice_goal"></textarea>
-    <label>Why this matters</label><textarea id="choice_why"></textarea>
-    <label>Current barriers</label><textarea id="choice_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="choice_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="choice_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities</label><textarea id="choice_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="choice_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Life Area 2 — Education / Learning</div>
-      <div class="card-sub">Goals around learning, training, and lifelong education inside or outside formal school settings.</div>
-    </div>
-    <label>Goal in this life area</label><textarea id="education_goal"></textarea>
-    <label>Why this matters</label><textarea id="education_why"></textarea>
-    <label>Current barriers</label><textarea id="education_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="education_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="education_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities</label><textarea id="education_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="education_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Life Area 3 — Employment</div>
-      <div class="card-sub">Exploring and preparing for competitive integrated employment or meaningful day/work programs.</div>
-    </div>
-    <label>Goal in this life area</label><textarea id="employment_goal"></textarea>
-    <label>Why this matters</label><textarea id="employment_why"></textarea>
-    <label>Current barriers</label><textarea id="employment_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="employment_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="employment_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities</label><textarea id="employment_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="employment_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Life Area 4 — Healthcare / Wellness</div>
-      <div class="card-sub">Medical, dental, mental health, and general wellness routines and support.</div>
-    </div>
-    <label>Goal in this life area</label><textarea id="healthcare_goal"></textarea>
-    <label>Why this matters</label><textarea id="healthcare_why"></textarea>
-    <label>Current barriers</label><textarea id="healthcare_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="healthcare_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="healthcare_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities</label><textarea id="healthcare_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="healthcare_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Life Area 5 — Home Life / Housing</div>
-      <div class="card-sub">Where Hayden lives, how daily life at home works, and what housing goals he has.</div>
-    </div>
-    <label>Goal in this life area</label><textarea id="home_goal"></textarea>
-    <label>Why this matters</label><textarea id="home_why"></textarea>
-    <label>Current barriers</label><textarea id="home_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="home_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="home_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities</label><textarea id="home_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="home_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Life Area 6 — Personal / Emotional Growth</div>
-      <div class="card-sub">Emotional well-being, coping skills, mental health growth, and self-improvement.</div>
-    </div>
-    <label>Goal in this life area</label><textarea id="emotional_goal"></textarea>
-    <label>Why this matters</label><textarea id="emotional_why"></textarea>
-    <label>Current barriers</label><textarea id="emotional_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="emotional_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="emotional_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities</label><textarea id="emotional_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="emotional_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Life Area 7 — Relationships</div>
-      <div class="card-sub">Family, friends, and important people in Hayden’s life and how he wants those relationships to grow.</div>
-    </div>
-    <label>Goal in this life area</label><textarea id="relationships_goal"></textarea>
-    <label>Why this matters</label><textarea id="relationships_why"></textarea>
-    <label>Current barriers</label><textarea id="relationships_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="relationships_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="relationships_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities</label><textarea id="relationships_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="relationships_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Life Area 8 — Supports at Home</div>
-      <div class="card-sub">How family and paid supports help Hayden in the home, and how those supports are organized.</div>
-    </div>
-    <label>Goal in this life area</label><textarea id="supports_home_goal"></textarea>
-    <label>Why this matters</label><textarea id="supports_home_why"></textarea>
-    <label>Current barriers</label><textarea id="supports_home_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="supports_home_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="supports_home_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities</label><textarea id="supports_home_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="supports_home_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Life Area 9 — Transportation / Getting Around</div>
-      <div class="card-sub">How Hayden gets around (walking, rides, public transit) and what travel skills he wants to build.</div>
-    </div>
-    <label>Goal in this life area</label><textarea id="transport_goal"></textarea>
-    <label>Why this matters</label><textarea id="transport_why"></textarea>
-    <label>Current barriers</label><textarea id="transport_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="transport_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="transport_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities</label><textarea id="transport_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="transport_timeline" class="short"></textarea>
-  </div>
-
-  <!-- SECTION 5 – INDIVIDUAL OUTCOMES (original outcomes kept) -->
-  <h2 class="section-heading">Section 5 — Individual Outcomes (Summary)</h2>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Outcome 1 — Community Engagement</div>
-      <div class="card-sub">Ties directly to IPP goals and SDP service domains.</div>
-    </div>
-    <label>Goal</label><textarea id="outcome1_goal"></textarea>
-    <label>Why this matters</label><textarea id="outcome1_why"></textarea>
-    <label>Current barriers</label><textarea id="outcome1_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="outcome1_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="outcome1_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome1_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="outcome1_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Outcome 2 — Independent Living Skills</div>
-      <div class="card-sub">Daily living & functional independence.</div>
-    </div>
-    <label>Goal</label><textarea id="outcome2_goal"></textarea>
-    <label>Why this matters</label><textarea id="outcome2_why"></textarea>
-    <label>Current barriers</label><textarea id="outcome2_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="outcome2_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="outcome2_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome2_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="outcome2_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Outcome 3 — Health & Safety</div>
-      <div class="card-sub">Medical, behavioral, and general safety stability.</div>
-    </div>
-    <label>Goal</label><textarea id="outcome3_goal"></textarea>
-    <label>Why this matters</label><textarea id="outcome3_why"></textarea>
-    <label>Current barriers</label><textarea id="outcome3_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="outcome3_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="outcome3_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome3_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="outcome3_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Outcome 4 — Behavioral / Emotional Regulation</div>
-      <div class="card-sub">Helps RC see the behavioral support structure clearly.</div>
-    </div>
-    <label>Goal</label><textarea id="outcome4_goal"></textarea>
-    <label>Why this matters</label><textarea id="outcome4_why"></textarea>
-    <label>Current barriers</label><textarea id="outcome4_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="outcome4_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="outcome4_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome4_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="outcome4_timeline" class="short"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Outcome 5 — Communication & Self-Advocacy</div>
-      <div class="card-sub">Supports Hayden to speak up, request, refuse, and direct his life.</div>
-    </div>
-    <label>Goal</label><textarea id="outcome5_goal"></textarea>
-    <label>Why this matters</label><textarea id="outcome5_why"></textarea>
-    <label>Current barriers</label><textarea id="outcome5_barriers" class="short"></textarea>
-    <label>Teaching & support strategies</label><textarea id="outcome5_strategies"></textarea>
-    <label>Progress measurement</label><textarea id="outcome5_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome5_staff"></textarea>
-    <label>Timeline / expected progress</label><textarea id="outcome5_timeline" class="short"></textarea>
-  </div>
-
-  <!-- SECTION 6 – SUPPORTS -->
-  <h2 class="section-heading">Section 6 — Natural & Paid Supports</h2>
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Circle of support</div>
-      <div class="card-sub">Shows why ESS is needed alongside family and community.</div>
+    <div style="margin-top:12px;">
+      <label for="w_notes" class="label">Progress Notes</label>
+      <textarea id="w_notes" class="textarea" placeholder="what/where/with whom, goals"></textarea>
     </div>
 
-    <label>Natural supports (e.g., John Doe)</label>
-    <textarea id="natural_supports"></textarea>
-
-    <label>Paid supports (ESS Staff)</label>
-    <textarea id="paid_supports"></textarea>
-
-    <div class="grid-2">
-      <div>
-        <label>Justification for paid supports</label>
-        <textarea id="justification" class="tall"></textarea>
-      </div>
-      <div>
-        <label>Hours needed per month</label>
-        <textarea id="hours_needed" class="tall"></textarea>
-      </div>
-    </div>
-  </div>
-
-  <!-- SECTION 7 – RISK -->
-  <h2 class="section-heading">Section 7 — Risk & Mitigation</h2>
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Risks and protection plan</div>
-      <div class="card-sub">Supports dignity of risk while keeping Hayden safe.</div>
+    <div style="margin-top:12px;">
+      <label for="w_obs" class="label">Observation</label>
+      <textarea id="w_obs" class="textarea" placeholder="reaction/response to today's services"></textarea>
     </div>
 
-    <div class="grid-2">
-      <div>
-        <label>Behavioral risks</label><textarea id="risk_behavior"></textarea>
-      </div>
-      <div>
-        <label>Medical risks</label><textarea id="risk_medical"></textarea>
+    <div style="margin-top:12px;">
+      <label for="w_plan" class="label">Action Plan</label>
+      <textarea id="w_plan" class="textarea" placeholder="next steps to work on the service codes"></textarea>
+    </div>
+
+    <div class="sig-wrap">
+      <div style="display:flex;gap:20px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:240px;">
+          <div class="sig-title">Staff Signature</div>
+          <div class="sig-box">
+            <canvas id="staffSig" class="sig"></canvas>
+          </div>
+          <div style="font-size:12px;color:#6b7280;margin-top:6px;">Draw with mouse/finger.</div>
+          <button id="clearStaffSig" class="btn" style="margin-top:8px;">Clear Staff Signature</button>
+        </div>
+        <div style="flex:1;min-width:240px;">
+          <div class="sig-title">Client / Parent / Authorized Signature</div>
+          <div class="sig-box">
+            <canvas id="clientSig" class="sig"></canvas>
+          </div>
+          <div style="font-size:12px;color:#6b7280;margin-top:6px;">Draw with mouse/finger.</div>
+          <button id="clearClientSig" class="btn" style="margin-top:8px;">Clear Client Signature</button>
+        </div>
       </div>
     </div>
 
-    <div class="grid-2">
-      <div>
-        <label>Environmental risks</label><textarea id="risk_env"></textarea>
-      </div>
-      <div>
-        <label>Community risks</label><textarea id="risk_comm"></textarea>
-      </div>
-    </div>
-
-    <label>Crisis plan</label><textarea id="crisis_plan" class="tall"></textarea>
-    <label>Mitigation strategies</label><textarea id="mitigation" class="tall"></textarea>
-  </div>
-
-  <!-- SECTION 8 – FUTURE VISION -->
-  <h2 class="section-heading">Section 8 — Future Vision</h2>
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Hayden’s future direction</div>
-      <div class="card-sub">Connects today’s supports with long-term outcomes.</div>
-    </div>
-
-    <label>Hayden’s preferred future</label><textarea id="future_pref"></textarea>
-    <label>Goals for independence</label><textarea id="future_goals"></textarea>
-    <label>Community involvement</label><textarea id="future_comm"></textarea>
-    <label>Long-term direction</label><textarea id="future_long"></textarea>
-  </div>
-
-  <!-- SECTION 9 – SIGNATURES -->
-  <h2 class="section-heading">Section 9 — PCP Agreement & Signatures</h2>
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Hayden + ESS Staff</div>
-      <div class="card-sub">Signatures show the team participated and agrees this plan reflects Hayden’s goals.</div>
-    </div>
-
-    <div class="sig-row">
-      <div class="sig-box">
-        <div class="sig-label">Hayden Signature</div>
-        <canvas id="sig_omar" class="sig-canvas" height="180"></canvas>
-        <button class="clear-btn" type="button" id="clearOmar">Clear</button>
-      </div>
-
-      <div class="sig-box">
-        <div class="sig-label">ESS Staff Signature (John Doe)</div>
-        <canvas id="sig_staff" class="sig-canvas" height="180"></canvas>
-        <button class="clear-btn" type="button" id="clearStaff">Clear</button>
-      </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+      <button id="w_submitDay" class="btn btn--primary">Submit Day (Official)</button>
     </div>
   </div>
 
-  <button id="exportPCP" type="button">Export PCP as PDF</button>
-  <button id="submitPCP" type="button">Submit PCP</button>
-</div>
+  <div id="w_error"></div>
+  <div id="w_toast"></div>
+</section>
 
-<footer>
-  <span>Empowerment Support Solutions, LLC</span>
-  <span>Self-Determination Program • Person-Centered Planning (PCP Compliant)</span>
-</footer>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  document.getElementById("todayDate").textContent =
-    "Date: " + new Date().toLocaleDateString();
-
+document.addEventListener('DOMContentLoaded', () => {
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_J6Y49EQarV5pAzhOdokl7w_GVlPoPSb";
-  const { createClient } = supabase;
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const ess = sb.schema("ess");
 
-  // 🔹 Hayden's UUID (from ess.clients) — UPDATE THIS VALUE
-  const CLIENT_ID = "e083501e-86d5-41e8-b840-c3ba5b6dc9c9";
+  const $ = (id) => document.getElementById(id);
 
-  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    db: { schema: "ess" }
+  const CLIENT_ID_INPUT = $("client_id");
+  const STAFF_INPUT     = $("staff_id");
+
+  const w_days=$("w_days"), w_range=$("w_range"), w_startTxt=$("w_startTxt"), w_endTxt=$("w_endTxt");
+  const w_prevWeek=$("w_prevWeek"), w_nextWeek=$("w_nextWeek");
+  const w_panel=$("w_panel"), w_panelDate=$("w_panelDate");
+  const w_start=$("w_start"), w_end=$("w_end"), w_modality=$("w_modality");
+  const w_hours=$("w_hours"), w_domain=$("w_domain"), w_notes=$("w_notes");
+  const w_obs=$("w_obs"), w_plan=$("w_plan");
+  const w_rc=$("w_rc"), w_sc=$("w_sc");
+  const w_submitDay=$("w_submitDay");
+  const w_toast=$("w_toast"), w_error=$("w_error");
+
+  const staffSigCanvas = $("staffSig");
+  const clientSigCanvas = $("clientSig");
+  let staffSigData = null, clientSigData = null;
+
+  function initSignatureCanvas(canvas, existingDataUrl){
+    const box = canvas.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    const width = Math.max(1, box.width);
+    const height = 140;
+    canvas.width  = width * ratio;
+    canvas.height = height * ratio;
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+    if (existingDataUrl){
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0, width, height);
+      img.src = existingDataUrl;
+    }
+    return ctx;
+  }
+
+  let staffSigCtx = initSignatureCanvas(staffSigCanvas, null);
+  let clientSigCtx = initSignatureCanvas(clientSigCanvas, null);
+
+  function makeDrawable(canvas, ctx, onEnd){
+    let drawing = false;
+    function getPos(e){
+      const r = canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+      return {x,y};
+    }
+    function down(e){ e.preventDefault(); drawing = true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+    function move(e){ if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }
+    function up(){ if(!drawing) return; drawing=false; if(onEnd) onEnd(canvas); }
+    canvas.addEventListener("pointerdown", down);
+    canvas.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    canvas.addEventListener("touchstart", down, {passive:false});
+    canvas.addEventListener("touchmove", move, {passive:false});
+    canvas.addEventListener("touchend", up);
+  }
+
+  function captureCanvasData(c){ return c.toDataURL("image/png"); }
+
+  makeDrawable(staffSigCanvas, staffSigCtx, (c)=>{ staffSigData = captureCanvasData(c); });
+  makeDrawable(clientSigCanvas, clientSigCtx, (c)=>{ clientSigData = captureCanvasData(c); });
+
+  $("clearStaffSig").addEventListener("click",()=>{
+    staffSigCtx.clearRect(0,0,staffSigCanvas.width,staffSigCanvas.height);
+    staffSigData = null;
+  });
+  $("clearClientSig").addEventListener("click",()=>{
+    clientSigCtx.clearRect(0,0,clientSigCanvas.width,clientSigCanvas.height);
+    clientSigData = null;
   });
 
-  function setupSignatureCanvas(canvasId, clearBtnId){
-    const canvas = document.getElementById(canvasId);
-    const clearBtn = document.getElementById(clearBtnId);
-    const ctx = canvas.getContext("2d");
-
-    function resizeCanvas(){
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
+  window.addEventListener("resize", ()=>{
+    if (w_panel.style.display !== "none") {
+      staffSigCtx = initSignatureCanvas(staffSigCanvas, staffSigData);
+      clientSigCtx = initSignatureCanvas(clientSigCanvas, clientSigData);
     }
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+  });
 
-    let drawing = false;
-    let rect = canvas.getBoundingClientRect();
+  function toast(m){w_toast.textContent=m;w_toast.style.opacity="1";setTimeout(()=>w_toast.style.opacity="0",1600);}
 
-    function getPos(e){
-      const point = e.touches ? e.touches[0] : e;
+  const fmt = (d)=>new Intl.DateTimeFormat("en-US",{month:"short",day:"2-digit",year:"numeric"}).format(d);
+  const ymd = (d)=>d.toISOString().slice(0,10);
+  function startOfWeekMonday(d){const nd=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=nd.getDay();const diff=(day===0?-6:1-day);nd.setDate(nd.getDate()+diff);nd.setHours(0,0,0,0);return nd;}
+  function addDays(d,n){const nd=new Date(d);nd.setDate(nd.getDate()+n);return nd;}
+
+  const getClientId  = ()=> CLIENT_ID_INPUT.value;
+  const getStaffName = ()=> (STAFF_INPUT.value || "").replace(/\s+/g,' ').trim();
+  const isUuid = (s)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
+
+  const staffUuidCache = new Map();
+
+  async function getOrCreateStaffUuid() {
+    const nameOrId = getStaffName();
+    if (!nameOrId) return null;
+    if (isUuid(nameOrId)) return nameOrId;
+    if (staffUuidCache.has(nameOrId)) return staffUuidCache.get(nameOrId);
+
+    let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", nameOrId).maybeSingle();
+    if (!error && data?.id) {
+      staffUuidCache.set(nameOrId, data.id);
+      return data.id;
+    }
+
+    ({ data, error } = await ess.from("staff").select("id, full_name").ilike("full_name", `%${nameOrId}%`).limit(1).maybeSingle());
+    if (!error && data?.id) {
+      staffUuidCache.set(nameOrId, data.id);
+      return data.id;
+    }
+
+    const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
+      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+        const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
+      });
+
+    const insert = await ess.from("staff").insert([{ id: newId, full_name: nameOrId }]).select("id").maybeSingle();
+    if (insert.error) throw new Error(`Could not add staff "${nameOrId}". (${insert.error.message})`);
+
+    const resolved = insert.data?.id || newId;
+    staffUuidCache.set(nameOrId, resolved);
+    return resolved;
+  }
+
+  let current = startOfWeekMonday(new Date());
+  let activeIndex = null;
+
+  async function fetchServerDay(i){
+    const staffUuid = await getOrCreateStaffUuid();
+    if (!staffUuid) return null;
+    const dayDate = ymd(addDays(current,i));
+
+    let { data: official } = await ess.from("daily_entries")
+      .select("*")
+      .eq("client_id", getClientId())
+      .eq("staff_id", staffUuid)
+      .eq("service_date", dayDate)
+      .maybeSingle();
+
+    if (official) {
       return {
-        x: point.clientX - rect.left,
-        y: point.clientY - rect.top
+        source: "official",
+        hours: (official.hours !== undefined && official.hours !== null) ? official.hours : null,
+        activities: Array.isArray(official.activities) ? official.activities.join(", ") : (official.activities || ""),
+        notes: official.service_notes || "",
+        start_time: official.start_time || "",
+        end_time: official.end_time || "",
+        modality: official.modality || "Remote",
+        staff_signature: official.staff_signature || null,
+        client_signature: official.client_signature || null,
+        regional_center: official.regional_center || "",
+        service_coordinator: official.service_coordinator || "",
+        date: dayDate
       };
     }
 
-    function start(e){
-      e.preventDefault();
-      drawing = true;
-      rect = canvas.getBoundingClientRect();
-      ctx.beginPath();
-      const pos = getPos(e);
-      ctx.moveTo(pos.x, pos.y);
-    }
+    let { data: draft } = await ess.from("daily_drafts")
+      .select("*")
+      .eq("client_id", getClientId())
+      .eq("staff_id", staffUuid)
+      .eq("date", dayDate)
+      .maybeSingle();
 
-    function move(e){
-      if(!drawing) return;
-      e.preventDefault();
-      const pos = getPos(e);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 2;
-      ctx.lineCap = "round";
-      ctx.stroke();
-    }
-
-    function end(){
-      drawing = false;
-    }
-
-    canvas.addEventListener("mousedown", start);
-    canvas.addEventListener("mousemove", move);
-    canvas.addEventListener("mouseup", end);
-    canvas.addEventListener("mouseleave", end);
-
-    canvas.addEventListener("touchstart", start, { passive:false });
-    canvas.addEventListener("touchmove", move, { passive:false });
-    canvas.addEventListener("touchend", end);
-
-    clearBtn.addEventListener("click", () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
-
-    return canvas;
-  }
-
-  const canvasOmar  = setupSignatureCanvas("sig_omar",  "clearOmar");
-  const canvasStaff = setupSignatureCanvas("sig_staff", "clearStaff");
-
-  function getSignatureBase64(canvas){
-    return canvas.toDataURL("image/png");
-  }
-
-  function collectPCPData(){
-    const ids = [
-      "pcp_conducted_by","pcp_format","pcp_date","pcp_location",
-      "pcp_participants","pcp_summary",
-      "like_admire","strengths","communication","important_to","important_for",
-      "sensory","behavioral","health_safety","cultural",
-      "morning","afternoon","evening","community","stress_help","triggers",
-
-      // 🔹 ELARC Life Areas
-      "choice_goal","choice_why","choice_barriers","choice_strategies",
-      "choice_measure","choice_staff","choice_timeline",
-      "education_goal","education_why","education_barriers","education_strategies",
-      "education_measure","education_staff","education_timeline",
-      "employment_goal","employment_why","employment_barriers","employment_strategies",
-      "employment_measure","employment_staff","employment_timeline",
-      "healthcare_goal","healthcare_why","healthcare_barriers","healthcare_strategies",
-      "healthcare_measure","healthcare_staff","healthcare_timeline",
-      "home_goal","home_why","home_barriers","home_strategies",
-      "home_measure","home_staff","home_timeline",
-      "emotional_goal","emotional_why","emotional_barriers","emotional_strategies",
-      "emotional_measure","emotional_staff","emotional_timeline",
-      "relationships_goal","relationships_why","relationships_barriers","relationships_strategies",
-      "relationships_measure","relationships_staff","relationships_timeline",
-      "supports_home_goal","supports_home_why","supports_home_barriers","supports_home_strategies",
-      "supports_home_measure","supports_home_staff","supports_home_timeline",
-      "transport_goal","transport_why","transport_barriers","transport_strategies",
-      "transport_measure","transport_staff","transport_timeline",
-
-      // 🔹 Original outcome summary section
-      "outcome1_goal","outcome1_why","outcome1_barriers","outcome1_strategies",
-      "outcome1_measure","outcome1_staff","outcome1_timeline",
-      "outcome2_goal","outcome2_why","outcome2_barriers","outcome2_strategies",
-      "outcome2_measure","outcome2_staff","outcome2_timeline",
-      "outcome3_goal","outcome3_why","outcome3_barriers","outcome3_strategies",
-      "outcome3_measure","outcome3_staff","outcome3_timeline",
-      "outcome4_goal","outcome4_why","outcome4_barriers","outcome4_strategies",
-      "outcome4_measure","outcome4_staff","outcome4_timeline",
-      "outcome5_goal","outcome5_why","outcome5_barriers","outcome5_strategies",
-      "outcome5_measure","outcome5_staff","outcome5_timeline",
-
-      // 🔹 Supports, risk, and future vision
-      "natural_supports","paid_supports","justification","hours_needed",
-      "risk_behavior","risk_medical","risk_env","risk_comm","crisis_plan",
-      "mitigation","future_pref","future_goals","future_comm","future_long"
-    ];
-
-    const data = {};
-    ids.forEach(id => {
-      const el = document.getElementById(id);
-      data[id] = el ? el.value.trim() : "";
-    });
-    return data;
-  }
-
-  document.getElementById("submitPCP").addEventListener("click", async () => {
-    const btn = document.getElementById("submitPCP");
-
-    try{
-      btn.disabled = true;
-      btn.textContent = "Submitting…";
-
-      const pcpData = collectPCPData();
-      const sigOmar  = getSignatureBase64(canvasOmar);
-      const sigStaff = getSignatureBase64(canvasStaff);
-
-      const record = {
-        client_id: CLIENT_ID,
-        pcp_data: pcpData,
-        signature_base64: JSON.stringify({
-          // 🔹 keep same keys admin expects (omar_signature / staff_signature)
-          omar_signature: sigOmar,
-          staff_signature: sigStaff
-        })
+    if (draft) {
+      return {
+        source: "draft",
+        hours: draft.hours ?? null,
+        activities: draft.activities || "",
+        notes: draft.notes || "",
+        start_time: draft.start_time || "",
+        end_time: draft.end_time || "",
+        modality: draft.modality || "Remote",
+        staff_signature: draft.staff_signature || null,
+        client_signature: draft.client_signature || null,
+        regional_center: draft.regional_center || "",
+        service_coordinator: draft.service_coordinator || "",
+        date: dayDate
       };
+    }
 
-      const { data, error } = await db
-        .from("pcp_entries")
-        .insert(record)
-        .select();
+    return null;
+  }
 
-      if(error){
-        console.error("Supabase insert error:", error);
-        alert("Error saving PCP: " + (error.message || "Unknown error"));
-        btn.disabled = false;
-        btn.textContent = "Submit PCP";
+  async function markDotsFromServer(){
+    for (let i=0;i<7;i++){
+      const dot = document.getElementById("w_dot"+i);
+      if (!dot) continue;
+      const staff = getStaffName();
+      if (!staff){
+        dot.style.background = "#e5e7eb";
+        continue;
+      }
+      const srv = await fetchServerDay(i);
+      dot.style.background = srv ? "#22c55e" : "#e5e7eb";
+    }
+  }
+
+  function renderWeek(){
+    const start=new Date(current), end=addDays(start,6);
+    end.setHours(23,59,59,999);
+    w_startTxt.textContent=fmt(start); w_endTxt.textContent=fmt(end);
+    w_range.textContent=`Mon ${start.getDate()} — Sun ${end.getDate()}`;
+    const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    w_days.innerHTML='';
+    for(let i=0;i<7;i++){
+      const d = addDays(start,i);
+      const btn = document.createElement('button');
+      btn.type='button';
+      btn.className='daybtn';
+      btn.innerHTML=`
+        <div style="font-size:12px;color:#6b7280;">${names[i]}</div>
+        <div style="font-size:16px;font-weight:800;color:#0f172a;">${d.getDate()}</div>
+        <div id="w_dot${i}" class="dot"></div>
+      `;
+      btn.addEventListener('click',()=>openDay(i));
+      w_days.appendChild(btn);
+    }
+    const today=new Date();
+    const inRange=+today>=+start && +today<=+end;
+    openDay(inRange ? (today.getDay()===0?6:today.getDay()-1) : 0);
+    setTimeout(markDotsFromServer, 200);
+  }
+
+  function parseMergedNotes(text){
+    const out = { notes:'', obs:'', plan:'' };
+    if(!text) return out;
+    const N='## Progress Notes:', O='## Observation:', P='## Action Plan:';
+    if(text.includes(N)){
+      const nIdx=text.indexOf(N)+N.length;
+      const oIdx=text.indexOf(O, nIdx);
+      const pIdx=text.indexOf(P, oIdx>-1?oIdx:nIdx);
+      out.notes = text.slice(nIdx, oIdx>-1?oIdx:(pIdx>-1?pIdx:text.length)).trim();
+      if (oIdx>-1) out.obs = text.slice(oIdx+O.length, pIdx>-1?pIdx:text.length).trim();
+      if (pIdx>-1) out.plan = text.slice(pIdx+P.length).trim();
+      return out;
+    }
+    out.notes = text;
+    return out;
+  }
+
+  function mergeNotes(notes, obs, plan){
+    return [
+      "## Progress Notes:\n" + (notes||"").trim(),
+      "## Observation:\n" + (obs||"").trim(),
+      "## Action Plan:\n" + (plan||"").trim(),
+    ].join("\n\n").trim();
+  }
+
+  async function openDay(i){
+    activeIndex=i;
+    w_error.style.display='none';
+    [...w_days.children].forEach((el,idx)=>{ el.style.outline=(idx===i)?'2px solid #0ea5e9':'none'; });
+
+    const d=addDays(current,i);
+    w_panelDate.textContent=`${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} — ${fmt(d)}`;
+    w_panel.style.display='block';
+
+    const srv = await fetchServerDay(i);
+    if (srv){
+      const parsed = parseMergedNotes(srv.notes || "");
+      w_hours.value = srv.hours ?? '';
+      w_domain.value= srv.activities ?? '';
+      w_notes.value = parsed.notes ?? '';
+      w_obs.value   = parsed.obs ?? '';
+      w_plan.value  = parsed.plan ?? '';
+      w_start.value = srv.start_time ?? '';
+      w_end.value   = srv.end_time ?? '';
+      w_modality.value = srv.modality ?? 'Remote';
+      w_rc.value = srv.regional_center ?? '';
+      w_sc.value = srv.service_coordinator ?? '';
+
+      staffSigData = srv.staff_signature || null;
+      clientSigData = srv.client_signature || null;
+      staffSigCtx  = initSignatureCanvas(staffSigCanvas,  staffSigData);
+      clientSigCtx = initSignatureCanvas(clientSigCanvas, clientSigData);
+    } else {
+      w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
+      w_modality.value='Remote';
+      w_rc.value='';
+      w_sc.value='';
+      staffSigData=null;
+      clientSigData=null;
+      staffSigCtx  = initSignatureCanvas(staffSigCanvas,  null);
+      clientSigCtx = initSignatureCanvas(clientSigCanvas, null);
+    }
+  }
+
+  function buildPayload(){
+    const notesMerged = mergeNotes((w_notes.value||''),(w_obs.value||''),(w_plan.value||''));
+    return {
+      date: ymd(addDays(current,activeIndex)),
+      hours: (w_hours.value||''),
+      activities: (w_domain.value||''),
+      notes: notesMerged,
+      start_time: (w_start.value||''),
+      end_time: (w_end.value||''),
+      modality: (w_modality.value||'Remote'),
+      regional_center: (w_rc.value || ''),
+      service_coordinator: (w_sc.value || ''),
+      staff_signature: staffSigData || null,
+      client_signature: clientSigData || null
+    };
+  }
+
+  async function submitDay(){
+    if (activeIndex == null) return;
+    if (!getStaffName()){ toast("Type staff name first"); return; }
+
+    const payload = buildPayload();
+
+    let staffUuid;
+    try {
+      staffUuid = await getOrCreateStaffUuid();
+    } catch (e) {
+      w_error.style.display='block';
+      w_error.textContent = e.message;
+      toast('Staff error ❌');
+      return;
+    }
+
+    const baseEntry = {
+      client_id: getClientId(),
+      staff_id: staffUuid,
+      service_date: payload.date,
+      start_time: payload.start_time || null,
+      end_time: payload.end_time || null,
+      modality: payload.modality || 'Remote',
+      service_notes: payload.notes || null,
+      activities: payload.activities ? [payload.activities] : null,
+      staff_signature: payload.staff_signature || null,
+      client_signature: payload.client_signature || null,
+      regional_center: payload.regional_center || null,
+      service_coordinator: payload.service_coordinator || null,
+      signed_at: new Date().toISOString(),
+      hours: payload.hours !== '' ? Number(payload.hours) : null
+    };
+
+    let { error } = await ess.from("daily_entries").insert(baseEntry);
+
+    if (error && (error.message || '').toLowerCase().includes("could not find the 'hours' column")) {
+      const { error: e2 } = await ess.from("daily_entries").insert({
+        ...baseEntry,
+        hours: undefined
+      });
+      if (e2) {
+        w_error.style.display='block';
+        w_error.textContent = 'Submit failed: ' + e2.message;
+        toast('Submit failed ❌');
         return;
       }
-
-      alert("PCP successfully submitted.");
-      btn.textContent = "Submitted ✔";
-
-    }catch(err){
-      console.error("Unexpected submit error:", err);
-      alert("Unexpected error submitting PCP.");
-      btn.disabled = false;
-      btn.textContent = "Submit PCP";
+    } else if (error && String(error.message||'').includes('activities_allowed')) {
+      const { error: e3 } = await ess.from("daily_entries").insert({
+        ...baseEntry,
+        activities: null
+      });
+      if (e3) {
+        w_error.style.display='block';
+        w_error.textContent = 'Submit failed: ' + e3.message;
+        toast('Submit failed ❌');
+        return;
+      }
+    } else if (error) {
+      w_error.style.display='block';
+      w_error.textContent = 'Submit failed: ' + error.message;
+      toast('Submit failed ❌');
+      return;
     }
-  });
 
-  document.getElementById("exportPCP").addEventListener("click", () => {
-    window.print();
-  });
+    await ess.from("daily_drafts").upsert({
+      client_id: getClientId(),
+      staff_id: staffUuid,
+      week_start: ymd(current),
+      day_index: activeIndex,
+      date: payload.date,
+      hours: payload.hours !== '' ? Number(payload.hours) : null,
+      activities: payload.activities || null,
+      notes: payload.notes || null,
+      start_time: payload.start_time || null,
+      end_time: payload.end_time || null,
+      modality: payload.modality || 'Remote',
+      staff_signature: payload.staff_signature || null,
+      client_signature: payload.client_signature || null,
+      regional_center: payload.regional_center || null,
+      service_coordinator: payload.service_coordinator || null,
+      submitted: true
+    }, { onConflict: "client_id,staff_id,week_start,day_index" });
+
+    toast('Day submitted (official) ✅');
+    setTimeout(markDotsFromServer, 200);
+  }
+
+  function shiftWeek(delta){ current=addDays(current,7*delta); renderWeek(); }
+
+  w_prevWeek.addEventListener('click',()=>shiftWeek(-1));
+  w_nextWeek.addEventListener('click',()=>shiftWeek(1));
+  w_submitDay.addEventListener('click',submitDay);
+
+  renderWeek();
+});
 </script>
-
 </body>
 </html>
