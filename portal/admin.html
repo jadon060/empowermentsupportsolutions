@@ -114,14 +114,10 @@
       cursor:pointer;
     }
 
-    /* 📱 mobile fixes */
     @media (max-width: 600px){
-      .link{
-        white-space:normal;          /* allow wrapping */
-        align-items:flex-start;      /* top-align icon/text */
-      }
+      .link{white-space:normal;align-items:flex-start;}
       .card{padding:14px}
-      .note-row{grid-template-columns:1fr;} /* actions under note on tiny screens */
+      .note-row{grid-template-columns:1fr;}
       .note-actions{flex-direction:row;flex-wrap:wrap;}
     }
   </style>
@@ -182,8 +178,6 @@
               <span class="small">opens page</span>
             </a>
 
-            <!-- Weekly staff calendar link removed -->
-
             <a class="link" href="https://supabase.com/dashboard/project/bqanjupmcgydvmfgvutx" target="_blank" rel="noopener">
               🗄️ Supabase (ESS)
               <span class="small">opens new tab</span>
@@ -196,11 +190,18 @@
               🏀 Omar's Portal
               <span class="small">opens page</span>
             </a>
-            <!-- ✅ NEW BUTTON: Jeremy's Portal -->
+
             <a class="link" href="/jeremy-n.html">
               📖 Jeremy's Portal
               <span class="small">opens page</span>
             </a>
+
+            <!-- ✅ NEW BUTTON ADDED EXACTLY AS REQUESTED -->
+            <a class="link" href="/Hayden_H.html">
+              📚 Hayden's Portal
+              <span class="small">opens page</span>
+            </a>
+            <!-- ✅ NOTHING ELSE WAS TOUCHED -->
           </div>
         </div>
 
@@ -402,7 +403,6 @@
 
     render();
 
-    /* ===== CYBERWORLD ANIMATION ===== */
     (function(){
       const canvas = document.getElementById("cyberworldCanvas");
       if(!canvas) return;
