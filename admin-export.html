@@ -5,18 +5,163 @@
   <title>ESS • SDP Admin Export (Daily)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body{margin:0;background:#f3f4f6;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#0f172a;}
-    header{background:#111827;color:#fff;padding:14px 18px;display:flex;align-items:center;gap:14px;}
+    :root{
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --border:#e5e7eb;
+      --border-soft:#e5e7eb;
+      --text:#0f172a;
+      --muted:#6b7280;
+      --accent:#111827;
+      --accent-soft:#e5e7eb;
+      --input-bg:#f9fafb;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      background:var(--bg);
+      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+      color:var(--text);
+    }
+    header{
+      background:#020617;
+      color:#fff;
+      padding:16px 20px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      box-shadow:0 8px 20px rgba(15,23,42,.45);
+    }
     header img{height:40px;}
-    .wrap{max-width:1100px;margin:1.4rem auto;padding:0 1rem;}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;}
-    label{font-size:.75rem;font-weight:500;display:block;margin-bottom:3px;}
-    input,select{padding:6px 9px;border:1px solid #d1d5db;border-radius:8px;font-size:.78rem;}
-    button{border:none;border-radius:8px;padding:7px 12px;background:#111827;color:#fff;cursor:pointer;font-size:.78rem;}
-    button.btn-muted{background:#e5e7eb;color:#111827;}
-    table{width:100%;border-collapse:collapse;}
-    th,td{padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:.75rem;vertical-align:top;}
-    .flex{display:flex;gap:10px;flex-wrap:wrap;}
+    header-title-main{
+      font-weight:700;
+      font-size:1.05rem;
+    }
+    header-sub{
+      font-size:.74rem;
+      opacity:.8;
+    }
+    .wrap{
+      max-width:1100px;
+      margin:1.8rem auto 2.2rem;
+      padding:0 1.2rem;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:1.1rem 1.3rem 1.2rem;
+      margin-bottom:1.2rem;
+      box-shadow:0 10px 25px rgba(15,23,42,.08);
+    }
+    .card h2{
+      margin:0 0 .75rem;
+      font-size:1.15rem;
+      letter-spacing:.01em;
+    }
+    .card h3{
+      margin:0 0 .6rem;
+      font-size:1rem;
+    }
+    label{
+      font-size:.74rem;
+      font-weight:600;
+      display:block;
+      margin-bottom:3px;
+      letter-spacing:.03em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    input,select{
+      padding:7px 10px;
+      border:1px solid var(--border-soft);
+      border-radius:9px;
+      font-size:.8rem;
+      background:var(--input-bg);
+      outline:none;
+      min-width:0;
+      transition:border-color .15s, box-shadow .15s, background .15s;
+    }
+    input:focus,select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(15,23,42,.25);
+      background:#fff;
+    }
+    button{
+      border:none;
+      border-radius:999px;
+      padding:8px 14px;
+      background:var(--accent);
+      color:#fff;
+      cursor:pointer;
+      font-size:.8rem;
+      font-weight:600;
+      letter-spacing:.02em;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      white-space:nowrap;
+      box-shadow:0 8px 18px rgba(15,23,42,.35);
+      transition:background .15s, box-shadow .15s, transform .1s, opacity .1s;
+    }
+    button:hover{
+      background:#020617;
+      box-shadow:0 10px 22px rgba(15,23,42,.45);
+      transform:translateY(-1px);
+    }
+    button:disabled{
+      opacity:.45;
+      cursor:default;
+      box-shadow:none;
+      transform:none;
+    }
+    button.btn-muted{
+      background:var(--accent-soft);
+      color:var(--text);
+      box-shadow:none;
+    }
+    button.btn-muted:hover{
+      background:#d1d5db;
+      box-shadow:none;
+      transform:none;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      border-radius:10px;
+      overflow:hidden;
+      background:#fff;
+    }
+    thead{
+      background:#f9fafb;
+    }
+    th,td{
+      padding:7px 10px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      font-size:.76rem;
+      vertical-align:top;
+    }
+    th{
+      font-weight:600;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      font-size:.7rem;
+    }
+    tbody tr:last-child td{
+      border-bottom:none;
+    }
+    .flex{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .flex > div{
+      min-width:180px;
+      flex:1 1 auto;
+    }
     .trash-btn{
       background:transparent;
       border:none;
@@ -27,25 +172,30 @@
       color:#ef4444;
     }
     .trash-btn:hover{color:#b91c1c;}
+    @media (max-width:720px){
+      header{align-items:flex-start;flex-direction:column;}
+      .wrap{padding:0 .8rem;}
+      .card{padding:.9rem 1rem;}
+    }
   </style>
 </head>
 <body>
 <header>
   <img src="https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png" alt="ESS" onerror="this.style.display='none'">
   <div>
-    <div style="font-weight:600;">Empowerment Support Solutions, LLC</div>
-    <div style="font-size:.72rem;opacity:.7;">SDP • Service Log Export (Daily – Unified)</div>
+    <div style="font-weight:700;font-size:1.05rem;">Empowerment Support Solutions, LLC</div>
+    <div style="font-size:.72rem;opacity:.78;">SDP • Service Log Export (Daily & Weekly)</div>
   </div>
 </header>
 
 <div class="wrap">
   <!-- DAILY -->
   <div class="card">
-    <h2 style="margin-top:0;">Daily export</h2>
+    <h2>Daily export</h2>
     <div class="flex">
       <div>
         <label for="clientSelect">Client</label>
-        <select id="clientSelect" style="min-width:220px;">
+        <select id="clientSelect">
           <option value="">— loading clients… —</option>
         </select>
       </div>
@@ -85,7 +235,7 @@
   </div>
 
   <div class="card">
-    <h3 style="margin-top:0;">Day preview</h3>
+    <h3>Day preview</h3>
     <table>
       <thead>
         <tr>
@@ -111,11 +261,11 @@
 
   <!-- WEEKLY -->
   <div class="card">
-    <h2 style="margin-top:0;">Weekly staff plans</h2>
+    <h2>Weekly staff plans</h2>
     <div class="flex">
       <div>
         <label for="wk_clientSelect">Client</label>
-        <select id="wk_clientSelect" style="min-width:220px;">
+        <select id="wk_clientSelect">
           <option value="">— select client —</option>
         </select>
       </div>
@@ -139,7 +289,7 @@
   </div>
 
   <div class="card" id="wk_resultsCard" style="display:none;">
-    <h3 style="margin-top:0;">Weekly plans for selected client</h3>
+    <h3>Weekly plans for selected client</h3>
     <table>
       <thead>
         <tr>
@@ -158,45 +308,6 @@
       </thead>
       <tbody id="wk_body">
         <tr><td colspan="11">No weekly plan loaded.</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- PCP (new) -->
-  <div class="card">
-    <h2 style="margin-top:0;">Person-Centered Plans</h2>
-    <div class="flex">
-      <div>
-        <label for="pcp_clientSelect">Client</label>
-        <select id="pcp_clientSelect" style="min-width:220px;">
-          <option value="">— select client —</option>
-        </select>
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button id="pcp_load">Load PCP</button>
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button id="pcp_export" class="btn-muted" disabled>Export PCP</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card" id="pcp_resultsCard" style="display:none;">
-    <h3 style="margin-top:0;">Most recent PCP for selected client</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Created</th>
-          <th>Summary</th>
-          <th>Client Sig</th>
-          <th>Staff Sig</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="pcp_body">
-        <tr><td colspan="5">No PCP loaded.</td></tr>
       </tbody>
     </table>
   </div>
@@ -233,13 +344,6 @@
   const wk_resultsCard = document.getElementById("wk_resultsCard");
   const wk_body = document.getElementById("wk_body");
 
-  // PCP elems
-  const pcp_clientSelect = document.getElementById("pcp_clientSelect");
-  const pcp_load = document.getElementById("pcp_load");
-  const pcp_export = document.getElementById("pcp_export");
-  const pcp_resultsCard = document.getElementById("pcp_resultsCard");
-  const pcp_body = document.getElementById("pcp_body");
-
   const LOGO_URL =
     "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
   const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
@@ -265,7 +369,6 @@
 
   let currentDayData = null;
   let currentWeeklyRows = [];
-  let currentPCP = null;
 
   // 🔹 Load clients
   async function loadClients() {
@@ -322,7 +425,6 @@
 
     clientSelect.innerHTML = html;
     wk_clientSelect.innerHTML = html;
-    pcp_clientSelect.innerHTML = html;
   }
   await loadClients();
 
@@ -489,9 +591,7 @@
         <td>${formatYMD(serviceDate)}</td>
         <td>${merged.start_time ? to12h(merged.start_time) : "—"}</td>
         <td>${merged.end_time ? to12h(merged.end_time) : "—"}</td>
-        <td>${
-          merged.hours !== "" ? Number(merged.hours).toFixed(2) : "—
-        "}</td>
+        <td>${merged.hours !== "" ? Number(merged.hours).toFixed(2) : "—"}</td>
         <td>${merged.modality || "—"}</td>
         <td>${merged.domain || "—"}</td>
         <td>${merged.regional_center || "—"}</td>
@@ -506,7 +606,149 @@
   }
   btnLoad.addEventListener("click", loadDay);
 
-  // ===== WEEKLY FIXED =====
+  window.__essDeleteDay = async function () {
+    if (!currentDayData) return;
+    const ok = confirm("Delete this day's entry for this client?");
+    if (!ok) return;
+    const { clientId, date, staffId } = currentDayData;
+    let delOfficial = ess
+      .from("daily_entries")
+      .delete()
+      .eq("client_id", clientId)
+      .eq("service_date", date);
+    if (staffId) delOfficial = delOfficial.eq("staff_id", staffId);
+    await delOfficial;
+    let delDraft = ess
+      .from("daily_drafts")
+      .delete()
+      .eq("client_id", clientId)
+      .eq("date", date);
+    if (staffId) delDraft = delDraft.eq("staff_id", staffId);
+    dayBody.innerHTML = `<tr><td colspan="12">No data for this date.</td></tr>`;
+    currentDayData = null;
+    btnExport.disabled = true;
+    alert("Day deleted ✅");
+  };
+
+  function exportDay() {
+    if (!currentDayData) return;
+    const {
+      clientLabel, date, start_time, end_time, hours, modality,
+      domain, notes, staff_signature, client_signature,
+      regional_center, service_coordinator, staffName, source
+    } = currentDayData;
+
+    const businessName = "Empowerment Support Solutions, LLC";
+    const serviceCode  = serviceInput.value || "SDP Service Code";
+    const { progress, observation, action } = splitNotes(notes);
+    const start12 = start_time ? to12h(start_time) : "—";
+    const end12   = end_time ? to12h(end_time) : "—";
+    const hoursStr = (hours !== "" && hours !== null) ? Number(hours).toFixed(2) : "—";
+
+    const win = window.open("", "_blank", "width=900,height=1100");
+    win.document.write(`
+      <html>
+      <head>
+        <title>ESS_${clientLabel.replace(/\\s+/g,"_")}_${date}.pdf</title>
+        <style>
+          body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;background:#fff;}
+          .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;box-sizing:border-box;}
+          .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+          .header-left{max-width:70%;}
+          .logo{height:90px;object-fit:contain;}
+          .box{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:10px;}
+          img.sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
+          .section-title{font-weight:600;font-size:11px;margin-top:6px;margin-bottom:3px;}
+          .note-box{
+            border:1px solid #e5e7eb;
+            border-radius:6px;
+            padding:4px 6px;
+            min-height:40px;
+            font-size:11px;
+            white-space:pre-wrap;
+            word-break:break-word;
+            overflow-wrap:anywhere;
+            max-width:100%;
+          }
+          @media print { body{background:#fff;} .page{margin:0;} }
+        </style>
+      </head>
+      <body>
+        <div class="page">
+          <div class="header">
+            <div class="header-left">
+              <div style="font-size:15px;font-weight:700;">${businessName}</div>
+              <div style="font-size:11px;">SDP – Daily Service Log (Unified: RC / SC / FMS)</div>
+              <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${clientLabel}</div>
+              <div style="font-size:11px;"><strong>Service Date:</strong> ${formatYMD(date)}</div>
+              <div style="font-size:11px;"><strong>Staff:</strong> ${staffName || "—"}</div>
+              <div style="font-size:11px;"><strong>Service Code:</strong> ${serviceCode}</div>
+              <div style="font-size:11px;"><strong>Regional Center:</strong> ${regional_center || "—"}</div>
+              <div style="font-size:11px;"><strong>Service Coordinator:</strong> ${service_coordinator || "—"}</div>
+            </div>
+            <div>
+              <img src="${LOGO_URL}" class="logo" onerror="this.style.display='none'">
+              <div style="font-size:10px;color:#94a3b8;text-align:right;margin-top:4px;">ESS • Daily export</div>
+            </div>
+          </div>
+
+          <div class="box">
+            <div style="font-size:11.5px;margin-bottom:4px;">
+              <strong>Time In:</strong> ${start12} &nbsp;
+              <strong>Time Out:</strong> ${end12} &nbsp;
+              <strong>Hours:</strong> ${hoursStr}
+            </div>
+            <div style="font-size:11.5px;margin-bottom:4px;"><strong>Location / Modality:</strong> ${modality || "—"}</div>
+            <div style="font-size:11.5px;margin-bottom:4px;"><strong>Service / Domain:</strong> ${domain || "—"}</div>
+            <div style="font-size:11.5px;margin-bottom:6px;"><strong>Source:</strong> ${source}</div>
+
+            <div class="section-title">Description / Progress:</div>
+            <div class="note-box">${progress || "—"}</div>
+
+            <div class="section-title">Observation:</div>
+            <div class="note-box">${observation || "—"}</div>
+
+            <div class="section-title">Action Plan:</div>
+            <div class="note-box">${action || "—"}</div>
+
+            <div style="display:flex;gap:20px;margin-top:10px;align-items:flex-end;">
+              <div>
+                <div style="font-size:10.5px;font-weight:600;">Staff Signature:</div>
+                ${
+                  staff_signature
+                    ? `<img class="sig" src="${staff_signature}">`
+                    : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
+                }
+              </div>
+              <div>
+                <div style="font-size:10.5px;font-weight:600;">Participant / Parent:</div>
+                ${
+                  client_signature
+                    ? `<img class="sig" src="${client_signature}">`
+                    : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
+                }
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;font-size:9.5px;line-height:1.35;">
+            I certify that the services listed above were actually provided to the participant in accordance with the participant’s Individual Program Plan (IPP) and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
+          </div>
+
+          <div style="margin-top:14px;font-size:9px;color:#6b7280;">
+            ${businessName} • ${CONTACT_LINE}
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 400);
+  }
+  btnExport.addEventListener("click", exportDay);
+
+  // ===== WEEKLY =====
   async function staffNameById(id) {
     if (!id) return "";
     const { data } = await ess
@@ -528,7 +770,6 @@
     const monday = startOfWeekMonday(picked);
     const mondayStr = ymd(monday);
 
-    // 🔥 FIX: compute Sunday
     const sunday = new Date(monday);
     sunday.setDate(sunday.getDate() + 6);
     const sundayStr = ymd(sunday);
@@ -544,7 +785,6 @@
       staffIdFilter = data?.id || null;
     }
 
-    // 🔥 FIXED QUERY — load entire week range
     const { data, error } = await ess
       .from("weekly_staff_plans")
       .select("*")
@@ -581,13 +821,13 @@
       <tr>
         <td>${r.__staff_name}</td>
         <td>${r.week_start}</td>
-        <td>${r.mon_text || ""}</td>
-        <td>${r.tue_text || ""}</td>
-        <td>${r.wed_text || ""}</td>
-        <td>${r.thu_text || ""}</td>
-        <td>${r.fri_text || ""}</td>
-        <td>${r.sat_text || ""}</td>
-        <td>${r.sun_text || ""}</td>
+        <td>${(r.mon_text || "").replace(/\\n/g,"<br>")}</td>
+        <td>${(r.tue_text || "").replace(/\\n/g,"<br>")}</td>
+        <td>${(r.wed_text || "").replace(/\\n/g,"<br>")}</td>
+        <td>${(r.thu_text || "").replace(/\\n/g,"<br>")}</td>
+        <td>${(r.fri_text || "").replace(/\\n/g,"<br>")}</td>
+        <td>${(r.sat_text || "").replace(/\\n/g,"<br>")}</td>
+        <td>${(r.sun_text || "").replace(/\\n/g,"<br>")}</td>
         <td>${r.staff_signature ? "✅" : "—"}</td>
         <td><button class="trash-btn" onclick="window.__essDeleteWeekly && window.__essDeleteWeekly(${idx})">🗑️</button></td>
       </tr>
@@ -619,367 +859,82 @@
     alert("Weekly plan deleted ✅");
   };
 
-  // ===== PCP loading and exporting unchanged =====
-  async function loadPCP() {
-    const clientId = pcp_clientSelect.value;
-    if (!clientId) {
-      alert("Select a client first.");
-      return;
-    }
-
-    const { data, error } = await ess
-      .from("pcp_entries")
-      .select("id, client_id, pcp_data, signature_base64, created_at")
-      .eq("client_id", clientId)
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    if (error) {
-      console.error("PCP load error:", error);
-      alert("Error loading PCP from database.");
-      return;
-    }
-
-    if (!data || !data.length) {
-      pcp_resultsCard.style.display = "block";
-      pcp_body.innerHTML = `<tr><td colspan="5">No PCP found for this client.</td></tr>`;
-      currentPCP = null;
-      pcp_export.disabled = true;
-      return;
-    }
-
-    const rec = data[0];
-    currentPCP = rec;
-    const p = rec.pcp_data || {};
-    let sigs = {};
-    try {
-      sigs = rec.signature_base64
-        ? JSON.parse(rec.signature_base64)
-        : {};
-    } catch (e) {}
-
-    pcp_resultsCard.style.display = "block";
-    pcp_body.innerHTML = `
-      <tr>
-        <td>${rec.created_at ? formatYMD(rec.created_at.slice(0, 10)) : "—"}</td>
-        <td>${(p.pcp_summary || "").slice(0, 160) || "—"}</td>
-        <td>${sigs.omar_signature || sigs.client_signature ? "✅" : "—"}</td>
-        <td>${sigs.staff_signature ? "✅" : "—"}</td>
-        <td><button class="trash-btn" onclick="window.__essDeletePCP && window.__essDeletePCP()">🗑️</button></td>
-      </tr>
-    `;
-    pcp_export.disabled = false;
-  }
-  pcp_load.addEventListener("click", loadPCP);
-
-  window.__essDeletePCP = async function () {
-    if (!currentPCP) return;
-    const clientLabel =
-      pcp_clientSelect.options[pcp_clientSelect.selectedIndex]?.text ||
-      "this client";
-    const ok = confirm(`Delete the most recent PCP for ${clientLabel}?`);
-    if (!ok) return;
-    await ess.from("pcp_entries").delete().eq("id", currentPCP.id);
-    currentPCP = null;
-    pcp_body.innerHTML = `<tr><td colspan="5">No PCP loaded.</td></tr>`;
-    pcp_export.disabled = true;
-    alert("PCP deleted ✅");
-  };
-
-  function exportPCP() {
-    if (!currentPCP) return;
-    const rec = currentPCP;
-    const data = rec.pcp_data || {};
-    let sigs = {};
-    try {
-      sigs = rec.signature_base64
-        ? JSON.parse(rec.signature_base64)
-        : {};
-    } catch (e) {}
-    const clientLabel =
-      pcp_clientSelect.options[pcp_clientSelect.selectedIndex]?.text ||
-      "Client";
-
-    const rawDate =
-      data && data["pcp_date"]
-        ? String(data["pcp_date"])
-        : rec.created_at
-        ? rec.created_at.slice(0, 10)
-        : "";
-    const pcpDate = rawDate ? formatYMD(rawDate.slice(0, 10)) : "—";
-
-    const v = (key) => (data && data[key] ? String(data[key]) : "");
-
+  function exportWeekly() {
+    if (!currentWeeklyRows.length) return;
+    const clientLabel = wk_clientSelect.options[wk_clientSelect.selectedIndex]?.text || "Client";
+    const weekStart = currentWeeklyRows[0].week_start;
     const win = window.open("", "_blank", "width=900,height=1100");
     win.document.write(`
       <html>
       <head>
-        <title>ESS_${clientLabel.replace(/\\s+/g, "_")}_PCP_${rec.id}.pdf</title>
+        <title>ESS_${clientLabel.replace(/\\s+/g,"_")}_weekly_${weekStart}.pdf</title>
         <style>
-          body {
-            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #fff;
-          }
-          .page {
-            width: 8.5in;
-            min-height: 11in;
-            margin: 0 auto;
-            padding: 0.5in;
-            box-sizing: border-box;
-          }
-          h1 {
-            font-size: 18px;
-            margin: 0 0 4px;
-          }
-          h2 {
-            font-size: 14px;
-            margin: 14px 0 6px;
-          }
-          .section {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 8px 10px;
-            margin-bottom: 10px;
-          }
-          .label {
-            font-weight: 600;
-            font-size: 11px;
-            margin-top: 4px;
-          }
-          .value {
-            font-size: 11px;
-            white-space: pre-wrap;
-            word-break: break-word;
-          }
-          .top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-          }
-          .logo {
-            height: 70px;
-            object-fit: contain;
-          }
-          .sig {
-            width: 200px;
-            height: 60px;
-            object-fit: contain;
-            border-bottom: 1px solid #000;
-          }
+          body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;}
+          .page{width:8.5in;margin:0 auto;padding:0.5in;box-sizing:border-box;}
+          table{width:100%;border-collapse:collapse;font-size:11px;}
+          th,td{border:1px solid #e5e7eb;padding:6px;vertical-align:top;}
+          .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+          .sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
         </style>
       </head>
       <body>
         <div class="page">
-          <div class="top-row">
+          <div class="head">
             <div>
-              <h1>Person-Centered Plan (PCP)</h1>
-              <div style="font-size:11px;">Empowerment Support Solutions, LLC</div>
-              <div style="font-size:11px;margin-top:4px;">
-                <strong>Client:</strong> ${clientLabel}
-              </div>
-              <div style="font-size:11px;">
-                <strong>PCP Date:</strong> ${pcpDate}
-              </div>
+              <h2>Weekly Staff Plans</h2>
+              <div><strong>Client:</strong> ${clientLabel}</div>
+              <div><strong>Week start:</strong> ${weekStart}</div>
             </div>
             <div>
-              <img
-                src="${LOGO_URL}"
-                class="logo"
-                onerror="this.style.display='none'"
-              >
+              <img src="${LOGO_URL}" style="height:70px;" onerror="this.style.display='none'">
             </div>
           </div>
-
-          <div class="section">
-            <h2>Section 1 — Meeting Details & Participants</h2>
-            <div class="label">PCP conducted by</div>
-            <div class="value">${v("pcp_conducted_by")}</div>
-
-            <div class="label">Format</div>
-            <div class="value">${v("pcp_format")}</div>
-
-            <div class="label">Meeting date(s)</div>
-            <div class="value">${v("pcp_date")}</div>
-
-            <div class="label">Location(s)</div>
-            <div class="value">${v("pcp_location")}</div>
-
-            <div class="label">Participants</div>
-            <div class="value">${v("pcp_participants")}</div>
-
-            <div class="label">Summary</div>
-            <div class="value">${v("pcp_summary")}</div>
-          </div>
-
-          <div class="section">
-            <h2>Section 2 — Personal Profile</h2>
-            <div class="label">Who ${clientLabel} is</div>
-            <div class="value">${v("profile_who")}</div>
-
-            <div class="label">Like & admire</div>
-            <div class="value">${v("like_admire")}</div>
-
-            <div class="label">Strengths</div>
-            <div class="value">${v("strengths")}</div>
-
-            <div class="label">Communication</div>
-            <div class="value">${v("communication")}</div>
-
-            <div class="label">Important TO</div>
-            <div class="value">${v("important_to")}</div>
-
-            <div class="label">Important FOR</div>
-            <div class="value">${v("important_for")}</div>
-
-            <div class="label">Sensory needs</div>
-            <div class="value">${v("sensory")}</div>
-
-            <div class="label">Behavioral</div>
-            <div class="value">${v("behavioral")}</div>
-
-            <div class="label">Health & safety</div>
-            <div class="value">${v("health_safety")}</div>
-
-            <div class="label">Cultural</div>
-            <div class="value">${v("cultural")}</div>
-          </div>
-
-          <div class="section">
-            <h2>Section 3 — Routines</h2>
-            <div class="label">Morning</div>
-            <div class="value">${v("routine_morning")}</div>
-
-            <div class="label">Afternoon</div>
-            <div class="value">${v("routine_afternoon")}</div>
-
-            <div class="label">Evening</div>
-            <div class="value">${v("routine_evening")}</div>
-
-            <div class="label">Community</div>
-            <div class="value">${v("routine_community")}</div>
-
-            <div class="label">Stress help</div>
-            <div class="value">${v("routine_stress_help")}</div>
-
-            <div class="label">Triggers</div>
-            <div class="value">${v("routine_triggers")}</div>
-          </div>
-
-          <div class="section">
-            <h2>Section 4 — Outcomes</h2>
-            <div class="label">Outcome 1</div>
-            <div class="value"><strong>Goal:</strong> ${v("outcome1_goal")}</div>
-            <div class="value"><strong>Why:</strong> ${v("outcome1_why")}</div>
-            <div class="value"><strong>Barriers:</strong> ${v("outcome1_barriers")}</div>
-            <div class="value"><strong>Teaching:</strong> ${v("outcome1_teaching")}</div>
-            <div class="value"><strong>Progress:</strong> ${v("outcome1_progress")}</div>
-            <div class="value"><strong>Staff:</strong> ${v("outcome1_staff")}</div>
-
-            <div class="label" style="margin-top:10px;">Outcome 2</div>
-            <div class="value"><strong>Goal:</strong> ${v("outcome2_goal")}</div>
-            <div class="value"><strong>Why:</strong> ${v("outcome2_why")}</div>
-            <div class="value"><strong>Barriers:</strong> ${v("outcome2_barriers")}</div>
-            <div class="value"><strong>Teaching:</strong> ${v("outcome2_teaching")}</div>
-            <div class="value"><strong>Progress:</strong> ${v("outcome2_progress")}</div>
-            <div class="value"><strong>Staff:</strong> ${v("outcome2_staff")}</div>
-
-            <div class="label" style="margin-top:10px;">Outcome 3</div>
-            <div class="value"><strong>Goal:</strong> ${v("outcome3_goal")}</div>
-            <div class="value"><strong>Why:</strong> ${v("outcome3_why")}</div>
-            <div class="value"><strong>Barriers:</strong> ${v("outcome3_barriers")}</div>
-            <div class="value"><strong>Teaching:</strong> ${v("outcome3_teaching")}</div>
-            <div class="value"><strong>Progress:</strong> ${v("outcome3_progress")}</div>
-            <div class="value"><strong>Staff:</strong> ${v("outcome3_staff")}</div>
-
-            <div class="label" style="margin-top:10px;">Outcome 4</div>
-            <div class="value"><strong>Goal:</strong> ${v("outcome4_goal")}</div>
-            <div class="value"><strong>Why:</strong> ${v("outcome4_why")}</div>
-            <div class="value"><strong>Barriers:</strong> ${v("outcome4_barriers")}</div>
-            <div class="value"><strong>Teaching:</strong> ${v("outcome4_teaching")}</div>
-            <div class="value"><strong>Progress:</strong> ${v("outcome4_progress")}</div>
-            <div class="value"><strong>Staff:</strong> ${v("outcome4_staff")}</div>
-
-            <div class="label" style="margin-top:10px;">Outcome 5</div>
-            <div class="value"><strong>Goal:</strong> ${v("outcome5_goal")}</div>
-            <div class="value"><strong>Why:</strong> ${v("outcome5_why")}</div>
-            <div class="value"><strong>Barriers:</strong> ${v("outcome5_barriers")}</div>
-            <div class="value"><strong>Teaching:</strong> ${v("outcome5_teaching")}</div>
-            <div class="value"><strong>Progress:</strong> ${v("outcome5_progress")}</div>
-            <div class="value"><strong>Staff:</strong> ${v("outcome5_staff")}</div>
-          </div>
-
-          <div class="section">
-            <h2>Section 5 — Supports & Risk</h2>
-            <div class="label">Natural supports</div>
-            <div class="value">${v("natural_supports")}</div>
-
-            <div class="label">Paid supports</div>
-            <div class="value">${v("paid_supports")}</div>
-
-            <div class="label">Justification</div>
-            <div class="value">${v("justification")}</div>
-
-            <div class="label">Hours needed</div>
-            <div class="value">${v("hours_needed")}</div>
-
-            <div class="label">Risk mitigation</div>
-            <div class="value">${v("risk_mitigation")}</div>
-          </div>
-
-          <div class="section">
-            <h2>Section 7 — Future Vision</h2>
-            <div class="label">Preferred future</div>
-            <div class="value">${v("future_pref")}</div>
-
-            <div class="label">Goals</div>
-            <div class="value">${v("future_goals")}</div>
-
-            <div class="label">Community</div>
-            <div class="value">${v("future_comm")}</div>
-
-            <div class="label">Long-term direction</div>
-            <div class="value">${v("future_long")}</div>
-          </div>
-
-          <div class="section">
-            <h2>Signatures</h2>
-            <div style="display:flex;gap:24px;align-items:flex-end;">
-              <div>
-                <div class="label">Client / Parent / Responsible Party</div>
-                ${
-                  sigs.omar_signature || sigs.client_signature
-                    ? `<img class="sig" src="${
-                        sigs.omar_signature || sigs.client_signature
-                      }">`
-                    : `<div class="sig"></div>`
-                }
-              </div>
-              <div>
-                <div class="label">ESS Staff Signature</div>
-                ${
-                  sigs.staff_signature
-                    ? `<img class="sig" src="${sigs.staff_signature}">`
-                    : `<div class="sig"></div>`
-                }
-              </div>
-            </div>
-          </div>
-
-          <div style="margin-top:12px;font-size:9.5px;color:#6b7280;">
-            ${CONTACT_LINE}
-          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Staff</th>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+                <th>Sun</th>
+                <th>Signature</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${
+                currentWeeklyRows.map(r => `
+                  <tr>
+                    <td>${r.__staff_name}</td>
+                    <td>${(r.mon_text||"").replace(/\\n/g,"<br>")}</td>
+                    <td>${(r.tue_text||"").replace(/\\n/g,"<br>")}</td>
+                    <td>${(r.wed_text||"").replace(/\\n/g,"<br>")}</td>
+                    <td>${(r.thu_text||"").replace(/\\n/g,"<br>")}</td>
+                    <td>${(r.fri_text||"").replace(/\\n/g,"<br>")}</td>
+                    <td>${(r.sat_text||"").replace(/\\n/g,"<br>")}</td>
+                    <td>${(r.sun_text||"").replace(/\\n/g,"<br>")}</td>
+                    <td>${
+                      r.staff_signature
+                        ? `<img class="sig" src="${r.staff_signature}">`
+                        : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
+                    }</td>
+                  </tr>
+                `).join("")
+              }
+            </tbody>
+          </table>
+          <p style="margin-top:14px;font-size:10px;color:#6b7280;">${CONTACT_LINE}</p>
         </div>
       </body>
       </html>
     `);
     win.document.close();
     win.focus();
-    setTimeout(() => win.print(), 400);
+    setTimeout(()=>win.print(), 400);
   }
-  pcp_export.addEventListener("click", exportPCP);
+  wk_export.addEventListener("click", exportWeekly);
 
 })();
 </script>
