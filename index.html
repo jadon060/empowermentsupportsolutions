@@ -30,7 +30,7 @@
     header {
       background: linear-gradient(90deg, #1b7ea0 0%, #2fb6a6 100%);
       color:#fff;
-      text-align:left;
+      text-align:center;
       padding: 18px 22px;
       padding-top: calc(60px + env(safe-area-inset-top));
       box-shadow:0 3px 12px rgba(0,0,0,0.15);
@@ -42,38 +42,13 @@
       letter-spacing:.2px;
       line-height:1.15;
     }
-    .header-subtitle{
-      margin-top:2px;
-      font-size:1.05rem;
-      opacity:.95;
-      font-weight:600;
-      line-height:1.1;
-    }
     .header-inner{
       display:flex;
       align-items:center;
+      justify-content:center;
       gap:14px;
       max-width:1200px;
       margin:0 auto;
-    }
-    .header-logo-wrap{
-      background: rgba(255,255,255,0.18);
-      border: 1px solid rgba(255,255,255,0.22);
-      border-radius: 14px;
-      padding: 10px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      width: 54px;
-      height: 54px;
-      flex: 0 0 auto;
-    }
-    .header-logo{
-      width: 34px;
-      height: 34px;
-      object-fit: contain;
-      display:block;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.12));
     }
 
     /* Login button */
@@ -120,9 +95,6 @@
     @media (max-width:600px){
       .careers-btn{ font-size:0.8rem; padding:7px 12px; }
       header h1{ font-size:1.25rem; }
-      .header-subtitle{ font-size:.95rem; }
-      .header-logo-wrap{ width:48px; height:48px; }
-      .header-logo{ width:30px; height:30px; }
     }
 
     /* Logo */
@@ -322,12 +294,8 @@
     <a href="https://empowermentss.com/careers/careers.html?_ts=1" class="careers-btn">Careers</a>
 
     <div class="header-inner">
-      <div class="header-logo-wrap" aria-hidden="true">
-        <img src="logo full.png" alt="" class="header-logo" loading="lazy">
-      </div>
       <div>
         <h1>Empowerment Support Solutions, LLC</h1>
-        <div class="header-subtitle">Career Page</div>
       </div>
     </div>
   </header>
