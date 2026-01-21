@@ -104,11 +104,6 @@
       display:block;
       margin:8px 0 4px;
     }
-    .hint{
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:8px;
-    }
 
     textarea{
       width:100%;
@@ -138,6 +133,7 @@
       .grid-2,.grid-3{grid-template-columns:1fr;}
     }
 
+    /* SIGNATURES */
     .sig-row{
       display:flex;
       flex-wrap:wrap;
@@ -157,18 +153,15 @@
       margin-bottom:6px;
       color:var(--brand);
     }
-
-    /* IMPORTANT: we keep CSS height explicit so touch devices behave consistently */
     canvas.sig-canvas{
       width:100%;
-      height:180px;
+      height:180px;           /* IMPORTANT: fixed CSS height so resize math is stable */
       border-radius:10px;
       border:1px solid #d4d4d8;
       background:#fff;
-      touch-action:none; /* prevents scrolling while signing */
+      touch-action:none;      /* IMPORTANT: allows drawing on touch screens */
       display:block;
     }
-
     .clear-btn{
       background:#e5e7eb;
       color:#111827;
@@ -674,13 +667,13 @@
     <div class="sig-row">
       <div class="sig-box">
         <div class="sig-label">Uvlester Signature</div>
-        <canvas id="sig_uvlester" class="sig-canvas" height="180"></canvas>
+        <canvas id="sig_uvlester" class="sig-canvas"></canvas>
         <button class="clear-btn" type="button" id="clearUvlester">Clear</button>
       </div>
 
       <div class="sig-box">
         <div class="sig-label">ESS Staff Signature (John Doe)</div>
-        <canvas id="sig_staff" class="sig-canvas" height="180"></canvas>
+        <canvas id="sig_staff" class="sig-canvas"></canvas>
         <button class="clear-btn" type="button" id="clearStaff">Clear</button>
       </div>
     </div>
@@ -703,72 +696,62 @@
   const SUPABASE_ANON_KEY = "sb_publishable_J6Y49EQarV5pAzhOdokl7w_GVlPoPSb";
   const { createClient } = supabase;
 
-  // 🔹 Uvlester's UUID (from ess.clients)
-  const CLIENT_ID = "PASTE_UVLESTER_UUID_HERE";
+  // 🔹 Uvlester's UUID (from ess.clients) — REPLACE this with Uvlester’s actual client_id
+  const CLIENT_ID = "REPLACE_WITH_UVLESTER_CLIENT_ID";
 
   const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     db: { schema: "ess" }
   });
 
-  /**
-   * Signature pad that actually works:
-   * - Pointer Events (mouse/touch/pen)
-   * - Proper devicePixelRatio scaling
-   * - Correct coordinate mapping
-   * - Prevent scroll while drawing
-   */
-  function createSignaturePad(canvasId, clearBtnId){
+  // ✅ Robust signature pad (Pointer Events + DPR scaling + preserves drawing on resize)
+  function setupSignatureCanvas(canvasId, clearBtnId){
     const canvas = document.getElementById(canvasId);
     const clearBtn = document.getElementById(clearBtnId);
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
-    // drawing style
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 2.2;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
 
-    let isDrawing = false;
-    let last = { x: 0, y: 0 };
-
-    function fitToContainer(preserve){
-      const dpr = window.devicePixelRatio || 1;
+    function resizeCanvasPreserve(){
       const rect = canvas.getBoundingClientRect();
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
 
-      // preserve existing drawing if asked
+      // Save current drawing
       let snapshot = null;
-      if (preserve) {
-        try { snapshot = canvas.toDataURL("image/png"); } catch (e) { snapshot = null; }
-      }
+      try { snapshot = canvas.toDataURL("image/png"); } catch(e) {}
 
-      // Set real pixel buffer size based on CSS size * DPR
-      canvas.width  = Math.max(1, Math.floor(rect.width * dpr));
-      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      // Set internal pixel buffer to match CSS size * DPR
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
 
-      // Make drawing units map to CSS pixels
+      // Map drawing units back to CSS pixels
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // Re-apply style after transform resets
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 2.2;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-
-      if (snapshot) {
+      // Restore snapshot if existed
+      if(snapshot){
         const img = new Image();
         img.onload = () => {
-          // draw image back at CSS pixel scale
+          // draw in CSS pixel space
           ctx.drawImage(img, 0, 0, rect.width, rect.height);
         };
         img.src = snapshot;
       }
     }
 
-    // initial fit after layout paints
-    requestAnimationFrame(() => fitToContainer(false));
-    window.addEventListener("resize", () => fitToContainer(true));
+    // First layout
+    resizeCanvasPreserve();
 
-    function getPointFromEvent(e){
+    // Keep correct when page resizes / fonts load
+    window.addEventListener("resize", resizeCanvasPreserve);
+    window.addEventListener("orientationchange", resizeCanvasPreserve);
+
+    let drawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    function getXY(e){
       const rect = canvas.getBoundingClientRect();
       return {
         x: e.clientX - rect.left,
@@ -777,33 +760,28 @@
     }
 
     function pointerDown(e){
-      // only primary button for mouse; touch/pen are fine
-      if (e.pointerType === "mouse" && e.button !== 0) return;
-
       e.preventDefault();
       canvas.setPointerCapture(e.pointerId);
-
-      isDrawing = true;
-      last = getPointFromEvent(e);
-
+      const { x, y } = getXY(e);
+      drawing = true;
+      lastX = x; lastY = y;
       ctx.beginPath();
-      ctx.moveTo(last.x, last.y);
+      ctx.moveTo(lastX, lastY);
     }
 
     function pointerMove(e){
-      if (!isDrawing) return;
+      if(!drawing) return;
       e.preventDefault();
-
-      const p = getPointFromEvent(e);
-      ctx.lineTo(p.x, p.y);
+      const { x, y } = getXY(e);
+      ctx.lineTo(x, y);
       ctx.stroke();
-      last = p;
+      lastX = x; lastY = y;
     }
 
     function pointerUp(e){
-      if (!isDrawing) return;
+      if(!drawing) return;
       e.preventDefault();
-      isDrawing = false;
+      drawing = false;
       try { canvas.releasePointerCapture(e.pointerId); } catch(_) {}
     }
 
@@ -813,10 +791,6 @@
     canvas.addEventListener("pointercancel", pointerUp);
     canvas.addEventListener("pointerleave", pointerUp);
 
-    // extra safety: block touch scrolling on older browsers
-    canvas.addEventListener("touchstart", (e) => e.preventDefault(), { passive:false });
-    canvas.addEventListener("touchmove", (e) => e.preventDefault(), { passive:false });
-
     clearBtn.addEventListener("click", () => {
       const rect = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
@@ -825,13 +799,25 @@
     return canvas;
   }
 
-  const canvasUvlester = createSignaturePad("sig_uvlester", "clearUvlester");
-  const canvasStaff    = createSignaturePad("sig_staff", "clearStaff");
+  function canvasHasInk(canvas){
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const imgData = ctx.getImageData(0, 0, Math.max(1, Math.floor(rect.width)), Math.max(1, Math.floor(rect.height))).data;
+    // Check if any pixel alpha is non-zero (drawn)
+    for(let i=3; i<imgData.length; i+=4){
+      if(imgData[i] !== 0) return true;
+    }
+    return false;
+  }
 
   function getSignatureBase64(canvas){
-    // If user signs on a transparent canvas, this still exports correctly.
+    // If blank, store empty string (clean)
+    if(!canvasHasInk(canvas)) return "";
     return canvas.toDataURL("image/png");
   }
+
+  const canvasUvlester = setupSignatureCanvas("sig_uvlester", "clearUvlester");
+  const canvasStaff    = setupSignatureCanvas("sig_staff", "clearStaff");
 
   function collectPCPData(){
     const ids = [
@@ -928,6 +914,7 @@
     }
   });
 
+  // ✅ Export: triggers print dialog (Save as PDF). Keeps signatures because canvas now works.
   document.getElementById("exportPCP").addEventListener("click", () => {
     window.print();
   });
