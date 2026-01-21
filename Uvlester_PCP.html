@@ -1,4 +1,4 @@
-<!doctype html> 
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -157,14 +157,18 @@
       margin-bottom:6px;
       color:var(--brand);
     }
+
+    /* IMPORTANT: we keep CSS height explicit so touch devices behave consistently */
     canvas.sig-canvas{
       width:100%;
+      height:180px;
       border-radius:10px;
       border:1px solid #d4d4d8;
       background:#fff;
-      touch-action:none;
+      touch-action:none; /* prevents scrolling while signing */
       display:block;
     }
+
     .clear-btn{
       background:#e5e7eb;
       color:#111827;
@@ -706,73 +710,126 @@
     db: { schema: "ess" }
   });
 
-  function setupSignatureCanvas(canvasId, clearBtnId){
+  /**
+   * Signature pad that actually works:
+   * - Pointer Events (mouse/touch/pen)
+   * - Proper devicePixelRatio scaling
+   * - Correct coordinate mapping
+   * - Prevent scroll while drawing
+   */
+  function createSignaturePad(canvasId, clearBtnId){
     const canvas = document.getElementById(canvasId);
     const clearBtn = document.getElementById(clearBtnId);
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
-    function resizeCanvas(){
+    // drawing style
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    let isDrawing = false;
+    let last = { x: 0, y: 0 };
+
+    function fitToContainer(preserve){
+      const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
+
+      // preserve existing drawing if asked
+      let snapshot = null;
+      if (preserve) {
+        try { snapshot = canvas.toDataURL("image/png"); } catch (e) { snapshot = null; }
+      }
+
+      // Set real pixel buffer size based on CSS size * DPR
+      canvas.width  = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+
+      // Make drawing units map to CSS pixels
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Re-apply style after transform resets
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      if (snapshot) {
+        const img = new Image();
+        img.onload = () => {
+          // draw image back at CSS pixel scale
+          ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        };
+        img.src = snapshot;
+      }
     }
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
 
-    let drawing = false;
-    let rect = canvas.getBoundingClientRect();
+    // initial fit after layout paints
+    requestAnimationFrame(() => fitToContainer(false));
+    window.addEventListener("resize", () => fitToContainer(true));
 
-    function getPos(e){
-      const point = e.touches ? e.touches[0] : e;
+    function getPointFromEvent(e){
+      const rect = canvas.getBoundingClientRect();
       return {
-        x: point.clientX - rect.left,
-        y: point.clientY - rect.top
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
       };
     }
 
-    function start(e){
+    function pointerDown(e){
+      // only primary button for mouse; touch/pen are fine
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+
       e.preventDefault();
-      drawing = true;
-      rect = canvas.getBoundingClientRect();
+      canvas.setPointerCapture(e.pointerId);
+
+      isDrawing = true;
+      last = getPointFromEvent(e);
+
       ctx.beginPath();
-      const pos = getPos(e);
-      ctx.moveTo(pos.x, pos.y);
+      ctx.moveTo(last.x, last.y);
     }
 
-    function move(e){
-      if(!drawing) return;
+    function pointerMove(e){
+      if (!isDrawing) return;
       e.preventDefault();
-      const pos = getPos(e);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 2;
-      ctx.lineCap = "round";
+
+      const p = getPointFromEvent(e);
+      ctx.lineTo(p.x, p.y);
       ctx.stroke();
+      last = p;
     }
 
-    function end(){
-      drawing = false;
+    function pointerUp(e){
+      if (!isDrawing) return;
+      e.preventDefault();
+      isDrawing = false;
+      try { canvas.releasePointerCapture(e.pointerId); } catch(_) {}
     }
 
-    canvas.addEventListener("mousedown", start);
-    canvas.addEventListener("mousemove", move);
-    canvas.addEventListener("mouseup", end);
-    canvas.addEventListener("mouseleave", end);
+    canvas.addEventListener("pointerdown", pointerDown);
+    canvas.addEventListener("pointermove", pointerMove);
+    canvas.addEventListener("pointerup", pointerUp);
+    canvas.addEventListener("pointercancel", pointerUp);
+    canvas.addEventListener("pointerleave", pointerUp);
 
-    canvas.addEventListener("touchstart", start, { passive:false });
-    canvas.addEventListener("touchmove", move, { passive:false });
-    canvas.addEventListener("touchend", end);
+    // extra safety: block touch scrolling on older browsers
+    canvas.addEventListener("touchstart", (e) => e.preventDefault(), { passive:false });
+    canvas.addEventListener("touchmove", (e) => e.preventDefault(), { passive:false });
 
     clearBtn.addEventListener("click", () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const rect = canvas.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
     });
 
     return canvas;
   }
 
-  const canvasUvlester = setupSignatureCanvas("sig_uvlester", "clearUvlester");
-  const canvasStaff    = setupSignatureCanvas("sig_staff", "clearStaff");
+  const canvasUvlester = createSignaturePad("sig_uvlester", "clearUvlester");
+  const canvasStaff    = createSignaturePad("sig_staff", "clearStaff");
 
   function getSignatureBase64(canvas){
+    // If user signs on a transparent canvas, this still exports correctly.
     return canvas.toDataURL("image/png");
   }
 
