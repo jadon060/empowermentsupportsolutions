@@ -5,7 +5,11 @@
   <title>ESS Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    :root { --brand:#2c3e50; --brand-2:#0f4c81; --bg:#f7f7fb; }
+    :root { 
+      --brand:#1b7ea0; 
+      --brand-2:#2fb6a6; 
+      --bg:#f7f7fb; 
+    }
     *,*::before,*::after{ box-sizing:border-box; }
 
     body {
@@ -22,18 +26,32 @@
       background:#fff;
     }
 
+    /* HEADER WITH SUBTLE COLOR PULSE */
     header {
-      background:linear-gradient(135deg,var(--brand),var(--brand-2));
-      color:#fff; padding:20px; text-align:center;
-      animation: essPulse 4.8s ease-in-out infinite;
-      transform-origin:center;
-      will-change: transform, filter;
+      background: linear-gradient(
+        120deg,
+        var(--brand),
+        var(--brand-2),
+        var(--brand)
+      );
+      background-size: 300% 300%;
+      animation: gradientPulse 10s ease-in-out infinite;
+      color:#fff;
+      padding:20px;
+      text-align:center;
     }
-    header h1 { margin:0; font-size:1.5rem; font-weight:700; letter-spacing:.3px; }
 
-    @keyframes essPulse{
-      0%, 100% { transform: scale(1); filter: brightness(1); }
-      50% { transform: scale(1.015); filter: brightness(1.08); }
+    header h1 { 
+      margin:0; 
+      font-size:1.5rem; 
+      font-weight:700; 
+      letter-spacing:.3px; 
+    }
+
+    @keyframes gradientPulse {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .card { padding:22px; text-align:center; }
@@ -43,19 +61,31 @@
       width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;
       font-size:16px; transition:border .2s, box-shadow .2s;
     }
-    input:focus { outline:none; border-color:var(--brand); box-shadow:0 0 0 3px rgba(44,62,80,0.25); }
+    input:focus { 
+      outline:none; 
+      border-color:var(--brand); 
+      box-shadow:0 0 0 3px rgba(27,126,160,0.25); 
+    }
 
     button {
-      margin-top:12px; background:var(--brand); color:#fff; border:0;
-      font-weight:600; cursor:pointer; transition:background .2s ease;
+      margin-top:12px; 
+      background:var(--brand); 
+      color:#fff; 
+      border:0;
+      font-weight:600; 
+      cursor:pointer; 
+      transition:background .2s ease;
     }
-    button:hover { background:#1b2a38; }
+    button:hover { background:#166b88; }
 
     .err { color:#b00020; margin-top:8px; min-height:1.2em; }
 
     a.home {
-      display:inline-block; margin-top:10px; color:var(--brand);
-      text-decoration:none; font-weight:600;
+      display:inline-block; 
+      margin-top:10px; 
+      color:var(--brand);
+      text-decoration:none; 
+      font-weight:600;
     }
   </style>
 </head>
