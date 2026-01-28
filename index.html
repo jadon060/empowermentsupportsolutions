@@ -13,6 +13,10 @@
       --card:#ffffff; 
       --text:#2a2a2a;
       --accent:#4c8cd7;
+
+      /* for the pulsing header like login */
+      --header-a:#1b7ea0;
+      --header-b:#2fb6a6;
     }
 
     * { box-sizing: border-box; }
@@ -26,9 +30,12 @@
       scroll-behavior:smooth;
     }
 
-    /* Header */
+    /* Header (NOW WITH SUBTLE COLOR PULSE LIKE LOGIN) */
     header {
-      background: linear-gradient(90deg, #1b7ea0 0%, #2fb6a6 100%);
+      background: linear-gradient(120deg, var(--header-a), var(--header-b), var(--header-a));
+      background-size: 300% 300%;
+      animation: gradientPulse 10s ease-in-out infinite;
+
       color:#fff;
       text-align:center;
       padding: 18px 22px;
@@ -49,6 +56,12 @@
       gap:14px;
       max-width:1200px;
       margin:0 auto;
+    }
+
+    @keyframes gradientPulse {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     /* Login button */
@@ -138,38 +151,31 @@
       box-shadow:0 4px 15px rgba(0,0,0,0.08);
       transition:transform .25s ease, box-shadow .25s ease;
       border-top:4px solid var(--accent);
+      height:100%;
     }
     .card:hover {
       transform:translateY(-5px);
       box-shadow:0 8px 22px rgba(0,0,0,0.12);
     }
 
-    /* ✅ force the service title to stay on one line */
-    .card h3{
-      margin-top:0;
-      line-height:1.15;
-      font-size:1.28rem;
-      letter-spacing:-0.2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    @media (max-width:640px){
-      .card h3{ font-size:1.22rem; }
-    }
-
-    /* ✅ clickable service-card wrapper */
+    /* clickable card wrapper */
     .card-link{
       display:block;
       text-decoration:none;
       color:inherit;
-      border-radius:12px;
-      outline:none;
+      height:100%;
     }
-    .card-link .card{ cursor:pointer; }
-    .card-link:focus-visible .card{
+    .card-link:focus-visible{
       outline:3px solid rgba(76,140,215,0.85);
-      outline-offset:3px;
+      outline-offset:4px;
+      border-radius:12px;
+    }
+
+    /* Make the SDP title stay on one line */
+    .sdp-title{
+      white-space:nowrap;
+      font-size:clamp(1.05rem, 1.2vw + 0.9rem, 1.35rem);
+      letter-spacing:.1px;
     }
 
     @media(max-width:1024px){ .service-cards{grid-template-columns:repeat(2,minmax(260px,1fr));} }
@@ -256,7 +262,7 @@
       flex-wrap:wrap;
     }
 
-    /* NEW: section title above partners */
+    /* Section title above partners */
     .partners-title{
       margin-top:18px;
       font-weight:700;
@@ -270,7 +276,7 @@
       color:rgba(214,214,214,0.95);
     }
 
-    /* NEW: uniform logo tiles + clickable */
+    /* Uniform logo tiles + clickable */
     .logo-link{
       display:inline-flex;
       text-decoration:none;
@@ -306,7 +312,6 @@
       object-fit:contain;
       display:block;
     }
-
     @media (max-width:520px){
       .logo-tile{ width:92vw; max-width:340px; }
     }
@@ -334,7 +339,7 @@
     .translate-toggle button.active{ outline:2px solid var(--accent); background:#eef4ff; }
     #google_translate_element { display:none; }
 
-    /* === added to make the two team photos sit side by side and not be huge === */
+    /* Two team photos side by side */
     #team .team-photo {
       display:inline-block;
       width:43%;
@@ -409,17 +414,18 @@
 
   <section id="services" class="section">
     <h2>Our Services</h2>
+
+    <!-- Rearranged: SDP card is now in the middle and the whole card is clickable -->
     <div class="service-cards">
       <div class="card">
         <h3>Personalized Living Support</h3>
         <p>Daily one-on-one support designed around each participant’s strengths, preferences and goals, helping people build confidence, skills and independence at their own pace.</p>
       </div>
 
-      <!-- ✅ SDP card moved to the middle + whole card clickable -->
       <a class="card-link" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener noreferrer"
-         aria-label="Learn about the California Self-Determination Program (DDS official page)">
+         aria-label="Learn about the Self-Determination Program (DDS official page)">
         <div class="card">
-          <h3>Self-Determination Program </h3>
+          <h3 class="sdp-title">Self Determination Program</h3>
           <p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p>
         </div>
       </a>
@@ -437,7 +443,7 @@
 
     <p class="testimonial">
       “I've noticed a real difference since working with ESS. They take feedback seriously and focus on what actually helps.”
-      <cite>- Jeremy, ESS participant </cite>
+      <cite>- Jeremy, ESS Participant </cite>
     </p>
   </section>
 
@@ -523,6 +529,7 @@
       document.head.appendChild(s);
     })();
 
+    /* Auto Last Updated */
     const d = new Date(document.lastModified);
     const opts = { year: 'numeric', month: 'long', day: 'numeric' };
     document.getElementById('lu-text').textContent = d.toLocaleDateString('en-US', opts);
