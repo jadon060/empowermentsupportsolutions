@@ -144,6 +144,34 @@
       box-shadow:0 8px 22px rgba(0,0,0,0.12);
     }
 
+    /* ✅ force the service title to stay on one line */
+    .card h3{
+      margin-top:0;
+      line-height:1.15;
+      font-size:1.28rem;
+      letter-spacing:-0.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    @media (max-width:640px){
+      .card h3{ font-size:1.22rem; }
+    }
+
+    /* ✅ clickable service-card wrapper */
+    .card-link{
+      display:block;
+      text-decoration:none;
+      color:inherit;
+      border-radius:12px;
+      outline:none;
+    }
+    .card-link .card{ cursor:pointer; }
+    .card-link:focus-visible .card{
+      outline:3px solid rgba(76,140,215,0.85);
+      outline-offset:3px;
+    }
+
     @media(max-width:1024px){ .service-cards{grid-template-columns:repeat(2,minmax(260px,1fr));} }
     @media(max-width:640px){ .service-cards{grid-template-columns:1fr;} }
 
@@ -250,15 +278,15 @@
       outline:none;
     }
     .logo-tile{
-      width:260px;            /* bigger so SGPRC text has room */
-      height:100px;           /* same visual height for all */
+      width:260px;
+      height:100px;
       background:rgba(255,255,255,0.92);
       border-radius:14px;
       box-shadow:0 2px 8px rgba(0,0,0,0.25);
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:8px 10px;       /* breathing room so letters don’t feel clipped */
+      padding:8px 10px;
       transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
     }
     .logo-link:hover .logo-tile{
@@ -273,9 +301,9 @@
     .logo-tile img{
       max-width:100%;
       max-height:100%;
-      width:auto;            /* prevents “edge-to-edge” tightness */
-      height:auto;           /* keeps aspect ratio */
-      object-fit:contain;    /* keeps ELARC from overpowering */
+      width:auto;
+      height:auto;
+      object-fit:contain;
       display:block;
     }
 
@@ -386,22 +414,25 @@
         <h3>Personalized Living Support</h3>
         <p>Daily one-on-one support designed around each participant’s strengths, preferences and goals, helping people build confidence, skills and independence at their own pace.</p>
       </div>
+
+      <!-- ✅ SDP card moved to the middle + whole card clickable -->
+      <a class="card-link" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener noreferrer"
+         aria-label="Learn about the California Self-Determination Program (DDS official page)">
+        <div class="card">
+          <h3>Self Determination Program Coordination</h3>
+          <p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p>
+        </div>
+      </a>
+
       <div class="card">
         <h3>Staff Placement</h3>
         <p>We provide dependable staff you can count on that are trained to follow PCT practices, honor individual routines and collaborate closely with families for consistency and trust.</p>
-      </div>
-      <div class="card">
-        <h3>Self Determination Program Coordination</h3>
-        <p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p>
       </div>
     </div>
   </section>
 
   <section id="team" class="section" aria-label="ESS Team Photo & Testimonial" style="text-align:center;">
-    <!-- ✅ Photo 1: library selfie (unnamed (1).jpg) -->
     <img src="unnamed%20(1).jpg" alt="ESS staff photo (library)" class="team-photo" loading="lazy">
-
-    <!-- ✅ Photo 2: restaurant group photo (Screenshot 2026-01-21 112803.png) -->
     <img src="Screenshot%202026-01-21%20112803.png" alt="ESS team photo (restaurant)" class="team-photo" loading="lazy">
 
     <p class="testimonial">
@@ -423,30 +454,25 @@
     <div class="partners-title">Our Trusted Partners</div>
     <div class="partners-sub">Official resources and regional centers we work alongside.</div>
 
-    <!-- Footer logos (clickable + uniform sizing) -->
     <div class="footer-logos">
-      <!-- SCLARC -->
       <a class="logo-link" href="https://www.sclarc.org/" target="_blank" rel="noopener noreferrer" aria-label="Visit SCLARC official website">
         <div class="logo-tile">
           <img src="newforms/1631343033971.jpg" alt="South Central Los Angeles Regional Center (SCLARC) Logo" loading="lazy">
         </div>
       </a>
 
-      <!-- DDS -->
       <a class="logo-link" href="https://www.dds.ca.gov/" target="_blank" rel="noopener noreferrer" aria-label="Visit California Department of Developmental Services official website">
         <div class="logo-tile">
           <img src="newforms/DDS_Cover.png" alt="California Department of Developmental Services (DDS) Logo" loading="lazy">
         </div>
       </a>
 
-      <!-- SGPRC -->
       <a class="logo-link" href="https://sgprc.org/" target="_blank" rel="noopener noreferrer" aria-label="Visit SGPRC official website">
         <div class="logo-tile">
           <img src="sgprc.png" alt="San Gabriel/Pomona Regional Center (SGPRC) Logo" loading="lazy">
         </div>
       </a>
 
-      <!-- ELARC -->
       <a class="logo-link" href="https://www.elarc.org/Home" target="_blank" rel="noopener noreferrer" aria-label="Visit ELARC official website">
         <div class="logo-tile">
           <img src="east-la-logo.jpg" alt="Eastern Los Angeles Regional Center (ELARC) Logo" loading="lazy">
@@ -454,7 +480,6 @@
       </a>
     </div>
 
-    <!-- NEW: Last Updated -->
     <p id="last-updated">Last updated: <span id="lu-text"></span></p>
 
     <p class="copyright">© 2025 Empowerment Support Solutions, LLC. All rights reserved.</p>
@@ -498,7 +523,6 @@
       document.head.appendChild(s);
     })();
 
-    /* Auto Last Updated */
     const d = new Date(document.lastModified);
     const opts = { year: 'numeric', month: 'long', day: 'numeric' };
     document.getElementById('lu-text').textContent = d.toLocaleDateString('en-US', opts);
