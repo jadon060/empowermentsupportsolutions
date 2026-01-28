@@ -220,31 +220,45 @@
 
     /* Footer logos */
     .footer-logos {
-      margin-top:25px;
+      margin-top:18px;
       display:flex;
       justify-content:center;
       align-items:center;
-      gap:30px;
+      gap:22px;
       flex-wrap:wrap;
+    }
+
+    /* NEW: section title above partners */
+    .partners-title{
+      margin-top:18px;
+      font-weight:700;
+      letter-spacing:.2px;
+      font-size:1.05rem;
+      color:rgba(255,255,255,0.92);
+    }
+    .partners-sub{
+      margin-top:6px;
+      font-size:0.92rem;
+      color:rgba(214,214,214,0.95);
     }
 
     /* NEW: uniform logo tiles + clickable */
     .logo-link{
       display:inline-flex;
       text-decoration:none;
-      border-radius:12px;
+      border-radius:14px;
       outline:none;
     }
     .logo-tile{
-      width:210px;            /* keeps everything symmetrical */
-      height:92px;            /* same visual height for all */
+      width:260px;            /* bigger so SGPRC text has room */
+      height:100px;           /* same visual height for all */
       background:rgba(255,255,255,0.92);
-      border-radius:12px;
+      border-radius:14px;
       box-shadow:0 2px 8px rgba(0,0,0,0.25);
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:10px 14px;
+      padding:8px 10px;       /* breathing room so letters don’t feel clipped */
       transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
     }
     .logo-link:hover .logo-tile{
@@ -257,16 +271,16 @@
       outline-offset:3px;
     }
     .logo-tile img{
-      width:100%;
-      height:100%;
-      object-fit:contain;     /* fixes ELARC being too big */
-      border-radius:0;        /* tile already rounds */
-      box-shadow:none;        /* tile already shadows */
+      max-width:100%;
+      max-height:100%;
+      width:auto;            /* prevents “edge-to-edge” tightness */
+      height:auto;           /* keeps aspect ratio */
+      object-fit:contain;    /* keeps ELARC from overpowering */
       display:block;
     }
 
     @media (max-width:520px){
-      .logo-tile{ width:92vw; max-width:320px; }
+      .logo-tile{ width:92vw; max-width:340px; }
     }
 
     /* Translate toggle */
@@ -377,7 +391,7 @@
         <p>We provide dependable staff you can count on that are trained to follow PCT practices, honor individual routines and collaborate closely with families for consistency and trust.</p>
       </div>
       <div class="card">
-        <h3>SDP Coordination</h3>
+        <h3>Self Determination Program Coordination</h3>
         <p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p>
       </div>
     </div>
@@ -405,6 +419,9 @@
         Verify with CA Secretary of State (Search: Empowerment Support Solutions LLC)
       </a>
     </p>
+
+    <div class="partners-title">Our Trusted Partners</div>
+    <div class="partners-sub">Official resources and regional centers we work alongside.</div>
 
     <!-- Footer logos (clickable + uniform sizing) -->
     <div class="footer-logos">
@@ -440,7 +457,7 @@
     <!-- NEW: Last Updated -->
     <p id="last-updated">Last updated: <span id="lu-text"></span></p>
 
-    <p class="copyright">© 2025 Empowerment Support Solutions LLC. All rights reserved.</p>
+    <p class="copyright">© 2025 Empowerment Support Solutions, LLC. All rights reserved.</p>
   </footer>
 
   <a href="/login.html" class="login-btn">Login</a>
