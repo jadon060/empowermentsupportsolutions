@@ -1,61 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Empowerment Support Solutions, LLC</title>
-  <link rel="icon" href="logo full.png" type="image/png" />
+  <meta charset="utf-8">
+  <title>ESS Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    :root {
-      --brand:#2c3e50; 
-      --brand-2:#0f4c81;
-      --bg:linear-gradient(180deg,#f9fbff 0%,#f3f6fc 100%);
-      --card:#ffffff; 
-      --text:#2a2a2a;
-      --accent:#4c8cd7;
-
-      /* for the pulsing header like login */
-      --header-a:#1b7ea0;
-      --header-b:#2fb6a6;
+    :root { 
+      --brand:#1b7ea0; 
+      --brand-2:#2fb6a6; 
+      --bg:#f7f7fb; 
     }
-
-    * { box-sizing: border-box; }
+    *,*::before,*::after{ box-sizing:border-box; }
 
     body {
-      margin:0;
-      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      line-height:1.6;
-      scroll-behavior:smooth;
+      margin:0; display:grid; place-items:center; min-height:100vh;
+      background:var(--bg); font-family:Arial,Helvetica,sans-serif;
     }
 
-    /* Header (NOW WITH SUBTLE COLOR PULSE LIKE LOGIN) */
+    .wrap {
+      width:100%;
+      max-width:380px;
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:0 8px 30px rgba(0,0,0,.08);
+      background:#fff;
+    }
+
+    /* HEADER WITH SUBTLE COLOR PULSE */
     header {
-      background: linear-gradient(120deg, var(--header-a), var(--header-b), var(--header-a));
+      background: linear-gradient(
+        120deg,
+        var(--brand),
+        var(--brand-2),
+        var(--brand)
+      );
       background-size: 300% 300%;
       animation: gradientPulse 10s ease-in-out infinite;
-
       color:#fff;
+      padding:20px;
       text-align:center;
-      padding: 18px 22px;
-      padding-top: calc(60px + env(safe-area-inset-top));
-      box-shadow:0 3px 12px rgba(0,0,0,0.15);
-      position: relative;
     }
+
     header h1 { 
       margin:0; 
-      font-size:1.55rem; 
-      letter-spacing:.2px;
-      line-height:1.15;
-    }
-    .header-inner{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      max-width:1200px;
-      margin:0 auto;
+      font-size:1.5rem; 
+      font-weight:700; 
+      letter-spacing:.3px; 
     }
 
     @keyframes gradientPulse {
@@ -64,476 +54,95 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* Login button */
-    .login-btn {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 600;
-      font-size: 0.9rem;
-      padding: 9px 15px;
-      border-radius: 8px;
-      text-decoration: none;
-      border: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      transition: all 0.25s ease;
-      z-index: 9999;
-    }
-    .login-btn:hover { background:#336fb4; transform: translateY(-3px); }
+    .card { padding:22px; text-align:center; }
+    p { margin:0 0 12px; color:#555; }
 
-    @media (max-width: 600px) {
-      .login-btn { font-size: 0.8rem; padding: 7px 12px; }
+    input, button {
+      width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;
+      font-size:16px; transition:border .2s, box-shadow .2s;
+    }
+    input:focus { 
+      outline:none; 
+      border-color:var(--brand); 
+      box-shadow:0 0 0 3px rgba(27,126,160,0.25); 
     }
 
-    /* Careers button */
-    .careers-btn{
-      position:absolute; 
-      left:16px; 
-      top:16px;
-      background:var(--accent);
-      color:#fff;
+    button {
+      margin-top:12px; 
+      background:var(--brand); 
+      color:#fff; 
+      border:0;
+      font-weight:600; 
+      cursor:pointer; 
+      transition:background .2s ease;
+    }
+    button:hover { background:#166b88; }
+
+    .err { color:#b00020; margin-top:8px; min-height:1.2em; }
+
+    a.home {
+      display:inline-block; 
+      margin-top:10px; 
+      color:var(--brand);
+      text-decoration:none; 
       font-weight:600;
-      font-size:0.9rem;
-      padding:9px 15px;
-      border-radius:8px;
-      text-decoration:none;
-      border:none;
-      box-shadow:0 4px 10px rgba(0,0,0,0.25);
-      transition:background .25s ease, transform .25s ease;
-      z-index: 2;
-    }
-    .careers-btn:hover{ background:#336fb4; transform: translateY(-3px); }
-    @media (max-width:600px){
-      .careers-btn{ font-size:0.8rem; padding:7px 12px; }
-      header h1{ font-size:1.25rem; }
-    }
-
-    /* Logo */
-    .logo-center {
-      display:block;
-      margin: 26px auto 10px auto;
-      max-width: 260px;
-      height:auto;
-      filter: drop-shadow(0 3px 8px rgba(0,0,0,0.1));
-    }
-    @media (max-width:600px){ .logo-center{ max-width:190px; } }
-
-    /* Sections */
-    .section {
-      max-width:1200px;
-      margin:25px auto;
-      padding:20px;
-      background:rgba(255,255,255,0.8);
-      border-radius:14px;
-      box-shadow:0 6px 20px rgba(0,0,0,0.05);
-    }
-    .section h2 {
-      color:var(--brand-2);
-      margin-bottom:12px;
-      font-size:1.8rem;
-      border-left:6px solid var(--accent);
-      padding-left:10px;
-    }
-
-    /* Service cards */
-    .service-cards {
-      display:grid;
-      grid-template-columns:repeat(3,minmax(300px,1fr));
-      gap:24px;
-      align-items:stretch;
-    }
-    .card {
-      background:var(--card);
-      border-radius:12px;
-      padding:22px;
-      box-shadow:0 4px 15px rgba(0,0,0,0.08);
-      transition:transform .25s ease, box-shadow .25s ease;
-      border-top:4px solid var(--accent);
-      height:100%;
-    }
-    .card:hover {
-      transform:translateY(-5px);
-      box-shadow:0 8px 22px rgba(0,0,0,0.12);
-    }
-
-    /* clickable card wrapper */
-    .card-link{
-      display:block;
-      text-decoration:none;
-      color:inherit;
-      height:100%;
-    }
-    .card-link:focus-visible{
-      outline:3px solid rgba(76,140,215,0.85);
-      outline-offset:4px;
-      border-radius:12px;
-    }
-
-    /* Make the SDP title stay on one line */
-    .sdp-title{
-      white-space:nowrap;
-      font-size:clamp(1.05rem, 1.2vw + 0.9rem, 1.35rem);
-      letter-spacing:.1px;
-    }
-
-    @media(max-width:1024px){ .service-cards{grid-template-columns:repeat(2,minmax(260px,1fr));} }
-    @media(max-width:640px){ .service-cards{grid-template-columns:1fr;} }
-
-    /* CTA Button */
-    .cta-button {
-      display:inline-block;
-      margin-top:15px;
-      background:var(--brand-2);
-      color:white;
-      padding:12px 24px;
-      border-radius:8px;
-      text-decoration:none;
-      font-weight:bold;
-      font-size:1rem;
-      transition:background .25s ease;
-    }
-    .cta-button:hover { background:#09355d; }
-
-    /* Team photo + testimonial */
-    .team-photo {
-      width:55%;
-      max-width:520px;
-      display:block;
-      margin:10px auto 16px auto;
-      border-radius:12px;
-      box-shadow:0 8px 25px rgba(0,0,0,0.12);
-    }
-    .testimonial {
-      max-width:720px;
-      margin:0 auto 10px auto;
-      padding:0 16px;
-      text-align:center;
-      color:#444;
-      font-style:italic;
-    }
-    .testimonial cite {
-      display:block;
-      margin-top:6px;
-      font-style:normal;
-      color:#666;
-      font-size:.95rem;
-    }
-
-    /* Footer */
-    footer {
-      background:linear-gradient(135deg,var(--brand),var(--brand-2));
-      color:#fff;
-      text-align:center;
-      padding:40px 20px;
-      margin-top:50px;
-      box-shadow:0 -4px 12px rgba(0,0,0,0.08);
-    }
-    footer h2{margin-top:0;font-size:1.5rem;}
-    footer a{color:#9fd0ff;text-decoration:none;}
-    footer a:hover{text-decoration:underline;}
-    .trust-badge {
-      display:inline-block;
-      margin:15px 0;
-      background:#1f4e99;
-      color:white;
-      padding:10px 18px;
-      border-radius:8px;
-      text-decoration:none;
-      font-weight:bold;
-      font-size:0.9rem;
-      transition:background .25s ease;
-    }
-    .trust-badge:hover { background:#173d78; }
-    .copyright {
-      margin-top:18px;
-      font-size:0.9rem;
-      color:#d6d6d6;
-    }
-
-    /* Footer logos */
-    .footer-logos {
-      margin-top:18px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:22px;
-      flex-wrap:wrap;
-    }
-
-    /* Section title above partners */
-    .partners-title{
-      margin-top:18px;
-      font-weight:700;
-      letter-spacing:.2px;
-      font-size:1.05rem;
-      color:rgba(255,255,255,0.92);
-    }
-    .partners-sub{
-      margin-top:6px;
-      font-size:0.92rem;
-      color:rgba(214,214,214,0.95);
-    }
-
-    /* Uniform logo tiles + clickable */
-    .logo-link{
-      display:inline-flex;
-      text-decoration:none;
-      border-radius:14px;
-      outline:none;
-    }
-    .logo-tile{
-      width:260px;
-      height:100px;
-      background:rgba(255,255,255,0.92);
-      border-radius:14px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.25);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:8px 10px;
-      transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
-    }
-    .logo-link:hover .logo-tile{
-      transform:translateY(-2px);
-      box-shadow:0 6px 14px rgba(0,0,0,0.28);
-      background:rgba(255,255,255,0.98);
-    }
-    .logo-link:focus-visible .logo-tile{
-      outline:3px solid rgba(76,140,215,0.85);
-      outline-offset:3px;
-    }
-    .logo-tile img{
-      max-width:100%;
-      max-height:100%;
-      width:auto;
-      height:auto;
-      object-fit:contain;
-      display:block;
-    }
-    @media (max-width:520px){
-      .logo-tile{ width:92vw; max-width:340px; }
-    }
-
-    /* Translate toggle */
-    .translate-toggle{
-      position:fixed;
-      top:calc(8px + env(safe-area-inset-top));
-      right:12px;
-      z-index:9999;
-      display:flex;
-      gap:6px;
-      font:14px/1.2 system-ui, Arial, sans-serif;
-    }
-    .translate-toggle button{
-      border:1px solid #d0d7de;
-      background:#fff;
-      padding:4px 8px;
-      border-radius:6px;
-      cursor:pointer;
-      font-size:13px;
-      transition:all 0.2s;
-    }
-    .translate-toggle button:hover{background:#f1f5fb;}
-    .translate-toggle button.active{ outline:2px solid var(--accent); background:#eef4ff; }
-    #google_translate_element { display:none; }
-
-    /* Two team photos side by side */
-    #team .team-photo {
-      display:inline-block;
-      width:43%;
-      max-width:420px;
-      margin:10px 8px 16px 8px;
-      vertical-align:top;
-    }
-    @media (max-width:850px){
-      #team .team-photo{
-        width:88%;
-        max-width:520px;
-        display:block;
-        margin:10px auto 16px auto;
-      }
-    }
-
-    /* Last updated styling */
-    #last-updated {
-      margin-top: 20px;
-      font-size: 0.9rem;
-      color: #d6d6d6;
     }
   </style>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <h1>ESS Login</h1>
+    </header>
 
-  <div class="translate-toggle" aria-label="Site language">
-    <button id="btn-en" type="button">EN</button>
-    <button id="btn-es" type="button">ES</button>
+    <div class="card">
+      <p>Enter credentials to access your portal.</p>
+      <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+      <button id="go">Login</button>
+      <div id="err" class="err"></div>
+      <a class="home" href="/index.html">← Back to Home</a>
+    </div>
   </div>
-  <div id="google_translate_element"></div>
-
-  <header>
-    <a href="https://empowermentss.com/careers/careers.html?_ts=1" class="careers-btn">Careers</a>
-
-    <div class="header-inner">
-      <div>
-        <h1>Empowerment Support Solutions, LLC</h1>
-      </div>
-    </div>
-  </header>
-
-  <img src="logo full.png" alt="ESS Logo" class="logo-center" loading="lazy">
-
-  <div style="text-align:center; margin:12px 0;">
-    <iframe src="https://player.vimeo.com/video/1123978843?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
-      width="560" height="315"
-      style="max-width:100%; border-radius:10px;"
-      frameborder="0"
-      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-      referrerpolicy="strict-origin-when-cross-origin"
-      title="ESS Intro Video">
-    </iframe>
-    <br>
-    <a href="#contact" class="cta-button">Contact Us Today</a>
-  </div>
-
-  <section id="about" class="section">
-    <h2>About Us</h2>
-    <p>At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. 
-    Our work is rooted in <strong>Person-Centered Thinking (PCT)</strong>, which means we put the voice, choice, and goals of the participant at the center of everything we do. 
-    We listen first, then design supports that reflect what is important <em>to</em> and important <em>for</em> the person.</p>
-
-    <p>Whether it’s developing daily living skills, connecting with the community, or building independence, 
-    we tailor our services to meet the specific needs of each participant. We recognize that every journey is different, 
-    and our role is to walk alongside individuals and families to make sure services are not just provided, but are meaningful, respectful, and empowering.</p>
-
-    <p>ESS is committed to flexibility, reliability, and collaboration. 
-    We work hand-in-hand with families, Independent Facilitators, and regional center teams to ensure that supports are not only effective but also aligned with the participant’s life vision. 
-    Our mission is simple: <strong>supporting people to live their best lives, their way</strong>.</p>
-  </section>
-
-  <section id="services" class="section">
-    <h2>Our Services</h2>
-
-    <!-- Rearranged: SDP card is now in the middle and the whole card is clickable -->
-    <div class="service-cards">
-      <div class="card">
-        <h3>Personalized Living Support</h3>
-        <p>Daily one-on-one support designed around each participant’s strengths, preferences and goals, helping people build confidence, skills and independence at their own pace.</p>
-      </div>
-
-      <a class="card-link" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener noreferrer"
-         aria-label="Learn about the Self-Determination Program (DDS official page)">
-        <div class="card">
-          <h3 class="sdp-title">Self Determination Program</h3>
-          <p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p>
-        </div>
-      </a>
-
-      <div class="card">
-        <h3>Staff Placement</h3>
-        <p>We provide dependable staff you can count on that are trained to follow PCT practices, honor individual routines and collaborate closely with families for consistency and trust.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="team" class="section" aria-label="ESS Team Photo & Testimonial" style="text-align:center;">
-    <img src="unnamed%20(1).jpg" alt="ESS staff photo (library)" class="team-photo" loading="lazy">
-    <img src="Screenshot%202026-01-21%20112803.png" alt="ESS team photo (restaurant)" class="team-photo" loading="lazy">
-
-    <p class="testimonial">
-      “I've noticed a real difference since working with ESS. They take feedback seriously and focus on what actually helps.”
-      <cite>- Jeremy, ESS Participant </cite>
-    </p>
-  </section>
-
-  <footer id="contact">
-    <h2>Contact Us</h2>
-    <p><strong>Phone:</strong> 626-596-6155</p>
-    <p><strong>Email:</strong> <a href="mailto:Empowermentess@gmail.com">empowermentess@gmail.com</a></p>
-    <p>
-      <a href="https://bizfileonline.sos.ca.gov/search/business" target="_blank" class="trust-badge">
-        Verify with CA Secretary of State (Search: Empowerment Support Solutions LLC)
-      </a>
-    </p>
-
-    <div class="partners-title">Our Trusted Partners</div>
-    <div class="partners-sub">Official resources and regional centers we work alongside.</div>
-
-    <div class="footer-logos">
-      <a class="logo-link" href="https://www.sclarc.org/" target="_blank" rel="noopener noreferrer" aria-label="Visit SCLARC official website">
-        <div class="logo-tile">
-          <img src="newforms/1631343033971.jpg" alt="South Central Los Angeles Regional Center (SCLARC) Logo" loading="lazy">
-        </div>
-      </a>
-
-      <a class="logo-link" href="https://www.dds.ca.gov/" target="_blank" rel="noopener noreferrer" aria-label="Visit California Department of Developmental Services official website">
-        <div class="logo-tile">
-          <img src="newforms/DDS_Cover.png" alt="California Department of Developmental Services (DDS) Logo" loading="lazy">
-        </div>
-      </a>
-
-      <a class="logo-link" href="https://sgprc.org/" target="_blank" rel="noopener noreferrer" aria-label="Visit SGPRC official website">
-        <div class="logo-tile">
-          <img src="sgprc.png" alt="San Gabriel/Pomona Regional Center (SGPRC) Logo" loading="lazy">
-        </div>
-      </a>
-
-      <a class="logo-link" href="https://www.elarc.org/Home" target="_blank" rel="noopener noreferrer" aria-label="Visit ELARC official website">
-        <div class="logo-tile">
-          <img src="east-la-logo.jpg" alt="Eastern Los Angeles Regional Center (ELARC) Logo" loading="lazy">
-        </div>
-      </a>
-    </div>
-
-    <p id="last-updated">Last updated: <span id="lu-text"></span></p>
-
-    <p class="copyright">© 2025 Empowerment Support Solutions, LLC. All rights reserved.</p>
-  </footer>
-
-  <a href="/login.html" class="login-btn">Login</a>
 
   <script>
-    function googleTranslateElementInit(){
-      new google.translate.TranslateElement(
-        {pageLanguage:'en', includedLanguages:'es', autoDisplay:false},
-        'google_translate_element'
-      );
-      setActiveFromCookie();
-    }
+    // Root-level pages
+    const FAMILY_PW = "08052023";   // -> /families.html
+    const STAFF_PW  = "05041993";   // -> /staff.html
+    // Admin lives under /portal
+    const ADMIN_PW  = "10301993";   // -> /portal/admin.html
 
-    function setLang(lang){
-      var val = (lang === 'es') ? '/en/es' : '/es/en';
-      document.cookie = 'googtrans=' + val + ';path=/';
-      var hostParts = window.location.hostname.split('.');
-      if (hostParts.length > 1) {
-        var rootDomain = hostParts.slice(-2).join('.');
-        document.cookie = 'googtrans=' + val + ';domain=.' + rootDomain + ';path=/';
+    function route(){
+      const val = (document.getElementById("pw").value || "").trim();
+      const err = document.getElementById("err");
+
+      if(!val){ err.textContent = "Please enter a password."; return; }
+
+      // Admin: set auth flag and go to /portal/admin.html
+      if(val === ADMIN_PW){
+        try { localStorage.setItem("ESS_Admin_Login","true"); } catch(e){}
+        location.href = "/portal/admin.html";
+        return;
       }
-      location.reload();
+
+      // Families (root)
+      if(val === FAMILY_PW){
+        location.href = "/families.html";
+        return;
+      }
+
+      // Staff (root)
+      if(val === STAFF_PW){
+        location.href = "/staff.html";
+        return;
+      }
+
+      err.textContent = "Wrong password. Please try again.";
     }
 
-    function setActiveFromCookie(){
-      var c = document.cookie;
-      var isES = /googtrans=\/en\/es/.test(c);
-      document.getElementById('btn-en').classList.toggle('active', !isES);
-      document.getElementById('btn-es').classList.toggle('active', isES);
-    }
-
-    document.getElementById('btn-en').addEventListener('click', function(){ setLang('en'); });
-    document.getElementById('btn-es').addEventListener('click', function(){ setLang('es'); });
-
-    (function(){
-      var s = document.createElement('script');
-      s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-      document.head.appendChild(s);
-    })();
-
-    /* Auto Last Updated */
-    const d = new Date(document.lastModified);
-    const opts = { year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('lu-text').textContent = d.toLocaleDateString('en-US', opts);
+    document.getElementById("go").addEventListener("click", route);
+    document.getElementById("pw").addEventListener("keydown", e => {
+      if(e.key === "Enter") route();
+    });
   </script>
-
 </body>
 </html>
