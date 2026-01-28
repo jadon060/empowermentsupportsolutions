@@ -227,11 +227,46 @@
       gap:30px;
       flex-wrap:wrap;
     }
-    .footer-logos img {
-      height:70px;
-      width:auto;
-      border-radius:8px;
+
+    /* NEW: uniform logo tiles + clickable */
+    .logo-link{
+      display:inline-flex;
+      text-decoration:none;
+      border-radius:12px;
+      outline:none;
+    }
+    .logo-tile{
+      width:210px;            /* keeps everything symmetrical */
+      height:92px;            /* same visual height for all */
+      background:rgba(255,255,255,0.92);
+      border-radius:12px;
       box-shadow:0 2px 8px rgba(0,0,0,0.25);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .logo-link:hover .logo-tile{
+      transform:translateY(-2px);
+      box-shadow:0 6px 14px rgba(0,0,0,0.28);
+      background:rgba(255,255,255,0.98);
+    }
+    .logo-link:focus-visible .logo-tile{
+      outline:3px solid rgba(76,140,215,0.85);
+      outline-offset:3px;
+    }
+    .logo-tile img{
+      width:100%;
+      height:100%;
+      object-fit:contain;     /* fixes ELARC being too big */
+      border-radius:0;        /* tile already rounds */
+      box-shadow:none;        /* tile already shadows */
+      display:block;
+    }
+
+    @media (max-width:520px){
+      .logo-tile{ width:92vw; max-width:320px; }
     }
 
     /* Translate toggle */
@@ -371,12 +406,35 @@
       </a>
     </p>
 
-    <!-- Footer logos -->
+    <!-- Footer logos (clickable + uniform sizing) -->
     <div class="footer-logos">
-      <img src="newforms/1631343033971.jpg" alt="SCLARC Logo" loading="lazy">
-      <img src="newforms/DDS_Cover.png" alt="DDS Logo" loading="lazy">
-      <img src="sgprc.png" alt="San Gabriel/Pomona Regional Center (SGPRC) Logo" loading="lazy">
-      <img src="east-la-logo.jpg" alt="Eastern Los Angeles Regional Center (ELARC) Logo" loading="lazy">
+      <!-- SCLARC -->
+      <a class="logo-link" href="https://www.sclarc.org/" target="_blank" rel="noopener noreferrer" aria-label="Visit SCLARC official website">
+        <div class="logo-tile">
+          <img src="newforms/1631343033971.jpg" alt="South Central Los Angeles Regional Center (SCLARC) Logo" loading="lazy">
+        </div>
+      </a>
+
+      <!-- DDS -->
+      <a class="logo-link" href="https://www.dds.ca.gov/" target="_blank" rel="noopener noreferrer" aria-label="Visit California Department of Developmental Services official website">
+        <div class="logo-tile">
+          <img src="newforms/DDS_Cover.png" alt="California Department of Developmental Services (DDS) Logo" loading="lazy">
+        </div>
+      </a>
+
+      <!-- SGPRC -->
+      <a class="logo-link" href="https://sgprc.org/" target="_blank" rel="noopener noreferrer" aria-label="Visit SGPRC official website">
+        <div class="logo-tile">
+          <img src="sgprc.png" alt="San Gabriel/Pomona Regional Center (SGPRC) Logo" loading="lazy">
+        </div>
+      </a>
+
+      <!-- ELARC -->
+      <a class="logo-link" href="https://www.elarc.org/Home" target="_blank" rel="noopener noreferrer" aria-label="Visit ELARC official website">
+        <div class="logo-tile">
+          <img src="east-la-logo.jpg" alt="Eastern Los Angeles Regional Center (ELARC) Logo" loading="lazy">
+        </div>
+      </a>
     </div>
 
     <!-- NEW: Last Updated -->
