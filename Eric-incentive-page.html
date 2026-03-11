@@ -466,31 +466,38 @@
       </div>
     </section>
 
-    <section class="card admin-section" id="admin" style="display:none;">
+    <section class="card admin-section" id="admin">
       <h2>Admin Point Entry</h2>
-      <p class="sub">Scan the QR code to jump straight to the admin section on your phone, then enter Eric's updated points. Points save in that device's browser automatically.</p>
+      <p class="sub">This section is locked. Enter the admin PIN to update Eric's points.</p>
 
       <div class="admin-grid">
-        <div class="qr-box">
-          <img id="qrImage" alt="QR code for Eric admin page" />
-          <div class="tiny">Scan this QR code to open this page directly at the admin point entry section.</div>
-        </div>
-
-        <div class="admin-panel">
-          <div class="admin-list">
-            <div>
-              <label for="pointInput">Enter total points</label>
-              <input id="pointInput" type="number" min="0" step="1" placeholder="Enter Eric's total points" />
+        <div class="admin-panel" style="grid-column:1/-1;">
+          <div id="pinLockWrap">
+            <label for="pinInput">Admin PIN</label>
+            <input id="pinInput" type="password" inputmode="numeric" placeholder="Enter admin PIN" />
+            <div class="btn-row">
+              <button class="btn btn-primary" id="unlockBtn" type="button">Unlock Admin</button>
             </div>
+            <p class="admin-note" id="pinMessage">Only authorized staff can edit points.</p>
           </div>
 
-          <div class="btn-row">
-            <button class="btn btn-primary" id="savePointsBtn" type="button">Save Points</button>
-            <button class="btn btn-secondary" id="addOneBtn" type="button">+1 Point</button>
-            <button class="btn btn-secondary" id="resetPointsBtn" type="button">Reset</button>
-          </div>
+          <div id="adminControls" style="display:none; margin-top:14px;">
+            <div class="admin-list">
+              <div>
+                <label for="pointInput">Enter total points</label>
+                <input id="pointInput" type="number" min="0" step="1" placeholder="Enter Eric's total points" />
+              </div>
+            </div>
 
-          <p class="admin-note">This updates the visible progress bar and point count on the page. Reward level targets stay at 10, 20, and 30 points.</p>
+            <div class="btn-row">
+              <button class="btn btn-primary" id="savePointsBtn" type="button">Save Points</button>
+              <button class="btn btn-secondary" id="addOneBtn" type="button">+1 Point</button>
+              <button class="btn btn-secondary" id="resetPointsBtn" type="button">Reset</button>
+              <button class="btn btn-secondary" id="lockBtn" type="button">Lock Admin</button>
+            </div>
+
+            <p class="admin-note">This updates the visible progress bar and point count on the page. Reward level targets stay at 10, 20, and 30 points.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -499,23 +506,40 @@
   <script>
     const targetPoints = 20;
 
-    // Admin access control
-    const urlParams = new URLSearchParams(window.location.search);
-    const adminMode = urlParams.get('admin') === '1';
-
-    const adminSection = document.getElementById('admin');
-    if(adminMode){
-      adminSection.style.display = 'block';
+    function unlockAdmin(){
+      if(pinInput.value === adminPin){
+        adminControls.style.display = 'block';
+        pinMessage.textContent = 'Admin unlocked.';
+        pinMessage.style.color = 'var(--success)';
+        pinInput.value = '';
+      } else {
+        adminControls.style.display = 'none';
+        pinMessage.textContent = 'Incorrect PIN.';
+        pinMessage.style.color = '#b42318';
+        pinInput.value = '';
+      }
     }
 
-    const storageKey = 'eric-incentive-points';
+    function lockAdmin(){
+      adminControls.style.display = 'none';
+      pinMessage.textContent = 'Only authorized staff can edit points.';
+      pinMessage.style.color = 'var(--muted)';
+      pinInput.value = '';
+    }
+
+const storageKey = 'eric-incentive-points';
+    const adminPin = '10301993';
     const fill = document.querySelector('.fill');
     const pointDisplay = document.querySelector('.progress-top span:last-child');
     const input = document.getElementById('pointInput');
-    const qrImage = document.getElementById('qrImage');
     const saveBtn = document.getElementById('savePointsBtn');
     const addOneBtn = document.getElementById('addOneBtn');
     const resetBtn = document.getElementById('resetPointsBtn');
+    const pinInput = document.getElementById('pinInput');
+    const unlockBtn = document.getElementById('unlockBtn');
+    const lockBtn = document.getElementById('lockBtn');
+    const pinMessage = document.getElementById('pinMessage');
+    const adminControls = document.getElementById('adminControls');
 
     function getPoints(){
       const saved = localStorage.getItem(storageKey);
@@ -532,19 +556,17 @@
       fill.style.width = percent + '%';
     }
 
-    // QR code should open ADMIN mode
-    function buildQr(){
-      const adminUrl = window.location.origin + window.location.pathname + '?admin=1#admin';
-      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(adminUrl);
-      qrImage.src = qrUrl;
-    }
-
     saveBtn.addEventListener('click', () => setPoints(input.value));
     addOneBtn.addEventListener('click', () => setPoints(getPoints() + 1));
     resetBtn.addEventListener('click', () => setPoints(0));
 
-    buildQr();
+    unlockBtn.addEventListener('click', unlockAdmin);
+    pinInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') unlockAdmin();
+    });
+    lockBtn.addEventListener('click', lockAdmin);
     setPoints(getPoints());
+    lockAdmin();
   </script>
 </body>
 </html>
