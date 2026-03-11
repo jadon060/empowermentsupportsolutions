@@ -466,7 +466,7 @@
       </div>
     </section>
 
-    <section class="card admin-section" id="admin">
+    <section class="card admin-section" id="admin" style="display:none;">
       <h2>Admin Point Entry</h2>
       <p class="sub">Scan the QR code to jump straight to the admin section on your phone, then enter Eric's updated points. Points save in that device's browser automatically.</p>
 
@@ -498,6 +498,16 @@
 
   <script>
     const targetPoints = 20;
+
+    // Admin access control
+    const urlParams = new URLSearchParams(window.location.search);
+    const adminMode = urlParams.get('admin') === '1';
+
+    const adminSection = document.getElementById('admin');
+    if(adminMode){
+      adminSection.style.display = 'block';
+    }
+
     const storageKey = 'eric-incentive-points';
     const fill = document.querySelector('.fill');
     const pointDisplay = document.querySelector('.progress-top span:last-child');
@@ -522,8 +532,9 @@
       fill.style.width = percent + '%';
     }
 
+    // QR code should open ADMIN mode
     function buildQr(){
-      const adminUrl = window.location.origin + window.location.pathname + '#admin';
+      const adminUrl = window.location.origin + window.location.pathname + '?admin=1#admin';
       const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(adminUrl);
       qrImage.src = qrUrl;
     }
