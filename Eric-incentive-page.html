@@ -41,6 +41,7 @@
       box-shadow:var(--shadow);
       position:relative;
       overflow:hidden;
+      min-height:280px;
     }
 
     .hero::after{
@@ -52,6 +53,20 @@
       top:-40px;
       border-radius:50%;
       background:rgba(255,255,255,.12);
+    }
+
+    .hero-inner{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:20px;
+      position:relative;
+      z-index:2;
+    }
+
+    .hero-copy{
+      max-width:720px;
+      flex:1 1 auto;
     }
 
     .hero h1{
@@ -66,6 +81,25 @@
       font-size:1.05rem;
       line-height:1.6;
       color:rgba(255,255,255,.94);
+    }
+
+    .hero-photo{
+      width:128px;
+      min-width:128px;
+      height:128px;
+      border-radius:24px;
+      overflow:hidden;
+      border:4px solid rgba(255,255,255,.85);
+      box-shadow:0 12px 24px rgba(0,0,0,.18);
+      background:rgba(255,255,255,.15);
+      backdrop-filter:blur(6px);
+    }
+
+    .hero-photo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
     .hero-badges{
@@ -114,7 +148,8 @@
 
     .goal-list,
     .reward-list,
-    .step-list{
+    .step-list,
+    .admin-list{
       display:grid;
       gap:12px;
     }
@@ -182,6 +217,7 @@
       height:100%;
       border-radius:999px;
       background:linear-gradient(90deg,var(--success),#51c97f);
+      transition:width .25s ease;
     }
 
     .reward-tag{
@@ -208,24 +244,137 @@
       font-weight:800;
     }
 
+    .admin-section{
+      margin-top:22px;
+    }
+
+    .admin-grid{
+      display:grid;
+      grid-template-columns:.9fr 1.1fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .qr-box{
+      text-align:center;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:18px;
+      background:#fbfdff;
+    }
+
+    .qr-box img{
+      width:100%;
+      max-width:220px;
+      aspect-ratio:1/1;
+      object-fit:contain;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:10px;
+    }
+
+    .tiny{
+      font-size:.9rem;
+      color:var(--muted);
+      line-height:1.6;
+      margin-top:10px;
+    }
+
+    .admin-panel{
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:18px;
+      background:#fbfdff;
+    }
+
+    .admin-panel label{
+      display:block;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .admin-panel input{
+      width:100%;
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid #cfdbe8;
+      font:inherit;
+      margin-bottom:12px;
+    }
+
+    .btn-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:4px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      font:inherit;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .btn-primary{
+      background:var(--brand);
+      color:#fff;
+    }
+
+    .btn-secondary{
+      background:#eaf2ff;
+      color:var(--brand);
+      border:1px solid #cfe0fb;
+    }
+
+    .admin-note{
+      margin-top:12px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:.94rem;
+    }
+
     @media (max-width:900px){
-      .grid{grid-template-columns:1fr}
+      .grid,
+      .admin-grid{grid-template-columns:1fr}
       .points-box{grid-template-columns:1fr}
+      .hero{padding:26px 20px}
+      .hero-inner{
+        flex-direction:column-reverse;
+        align-items:flex-start;
+      }
+      .hero-photo{
+        width:96px;
+        min-width:96px;
+        height:96px;
+        border-radius:20px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <section class="hero">
-      <h1>Eric's Incentive Page</h1>
-      <p>
-        Every session is a chance to build independence, confidence, and real-life wins. Show up, work hard, stay respectful, and earn rewards along the way.
-      </p>
-      <div class="hero-badges">
-        <span class="badge">✅ Participation</span>
-        <span class="badge">⭐ Positive Effort</span>
-        <span class="badge">🎯 Goal Progress</span>
-        <span class="badge">🏆 Earn Rewards</span>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <h1>Eric's Incentive Page</h1>
+          <p>
+            Every session is a chance to build independence, confidence, and real-life wins. Show up, work hard, stay respectful, and earn rewards along the way.
+          </p>
+          <div class="hero-badges">
+            <span class="badge">✅ Participation</span>
+            <span class="badge">⭐ Positive Effort</span>
+            <span class="badge">🎯 Goal Progress</span>
+            <span class="badge">🏆 Earn Rewards</span>
+          </div>
+        </div>
+
+        <div class="hero-photo">
+          <img src="Eric%20Profile%20Pic.jpg" alt="Eric profile photo" />
+        </div>
       </div>
     </section>
 
@@ -316,6 +465,75 @@
         </p>
       </div>
     </section>
+
+    <section class="card admin-section" id="admin">
+      <h2>Admin Point Entry</h2>
+      <p class="sub">Scan the QR code to jump straight to the admin section on your phone, then enter Eric's updated points. Points save in that device's browser automatically.</p>
+
+      <div class="admin-grid">
+        <div class="qr-box">
+          <img id="qrImage" alt="QR code for Eric admin page" />
+          <div class="tiny">Scan this QR code to open this page directly at the admin point entry section.</div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="admin-list">
+            <div>
+              <label for="pointInput">Enter total points</label>
+              <input id="pointInput" type="number" min="0" step="1" placeholder="Enter Eric's total points" />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="savePointsBtn" type="button">Save Points</button>
+            <button class="btn btn-secondary" id="addOneBtn" type="button">+1 Point</button>
+            <button class="btn btn-secondary" id="resetPointsBtn" type="button">Reset</button>
+          </div>
+
+          <p class="admin-note">This updates the visible progress bar and point count on the page. Reward level targets stay at 10, 20, and 30 points.</p>
+        </div>
+      </div>
+    </section>
   </div>
+
+  <script>
+    const targetPoints = 20;
+    const storageKey = 'eric-incentive-points';
+    const fill = document.querySelector('.fill');
+    const pointDisplay = document.querySelector('.progress-top span:last-child');
+    const input = document.getElementById('pointInput');
+    const qrImage = document.getElementById('qrImage');
+    const saveBtn = document.getElementById('savePointsBtn');
+    const addOneBtn = document.getElementById('addOneBtn');
+    const resetBtn = document.getElementById('resetPointsBtn');
+
+    function getPoints(){
+      const saved = localStorage.getItem(storageKey);
+      const points = Number(saved);
+      return Number.isFinite(points) && points >= 0 ? points : 9;
+    }
+
+    function setPoints(points){
+      const safePoints = Math.max(0, Math.floor(Number(points) || 0));
+      localStorage.setItem(storageKey, safePoints);
+      input.value = safePoints;
+      pointDisplay.textContent = safePoints + ' / ' + targetPoints + ' points';
+      const percent = Math.min((safePoints / targetPoints) * 100, 100);
+      fill.style.width = percent + '%';
+    }
+
+    function buildQr(){
+      const adminUrl = window.location.origin + window.location.pathname + '#admin';
+      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(adminUrl);
+      qrImage.src = qrUrl;
+    }
+
+    saveBtn.addEventListener('click', () => setPoints(input.value));
+    addOneBtn.addEventListener('click', () => setPoints(getPoints() + 1));
+    resetBtn.addEventListener('click', () => setPoints(0));
+
+    buildQr();
+    setPoints(getPoints());
+  </script>
 </body>
 </html>
