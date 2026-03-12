@@ -14,12 +14,15 @@
       --brand:#1f5fa8;
       --brand-2:#4f8fe0;
       --success:#1f9d55;
+      --success-2:#51c97f;
       --warn:#f59e0b;
+      --danger:#c62828;
       --shadow:0 12px 35px rgba(16,35,58,.10);
       --radius:22px;
     }
 
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -41,7 +44,18 @@
       box-shadow:var(--shadow);
       position:relative;
       overflow:hidden;
-      min-height:280px;
+      min-height:320px;
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.14), transparent 24%),
+        radial-gradient(circle at 80% 18%, rgba(255,255,255,.12), transparent 18%),
+        radial-gradient(circle at 85% 85%, rgba(255,255,255,.09), transparent 20%);
+      pointer-events:none;
     }
 
     .hero::after{
@@ -65,7 +79,7 @@
     }
 
     .hero-copy{
-      max-width:720px;
+      max-width:760px;
       flex:1 1 auto;
     }
 
@@ -80,7 +94,7 @@
       max-width:720px;
       font-size:1.05rem;
       line-height:1.6;
-      color:rgba(255,255,255,.94);
+      color:rgba(255,255,255,.95);
     }
 
     .hero-photo{
@@ -118,6 +132,68 @@
       font-weight:700;
       font-size:.95rem;
       backdrop-filter:blur(4px);
+    }
+
+    .hero-progress{
+      margin-top:22px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.24);
+      border-radius:24px;
+      padding:18px;
+      backdrop-filter:blur(8px);
+      box-shadow:0 10px 22px rgba(0,0,0,.10);
+    }
+
+    .hero-progress-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .hero-progress-label{
+      font-weight:900;
+      font-size:1.15rem;
+      letter-spacing:.2px;
+    }
+
+    .hero-progress-value{
+      font-weight:900;
+      font-size:1.15rem;
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.26);
+      padding:8px 12px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .bar{
+      width:100%;
+      height:24px;
+      border-radius:999px;
+      background:rgba(255,255,255,.22);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.28);
+      position:relative;
+    }
+
+    .fill{
+      width:0%;
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,#ffe66d,#ffca3a,#8ce99a,#51c97f);
+      transition:width .3s ease;
+      box-shadow:0 0 24px rgba(255,255,255,.35) inset;
+    }
+
+    .hero-progress-note{
+      margin-top:10px;
+      font-size:.95rem;
+      color:rgba(255,255,255,.95);
+      line-height:1.5;
+      font-weight:600;
     }
 
     .grid{
@@ -167,6 +243,15 @@
       margin-bottom:6px;
     }
 
+    .category-title{
+      margin:18px 0 10px;
+      font-size:1rem;
+      font-weight:900;
+      color:var(--brand);
+      text-transform:uppercase;
+      letter-spacing:.6px;
+    }
+
     .points-box{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -191,35 +276,6 @@
       margin-bottom:8px;
     }
 
-    .progress-wrap{
-      margin-top:18px;
-    }
-
-    .progress-top{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:8px;
-      font-weight:700;
-    }
-
-    .bar{
-      width:100%;
-      height:20px;
-      border-radius:999px;
-      background:#e9f0f7;
-      overflow:hidden;
-      border:1px solid #d9e4ef;
-    }
-
-    .fill{
-      width:45%;
-      height:100%;
-      border-radius:999px;
-      background:linear-gradient(90deg,var(--success),#51c97f);
-      transition:width .25s ease;
-    }
-
     .reward-tag{
       display:inline-block;
       font-size:.82rem;
@@ -230,6 +286,28 @@
       padding:5px 9px;
       border-radius:999px;
       margin-bottom:8px;
+    }
+
+    .warning-box{
+      margin-top:18px;
+      background:linear-gradient(180deg,#fff7f7,#fff1f1);
+      border:2px solid #f2b6b6;
+      border-radius:20px;
+      padding:18px;
+      box-shadow:0 6px 20px rgba(198,40,40,.08);
+    }
+
+    .warning-box h3{
+      margin:0 0 8px;
+      color:var(--danger);
+      font-size:1.05rem;
+    }
+
+    .warning-box p{
+      margin:0;
+      line-height:1.65;
+      color:#6d1d1d;
+      font-weight:700;
     }
 
     .footer-note{
@@ -250,35 +328,9 @@
 
     .admin-grid{
       display:grid;
-      grid-template-columns:.9fr 1.1fr;
+      grid-template-columns:1fr;
       gap:20px;
       align-items:start;
-    }
-
-    .qr-box{
-      text-align:center;
-      border:1px solid var(--line);
-      border-radius:22px;
-      padding:18px;
-      background:#fbfdff;
-    }
-
-    .qr-box img{
-      width:100%;
-      max-width:220px;
-      aspect-ratio:1/1;
-      object-fit:contain;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background:#fff;
-      padding:10px;
-    }
-
-    .tiny{
-      font-size:.9rem;
-      color:var(--muted);
-      line-height:1.6;
-      margin-top:10px;
     }
 
     .admin-panel{
@@ -330,6 +382,12 @@
       border:1px solid #cfe0fb;
     }
 
+    .btn-danger{
+      background:#fff1f1;
+      color:var(--danger);
+      border:1px solid #efc5c5;
+    }
+
     .admin-note{
       margin-top:12px;
       color:var(--muted);
@@ -337,20 +395,42 @@
       font-size:.94rem;
     }
 
+    .locked-box{
+      background:#f8fbff;
+      border:1px dashed #b7cbe3;
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:10px;
+    }
+
     @media (max-width:900px){
       .grid,
-      .admin-grid{grid-template-columns:1fr}
-      .points-box{grid-template-columns:1fr}
-      .hero{padding:26px 20px}
+      .admin-grid{
+        grid-template-columns:1fr;
+      }
+
+      .points-box{
+        grid-template-columns:1fr;
+      }
+
+      .hero{
+        padding:26px 20px;
+      }
+
       .hero-inner{
         flex-direction:column-reverse;
         align-items:flex-start;
       }
+
       .hero-photo{
         width:96px;
         min-width:96px;
         height:96px;
         border-radius:20px;
+      }
+
+      .hero-progress-top{
+        align-items:flex-start;
       }
     }
   </style>
@@ -362,13 +442,28 @@
         <div class="hero-copy">
           <h1>Eric's Incentive Page</h1>
           <p>
-            Every session is a chance to build independence, confidence, and real-life wins. Show up, work hard, stay respectful, and earn rewards along the way.
+            Build independence, make stronger choices, show respect, and stay consistent. Every point is earned through real progress at home, in the community, and during ILS sessions.
           </p>
+
           <div class="hero-badges">
-            <span class="badge">✅ Participation</span>
-            <span class="badge">⭐ Positive Effort</span>
-            <span class="badge">🎯 Goal Progress</span>
-            <span class="badge">🏆 Earn Rewards</span>
+            <span class="badge">🔥 Real Progress</span>
+            <span class="badge">📱 Check In</span>
+            <span class="badge">🏠 Stay Safe</span>
+            <span class="badge">🤝 Family Respect</span>
+            <span class="badge">🎯 ILS Goals</span>
+          </div>
+
+          <div class="hero-progress">
+            <div class="hero-progress-top">
+              <div class="hero-progress-label">🚀 Current Progress</div>
+              <div class="hero-progress-value" id="heroPointDisplay">0 / 120 points</div>
+            </div>
+            <div class="bar">
+              <div class="fill"></div>
+            </div>
+            <div class="hero-progress-note">
+              Keep stacking points through respectful choices, communication, and follow-through. Big rewards take consistency over time 💪
+            </div>
           </div>
         </div>
 
@@ -381,87 +476,126 @@
     <section class="grid">
       <div class="card">
         <h2>How Eric Earns Points</h2>
-        <p class="sub">Points are earned by active participation during sessions and positive follow-through with goals. This keeps things motivating, simple, and easy to track.</p>
+        <p class="sub">
+          This system is designed to reward consistent effort over time — not quick wins. Points are earned by showing maturity, respect, safe choices, and active progress in ILS.
+        </p>
 
+        <div class="category-title">Communication & Respect With Mom</div>
+        <div class="goal-list">
+          <div class="item">
+            <strong>+1 Point — Respectful Tone With Mom</strong>
+            Speaks respectfully, avoids rude comments, and responds appropriately when talking with mom.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Sends a Check-In Text Before Leaving</strong>
+            Lets mom know where he is going and about how long he plans to be out.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Follows Through With His Check-In</strong>
+            Returns when he said he would or updates mom respectfully if plans change.
+          </div>
+          <div class="item">
+            <strong>+3 Points — Chooses to Stay Home After Sundown</strong>
+            Makes the safe choice to remain home during evening hours and avoid roaming the streets.
+          </div>
+        </div>
+
+        <div class="category-title">Relationship With Brother</div>
+        <div class="goal-list">
+          <div class="item">
+            <strong>+1 Point — Shows Respect to Brother</strong>
+            Uses respectful words, avoids provoking, and keeps the interaction calm.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Avoids Conflict</strong>
+            Walks away, stays calm, or redirects instead of arguing or escalating.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Positive Family Interaction</strong>
+            Participates in a peaceful, respectful interaction with his brother or family at home.
+          </div>
+        </div>
+
+        <div class="category-title">ILS Progress</div>
         <div class="goal-list">
           <div class="item">
             <strong>+1 Point — Showing Up Ready</strong>
-            Arrives on time, is prepared, and starts session with a good attitude.
+            Arrives on time, participates, and starts session with a cooperative attitude.
           </div>
           <div class="item">
-            <strong>+2 Points — Active Participation</strong>
-            Joins in, answers questions, practices skills, and stays engaged.
+            <strong>+2 Points — Active Participation in ILS</strong>
+            Stays engaged in teaching, answers questions, and puts in visible effort.
           </div>
           <div class="item">
-            <strong>+2 Points — Respectful Communication</strong>
-            Uses calm words, listens, and communicates appropriately during session.
+            <strong>+2 Points — Completing an ILS Task</strong>
+            Finishes an assigned activity such as budgeting, planning, communication practice, or community skill work.
           </div>
           <div class="item">
-            <strong>+3 Points — Completing a Task</strong>
-            Finishes a planned activity like budgeting, community practice, scheduling, or daily living tasks.
-          </div>
-          <div class="item">
-            <strong>+4 Points — Extra Effort</strong>
-            Tries something new, stays focused, or pushes through frustration in a positive way.
+            <strong>+3 Points — Strong Follow-Through</strong>
+            Applies the skill outside of session, remembers expectations, or demonstrates improved decision-making.
           </div>
         </div>
 
         <div class="points-box">
           <div class="points">
-            <span class="num">10</span>
+            <span class="num">40</span>
             Small reward level
           </div>
           <div class="points">
-            <span class="num">20</span>
+            <span class="num">75</span>
             Medium reward level
           </div>
           <div class="points">
-            <span class="num">30</span>
-            Bigger reward level
+            <span class="num">120</span>
+            Major reward level
           </div>
         </div>
 
-        <div class="progress-wrap">
-          <div class="progress-top">
-            <span>Current Progress</span>
-            <span>9 / 20 points</span>
-          </div>
-          <div class="bar"><div class="fill"></div></div>
+        <div class="warning-box">
+          <h3>Important Point Policy</h3>
+          <p>
+            Liz and ESS staff have full control to add, deny, adjust, or remove points based on Eric’s performance, behavior, follow-through, honesty, respect, safety, and overall participation. Points are earned — not guaranteed.
+          </p>
         </div>
       </div>
 
       <div class="card">
         <h2>Reward Menu</h2>
-        <p class="sub">Rewards should be realistic, motivating, and tied to positive effort. Swap these with Eric’s real favorites anytime.</p>
+        <p class="sub">
+          Rewards are meant to motivate long-term consistency. Larger rewards require sustained effort over time.
+        </p>
 
         <div class="reward-list">
           <div class="item">
-            <span class="reward-tag">10 Points</span>
-            <strong>Choose a Snack or Drink</strong>
-            Earn a small treat or preferred item during or after session.
+            <span class="reward-tag">40 Points</span>
+            <strong>Small Preferred Reward</strong>
+            A simple approved incentive such as a snack, drink, or small preferred item.
           </div>
+
           <div class="item">
-            <span class="reward-tag">20 Points</span>
-            <strong>Preferred Community Stop</strong>
-            Pick a favorite store, drink stop, music choice, or fun outing add-on.
+            <span class="reward-tag">75 Points</span>
+            <strong>$25 Raffle Entry</strong>
+            Eric earns entry into a $25 raffle with fellow ESS clients. Winning is not guaranteed, but entry is earned through consistent positive effort.
           </div>
+
           <div class="item">
-            <span class="reward-tag">30 Points</span>
-            <strong>Bigger Weekly Reward</strong>
-            Earn a more exciting incentive approved by staff/family.
+            <span class="reward-tag">120 Points</span>
+            <strong>$100 Gift Card</strong>
+            Major reward earned only through steady, respectful, safe, and consistent progress over time.
           </div>
         </div>
 
-        <h2 style="margin-top:22px;">Success Steps</h2>
+        <h2 style="margin-top:22px;">Success Focus</h2>
         <div class="step-list">
-          <div class="item"><span class="check">✔</span> Be respectful</div>
-          <div class="item"><span class="check">✔</span> Try your best</div>
-          <div class="item"><span class="check">✔</span> Practice real-life skills</div>
-          <div class="item"><span class="check">✔</span> Stay focused and finish tasks</div>
+          <div class="item"><span class="check">✔</span> Communicate respectfully with mom</div>
+          <div class="item"><span class="check">✔</span> Text before leaving and update plans</div>
+          <div class="item"><span class="check">✔</span> Stay home after sundown when expected</div>
+          <div class="item"><span class="check">✔</span> Keep peace with brother and avoid conflict</div>
+          <div class="item"><span class="check">✔</span> Stay engaged in ILS and complete tasks</div>
         </div>
 
         <p class="footer-note">
-          This page is meant to keep sessions encouraging and goal-focused while reinforcing positive habits, independence, and consistency.
+          This page is meant to reinforce safer choices, stronger family communication, respectful behavior, and long-term independence skills.
         </p>
       </div>
     </section>
@@ -471,8 +605,8 @@
       <p class="sub">This section is locked. Enter the admin PIN to update Eric's points.</p>
 
       <div class="admin-grid">
-        <div class="admin-panel" style="grid-column:1/-1;">
-          <div id="pinLockWrap">
+        <div class="admin-panel">
+          <div id="pinLockWrap" class="locked-box">
             <label for="pinInput">Admin PIN</label>
             <input id="pinInput" type="password" inputmode="numeric" placeholder="Enter admin PIN" />
             <div class="btn-row">
@@ -492,11 +626,15 @@
             <div class="btn-row">
               <button class="btn btn-primary" id="savePointsBtn" type="button">Save Points</button>
               <button class="btn btn-secondary" id="addOneBtn" type="button">+1 Point</button>
+              <button class="btn btn-secondary" id="addFiveBtn" type="button">+5 Points</button>
+              <button class="btn btn-danger" id="minusOneBtn" type="button">-1 Point</button>
               <button class="btn btn-secondary" id="resetPointsBtn" type="button">Reset</button>
               <button class="btn btn-secondary" id="lockBtn" type="button">Lock Admin</button>
             </div>
 
-            <p class="admin-note">This updates the visible progress bar and point count on the page. Reward level targets stay at 10, 20, and 30 points.</p>
+            <p class="admin-note">
+              This updates the visible progress bar and point total on the page. Reward targets are 40, 75, and 120 points.
+            </p>
           </div>
         </div>
       </div>
@@ -504,7 +642,43 @@
   </div>
 
   <script>
-    const targetPoints = 20;
+    const storageKey = 'eric-incentive-points';
+    const adminPin = '8523';
+    const targetPoints = 120;
+    const defaultPoints = 0;
+
+    const fill = document.querySelector('.fill');
+    const pointDisplay = document.getElementById('heroPointDisplay');
+    const input = document.getElementById('pointInput');
+    const saveBtn = document.getElementById('savePointsBtn');
+    const addOneBtn = document.getElementById('addOneBtn');
+    const addFiveBtn = document.getElementById('addFiveBtn');
+    const minusOneBtn = document.getElementById('minusOneBtn');
+    const resetBtn = document.getElementById('resetPointsBtn');
+    const pinInput = document.getElementById('pinInput');
+    const unlockBtn = document.getElementById('unlockBtn');
+    const lockBtn = document.getElementById('lockBtn');
+    const pinMessage = document.getElementById('pinMessage');
+    const adminControls = document.getElementById('adminControls');
+
+    function getPoints(){
+      const saved = localStorage.getItem(storageKey);
+      const points = Number(saved);
+      return Number.isFinite(points) && points >= 0 ? points : defaultPoints;
+    }
+
+    function setPoints(points){
+      const safePoints = Math.max(0, Math.floor(Number(points) || 0));
+      localStorage.setItem(storageKey, safePoints);
+
+      if(input){
+        input.value = safePoints;
+      }
+
+      pointDisplay.textContent = safePoints + ' / ' + targetPoints + ' points';
+      const percent = Math.min((safePoints / targetPoints) * 100, 100);
+      fill.style.width = percent + '%';
+    }
 
     function unlockAdmin(){
       if(pinInput.value === adminPin){
@@ -512,6 +686,7 @@
         pinMessage.textContent = 'Admin unlocked.';
         pinMessage.style.color = 'var(--success)';
         pinInput.value = '';
+        input.value = getPoints();
       } else {
         adminControls.style.display = 'none';
         pinMessage.textContent = 'Incorrect PIN.';
@@ -527,37 +702,10 @@
       pinInput.value = '';
     }
 
-const storageKey = 'eric-incentive-points';
-    const adminPin = '10301993';
-    const fill = document.querySelector('.fill');
-    const pointDisplay = document.querySelector('.progress-top span:last-child');
-    const input = document.getElementById('pointInput');
-    const saveBtn = document.getElementById('savePointsBtn');
-    const addOneBtn = document.getElementById('addOneBtn');
-    const resetBtn = document.getElementById('resetPointsBtn');
-    const pinInput = document.getElementById('pinInput');
-    const unlockBtn = document.getElementById('unlockBtn');
-    const lockBtn = document.getElementById('lockBtn');
-    const pinMessage = document.getElementById('pinMessage');
-    const adminControls = document.getElementById('adminControls');
-
-    function getPoints(){
-      const saved = localStorage.getItem(storageKey);
-      const points = Number(saved);
-      return Number.isFinite(points) && points >= 0 ? points : 9;
-    }
-
-    function setPoints(points){
-      const safePoints = Math.max(0, Math.floor(Number(points) || 0));
-      localStorage.setItem(storageKey, safePoints);
-      input.value = safePoints;
-      pointDisplay.textContent = safePoints + ' / ' + targetPoints + ' points';
-      const percent = Math.min((safePoints / targetPoints) * 100, 100);
-      fill.style.width = percent + '%';
-    }
-
     saveBtn.addEventListener('click', () => setPoints(input.value));
     addOneBtn.addEventListener('click', () => setPoints(getPoints() + 1));
+    addFiveBtn.addEventListener('click', () => setPoints(getPoints() + 5));
+    minusOneBtn.addEventListener('click', () => setPoints(getPoints() - 1));
     resetBtn.addEventListener('click', () => setPoints(0));
 
     unlockBtn.addEventListener('click', unlockAdmin);
@@ -565,6 +713,7 @@ const storageKey = 'eric-incentive-points';
       if(e.key === 'Enter') unlockAdmin();
     });
     lockBtn.addEventListener('click', lockAdmin);
+
     setPoints(getPoints());
     lockAdmin();
   </script>
