@@ -144,34 +144,19 @@
       box-shadow:0 10px 22px rgba(0,0,0,.10);
       position:relative;
       overflow:hidden;
-      animation:pulseCard 2.6s infinite ease-in-out;
-    }
-
-    .hero-progress::before{
-      content:"";
-      position:absolute;
-      inset:-20%;
-      background:radial-gradient(circle, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 60%);
-      opacity:.35;
-      animation:pulseGlow 2.6s infinite ease-in-out;
-      pointer-events:none;
     }
 
     .hero-progress-top{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
       margin-bottom:10px;
       flex-wrap:wrap;
-      position:relative;
-      z-index:1;
     }
 
     .hero-progress-label{
       font-weight:900;
       font-size:1.15rem;
-      letter-spacing:.2px;
     }
 
     .hero-progress-value{
@@ -181,9 +166,6 @@
       border:1px solid rgba(255,255,255,.26);
       padding:8px 12px;
       border-radius:999px;
-      white-space:nowrap;
-      position:relative;
-      z-index:1;
     }
 
     .bar{
@@ -193,8 +175,6 @@
       background:rgba(255,255,255,.22);
       overflow:hidden;
       border:1px solid rgba(255,255,255,.28);
-      position:relative;
-      z-index:1;
     }
 
     .fill{
@@ -203,28 +183,6 @@
       border-radius:999px;
       background:linear-gradient(90deg,#ffe66d,#ffca3a,#8ce99a,#51c97f);
       transition:width .3s ease;
-      box-shadow:0 0 24px rgba(255,255,255,.35) inset;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .fill::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.35) 45%, transparent 100%);
-      transform:translateX(-100%);
-      animation:shine 2.8s infinite linear;
-    }
-
-    .hero-progress-note{
-      margin-top:10px;
-      font-size:.95rem;
-      color:rgba(255,255,255,.95);
-      line-height:1.5;
-      font-weight:600;
-      position:relative;
-      z-index:1;
     }
 
     .grid{
@@ -242,13 +200,61 @@
       padding:22px;
     }
 
+    .category-title{
+      margin:18px 0 10px;
+      font-size:1rem;
+      font-weight:900;
+      color:var(--brand);
+      text-transform:uppercase;
+      letter-spacing:.6px;
+    }
+
+    .goal-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .item{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      background:#fbfdff;
+    }
+
+    .item strong{
+      display:block;
+      margin-bottom:6px;
+    }
+
+    .points-box{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:16px;
+    }
+
+    .points{
+      background:linear-gradient(180deg,#f8fbff,#eef5ff);
+      border:1px solid #d7e6fb;
+      border-radius:18px;
+      padding:18px 14px;
+      text-align:center;
+    }
+
+    .points .num{
+      display:block;
+      font-size:2rem;
+      font-weight:800;
+      color:var(--brand);
+      margin-bottom:8px;
+    }
+
     .warning-box{
       margin-top:18px;
       background:linear-gradient(180deg,#fff7f7,#fff1f1);
       border:2px solid #f2b6b6;
       border-radius:20px;
       padding:18px;
-      box-shadow:0 6px 20px rgba(198,40,40,.08);
     }
 
     .warning-box h3{
@@ -263,9 +269,121 @@
       color:#6d1d1d;
       font-weight:700;
     }
+
   </style>
 </head>
 <body>
+
+<div class="wrap">
+
+<section class="hero">
+<div class="hero-inner">
+
+<div class="hero-copy">
+<h1>Omar's Incentive Page</h1>
+<p>
+Stay active, build healthy routines, keep up with support appointments, and keep making progress in ILS. Every point is earned through real effort, consistency, and healthy choices.
+</p>
+
+<div class="hero-badges">
+<span class="badge">💪 Workout Goals</span>
+<span class="badge">🥗 Healthy Choices</span>
+<span class="badge">🧠 Therapy + Psych</span>
+<span class="badge">🎯 ILS Goals</span>
+<span class="badge">🔥 Weekly Progress</span>
+</div>
+
+<div class="hero-progress">
+<div class="hero-progress-top">
+<div class="hero-progress-label">🚀 Current Progress</div>
+<div class="hero-progress-value" id="heroPointDisplay">0 / 120 points</div>
+</div>
+
+<div class="bar">
+<div class="fill"></div>
+</div>
+
+</div>
+</div>
+
+<div class="hero-photo">
+<img src="Omar_photos.jpg" alt="Omar profile photo" />
+</div>
+
+</div>
+</section>
+
+<section class="grid">
+
+<div class="card">
+
+<h2>How Omar Earns Points</h2>
+
+<div class="category-title">Workout & Healthy Living</div>
+
+<div class="goal-list">
+
+<div class="item">
+<strong>+1 Point — Completes a Workout</strong>
+Finishes a planned workout, exercise session, walk, or other approved physical activity.
+</div>
+
+<div class="item">
+<strong>+1 Point — Makes a Healthy Food Choice</strong>
+Chooses a healthier meal, snack, or drink instead of a less healthy option.
+</div>
+
+<div class="item">
+<strong>+2 Points — Stays Consistent With Health Routine</strong>
+Follows through with multiple healthy choices in the same day.
+</div>
+
+<div class="item">
+<strong>+2 Points — Shows Effort Toward Fitness Goal</strong>
+Puts in real effort toward a personal health goal.
+</div>
+
+</div>
+
+<div class="category-title">Therapy & Psychiatric Follow-Through</div>
+
+<div class="goal-list">
+
+<div class="item">
+<strong>+2 Points — Attends Weekly Therapy Session</strong>
+Shows up and participates in his scheduled therapy appointment.
+</div>
+
+<div class="item">
+<strong>+2 Points — Attends Weekly Psych Session</strong>
+Shows up and participates in his scheduled psychiatric appointment.
+</div>
+
+<div class="item">
+<strong>+1 Point — Talks About Mental Health Goals</strong>
+Engages in healthy conversations about emotional wellness.
+</div>
+
+</div>
+
+<div class="points-box">
+
+<div class="points">
+<span class="num">40</span>
+Small reward level
+</div>
+
+<div class="points">
+<span class="num">75</span>
+Medium reward level
+</div>
+
+<div class="points">
+<span class="num">120</span>
+Major reward level
+</div>
+
+</div>
 
 <div class="warning-box">
 <h3>Important Point Policy</h3>
@@ -274,9 +392,39 @@ ESS staff and Omar’s family have full authority to add, deny, adjust, or remov
 </p>
 </div>
 
+</div>
+
+</section>
+
+</div>
+
 <script>
+
 const storageKey = 'omar-incentive-points';
 const adminPin = '8523';
+const targetPoints = 120;
+
+const fill = document.querySelector('.fill');
+const pointDisplay = document.getElementById('heroPointDisplay');
+
+function getPoints(){
+const saved = localStorage.getItem(storageKey);
+const points = Number(saved);
+return Number.isFinite(points) && points >= 0 ? points : 0;
+}
+
+function setPoints(points){
+const safePoints = Math.max(0, Math.floor(Number(points) || 0));
+localStorage.setItem(storageKey, safePoints);
+
+pointDisplay.textContent = safePoints + ' / ' + targetPoints + ' points';
+
+const percent = Math.min((safePoints / targetPoints) * 100, 100);
+fill.style.width = percent + '%';
+}
+
+setPoints(getPoints());
+
 </script>
 
 </body>
