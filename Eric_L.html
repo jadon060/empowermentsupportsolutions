@@ -195,12 +195,17 @@
 
 <!-- 🔗 Eric quick-links bar -->
 <div class="quick-links">
+  <a href="https://jadon060.github.io/empowermentsupportsolutions/Eric-incentive-page.html" class="quick-link-btn">
+    <span>🏆</span>
+    <span>Eric incentive page</span>
+  </a>
+
   <a href="https://jadon060.github.io/empowermentsupportsolutions/Eric_Calendar.html" class="quick-link-btn">
     <span>📆</span>
     <span>Weekly staff calendar</span>
   </a>
 
-  <a href="https://jadon060.github.io/empowermentsupportsolutions/Eric%20L_PCP.html" class="quick-link-btn quick-link-btn--secondary">
+  <a href="https://jadon060.github.io/empowermentsupportsolutions/ESS%20%E2%80%A2%20Eric%20%E2%80%93%20Person-Centered%20Plan%20%28PCP%29.pdf" class="quick-link-btn quick-link-btn--secondary" target="_blank" rel="noopener noreferrer">
     <span>🧠</span>
     <span>Eric PCP (Person-Centered Plan)</span>
   </a>
@@ -449,24 +454,27 @@ document.addEventListener('DOMContentLoaded', () => {
       return data.id;
     }
 
-    const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
-      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
-        const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
-      });
+    if (!data?.id) {
+      throw new Error(`Staff name not found: "${nameOrId}".`);
+    }
 
-    const insert = await ess.from("staff").insert([{ id: newId, full_name: nameOrId }]).select("id").maybeSingle();
-    if (insert.error) throw new Error(`Could not add staff "${nameOrId}". (${insert.error.message})`);
-
-    const resolved = insert.data?.id || newId;
-    staffUuidCache.set(nameOrId, resolved);
-    return resolved;
+    return null;
   }
 
   let current = startOfWeekMonday(new Date());
   let activeIndex = null;
 
   async function fetchServerDay(i){
-    const staffUuid = await getOrCreateStaffUuid();
+    const staffName = getStaffName();
+    if (!staffName) return null;
+
+    let staffUuid;
+    try {
+      staffUuid = await getOrCreateStaffUuid();
+    } catch {
+      return null;
+    }
+
     if (!staffUuid) return null;
     const dayDate = ymd(addDays(current,i));
 
