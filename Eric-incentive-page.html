@@ -142,6 +142,19 @@
       padding:18px;
       backdrop-filter:blur(8px);
       box-shadow:0 10px 22px rgba(0,0,0,.10);
+      position:relative;
+      overflow:hidden;
+      animation:pulseCard 2.6s infinite ease-in-out;
+    }
+
+    .hero-progress::before{
+      content:"";
+      position:absolute;
+      inset:-20%;
+      background:radial-gradient(circle, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 60%);
+      opacity:.35;
+      animation:pulseGlow 2.6s infinite ease-in-out;
+      pointer-events:none;
     }
 
     .hero-progress-top{
@@ -151,6 +164,8 @@
       gap:12px;
       margin-bottom:10px;
       flex-wrap:wrap;
+      position:relative;
+      z-index:1;
     }
 
     .hero-progress-label{
@@ -167,6 +182,8 @@
       padding:8px 12px;
       border-radius:999px;
       white-space:nowrap;
+      position:relative;
+      z-index:1;
     }
 
     .bar{
@@ -177,6 +194,7 @@
       overflow:hidden;
       border:1px solid rgba(255,255,255,.28);
       position:relative;
+      z-index:1;
     }
 
     .fill{
@@ -186,6 +204,17 @@
       background:linear-gradient(90deg,#ffe66d,#ffca3a,#8ce99a,#51c97f);
       transition:width .3s ease;
       box-shadow:0 0 24px rgba(255,255,255,.35) inset;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .fill::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.35) 45%, transparent 100%);
+      transform:translateX(-100%);
+      animation:shine 2.8s infinite linear;
     }
 
     .hero-progress-note{
@@ -194,6 +223,8 @@
       color:rgba(255,255,255,.95);
       line-height:1.5;
       font-weight:600;
+      position:relative;
+      z-index:1;
     }
 
     .grid{
@@ -403,6 +434,45 @@
       margin-bottom:10px;
     }
 
+    @keyframes pulseCard{
+      0%{
+        transform:scale(1);
+        box-shadow:0 10px 22px rgba(0,0,0,.10);
+      }
+      50%{
+        transform:scale(1.01);
+        box-shadow:0 14px 30px rgba(255,255,255,.12), 0 12px 26px rgba(0,0,0,.12);
+      }
+      100%{
+        transform:scale(1);
+        box-shadow:0 10px 22px rgba(0,0,0,.10);
+      }
+    }
+
+    @keyframes pulseGlow{
+      0%{
+        transform:scale(.92);
+        opacity:.18;
+      }
+      50%{
+        transform:scale(1.06);
+        opacity:.42;
+      }
+      100%{
+        transform:scale(.92);
+        opacity:.18;
+      }
+    }
+
+    @keyframes shine{
+      0%{
+        transform:translateX(-100%);
+      }
+      100%{
+        transform:translateX(180%);
+      }
+    }
+
     @media (max-width:900px){
       .grid,
       .admin-grid{
@@ -477,7 +547,7 @@
       <div class="card">
         <h2>How Eric Earns Points</h2>
         <p class="sub">
-          This system is designed to reward consistent effort over time — not quick wins. Points are earned by showing maturity, respect, safe choices, and active progress in ILS.
+          This system is designed to reward consistent effort over time, not quick wins. Points are earned by showing maturity, respect, safe choices, and active progress in ILS.
         </p>
 
         <div class="category-title">Communication & Respect With Mom</div>
@@ -554,7 +624,7 @@
         <div class="warning-box">
           <h3>Important Point Policy</h3>
           <p>
-            Liz and ESS staff have full control to add, deny, adjust, or remove points based on Eric’s performance, behavior, follow-through, honesty, respect, safety, and overall participation. Points are earned — not guaranteed.
+            Liz and ESS staff have full control to add, deny, adjust, or remove points based on Eric’s performance, behavior, follow-through, honesty, respect, safety, and overall participation. Points are earned, not handed out freely.
           </p>
         </div>
       </div>
