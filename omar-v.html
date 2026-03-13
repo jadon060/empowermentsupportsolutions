@@ -181,8 +181,9 @@
   </div>
 </div>
 
-<!-- 🔗 Omar quick-links bar -->
+<!-- 🔗 Omar quick-links bar (new) -->
 <div class="quick-links">
+  <!-- ✅ fixed href to Calendar_Planning.html -->
   <a href="Calendar_Planning.html" class="quick-link-btn">
     <span>📆</span>
     <span>Weekly staff calendar</span>
@@ -324,7 +325,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFuZXYiLCJyZWYiOiJicWFuanVwbWNneWR2bWZndnV0eCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzYwODEyODc0LCJleHAiOjIwNzYzODg4NzR9.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const ess = sb.schema("ess");
 
@@ -406,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener("resize", ()=>{
     if (w_panel.style.display !== "none") {
-      staffSigCtx = initSignatureCanvas(staffSigCanvas,  staffSigData);
+      staffSigCtx = initSignatureCanvas(staffSigCanvas, staffSigData);
       clientSigCtx = initSignatureCanvas(clientSigCanvas, clientSigData);
     }
   });
@@ -430,18 +431,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isUuid(nameOrId)) return nameOrId;
     if (staffUuidCache.has(nameOrId)) return staffUuidCache.get(nameOrId);
 
+    // exact
     let { data, error } = await ess.from("staff").select("id, full_name").eq("full_name", nameOrId).maybeSingle();
     if (!error && data?.id) {
       staffUuidCache.set(nameOrId, data.id);
       return data.id;
     }
 
+    // ilike
     ({ data, error } = await ess.from("staff").select("id, full_name").ilike("full_name", `%${nameOrId}%`).limit(1).maybeSingle());
     if (!error && data?.id) {
       staffUuidCache.set(nameOrId, data.id);
       return data.id;
     }
 
+    // create
     const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
       'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
         const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
@@ -463,6 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!staffUuid) return null;
     const dayDate = ymd(addDays(current,i));
 
+    // official first
     let { data: official } = await ess.from("daily_entries")
       .select("*")
       .eq("client_id", getClientId())
@@ -487,6 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
 
+    // draft
     let { data: draft } = await ess.from("daily_drafts")
       .select("*")
       .eq("client_id", getClientId())
@@ -530,6 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderWeek(){
     const start=new Date(current), end=addDays(start,6);
+    // keep Sunday inclusive so Sun 2 loads
     end.setHours(23,59,59,999);
     w_startTxt.textContent=fmt(start); w_endTxt.textContent=fmt(end);
     w_range.textContent=`Mon ${start.getDate()} — Sun ${end.getDate()}`;
@@ -651,6 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // try insert WITH hours
     const baseEntry = {
       client_id: getClientId(),
       staff_id: staffUuid,
@@ -670,6 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let { error } = await ess.from("daily_entries").insert(baseEntry);
 
+    // if the error is exactly what you got, retry without hours
     if (error && (error.message || '').toLowerCase().includes("could not find the 'hours' column")) {
       const { error: e2 } = await ess.from("daily_entries").insert({
         ...baseEntry,
@@ -682,6 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
     } else if (error && String(error.message||'').includes('activities_allowed')) {
+      // old constraint for activities
       const { error: e3 } = await ess.from("daily_entries").insert({
         ...baseEntry,
         activities: null
@@ -699,6 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // mirror into daily_drafts
     await ess.from("daily_drafts").upsert({
       client_id: getClientId(),
       staff_id: staffUuid,
