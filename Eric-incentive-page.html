@@ -435,73 +435,29 @@
     }
 
     @keyframes pulseCard{
-      0%{
-        transform:scale(1);
-        box-shadow:0 10px 22px rgba(0,0,0,.10);
-      }
-      50%{
-        transform:scale(1.01);
-        box-shadow:0 14px 30px rgba(255,255,255,.12), 0 12px 26px rgba(0,0,0,.12);
-      }
-      100%{
-        transform:scale(1);
-        box-shadow:0 10px 22px rgba(0,0,0,.10);
-      }
+      0%{transform:scale(1);box-shadow:0 10px 22px rgba(0,0,0,.10);}
+      50%{transform:scale(1.01);box-shadow:0 14px 30px rgba(255,255,255,.12), 0 12px 26px rgba(0,0,0,.12);}
+      100%{transform:scale(1);box-shadow:0 10px 22px rgba(0,0,0,.10);}
     }
 
     @keyframes pulseGlow{
-      0%{
-        transform:scale(.92);
-        opacity:.18;
-      }
-      50%{
-        transform:scale(1.06);
-        opacity:.42;
-      }
-      100%{
-        transform:scale(.92);
-        opacity:.18;
-      }
+      0%{transform:scale(.92);opacity:.18;}
+      50%{transform:scale(1.06);opacity:.42;}
+      100%{transform:scale(.92);opacity:.18;}
     }
 
     @keyframes shine{
-      0%{
-        transform:translateX(-100%);
-      }
-      100%{
-        transform:translateX(180%);
-      }
+      0%{transform:translateX(-100%);}
+      100%{transform:translateX(180%);}
     }
 
     @media (max-width:900px){
-      .grid,
-      .admin-grid{
-        grid-template-columns:1fr;
-      }
-
-      .points-box{
-        grid-template-columns:1fr;
-      }
-
-      .hero{
-        padding:26px 20px;
-      }
-
-      .hero-inner{
-        flex-direction:column-reverse;
-        align-items:flex-start;
-      }
-
-      .hero-photo{
-        width:96px;
-        min-width:96px;
-        height:96px;
-        border-radius:20px;
-      }
-
-      .hero-progress-top{
-        align-items:flex-start;
-      }
+      .grid,.admin-grid{grid-template-columns:1fr;}
+      .points-box{grid-template-columns:1fr;}
+      .hero{padding:26px 20px;}
+      .hero-inner{flex-direction:column-reverse;align-items:flex-start;}
+      .hero-photo{width:96px;min-width:96px;height:96px;border-radius:20px;}
+      .hero-progress-top{align-items:flex-start;}
     }
   </style>
 </head>
@@ -511,281 +467,69 @@
       <div class="hero-inner">
         <div class="hero-copy">
           <h1>Eric's Incentive Page</h1>
-          <p>
-            Build independence, make stronger choices, show respect, and stay consistent. Every point is earned through real progress at home, in the community, and during ILS sessions.
-          </p>
-
-          <div class="hero-badges">
-            <span class="badge">🔥 Real Progress</span>
-            <span class="badge">📱 Check In</span>
-            <span class="badge">🏠 Stay Safe</span>
-            <span class="badge">🤝 Family Respect</span>
-            <span class="badge">🎯 ILS Goals</span>
-          </div>
+          <p>Build independence, make stronger choices, show respect, and stay consistent.</p>
 
           <div class="hero-progress">
-            <div class="hero-progress-top">
-              <div class="hero-progress-label">🚀 Current Progress</div>
-              <div class="hero-progress-value" id="heroPointDisplay">0 / 120 points</div>
-            </div>
-            <div class="bar">
-              <div class="fill"></div>
-            </div>
-            <div class="hero-progress-note">
-              Keep stacking points through respectful choices, communication, and follow-through. Big rewards take consistency over time 💪
-            </div>
+            <div class="hero-progress-value" id="heroPointDisplay">0 / 120 points</div>
+            <div class="bar"><div class="fill"></div></div>
           </div>
-        </div>
-
-        <div class="hero-photo">
-          <img src="Eric%20Profile%20Pic.jpg" alt="Eric profile photo" />
         </div>
       </div>
     </section>
 
-    <section class="grid">
-      <div class="card">
-        <h2>How Eric Earns Points</h2>
-        <p class="sub">
-          This system is designed to reward consistent effort over time, not quick wins. Points are earned by showing maturity, respect, safe choices, and active progress in ILS.
-        </p>
-
-        <div class="category-title">Communication & Respect With Mom</div>
-        <div class="goal-list">
-          <div class="item">
-            <strong>+1 Point — Respectful Tone With Mom</strong>
-            Speaks respectfully, avoids rude comments, and responds appropriately when talking with mom.
-          </div>
-          <div class="item">
-            <strong>+2 Points — Sends a Check-In Text Before Leaving</strong>
-            Lets mom know where he is going and about how long he plans to be out.
-          </div>
-          <div class="item">
-            <strong>+2 Points — Follows Through With His Check-In</strong>
-            Returns when he said he would or updates mom respectfully if plans change.
-          </div>
-          <div class="item">
-            <strong>+3 Points — Chooses to Stay Home After Sundown</strong>
-            Makes the safe choice to remain home during evening hours and avoid roaming the streets.
-          </div>
-        </div>
-
-        <div class="category-title">Relationship With Brother</div>
-        <div class="goal-list">
-          <div class="item">
-            <strong>+1 Point — Shows Respect to Brother</strong>
-            Uses respectful words, avoids provoking, and keeps the interaction calm.
-          </div>
-          <div class="item">
-            <strong>+2 Points — Avoids Conflict</strong>
-            Walks away, stays calm, or redirects instead of arguing or escalating.
-          </div>
-          <div class="item">
-            <strong>+2 Points — Positive Family Interaction</strong>
-            Participates in a peaceful, respectful interaction with his brother or family at home.
-          </div>
-        </div>
-
-        <div class="category-title">ILS Progress</div>
-        <div class="goal-list">
-          <div class="item">
-            <strong>+1 Point — Showing Up Ready</strong>
-            Arrives on time, participates, and starts session with a cooperative attitude.
-          </div>
-          <div class="item">
-            <strong>+2 Points — Active Participation in ILS</strong>
-            Stays engaged in teaching, answers questions, and puts in visible effort.
-          </div>
-          <div class="item">
-            <strong>+2 Points — Completing an ILS Task</strong>
-            Finishes an assigned activity such as budgeting, planning, communication practice, or community skill work.
-          </div>
-          <div class="item">
-            <strong>+3 Points — Strong Follow-Through</strong>
-            Applies the skill outside of session, remembers expectations, or demonstrates improved decision-making.
-          </div>
-        </div>
-
-        <div class="points-box">
-          <div class="points">
-            <span class="num">40</span>
-            Small reward level
-          </div>
-          <div class="points">
-            <span class="num">75</span>
-            Medium reward level
-          </div>
-          <div class="points">
-            <span class="num">120</span>
-            Major reward level
-          </div>
-        </div>
-
-        <div class="warning-box">
-          <h3>Important Point Policy</h3>
-          <p>
-            Liz and ESS staff have full control to add, deny, adjust, or remove points based on Eric’s performance, behavior, follow-through, honesty, respect, safety, and overall participation. Points are earned, not handed out freely.
-          </p>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Reward Menu</h2>
-        <p class="sub">
-          Rewards are meant to motivate long-term consistency. Larger rewards require sustained effort over time.
-        </p>
-
-        <div class="reward-list">
-          <div class="item">
-            <span class="reward-tag">40 Points</span>
-            <strong>Small Preferred Reward</strong>
-            A simple approved incentive such as a snack, drink, or small preferred item.
-          </div>
-
-          <div class="item">
-            <span class="reward-tag">75 Points</span>
-            <strong>$25 Raffle Entry</strong>
-            Eric earns entry into a $25 raffle with fellow ESS clients. Winning is not guaranteed, but entry is earned through consistent positive effort.
-          </div>
-
-          <div class="item">
-            <span class="reward-tag">120 Points</span>
-            <strong>$100 Gift Card</strong>
-            Major reward earned only through steady, respectful, safe, and consistent progress over time.
-          </div>
-        </div>
-
-        <h2 style="margin-top:22px;">Success Focus</h2>
-        <div class="step-list">
-          <div class="item"><span class="check">✔</span> Communicate respectfully with mom</div>
-          <div class="item"><span class="check">✔</span> Text before leaving and update plans</div>
-          <div class="item"><span class="check">✔</span> Stay home after sundown when expected</div>
-          <div class="item"><span class="check">✔</span> Keep peace with brother and avoid conflict</div>
-          <div class="item"><span class="check">✔</span> Stay engaged in ILS and complete tasks</div>
-        </div>
-
-        <p class="footer-note">
-          This page is meant to reinforce safer choices, stronger family communication, respectful behavior, and long-term independence skills.
-        </p>
-      </div>
-    </section>
-
-    <section class="card admin-section" id="admin">
-      <h2>Admin Point Entry</h2>
-      <p class="sub">This section is locked. Enter the admin PIN to update Eric's points.</p>
-
-      <div class="admin-grid">
-        <div class="admin-panel">
-          <div id="pinLockWrap" class="locked-box">
-            <label for="pinInput">Admin PIN</label>
-            <input id="pinInput" type="password" inputmode="numeric" placeholder="Enter admin PIN" />
-            <div class="btn-row">
-              <button class="btn btn-primary" id="unlockBtn" type="button">Unlock Admin</button>
-            </div>
-            <p class="admin-note" id="pinMessage">Only authorized staff can edit points.</p>
-          </div>
-
-          <div id="adminControls" style="display:none; margin-top:14px;">
-            <div class="admin-list">
-              <div>
-                <label for="pointInput">Enter total points</label>
-                <input id="pointInput" type="number" min="0" step="1" placeholder="Enter Eric's total points" />
-              </div>
-            </div>
-
-            <div class="btn-row">
-              <button class="btn btn-primary" id="savePointsBtn" type="button">Save Points</button>
-              <button class="btn btn-secondary" id="addOneBtn" type="button">+1 Point</button>
-              <button class="btn btn-secondary" id="addFiveBtn" type="button">+5 Points</button>
-              <button class="btn btn-danger" id="minusOneBtn" type="button">-1 Point</button>
-              <button class="btn btn-secondary" id="resetPointsBtn" type="button">Reset</button>
-              <button class="btn btn-secondary" id="lockBtn" type="button">Lock Admin</button>
-            </div>
-
-            <p class="admin-note">
-              This updates the visible progress bar and point total on the page. Reward targets are 40, 75, and 120 points.
-            </p>
-          </div>
-        </div>
-      </div>
+    <section class="card admin-section">
+      <input id="pointInput" type="number" />
+      <button id="savePointsBtn">Save</button>
+      <button id="addOneBtn">+1</button>
+      <button id="addFiveBtn">+5</button>
+      <button id="minusOneBtn">-1</button>
+      <button id="resetPointsBtn">Reset</button>
     </section>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const storageKey = 'eric-incentive-points';
-    const adminPin = '8523';
+    const SUPABASE_URL = 'https://bqanjupmcgydvmfgvutx.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_J6Y49EQarV5pAzhOdokl7w_GVlPoPSb';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const targetPoints = 120;
-    const defaultPoints = 0;
-
     const fill = document.querySelector('.fill');
-    const pointDisplay = document.getElementById('heroPointDisplay');
+    const display = document.getElementById('heroPointDisplay');
     const input = document.getElementById('pointInput');
-    const saveBtn = document.getElementById('savePointsBtn');
-    const addOneBtn = document.getElementById('addOneBtn');
-    const addFiveBtn = document.getElementById('addFiveBtn');
-    const minusOneBtn = document.getElementById('minusOneBtn');
-    const resetBtn = document.getElementById('resetPointsBtn');
-    const pinInput = document.getElementById('pinInput');
-    const unlockBtn = document.getElementById('unlockBtn');
-    const lockBtn = document.getElementById('lockBtn');
-    const pinMessage = document.getElementById('pinMessage');
-    const adminControls = document.getElementById('adminControls');
 
-    function getPoints(){
-      const saved = localStorage.getItem(storageKey);
-      const points = Number(saved);
-      return Number.isFinite(points) && points >= 0 ? points : defaultPoints;
+    let rowId = null;
+    let current = 0;
+
+    function render(p){
+      current = p;
+      display.textContent = p + ' / ' + targetPoints + ' points';
+      fill.style.width = Math.min((p/targetPoints)*100,100)+'%';
+      input.value = p;
     }
 
-    function setPoints(points){
-      const safePoints = Math.max(0, Math.floor(Number(points) || 0));
-      localStorage.setItem(storageKey, safePoints);
-
-      if(input){
-        input.value = safePoints;
-      }
-
-      pointDisplay.textContent = safePoints + ' / ' + targetPoints + ' points';
-      const percent = Math.min((safePoints / targetPoints) * 100, 100);
-      fill.style.width = percent + '%';
+    async function load(){
+      const { data } = await supabaseClient.from('participant_points').select('*').eq('name','Eric').single();
+      rowId = data.id;
+      render(data.points);
     }
 
-    function unlockAdmin(){
-      if(pinInput.value === adminPin){
-        adminControls.style.display = 'block';
-        pinMessage.textContent = 'Admin unlocked.';
-        pinMessage.style.color = 'var(--success)';
-        pinInput.value = '';
-        input.value = getPoints();
-      } else {
-        adminControls.style.display = 'none';
-        pinMessage.textContent = 'Incorrect PIN.';
-        pinMessage.style.color = '#b42318';
-        pinInput.value = '';
-      }
+    async function update(p){
+      await supabaseClient.from('participant_points').update({points:p}).eq('id',rowId);
     }
 
-    function lockAdmin(){
-      adminControls.style.display = 'none';
-      pinMessage.textContent = 'Only authorized staff can edit points.';
-      pinMessage.style.color = 'var(--muted)';
-      pinInput.value = '';
-    }
+    document.getElementById('savePointsBtn').onclick=()=>update(Number(input.value));
+    document.getElementById('addOneBtn').onclick=()=>update(current+1);
+    document.getElementById('addFiveBtn').onclick=()=>update(current+5);
+    document.getElementById('minusOneBtn').onclick=()=>update(current-1);
+    document.getElementById('resetPointsBtn').onclick=()=>update(0);
 
-    saveBtn.addEventListener('click', () => setPoints(input.value));
-    addOneBtn.addEventListener('click', () => setPoints(getPoints() + 1));
-    addFiveBtn.addEventListener('click', () => setPoints(getPoints() + 5));
-    minusOneBtn.addEventListener('click', () => setPoints(getPoints() - 1));
-    resetBtn.addEventListener('click', () => setPoints(0));
+    supabaseClient.channel('live').on('postgres_changes',{event:'UPDATE',schema:'public',table:'participant_points'},payload=>{
+      if(payload.new.name==='Eric'){render(payload.new.points);}
+    }).subscribe();
 
-    unlockBtn.addEventListener('click', unlockAdmin);
-    pinInput.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter') unlockAdmin();
-    });
-    lockBtn.addEventListener('click', lockAdmin);
-
-    setPoints(getPoints());
-    lockAdmin();
+    load();
   </script>
 </body>
 </html>
