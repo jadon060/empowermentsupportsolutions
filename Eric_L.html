@@ -246,6 +246,15 @@
   <div id="w_panel" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px;">
     <div id="w_panelDate" style="color:#6b7280;margin-bottom:10px;"></div>
 
+    <div id="w_entrySwitchWrap" style="display:none;margin-bottom:12px;">
+      <div class="row">
+        <div>
+          <label for="w_entrySelect" class="label">Saved entry for this day</label>
+          <select id="w_entrySelect" class="select"></select>
+        </div>
+      </div>
+    </div>
+
     <div class="row">
       <div>
         <label for="w_start" class="label">Start Time</label>
@@ -354,10 +363,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const w_rc=$("w_rc"), w_sc=$("w_sc");
   const w_submitDay=$("w_submitDay");
   const w_toast=$("w_toast"), w_error=$("w_error");
+  const w_entrySwitchWrap=$("w_entrySwitchWrap");
+  const w_entrySelect=$("w_entrySelect");
 
   const staffSigCanvas = $("staffSig");
   const clientSigCanvas = $("clientSig");
   let staffSigData = null, clientSigData = null;
+
+  let currentDayEntries = [];
+  let activeEntryIndex = -1;
 
   function initSignatureCanvas(canvas, existingDataUrl){
     const box = canvas.getBoundingClientRect();
@@ -464,69 +478,90 @@ document.addEventListener('DOMContentLoaded', () => {
   let current = startOfWeekMonday(new Date());
   let activeIndex = null;
 
-  async function fetchServerDay(i){
+  function normalizeEntry(row, source){
+    return {
+      source,
+      hours: (row.hours !== undefined && row.hours !== null) ? row.hours : null,
+      activities: Array.isArray(row.activities) ? row.activities.join(", ") : (row.activities || ""),
+      notes: row.service_notes || row.notes || "",
+      start_time: row.start_time || "",
+      end_time: row.end_time || "",
+      modality: row.modality || "Remote",
+      staff_signature: row.staff_signature || null,
+      client_signature: row.client_signature || null,
+      regional_center: row.regional_center || "",
+      service_coordinator: row.service_coordinator || "",
+      date: row.service_date || row.date || "",
+      signed_at: row.signed_at || null,
+      id: row.id || null
+    };
+  }
+
+  function sortEntries(entries){
+    return [...entries].sort((a,b)=>{
+      const aTime = (a.start_time || "99:99");
+      const bTime = (b.start_time || "99:99");
+      if (aTime !== bTime) return aTime.localeCompare(bTime);
+
+      const aEnd = (a.end_time || "99:99");
+      const bEnd = (b.end_time || "99:99");
+      if (aEnd !== bEnd) return aEnd.localeCompare(bEnd);
+
+      const aSource = a.source || "";
+      const bSource = b.source || "";
+      if (aSource !== bSource) return aSource.localeCompare(bSource);
+
+      const aSigned = a.signed_at || "";
+      const bSigned = b.signed_at || "";
+      return aSigned.localeCompare(bSigned);
+    });
+  }
+
+  function formatEntryLabel(entry, idx){
+    const parts = [];
+    parts.push(`Entry ${idx + 1}`);
+    if (entry.modality) parts.push(entry.modality);
+    if (entry.start_time || entry.end_time) {
+      parts.push(`${entry.start_time || "--:--"}–${entry.end_time || "--:--"}`);
+    }
+    if (entry.hours !== null && entry.hours !== undefined && entry.hours !== "") {
+      parts.push(`${entry.hours} hr`);
+    }
+    if (entry.source) parts.push(entry.source);
+    return parts.join(" • ");
+  }
+
+  async function fetchServerDayEntries(i){
     const staffName = getStaffName();
-    if (!staffName) return null;
+    if (!staffName) return [];
 
     let staffUuid;
     try {
       staffUuid = await getOrCreateStaffUuid();
     } catch {
-      return null;
+      return [];
     }
 
-    if (!staffUuid) return null;
+    if (!staffUuid) return [];
     const dayDate = ymd(addDays(current,i));
 
-    let { data: official } = await ess.from("daily_entries")
+    const officialRes = await ess.from("daily_entries")
       .select("*")
       .eq("client_id", getClientId())
       .eq("staff_id", staffUuid)
-      .eq("service_date", dayDate)
-      .maybeSingle();
+      .eq("service_date", dayDate);
 
-    if (official) {
-      return {
-        source: "official",
-        hours: (official.hours !== undefined && official.hours !== null) ? official.hours : null,
-        activities: Array.isArray(official.activities) ? official.activities.join(", ") : (official.activities || ""),
-        notes: official.service_notes || "",
-        start_time: official.start_time || "",
-        end_time: official.end_time || "",
-        modality: official.modality || "Remote",
-        staff_signature: official.staff_signature || null,
-        client_signature: official.client_signature || null,
-        regional_center: official.regional_center || "",
-        service_coordinator: official.service_coordinator || "",
-        date: dayDate
-      };
-    }
-
-    let { data: draft } = await ess.from("daily_drafts")
+    const draftRes = await ess.from("daily_drafts")
       .select("*")
       .eq("client_id", getClientId())
       .eq("staff_id", staffUuid)
-      .eq("date", dayDate)
-      .maybeSingle();
+      .eq("date", dayDate);
 
-    if (draft) {
-      return {
-        source: "draft",
-        hours: draft.hours ?? null,
-        activities: draft.activities || "",
-        notes: draft.notes || "",
-        start_time: draft.start_time || "",
-        end_time: draft.end_time || "",
-        modality: draft.modality || "Remote",
-        staff_signature: draft.staff_signature || null,
-        client_signature: draft.client_signature || null,
-        regional_center: draft.regional_center || "",
-        service_coordinator: draft.service_coordinator || "",
-        date: dayDate
-      };
-    }
+    const officialRows = Array.isArray(officialRes.data) ? officialRes.data.map(row => normalizeEntry(row, "official")) : [];
+    const draftRows = Array.isArray(draftRes.data) ? draftRes.data.map(row => normalizeEntry(row, "draft")) : [];
 
-    return null;
+    const all = sortEntries([...officialRows, ...draftRows]);
+    return all;
   }
 
   async function markDotsFromServer(){
@@ -538,8 +573,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dot.style.background = "#e5e7eb";
         continue;
       }
-      const srv = await fetchServerDay(i);
-      dot.style.background = srv ? "#22c55e" : "#e5e7eb";
+      const srv = await fetchServerDayEntries(i);
+      dot.style.background = srv.length ? "#22c55e" : "#e5e7eb";
     }
   }
 
@@ -594,34 +629,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ].join("\n\n").trim();
   }
 
-  async function openDay(i){
-    activeIndex=i;
-    w_error.style.display='none';
-    [...w_days.children].forEach((el,idx)=>{ el.style.outline=(idx===i)?'2px solid #0ea5e9':'none'; });
-
-    const d=addDays(current,i);
-    w_panelDate.textContent=`${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} — ${fmt(d)}`;
-    w_panel.style.display='block';
-
-    const srv = await fetchServerDay(i);
-    if (srv){
-      const parsed = parseMergedNotes(srv.notes || "");
-      w_hours.value = srv.hours ?? '';
-      w_domain.value= srv.activities ?? '';
-      w_notes.value = parsed.notes ?? '';
-      w_obs.value   = parsed.obs ?? '';
-      w_plan.value  = parsed.plan ?? '';
-      w_start.value = srv.start_time ?? '';
-      w_end.value   = srv.end_time ?? '';
-      w_modality.value = srv.modality ?? 'Remote';
-      w_rc.value = srv.regional_center ?? '';
-      w_sc.value = srv.service_coordinator ?? '';
-
-      staffSigData = srv.staff_signature || null;
-      clientSigData = srv.client_signature || null;
-      staffSigCtx  = initSignatureCanvas(staffSigCanvas,  staffSigData);
-      clientSigCtx = initSignatureCanvas(clientSigCanvas, clientSigData);
-    } else {
+  function loadEntryIntoForm(entry){
+    if (!entry) {
       w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
       w_modality.value='Remote';
       w_rc.value='';
@@ -630,6 +639,76 @@ document.addEventListener('DOMContentLoaded', () => {
       clientSigData=null;
       staffSigCtx  = initSignatureCanvas(staffSigCanvas,  null);
       clientSigCtx = initSignatureCanvas(clientSigCanvas, null);
+      return;
+    }
+
+    const parsed = parseMergedNotes(entry.notes || "");
+    w_hours.value = entry.hours ?? '';
+    w_domain.value= entry.activities ?? '';
+    w_notes.value = parsed.notes ?? '';
+    w_obs.value   = parsed.obs ?? '';
+    w_plan.value  = parsed.plan ?? '';
+    w_start.value = entry.start_time ?? '';
+    w_end.value   = entry.end_time ?? '';
+    w_modality.value = entry.modality ?? 'Remote';
+    w_rc.value = entry.regional_center ?? '';
+    w_sc.value = entry.service_coordinator ?? '';
+
+    staffSigData = entry.staff_signature || null;
+    clientSigData = entry.client_signature || null;
+    staffSigCtx  = initSignatureCanvas(staffSigCanvas,  staffSigData);
+    clientSigCtx = initSignatureCanvas(clientSigCanvas, clientSigData);
+  }
+
+  function renderEntrySwitcher(entries, selectedIndex){
+    currentDayEntries = entries;
+    activeEntryIndex = selectedIndex;
+
+    if (!entries.length) {
+      w_entrySwitchWrap.style.display = 'none';
+      w_entrySelect.innerHTML = '';
+      return;
+    }
+
+    if (entries.length === 1) {
+      w_entrySwitchWrap.style.display = 'none';
+      w_entrySelect.innerHTML = '';
+      return;
+    }
+
+    w_entrySwitchWrap.style.display = 'block';
+    w_entrySelect.innerHTML = entries.map((entry, idx) => {
+      const selected = idx === selectedIndex ? 'selected' : '';
+      return `<option value="${idx}" ${selected}>${formatEntryLabel(entry, idx)}</option>`;
+    }).join('');
+  }
+
+  async function openDay(i, preferredEntryIndex = null){
+    activeIndex=i;
+    w_error.style.display='none';
+    [...w_days.children].forEach((el,idx)=>{ el.style.outline=(idx===i)?'2px solid #0ea5e9':'none'; });
+
+    const d=addDays(current,i);
+    w_panelDate.textContent=`${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} — ${fmt(d)}`;
+    w_panel.style.display='block';
+
+    const entries = await fetchServerDayEntries(i);
+
+    let selectedIndex = -1;
+    if (entries.length) {
+      if (preferredEntryIndex !== null && preferredEntryIndex >= 0 && preferredEntryIndex < entries.length) {
+        selectedIndex = preferredEntryIndex;
+      } else {
+        selectedIndex = entries.length - 1;
+      }
+    }
+
+    renderEntrySwitcher(entries, selectedIndex);
+
+    if (selectedIndex >= 0) {
+      loadEntryIntoForm(entries[selectedIndex]);
+    } else {
+      loadEntryIntoForm(null);
     }
   }
 
@@ -734,6 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { onConflict: "client_id,staff_id,week_start,day_index" });
 
     toast('Day submitted (official) ✅');
+    await openDay(activeIndex);
     setTimeout(markDotsFromServer, 200);
   }
 
@@ -742,6 +822,13 @@ document.addEventListener('DOMContentLoaded', () => {
   w_prevWeek.addEventListener('click',()=>shiftWeek(-1));
   w_nextWeek.addEventListener('click',()=>shiftWeek(1));
   w_submitDay.addEventListener('click',submitDay);
+  w_entrySelect.addEventListener('change', ()=>{
+    const idx = Number(w_entrySelect.value);
+    if (!Number.isNaN(idx) && currentDayEntries[idx]) {
+      activeEntryIndex = idx;
+      loadEntryIntoForm(currentDayEntries[idx]);
+    }
+  });
 
   renderWeek();
 });
