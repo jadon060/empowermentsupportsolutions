@@ -172,6 +172,21 @@
       color:#ef4444;
     }
     .trash-btn:hover{color:#b91c1c;}
+    .row-action-btn{
+      padding:6px 10px;
+      font-size:.72rem;
+      border-radius:999px;
+    }
+    .radio-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .radio-wrap input[type="radio"]{
+      min-width:auto;
+      transform:scale(1.05);
+      cursor:pointer;
+    }
     @media (max-width:720px){
       header{align-items:flex-start;flex-direction:column;}
       .wrap{padding:0 .8rem;}
@@ -229,7 +244,7 @@
       </div>
       <div>
         <label>&nbsp;</label>
-        <button id="exportDay" class="btn-muted" disabled>Export Day (Unified)</button>
+        <button id="exportDay" class="btn-muted" disabled>Export Selected Page</button>
       </div>
     </div>
   </div>
@@ -239,6 +254,7 @@
     <table>
       <thead>
         <tr>
+          <th>Select</th>
           <th>Date</th>
           <th>Start</th>
           <th>End</th>
@@ -250,11 +266,12 @@
           <th>Staff Sig</th>
           <th>Client Sig</th>
           <th>Source</th>
+          <th>Export</th>
           <th></th>
         </tr>
       </thead>
       <tbody id="dayBody">
-        <tr><td colspan="12">No day loaded.</td></tr>
+        <tr><td colspan="14">No day loaded.</td></tr>
       </tbody>
     </table>
   </div>
@@ -283,7 +300,7 @@
       </div>
       <div>
         <label>&nbsp;</label>
-        <button id="wk_export" class="btn-muted" disabled>Export Weekly Plan</button>
+        <button id="wk_export" class="btn-muted" disabled>Export Selected Weekly Plan</button>
       </div>
     </div>
   </div>
@@ -293,6 +310,7 @@
     <table>
       <thead>
         <tr>
+          <th>Select</th>
           <th>Staff</th>
           <th>Week start</th>
           <th>Mon</th>
@@ -303,11 +321,12 @@
           <th>Sat</th>
           <th>Sun</th>
           <th>Signature</th>
+          <th>Export</th>
           <th></th>
         </tr>
       </thead>
       <tbody id="wk_body">
-        <tr><td colspan="11">No weekly plan loaded.</td></tr>
+        <tr><td colspan="13">No weekly plan loaded.</td></tr>
       </tbody>
     </table>
   </div>
@@ -369,6 +388,8 @@
 
   let currentDayData = null;
   let currentWeeklyRows = [];
+  let selectedDayRowIndex = null;
+  let selectedWeeklyRowIndex = null;
 
   // 🔹 Load clients
   async function loadClients() {
@@ -557,6 +578,93 @@
     });
   }
 
+  function updateDayExportButtonState() {
+    btnExport.disabled = !(
+      currentDayData &&
+      Array.isArray(currentDayData.rows) &&
+      currentDayData.rows.length &&
+      selectedDayRowIndex !== null &&
+      currentDayData.rows[selectedDayRowIndex]
+    );
+  }
+
+  function updateWeeklyExportButtonState() {
+    wk_export.disabled = !(
+      Array.isArray(currentWeeklyRows) &&
+      currentWeeklyRows.length &&
+      selectedWeeklyRowIndex !== null &&
+      currentWeeklyRows[selectedWeeklyRowIndex]
+    );
+  }
+
+  function selectDayRow(idx) {
+    selectedDayRowIndex = idx;
+    const radios = document.querySelectorAll('input[name="dayExportSelect"]');
+    radios.forEach((radio) => {
+      radio.checked = Number(radio.value) === idx;
+    });
+    updateDayExportButtonState();
+  }
+
+  function selectWeeklyRow(idx) {
+    selectedWeeklyRowIndex = idx;
+    const radios = document.querySelectorAll('input[name="weeklyExportSelect"]');
+    radios.forEach((radio) => {
+      radio.checked = Number(radio.value) === idx;
+    });
+    updateWeeklyExportButtonState();
+  }
+
+  function renderDayTable() {
+    if (!currentDayData || !currentDayData.rows || !currentDayData.rows.length) {
+      dayBody.innerHTML = `<tr><td colspan="14">No data for this date.</td></tr>`;
+      selectedDayRowIndex = null;
+      updateDayExportButtonState();
+      return;
+    }
+
+    const { rows, date } = currentDayData;
+    dayBody.innerHTML = rows
+      .map(
+        (row, idx) => `
+      <tr>
+        <td class="radio-wrap">
+          <input
+            type="radio"
+            name="dayExportSelect"
+            value="${idx}"
+            ${selectedDayRowIndex === idx ? "checked" : ""}
+            onclick="window.__essSelectDayRow && window.__essSelectDayRow(${idx})"
+          >
+        </td>
+        <td>${formatYMD(date)}</td>
+        <td>${row.start_time ? to12h(row.start_time) : "—"}</td>
+        <td>${row.end_time ? to12h(row.end_time) : "—"}</td>
+        <td>${row.hours !== "" && row.hours != null ? Number(row.hours).toFixed(2) : "—"}</td>
+        <td>${escapeHtml(row.modality || "—")}</td>
+        <td>${escapeHtml(row.domain || "—")}</td>
+        <td>${escapeHtml(row.regional_center || "—")}</td>
+        <td>${escapeHtml(row.service_coordinator || "—")}</td>
+        <td>${row.staff_signature ? "✅" : "—"}</td>
+        <td>${row.client_signature ? "✅" : "—"}</td>
+        <td>${escapeHtml(row.source)}</td>
+        <td>
+          <button
+            class="row-action-btn btn-muted"
+            onclick="window.__essExportSingleDay && window.__essExportSingleDay(${idx})"
+          >
+            Export
+          </button>
+        </td>
+        <td><button class="trash-btn" onclick="window.__essDeleteDay && window.__essDeleteDay(${idx})">🗑️</button></td>
+      </tr>
+    `
+      )
+      .join("");
+
+    updateDayExportButtonState();
+  }
+
   async function loadDay() {
     const clientId = clientIdInput.value.trim();
     if (!clientId) {
@@ -603,9 +711,9 @@
     ]);
 
     if (!normalizedRows.length) {
-      dayBody.innerHTML = `<tr><td colspan="12">No data for this date.</td></tr>`;
       currentDayData = null;
-      btnExport.disabled = true;
+      selectedDayRowIndex = null;
+      renderDayTable();
       return;
     }
 
@@ -618,29 +726,14 @@
       rows: normalizedRows,
     };
 
-    dayBody.innerHTML = normalizedRows
-      .map(
-        (row, idx) => `
-      <tr>
-        <td>${formatYMD(serviceDate)}</td>
-        <td>${row.start_time ? to12h(row.start_time) : "—"}</td>
-        <td>${row.end_time ? to12h(row.end_time) : "—"}</td>
-        <td>${row.hours !== "" && row.hours != null ? Number(row.hours).toFixed(2) : "—"}</td>
-        <td>${escapeHtml(row.modality || "—")}</td>
-        <td>${escapeHtml(row.domain || "—")}</td>
-        <td>${escapeHtml(row.regional_center || "—")}</td>
-        <td>${escapeHtml(row.service_coordinator || "—")}</td>
-        <td>${row.staff_signature ? "✅" : "—"}</td>
-        <td>${row.client_signature ? "✅" : "—"}</td>
-        <td>${escapeHtml(row.source)}</td>
-        <td><button class="trash-btn" onclick="window.__essDeleteDay && window.__essDeleteDay(${idx})">🗑️</button></td>
-      </tr>
-    `
-      )
-      .join("");
-    btnExport.disabled = false;
+    selectedDayRowIndex = 0;
+    renderDayTable();
   }
   btnLoad.addEventListener("click", loadDay);
+
+  window.__essSelectDayRow = function (idx) {
+    selectDayRow(idx);
+  };
 
   window.__essDeleteDay = async function (idx) {
     if (!currentDayData || !currentDayData.rows || !currentDayData.rows[idx]) return;
@@ -686,20 +779,86 @@
     alert("Day entry deleted ✅");
   };
 
-  function exportDay() {
-    if (!currentDayData || !currentDayData.rows || !currentDayData.rows.length) return;
+  function openPrintWindow(title, htmlBody) {
+    const win = window.open("", "_blank", "width=900,height=1100");
+    win.document.write(`
+      <html>
+      <head>
+        <title>${title}</title>
+        <style>
+          body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;background:#fff;}
+          .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;box-sizing:border-box;}
+          .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+          .header-left{max-width:70%;}
+          .logo{height:90px;object-fit:contain;}
+          .box{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:10px;}
+          img.sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
+          .section-title{font-weight:600;font-size:11px;margin-top:6px;margin-bottom:3px;}
+          .note-box{
+            border:1px solid #e5e7eb;
+            border-radius:6px;
+            padding:4px 6px;
+            min-height:40px;
+            font-size:11px;
+            white-space:pre-wrap;
+            word-break:break-word;
+            overflow-wrap:anywhere;
+            max-width:100%;
+          }
+          table{width:100%;border-collapse:collapse;font-size:11px;}
+          th,td{border:1px solid #e5e7eb;padding:6px;vertical-align:top;}
+          .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+          .sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
+          @media print { body{background:#fff;} .page{margin:0;} }
+        </style>
+      </head>
+      <body>${htmlBody}</body>
+      </html>
+    `);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 400);
+  }
+
+  function exportSingleDay(idx) {
+    if (!currentDayData || !currentDayData.rows || !currentDayData.rows[idx]) return;
+
+    selectedDayRowIndex = idx;
+    updateDayExportButtonState();
 
     const businessName = "Empowerment Support Solutions, LLC";
-    const serviceCode  = serviceInput.value || "SDP Service Code";
-    const { clientLabel, date, staffName, rows } = currentDayData;
+    const serviceCode = serviceInput.value || "SDP Service Code";
+    const { clientLabel, date, staffName } = currentDayData;
+    const row = currentDayData.rows[idx];
+    const { progress, observation, action } = splitNotes(row.notes);
+    const start12 = row.start_time ? to12h(row.start_time) : "—";
+    const end12 = row.end_time ? to12h(row.end_time) : "—";
+    const hoursStr = (row.hours !== "" && row.hours !== null) ? Number(row.hours).toFixed(2) : "—";
 
-    const renderedRows = rows.map((row) => {
-      const { progress, observation, action } = splitNotes(row.notes);
-      const start12 = row.start_time ? to12h(row.start_time) : "—";
-      const end12   = row.end_time ? to12h(row.end_time) : "—";
-      const hoursStr = (row.hours !== "" && row.hours !== null) ? Number(row.hours).toFixed(2) : "—";
+    const regionalCenterDisplay = row.regional_center || rcInput.value || "—";
+    const serviceCoordinatorDisplay = row.service_coordinator || scInput.value || "—";
 
-      return `
+    openPrintWindow(
+      `ESS_${clientLabel.replace(/\s+/g, "_")}_${date}_${idx + 1}.pdf`,
+      `
+      <div class="page">
+        <div class="header">
+          <div class="header-left">
+            <div style="font-size:15px;font-weight:700;">${businessName}</div>
+            <div style="font-size:11px;">SDP – Daily Service Log (Unified: RC / SC / FMS)</div>
+            <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${escapeHtml(clientLabel)}</div>
+            <div style="font-size:11px;"><strong>Service Date:</strong> ${formatYMD(date)}</div>
+            <div style="font-size:11px;"><strong>Staff:</strong> ${escapeHtml(staffName || "—")}</div>
+            <div style="font-size:11px;"><strong>Service Code:</strong> ${escapeHtml(serviceCode)}</div>
+            <div style="font-size:11px;"><strong>Regional Center:</strong> ${escapeHtml(regionalCenterDisplay)}</div>
+            <div style="font-size:11px;"><strong>Service Coordinator:</strong> ${escapeHtml(serviceCoordinatorDisplay)}</div>
+          </div>
+          <div>
+            <img src="${LOGO_URL}" class="logo" onerror="this.style.display='none'">
+            <div style="font-size:10px;color:#94a3b8;text-align:right;margin-top:4px;">ESS • Daily export</div>
+          </div>
+        </div>
+
         <div class="box">
           <div style="font-size:11.5px;margin-bottom:4px;">
             <strong>Time In:</strong> ${start12} &nbsp;
@@ -738,79 +897,32 @@
             </div>
           </div>
         </div>
-      `;
-    }).join("");
 
-    const regionalCenterDisplay =
-      rows.map((r) => r.regional_center).find(Boolean) || rcInput.value || "—";
-    const serviceCoordinatorDisplay =
-      rows.map((r) => r.service_coordinator).find(Boolean) || scInput.value || "—";
-
-    const win = window.open("", "_blank", "width=900,height=1100");
-    win.document.write(`
-      <html>
-      <head>
-        <title>ESS_${clientLabel.replace(/\s+/g,"_")}_${date}.pdf</title>
-        <style>
-          body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;background:#fff;}
-          .page{width:8.5in;min-height:11in;margin:0 auto;padding:0.5in;box-sizing:border-box;}
-          .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-          .header-left{max-width:70%;}
-          .logo{height:90px;object-fit:contain;}
-          .box{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;margin-bottom:10px;}
-          img.sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
-          .section-title{font-weight:600;font-size:11px;margin-top:6px;margin-bottom:3px;}
-          .note-box{
-            border:1px solid #e5e7eb;
-            border-radius:6px;
-            padding:4px 6px;
-            min-height:40px;
-            font-size:11px;
-            white-space:pre-wrap;
-            word-break:break-word;
-            overflow-wrap:anywhere;
-            max-width:100%;
-          }
-          @media print { body{background:#fff;} .page{margin:0;} }
-        </style>
-      </head>
-      <body>
-        <div class="page">
-          <div class="header">
-            <div class="header-left">
-              <div style="font-size:15px;font-weight:700;">${businessName}</div>
-              <div style="font-size:11px;">SDP – Daily Service Log (Unified: RC / SC / FMS)</div>
-              <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${escapeHtml(clientLabel)}</div>
-              <div style="font-size:11px;"><strong>Service Date:</strong> ${formatYMD(date)}</div>
-              <div style="font-size:11px;"><strong>Staff:</strong> ${escapeHtml(staffName || "—")}</div>
-              <div style="font-size:11px;"><strong>Service Code:</strong> ${escapeHtml(serviceCode)}</div>
-              <div style="font-size:11px;"><strong>Regional Center:</strong> ${escapeHtml(regionalCenterDisplay)}</div>
-              <div style="font-size:11px;"><strong>Service Coordinator:</strong> ${escapeHtml(serviceCoordinatorDisplay)}</div>
-            </div>
-            <div>
-              <img src="${LOGO_URL}" class="logo" onerror="this.style.display='none'">
-              <div style="font-size:10px;color:#94a3b8;text-align:right;margin-top:4px;">ESS • Daily export</div>
-            </div>
-          </div>
-
-          ${renderedRows}
-
-          <div style="margin-top:12px;font-size:9.5px;line-height:1.35;">
-            I certify that the services listed above were actually provided to the participant in accordance with the participant’s Individual Program Plan (IPP) and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
-          </div>
-
-          <div style="margin-top:14px;font-size:9px;color:#6b7280;">
-            ${businessName} • ${CONTACT_LINE}
-          </div>
+        <div style="margin-top:12px;font-size:9.5px;line-height:1.35;">
+          I certify that the services listed above were actually provided to the participant in accordance with the participant’s Individual Program Plan (IPP) and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
         </div>
-      </body>
-      </html>
-    `);
-    win.document.close();
-    win.focus();
-    setTimeout(() => win.print(), 400);
+
+        <div style="margin-top:14px;font-size:9px;color:#6b7280;">
+          ${businessName} • ${CONTACT_LINE}
+        </div>
+      </div>
+      `
+    );
   }
-  btnExport.addEventListener("click", exportDay);
+
+  function exportSelectedDay() {
+    if (selectedDayRowIndex === null) {
+      alert("Select one day entry first.");
+      return;
+    }
+    exportSingleDay(selectedDayRowIndex);
+  }
+
+  window.__essExportSingleDay = function (idx) {
+    exportSingleDay(idx);
+  };
+
+  btnExport.addEventListener("click", exportSelectedDay);
 
   // ===== WEEKLY =====
   async function staffNameById(id) {
@@ -821,6 +933,56 @@
       .eq("id", id)
       .maybeSingle();
     return data?.full_name || id;
+  }
+
+  function renderWeeklyTable() {
+    if (!currentWeeklyRows.length) {
+      wk_resultsCard.style.display = "block";
+      wk_body.innerHTML = `<tr><td colspan="13">No weekly plans for this client and week.</td></tr>`;
+      selectedWeeklyRowIndex = null;
+      updateWeeklyExportButtonState();
+      return;
+    }
+
+    wk_resultsCard.style.display = "block";
+    wk_body.innerHTML = currentWeeklyRows
+      .map(
+        (r, idx) => `
+      <tr>
+        <td class="radio-wrap">
+          <input
+            type="radio"
+            name="weeklyExportSelect"
+            value="${idx}"
+            ${selectedWeeklyRowIndex === idx ? "checked" : ""}
+            onclick="window.__essSelectWeeklyRow && window.__essSelectWeeklyRow(${idx})"
+          >
+        </td>
+        <td>${escapeHtml(r.__staff_name)}</td>
+        <td>${escapeHtml(r.week_start)}</td>
+        <td>${escapeHtml(r.mon_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.tue_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.wed_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.thu_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.fri_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.sat_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.sun_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${r.staff_signature ? "✅" : "—"}</td>
+        <td>
+          <button
+            class="row-action-btn btn-muted"
+            onclick="window.__essExportSingleWeekly && window.__essExportSingleWeekly(${idx})"
+          >
+            Export
+          </button>
+        </td>
+        <td><button class="trash-btn" onclick="window.__essDeleteWeekly && window.__essDeleteWeekly(${idx})">🗑️</button></td>
+      </tr>
+    `
+      )
+      .join("");
+
+    updateWeeklyExportButtonState();
   }
 
   async function loadWeekly() {
@@ -867,10 +1029,9 @@
     }
 
     if (!rows.length) {
-      wk_resultsCard.style.display = "block";
-      wk_body.innerHTML = `<tr><td colspan="11">No weekly plans for this client and week.</td></tr>`;
       currentWeeklyRows = [];
-      wk_export.disabled = true;
+      selectedWeeklyRowIndex = null;
+      renderWeeklyTable();
       return;
     }
 
@@ -878,31 +1039,15 @@
       r.__staff_name = await staffNameById(r.staff_id);
     }
 
-    wk_resultsCard.style.display = "block";
-    wk_body.innerHTML = rows
-      .map(
-        (r, idx) => `
-      <tr>
-        <td>${r.__staff_name}</td>
-        <td>${r.week_start}</td>
-        <td>${(r.mon_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${(r.tue_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${(r.wed_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${(r.thu_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${(r.fri_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${(r.sat_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${(r.sun_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${r.staff_signature ? "✅" : "—"}</td>
-        <td><button class="trash-btn" onclick="window.__essDeleteWeekly && window.__essDeleteWeekly(${idx})">🗑️</button></td>
-      </tr>
-    `
-      )
-      .join("");
-
     currentWeeklyRows = rows;
-    wk_export.disabled = false;
+    selectedWeeklyRowIndex = 0;
+    renderWeeklyTable();
   }
   wk_load.addEventListener("click", loadWeekly);
+
+  window.__essSelectWeeklyRow = function (idx) {
+    selectWeeklyRow(idx);
+  };
 
   window.__essDeleteWeekly = async function (idx) {
     const row = currentWeeklyRows[idx];
@@ -919,86 +1064,86 @@
       .eq("client_id", wk_clientSelect.value)
       .eq("staff_id", row.staff_id)
       .eq("week_start", row.week_start);
-    loadWeekly();
+    await loadWeekly();
     alert("Weekly plan deleted ✅");
   };
 
-  function exportWeekly() {
-    if (!currentWeeklyRows.length) return;
+  function exportSingleWeekly(idx) {
+    if (!currentWeeklyRows.length || !currentWeeklyRows[idx]) return;
+
+    selectedWeeklyRowIndex = idx;
+    updateWeeklyExportButtonState();
+
     const clientLabel = wk_clientSelect.options[wk_clientSelect.selectedIndex]?.text || "Client";
-    const weekStart = currentWeeklyRows[0].week_start;
-    const win = window.open("", "_blank", "width=900,height=1100");
-    win.document.write(`
-      <html>
-      <head>
-        <title>ESS_${clientLabel.replace(/\s+/g,"_")}_weekly_${weekStart}.pdf</title>
-        <style>
-          body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:0;}
-          .page{width:8.5in;margin:0 auto;padding:0.5in;box-sizing:border-box;}
-          table{width:100%;border-collapse:collapse;font-size:11px;}
-          th,td{border:1px solid #e5e7eb;padding:6px;vertical-align:top;}
-          .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-          .sig{width:180px;height:50px;object-fit:contain;border-bottom:1px solid #000;}
-        </style>
-      </head>
-      <body>
-        <div class="page">
-          <div class="head">
-            <div>
-              <h2>Weekly Staff Plans</h2>
-              <div><strong>Client:</strong> ${clientLabel}</div>
-              <div><strong>Week start:</strong> ${weekStart}</div>
-            </div>
-            <div>
-              <img src="${LOGO_URL}" style="height:70px;" onerror="this.style.display='none'">
-            </div>
+    const row = currentWeeklyRows[idx];
+    const weekStart = row.week_start;
+
+    openPrintWindow(
+      `ESS_${clientLabel.replace(/\s+/g,"_")}_weekly_${weekStart}_${idx + 1}.pdf`,
+      `
+      <div class="page">
+        <div class="head">
+          <div>
+            <h2>Weekly Staff Plan</h2>
+            <div><strong>Client:</strong> ${escapeHtml(clientLabel)}</div>
+            <div><strong>Week start:</strong> ${escapeHtml(weekStart)}</div>
+            <div><strong>Staff:</strong> ${escapeHtml(row.__staff_name || "—")}</div>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Staff</th>
-                <th>Mon</th>
-                <th>Tue</th>
-                <th>Wed</th>
-                <th>Thu</th>
-                <th>Fri</th>
-                <th>Sat</th>
-                <th>Sun</th>
-                <th>Signature</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${
-                currentWeeklyRows.map(r => `
-                  <tr>
-                    <td>${r.__staff_name}</td>
-                    <td>${(r.mon_text||"").replace(/\n/g,"<br>")}</td>
-                    <td>${(r.tue_text||"").replace(/\n/g,"<br>")}</td>
-                    <td>${(r.wed_text||"").replace(/\n/g,"<br>")}</td>
-                    <td>${(r.thu_text||"").replace(/\n/g,"<br>")}</td>
-                    <td>${(r.fri_text||"").replace(/\n/g,"<br>")}</td>
-                    <td>${(r.sat_text||"").replace(/\n/g,"<br>")}</td>
-                    <td>${(r.sun_text||"").replace(/\n/g,"<br>")}</td>
-                    <td>${
-                      r.staff_signature
-                        ? `<img class="sig" src="${r.staff_signature}">`
-                        : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
-                    }</td>
-                  </tr>
-                `).join("")
-              }
-            </tbody>
-          </table>
-          <p style="margin-top:14px;font-size:10px;color:#6b7280;">${CONTACT_LINE}</p>
+          <div>
+            <img src="${LOGO_URL}" style="height:70px;" onerror="this.style.display='none'">
+          </div>
         </div>
-      </body>
-      </html>
-    `);
-    win.document.close();
-    win.focus();
-    setTimeout(()=>win.print(), 400);
+        <table>
+          <thead>
+            <tr>
+              <th>Mon</th>
+              <th>Tue</th>
+              <th>Wed</th>
+              <th>Thu</th>
+              <th>Fri</th>
+              <th>Sat</th>
+              <th>Sun</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${escapeHtml(row.mon_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.tue_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.wed_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.thu_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.fri_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.sat_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.sun_text || "").replace(/\n/g,"<br>")}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:16px;">
+          <div style="font-size:10.5px;font-weight:600;margin-bottom:4px;">Staff Signature:</div>
+          ${
+            row.staff_signature
+              ? `<img class="sig" src="${row.staff_signature}">`
+              : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
+          }
+        </div>
+        <p style="margin-top:14px;font-size:10px;color:#6b7280;">${CONTACT_LINE}</p>
+      </div>
+      `
+    );
   }
-  wk_export.addEventListener("click", exportWeekly);
+
+  function exportSelectedWeekly() {
+    if (selectedWeeklyRowIndex === null) {
+      alert("Select one weekly plan first.");
+      return;
+    }
+    exportSingleWeekly(selectedWeeklyRowIndex);
+  }
+
+  window.__essExportSingleWeekly = function (idx) {
+    exportSingleWeekly(idx);
+  };
+
+  wk_export.addEventListener("click", exportSelectedWeekly);
 
 })();
 </script>
