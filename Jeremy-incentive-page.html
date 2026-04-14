@@ -686,7 +686,7 @@
               <button class="btn btn-secondary" id="lockBtn" type="button">Lock Admin</button>
             </div>
 
-            <p class="admin-note">
+            <p class="admin-note" id="saveStatus">
               This updates the visible progress bar and point total on the page. Reward targets are 40, 75, and 120 points.
             </p>
           </div>
@@ -698,6 +698,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const adminPin = '8523';
+    const participantName = 'Jeremy';
     const targetPoints = 120;
     const defaultPoints = 0;
 
@@ -719,9 +720,20 @@
     const lockBtn = document.getElementById('lockBtn');
     const pinMessage = document.getElementById('pinMessage');
     const adminControls = document.getElementById('adminControls');
+    const saveStatus = document.getElementById('saveStatus');
 
     let jeremyRowId = null;
     let currentPoints = defaultPoints;
+
+    function setStatus(message, color){
+      if(!saveStatus) return;
+      saveStatus.textContent = message;
+      if(color){
+        saveStatus.style.color = color;
+      } else {
+        saveStatus.style.color = 'var(--muted)';
+      }
+    }
 
     function renderPoints(points){
       const safePoints = Math.max(0, Math.floor(Number(points) || 0));
@@ -740,12 +752,13 @@
       const { data, error } = await supabaseClient
         .from('participant_points')
         .select('id, name, points, updated_at')
-        .eq('name', 'Jeremy')
+        .eq('name', participantName)
         .order('updated_at', { ascending:false })
         .limit(1);
 
       if(error){
         console.error('Error loading Jeremy points:', error);
+        setStatus('Could not load points from Supabase.', 'var(--danger)');
         renderPoints(defaultPoints);
         return;
       }
@@ -753,37 +766,101 @@
       if(data && data.length){
         jeremyRowId = data[0].id;
         renderPoints(data[0].points);
+        setStatus('Points loaded successfully.');
       } else {
+        jeremyRowId = null;
         renderPoints(defaultPoints);
+        setStatus('No Jeremy row found yet. First save will create it.');
       }
+    }
+
+    async function ensureJeremyRowExists(startingPoints = 0){
+      if(jeremyRowId){
+        return jeremyRowId;
+      }
+
+      const { data: existing, error: existingError } = await supabaseClient
+        .from('participant_points')
+        .select('id, name, points, updated_at')
+        .eq('name', participantName)
+        .order('updated_at', { ascending:false })
+        .limit(1);
+
+      if(existingError){
+        console.error('Error checking Jeremy row:', existingError);
+        throw existingError;
+      }
+
+      if(existing && existing.length){
+        jeremyRowId = existing[0].id;
+        return jeremyRowId;
+      }
+
+      const insertPayload = {
+        name: participantName,
+        points: Math.max(0, Math.floor(Number(startingPoints) || 0)),
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: inserted, error: insertError } = await supabaseClient
+        .from('participant_points')
+        .insert(insertPayload)
+        .select('id, name, points, updated_at')
+        .limit(1);
+
+      if(insertError){
+        console.error('Error creating Jeremy row:', insertError);
+        throw insertError;
+      }
+
+      if(inserted && inserted.length){
+        jeremyRowId = inserted[0].id;
+        return jeremyRowId;
+      }
+
+      throw new Error('Jeremy row could not be created.');
     }
 
     async function setPoints(points){
       const safePoints = Math.max(0, Math.floor(Number(points) || 0));
 
-      if(!jeremyRowId){
-        await loadJeremyPoints();
+      try {
+        saveBtn.disabled = true;
+        addOneBtn.disabled = true;
+        addFiveBtn.disabled = true;
+        minusOneBtn.disabled = true;
+        resetBtn.disabled = true;
+
+        setStatus('Saving points...', 'var(--brand)');
+
+        await ensureJeremyRowExists(safePoints);
+
+        const { error } = await supabaseClient
+          .from('participant_points')
+          .update({
+            points: safePoints,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', jeremyRowId);
+
+        if(error){
+          console.error('Error updating Jeremy points:', error);
+          setStatus('Could not save points. Check Supabase permissions/table columns.', 'var(--danger)');
+          return;
+        }
+
+        renderPoints(safePoints);
+        setStatus('Points saved successfully.', 'var(--success)');
+      } catch (err) {
+        console.error('Set points failed:', err);
+        setStatus('Could not save points. Jeremy row may be missing or insert/update is blocked.', 'var(--danger)');
+      } finally {
+        saveBtn.disabled = false;
+        addOneBtn.disabled = false;
+        addFiveBtn.disabled = false;
+        minusOneBtn.disabled = false;
+        resetBtn.disabled = false;
       }
-
-      if(!jeremyRowId){
-        console.error('Jeremy row not found in participant_points table.');
-        return;
-      }
-
-      const { error } = await supabaseClient
-        .from('participant_points')
-        .update({
-          points: safePoints,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', jeremyRowId);
-
-      if(error){
-        console.error('Error updating Jeremy points:', error);
-        return;
-      }
-
-      renderPoints(safePoints);
     }
 
     function unlockAdmin(){
@@ -808,9 +885,26 @@
       pinInput.value = '';
     }
 
+    function handleRealtimePayload(payload){
+      if(payload && payload.new && payload.new.name === participantName){
+        jeremyRowId = payload.new.id;
+        renderPoints(payload.new.points);
+        setStatus('Points synced live.');
+      }
+    }
+
     function subscribeToJeremyPoints(){
       supabaseClient
         .channel('participant-points-live-jeremy')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'participant_points'
+          },
+          handleRealtimePayload
+        )
         .on(
           'postgres_changes',
           {
@@ -818,12 +912,7 @@
             schema: 'public',
             table: 'participant_points'
           },
-          (payload) => {
-            if(payload.new && payload.new.name === 'Jeremy'){
-              jeremyRowId = payload.new.id;
-              renderPoints(payload.new.points);
-            }
-          }
+          handleRealtimePayload
         )
         .subscribe();
     }
