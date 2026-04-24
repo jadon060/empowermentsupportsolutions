@@ -13,6 +13,7 @@
       --card:#ffffff; 
       --text:#2a2a2a;
       --accent:#4c8cd7;
+
       --header-a:#1b7ea0;
       --header-b:#2fb6a6;
     }
@@ -43,6 +44,17 @@
     header h1 { 
       margin:0; 
       font-size:1.55rem; 
+      letter-spacing:.2px;
+      line-height:1.15;
+    }
+
+    .header-inner{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      max-width:1200px;
+      margin:0 auto;
     }
 
     @keyframes gradientPulse {
@@ -58,11 +70,17 @@
       background: var(--accent);
       color: #fff;
       font-weight: 600;
+      font-size: 0.9rem;
       padding: 9px 15px;
       border-radius: 8px;
       text-decoration: none;
+      border: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      transition: all 0.25s ease;
       z-index: 9999;
     }
+
+    .login-btn:hover { background:#336fb4; transform: translateY(-3px); }
 
     .careers-btn{
       position:absolute; 
@@ -70,15 +88,21 @@
       top:16px;
       background:var(--accent);
       color:#fff;
+      font-weight:600;
+      font-size:0.9rem;
       padding:9px 15px;
       border-radius:8px;
       text-decoration:none;
+      border:none;
+      box-shadow:0 4px 10px rgba(0,0,0,0.25);
+      z-index: 2;
     }
 
     .logo-center {
       display:block;
       margin: 26px auto 10px auto;
       max-width: 260px;
+      height:auto;
     }
 
     .section {
@@ -110,25 +134,21 @@
       border-top:4px solid var(--accent);
     }
 
-    .team-photo {
+    #team .team-photo {
       display:inline-block;
       width:43%;
       max-width:420px;
       margin:10px 8px 16px 8px;
-      border-radius:12px;
+      vertical-align:top;
     }
 
     @media (max-width:850px){
-      .team-photo{
+      #team .team-photo{
         width:88%;
+        max-width:520px;
         display:block;
         margin:10px auto 16px auto;
       }
-    }
-
-    .testimonial {
-      text-align:center;
-      font-style:italic;
     }
 
     footer {
@@ -139,26 +159,37 @@
       margin-top:50px;
     }
 
+    .testimonial {
+      max-width:720px;
+      margin:0 auto 10px auto;
+      padding:0 16px;
+      text-align:center;
+      color:#444;
+      font-style:italic;
+    }
+
   </style>
 </head>
 <body>
 
 <header>
-  <a href="#" class="careers-btn">Careers</a>
-  <h1>Empowerment Support Solutions, LLC</h1>
+  <a href="https://empowermentss.com/careers/careers.html?_ts=1" class="careers-btn">Careers</a>
+  <div class="header-inner">
+    <h1>Empowerment Support Solutions, LLC</h1>
+  </div>
 </header>
 
-<img src="logo full.png" class="logo-center">
+<img src="logo full.png" alt="ESS Logo" class="logo-center">
 
 <section id="team" class="section" style="text-align:center;">
 
-  <!-- ORIGINAL PHOTOS (UNCHANGED) -->
-  <img src="unnamed%20(1).jpg" class="team-photo">
-  <img src="Screenshot%202026-01-21%20112803.png" class="team-photo">
+  <!-- ORIGINAL IMAGES (UNCHANGED) -->
+  <img src="unnamed%20(1).jpg" alt="ESS staff photo (library)" class="team-photo">
+  <img src="Screenshot%202026-01-21%20112803.png" alt="ESS team photo (restaurant)" class="team-photo">
 
-  <!-- ✅ NEW PHOTOS ADDED (FROM GITHUB UPLOADS) -->
-  <img src="unnamed.jpg" class="team-photo">
-  <img src="unnamed%20(1).jpg" class="team-photo">
+  <!-- ✅ NEW IMAGES ADDED (FROM YOUR GITHUB UPLOADS) -->
+  <img src="unnamed.jpg" alt="ESS additional photo 1" class="team-photo">
+  <img src="unnamed%20(1).jpg" alt="ESS additional photo 2" class="team-photo">
 
   <p class="testimonial">
     “I've noticed a real difference since working with ESS. They take feedback seriously and focus on what actually helps.”
@@ -168,8 +199,8 @@
 
 <footer>
   <h2>Contact Us</h2>
-  <p>Phone: 626-596-6155</p>
-  <p>Email: empowermentess@gmail.com</p>
+  <p><strong>Phone:</strong> 626-596-6155</p>
+  <p><strong>Email:</strong> <a href="mailto:Empowermentess@gmail.com">empowermentess@gmail.com</a></p>
 </footer>
 
 <a href="/login.html" class="login-btn">Login</a>
