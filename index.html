@@ -198,12 +198,23 @@
 
     /* Team photo + testimonial */
     .team-photo {
-      width:55%;
-      max-width:520px;
+      width:100%;
+      height:185px;
       display:block;
-      margin:10px auto 16px auto;
+      object-fit:cover;
+      object-position:center;
+      margin:0;
       border-radius:12px;
       box-shadow:0 8px 25px rgba(0,0,0,0.12);
+    }
+    .team-photo-row {
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:16px;
+      width:100%;
+      max-width:1100px;
+      margin:10px auto 20px auto;
+      align-items:stretch;
     }
     .testimonial {
       max-width:720px;
@@ -339,20 +350,25 @@
     .translate-toggle button.active{ outline:2px solid var(--accent); background:#eef4ff; }
     #google_translate_element { display:none; }
 
-    /* Two team photos side by side */
-    #team .team-photo {
-      display:inline-block;
-      width:43%;
-      max-width:420px;
-      margin:10px 8px 16px 8px;
-      vertical-align:top;
-    }
     @media (max-width:850px){
-      #team .team-photo{
-        width:88%;
-        max-width:520px;
-        display:block;
-        margin:10px auto 16px auto;
+      .team-photo-row{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+        gap:14px;
+      }
+
+      .team-photo{
+        height:170px;
+      }
+    }
+
+    @media (max-width:520px){
+      .team-photo-row{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+        gap:10px;
+      }
+
+      .team-photo{
+        height:135px;
       }
     }
 
@@ -438,10 +454,12 @@
   </section>
 
   <section id="team" class="section" aria-label="ESS Team Photo & Testimonial" style="text-align:center;">
-    <img src="unnamed%20(1).jpg" alt="ESS staff photo (library)" class="team-photo" loading="lazy">
-    <img src="Screenshot%202026-01-21%20112803.png" alt="ESS team photo (restaurant)" class="team-photo" loading="lazy">
-    <img src="unnamed.jpg" alt="ESS additional photo" class="team-photo" loading="lazy">
-    <img src="unnamed%20(2).jpg" alt="ESS additional team photo" class="team-photo" loading="lazy">
+    <div class="team-photo-row">
+      <img src="unnamed%20(1).jpg" alt="ESS staff photo (library)" class="team-photo" loading="lazy">
+      <img src="Screenshot%202026-01-21%20112803.png" alt="ESS team photo (restaurant)" class="team-photo" loading="lazy">
+      <img src="unnamed.jpg" alt="ESS additional photo" class="team-photo" loading="lazy">
+      <img src="unnamed%20(1).jpg" alt="ESS additional team photo" class="team-photo" loading="lazy">
+    </div>
 
     <p class="testimonial">
       “I've noticed a real difference since working with ESS. They take feedback seriously and focus on what actually helps.”
