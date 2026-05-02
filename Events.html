@@ -129,27 +129,6 @@
       backdrop-filter:blur(4px);
     }
 
-    .intro-card{
-      margin-top:22px;
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:24px;
-    }
-
-    .intro-card h2{
-      margin:0 0 10px;
-      font-size:1.55rem;
-    }
-
-    .intro-card p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.75;
-      font-size:1rem;
-    }
-
     .section-title{
       margin:34px 0 14px;
       display:flex;
@@ -183,7 +162,7 @@
       border-radius:28px;
       box-shadow:var(--shadow);
       padding:24px;
-      min-height:360px;
+      min-height:385px;
     }
 
     .event-card::before{
@@ -350,11 +329,21 @@
     }
 
     .news-card{
+      display:block;
       background:#fff;
       border:1px solid #e5e7eb;
       border-radius:20px;
       padding:18px;
-      min-height:170px;
+      min-height:188px;
+      text-decoration:none;
+      color:inherit;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .news-card:hover{
+      transform:translateY(-3px);
+      box-shadow:0 14px 28px rgba(16,35,58,.14);
+      border-color:#bfd3f1;
     }
 
     .news-card .news-icon{
@@ -373,6 +362,20 @@
       color:var(--muted);
       line-height:1.55;
       font-size:.95rem;
+    }
+
+    .link-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      margin-top:12px;
+      background:#eef5ff;
+      color:#1f5fa8;
+      border:1px solid #d7e6fb;
+      border-radius:999px;
+      padding:7px 10px;
+      font-size:.85rem;
+      font-weight:900;
     }
 
     .footer{
@@ -415,7 +418,6 @@
         top:18px;
       }
 
-      .intro-card,
       .info-card,
       .news-section,
       .notice{
@@ -444,13 +446,6 @@
           <span class="tag">🤝 Community Connection</span>
         </div>
       </div>
-    </section>
-
-    <section class="intro-card">
-      <h2>What this page is for</h2>
-      <p>
-        This page gives participants and families a simple place to view upcoming ESS event ideas, annual traditions, holiday plans, participant celebrations, and public updates connected to DDS, Regional Centers, and disability-related community events. Details may change each year based on participant interest, safety planning, weather, transportation, staffing, and family coordination.
-      </p>
     </section>
 
     <div class="section-title">
@@ -484,7 +479,7 @@
       <article class="event-card christmas">
         <div class="event-icon">🎄</div>
         <h3>Christmas Event Vote</h3>
-        <div class="event-date">Participant vote planned before the holiday season</div>
+        <div class="event-date">Planned date: Saturday, December 12, 2026</div>
         <p>
           For Christmas, ESS will allow participants to vote on what type of holiday celebration they would prefer. This keeps the event participant-centered and gives everyone a voice.
         </p>
@@ -505,7 +500,7 @@
       <article class="event-card outing">
         <div class="event-icon">🎢</div>
         <h3>Annual Participant Outing</h3>
-        <div class="event-date">Planned once per year, usually during late fall or early winter</div>
+        <div class="event-date">Planned date: Sunday, January 24, 2027</div>
         <p>
           The annual participant outing is a special ESS tradition where participants get the chance to enjoy a major community outing together, free of charge to participants.
         </p>
@@ -551,48 +546,78 @@
     <section class="news-section">
       <h2>Public News, DDS Updates & Community Events</h2>
       <p>
-        This section is for public updates connected to DDS, Regional Centers, disability services, and community events. ESS may use this area to share general public news, event reminders, awareness days, and opportunities that may be helpful or meaningful for participants and families.
+        These links open live public pages that are maintained by DDS, Regional Centers, Los Angeles County, or community organizations. ESS does not need to manually update each event listing because the linked pages update from their original sources.
       </p>
 
       <div class="news-grid">
-        <div class="news-card">
+        <a class="news-card" href="https://www.dds.ca.gov/dds-events/" target="_blank" rel="noopener noreferrer">
+          <div class="news-icon">📅</div>
+          <strong>DDS Events Calendar</strong>
+          <span>
+            View upcoming DDS trainings, meetings, community events, SDP events, and other public developmental services updates.
+          </span>
+          <div class="link-pill">Open live DDS events →</div>
+        </a>
+
+        <a class="news-card" href="https://www.dds.ca.gov/category/news-releases/" target="_blank" rel="noopener noreferrer">
           <div class="news-icon">🏛️</div>
-          <strong>DDS Public Updates</strong>
+          <strong>DDS News Releases</strong>
           <span>
-            General public updates from the Department of Developmental Services, including announcements, community information, program updates, and public meetings.
+            View public DDS news releases, statewide announcements, program updates, grants, and developmental services information.
           </span>
-        </div>
+          <div class="link-pill">Open DDS news →</div>
+        </a>
 
-        <div class="news-card">
+        <a class="news-card" href="https://www.elarc.org/About-Us/Events-Calendar-True" target="_blank" rel="noopener noreferrer">
           <div class="news-icon">🤝</div>
-          <strong>Regional Center Events</strong>
+          <strong>ELARC Events Calendar</strong>
           <span>
-            Public events or announcements shared by Regional Centers, including workshops, fairs, trainings, family events, or community activities.
+            View Eastern Los Angeles Regional Center events, meetings, trainings, and community activities.
           </span>
-        </div>
+          <div class="link-pill">Open ELARC events →</div>
+        </a>
 
-        <div class="news-card">
-          <div class="news-icon">🌎</div>
-          <strong>Community Awareness Events</strong>
+        <a class="news-card" href="https://www.sgprc.org/news-events/event-calendar/" target="_blank" rel="noopener noreferrer">
+          <div class="news-icon">🌟</div>
+          <strong>SGPRC Events Calendar</strong>
           <span>
-            Public events connected to inclusion, disability awareness, Earth Day, health, safety, recreation, and community participation.
+            View San Gabriel/Pomona Regional Center events, trainings, family activities, provider meetings, and community events.
           </span>
-        </div>
+          <div class="link-pill">Open SGPRC events →</div>
+        </a>
+
+        <a class="news-card" href="https://ad.lacounty.gov/calendar/" target="_blank" rel="noopener noreferrer">
+          <div class="news-icon">🌎</div>
+          <strong>LA County Aging & Disabilities Calendar</strong>
+          <span>
+            View public Los Angeles County events, outreach activities, community engagement opportunities, and disability-related calendar updates.
+          </span>
+          <div class="link-pill">Open LA County calendar →</div>
+        </a>
+
+        <a class="news-card" href="https://dmh.lacounty.gov/our-services/developmental-disabilities/regional-centers/" target="_blank" rel="noopener noreferrer">
+          <div class="news-icon">🧭</div>
+          <strong>LA County Regional Center Event Links</strong>
+          <span>
+            View a public list of Regional Center calendar and event links for Los Angeles County, including multiple Regional Centers.
+          </span>
+          <div class="link-pill">Open RC calendar list →</div>
+        </a>
       </div>
     </section>
 
     <section class="wide-grid">
       <div class="info-card">
-        <h2>Examples of Public Event Topics</h2>
+        <h2>Live Public Event Sources</h2>
         <p>
-          ESS may share information about public DDS-related events, Regional Center events, Earth Day activities, disability awareness events, community resource fairs, safety workshops, transportation trainings, and recreation opportunities that are open to participants or families.
+          Participants and families can use the clickable cards above to check real public events, DDS updates, Regional Center calendars, trainings, resource fairs, community workshops, awareness events, and disability-related opportunities directly from the original source.
         </p>
       </div>
 
       <div class="info-card">
         <h2>Event Details May Change</h2>
         <p>
-          Dates, locations, and event details may change depending on participant needs, scheduling, transportation, staffing, safety, weather, ticket availability, and family coordination. Final event details will always be shared before the event.
+          Dates, locations, and event details may change depending on participant needs, scheduling, transportation, staffing, safety, weather, ticket availability, and family coordination. Final ESS event details will always be shared before the event.
         </p>
       </div>
     </section>
