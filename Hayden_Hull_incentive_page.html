@@ -1,1 +1,907 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hayden's Incentive Page</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --ink:#10233a;
+      --muted:#5f7187;
+      --line:#dbe4ee;
+      --brand:#1f5fa8;
+      --brand-2:#4f8fe0;
+      --success:#1f9d55;
+      --success-2:#51c97f;
+      --warn:#f59e0b;
+      --danger:#c62828;
+      --shadow:0 12px 35px rgba(16,35,58,.10);
+      --radius:22px;
+    }
 
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,#eef4fb 0%, #f8fbff 100%);
+      color:var(--ink);
+    }
+
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:28px 18px 48px;
+    }
+
+    .hero{
+      background:linear-gradient(135deg,var(--brand),var(--brand-2));
+      color:#fff;
+      border-radius:30px;
+      padding:32px 26px;
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+      min-height:320px;
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.14), transparent 24%),
+        radial-gradient(circle at 80% 18%, rgba(255,255,255,.12), transparent 18%),
+        radial-gradient(circle at 85% 85%, rgba(255,255,255,.09), transparent 20%);
+      pointer-events:none;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:220px;
+      height:220px;
+      right:-40px;
+      top:-40px;
+      border-radius:50%;
+      background:rgba(255,255,255,.12);
+    }
+
+    .hero-inner{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:20px;
+      position:relative;
+      z-index:2;
+    }
+
+    .hero-copy{
+      max-width:760px;
+      flex:1 1 auto;
+    }
+
+    .hero h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem,4vw,3rem);
+      line-height:1.05;
+    }
+
+    .hero p{
+      margin:0;
+      max-width:720px;
+      font-size:1.05rem;
+      line-height:1.6;
+      color:rgba(255,255,255,.95);
+    }
+
+    .hero-photo{
+      width:128px;
+      min-width:128px;
+      height:128px;
+      border-radius:24px;
+      overflow:hidden;
+      border:4px solid rgba(255,255,255,.85);
+      box-shadow:0 12px 24px rgba(0,0,0,.18);
+      background:rgba(255,255,255,.15);
+      backdrop-filter:blur(6px);
+    }
+
+    .hero-photo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .hero-badges{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .badge{
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.22);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:.95rem;
+      backdrop-filter:blur(4px);
+    }
+
+    .hero-progress{
+      margin-top:22px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.24);
+      border-radius:24px;
+      padding:18px;
+      backdrop-filter:blur(8px);
+      box-shadow:0 10px 22px rgba(0,0,0,.10);
+      position:relative;
+      overflow:hidden;
+      animation:pulseCard 2.6s infinite ease-in-out;
+    }
+
+    .hero-progress::before{
+      content:"";
+      position:absolute;
+      inset:-20%;
+      background:radial-gradient(circle, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 60%);
+      opacity:.35;
+      animation:pulseGlow 2.6s infinite ease-in-out;
+      pointer-events:none;
+    }
+
+    .hero-progress-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+      position:relative;
+      z-index:1;
+    }
+
+    .hero-progress-label{
+      font-weight:900;
+      font-size:1.15rem;
+      letter-spacing:.2px;
+    }
+
+    .hero-progress-value{
+      font-weight:900;
+      font-size:1.15rem;
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.26);
+      padding:8px 12px;
+      border-radius:999px;
+      white-space:nowrap;
+      position:relative;
+      z-index:1;
+    }
+
+    .bar{
+      width:100%;
+      height:24px;
+      border-radius:999px;
+      background:rgba(255,255,255,.22);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.28);
+      position:relative;
+      z-index:1;
+    }
+
+    .fill{
+      width:0%;
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,#ffe66d,#ffca3a,#8ce99a,#51c97f);
+      transition:width .3s ease;
+      box-shadow:0 0 24px rgba(255,255,255,.35) inset;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .fill::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.35) 45%, transparent 100%);
+      transform:translateX(-100%);
+      animation:shine 2.8s infinite linear;
+    }
+
+    .hero-progress-note{
+      margin-top:10px;
+      font-size:.95rem;
+      color:rgba(255,255,255,.95);
+      line-height:1.5;
+      font-weight:600;
+      position:relative;
+      z-index:1;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:20px;
+      margin-top:22px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
+
+    .card h2{
+      margin:0 0 12px;
+      font-size:1.35rem;
+    }
+
+    .sub{
+      color:var(--muted);
+      margin:0 0 18px;
+      line-height:1.6;
+    }
+
+    .goal-list,
+    .reward-list,
+    .step-list,
+    .admin-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .item{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      background:#fbfdff;
+    }
+
+    .item strong{
+      display:block;
+      font-size:1rem;
+      margin-bottom:6px;
+    }
+
+    .category-title{
+      margin:18px 0 10px;
+      font-size:1rem;
+      font-weight:900;
+      color:var(--brand);
+      text-transform:uppercase;
+      letter-spacing:.6px;
+    }
+
+    .points-box{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:16px;
+    }
+
+    .points{
+      background:linear-gradient(180deg,#f8fbff,#eef5ff);
+      border:1px solid #d7e6fb;
+      border-radius:18px;
+      padding:18px 14px;
+      text-align:center;
+    }
+
+    .points .num{
+      display:block;
+      font-size:2rem;
+      font-weight:800;
+      color:var(--brand);
+      line-height:1;
+      margin-bottom:8px;
+    }
+
+    .reward-tag{
+      display:inline-block;
+      font-size:.82rem;
+      font-weight:800;
+      color:#8a5a00;
+      background:#fff5db;
+      border:1px solid #f4df9b;
+      padding:5px 9px;
+      border-radius:999px;
+      margin-bottom:8px;
+    }
+
+    .warning-box{
+      margin-top:18px;
+      background:linear-gradient(180deg,#fff7f7,#fff1f1);
+      border:2px solid #f2b6b6;
+      border-radius:20px;
+      padding:18px;
+      box-shadow:0 6px 20px rgba(198,40,40,.08);
+    }
+
+    .warning-box h3{
+      margin:0 0 8px;
+      color:var(--danger);
+      font-size:1.05rem;
+    }
+
+    .warning-box p{
+      margin:0;
+      line-height:1.65;
+      color:#6d1d1d;
+      font-weight:700;
+    }
+
+    .footer-note{
+      margin-top:20px;
+      font-size:.96rem;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .check{
+      color:var(--success);
+      font-weight:800;
+    }
+
+    .admin-section{
+      margin-top:22px;
+    }
+
+    .admin-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .admin-panel{
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:18px;
+      background:#fbfdff;
+    }
+
+    .admin-panel label{
+      display:block;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .admin-panel input{
+      width:100%;
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid #cfdbe8;
+      font:inherit;
+      margin-bottom:12px;
+    }
+
+    .btn-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:4px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      font:inherit;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .btn-primary{
+      background:var(--brand);
+      color:#fff;
+    }
+
+    .btn-secondary{
+      background:#eaf2ff;
+      color:var(--brand);
+      border:1px solid #cfe0fb;
+    }
+
+    .btn-danger{
+      background:#fff1f1;
+      color:var(--danger);
+      border:1px solid #efc5c5;
+    }
+
+    .admin-note{
+      margin-top:12px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:.94rem;
+    }
+
+    .locked-box{
+      background:#f8fbff;
+      border:1px dashed #b7cbe3;
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:10px;
+    }
+
+    @keyframes pulseCard{
+      0%{
+        transform:scale(1);
+        box-shadow:0 10px 22px rgba(0,0,0,.10);
+      }
+      50%{
+        transform:scale(1.01);
+        box-shadow:0 14px 30px rgba(255,255,255,.12), 0 12px 26px rgba(0,0,0,.12);
+      }
+      100%{
+        transform:scale(1);
+        box-shadow:0 10px 22px rgba(0,0,0,.10);
+      }
+    }
+
+    @keyframes pulseGlow{
+      0%{
+        transform:scale(.92);
+        opacity:.18;
+      }
+      50%{
+        transform:scale(1.06);
+        opacity:.42;
+      }
+      100%{
+        transform:scale(.92);
+        opacity:.18;
+      }
+    }
+
+    @keyframes shine{
+      0%{
+        transform:translateX(-100%);
+      }
+      100%{
+        transform:translateX(180%);
+      }
+    }
+
+    @media (max-width:900px){
+      .grid,
+      .admin-grid{
+        grid-template-columns:1fr;
+      }
+
+      .points-box{
+        grid-template-columns:1fr;
+      }
+
+      .hero{
+        padding:26px 20px;
+      }
+
+      .hero-inner{
+        flex-direction:column-reverse;
+        align-items:flex-start;
+      }
+
+      .hero-photo{
+        width:96px;
+        min-width:96px;
+        height:96px;
+        border-radius:20px;
+      }
+
+      .hero-progress-top{
+        align-items:flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <h1>Hayden's Incentive Page</h1>
+          <p>
+            Build independence, stay consistent in college, complete responsibilities at home, show respect, and keep moving forward. Every point is earned through real effort, follow-through, and positive choices.
+          </p>
+
+          <div class="hero-badges">
+            <span class="badge">🎓 College Progress</span>
+            <span class="badge">📚 Homework</span>
+            <span class="badge">🏠 Household Responsibility</span>
+            <span class="badge">🤝 Respect</span>
+            <span class="badge">🎯 ILS Goals</span>
+          </div>
+
+          <div class="hero-progress">
+            <div class="hero-progress-top">
+              <div class="hero-progress-label">🚀 Current Progress</div>
+              <div class="hero-progress-value" id="heroPointDisplay">0 / 120 points</div>
+            </div>
+            <div class="bar">
+              <div class="fill"></div>
+            </div>
+            <div class="hero-progress-note">
+              Keep stacking points through school effort, respectful choices, household responsibility, and ILS follow-through. Big rewards take consistency over time 💪
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-photo">
+          <img src="Hayden%20Profile%20Pic.jpg" alt="Hayden profile photo" />
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>How Hayden Earns Points</h2>
+        <p class="sub">
+          This system is designed to reward consistent effort over time, not quick wins. Points are earned by showing maturity, responsibility, respect, school effort, and active progress in ILS.
+        </p>
+
+        <div class="category-title">College & School Responsibility</div>
+        <div class="goal-list">
+          <div class="item">
+            <strong>+1 Point — Prepared for School</strong>
+            Shows up ready for class with needed materials, a charged device if needed, and a cooperative attitude.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Attends Class as Expected</strong>
+            Follows his school schedule, attends class, and avoids unnecessary absences or skipping.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Completes Homework or Class Assignments</strong>
+            Works on homework, turns in assignments, studies, or completes required class tasks.
+          </div>
+          <div class="item">
+            <strong>+3 Points — Strong School Follow-Through</strong>
+            Stays consistent with school responsibilities, asks for help when needed, and shows improvement with college expectations.
+          </div>
+        </div>
+
+        <div class="category-title">Respect & Personal Responsibility</div>
+        <div class="goal-list">
+          <div class="item">
+            <strong>+1 Point — Respectful Communication</strong>
+            Speaks respectfully, listens when others are talking, and avoids rude or dismissive responses.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Accepts Redirection Calmly</strong>
+            Responds appropriately when corrected, reminded, or redirected by family, staff, or school personnel.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Handles Frustration Appropriately</strong>
+            Uses calm words, takes a break, asks for help, or redirects instead of arguing or shutting down.
+          </div>
+          <div class="item">
+            <strong>+3 Points — Shows Maturity in a Difficult Moment</strong>
+            Makes a positive choice during a frustrating situation and avoids escalating the problem.
+          </div>
+        </div>
+
+        <div class="category-title">Household Work & Taking Initiative</div>
+        <div class="goal-list">
+          <div class="item">
+            <strong>+1 Point — Completes a Basic Chore</strong>
+            Completes a simple household task such as taking out trash, cleaning up after himself, or putting items away.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Does a Chore Without Being Asked Multiple Times</strong>
+            Follows through after a reminder or completes the task without repeated prompting.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Takes Initiative Around the House</strong>
+            Notices something that needs to be done and helps with it, such as wiping a counter, picking up trash, organizing an area, or helping with laundry.
+          </div>
+          <div class="item">
+            <strong>+3 Points — Shows Consistent Household Responsibility</strong>
+            Completes chores, keeps his area cleaner, and shows that he is building stronger independent living habits at home.
+          </div>
+        </div>
+
+        <div class="category-title">ILS Progress</div>
+        <div class="goal-list">
+          <div class="item">
+            <strong>+1 Point — Showing Up Ready</strong>
+            Arrives on time, participates, and starts session with a cooperative attitude.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Active Participation in ILS</strong>
+            Stays engaged in teaching, answers questions, and puts in visible effort.
+          </div>
+          <div class="item">
+            <strong>+2 Points — Completing an ILS Task</strong>
+            Finishes an assigned activity such as budgeting, planning, communication practice, school planning, household responsibility, or community skill work.
+          </div>
+          <div class="item">
+            <strong>+3 Points — Strong Follow-Through</strong>
+            Applies the skill outside of session, remembers expectations, or demonstrates improved decision-making.
+          </div>
+        </div>
+
+        <div class="points-box">
+          <div class="points">
+            <span class="num">40</span>
+            Small reward level
+          </div>
+          <div class="points">
+            <span class="num">75</span>
+            Medium reward level
+          </div>
+          <div class="points">
+            <span class="num">120</span>
+            Major reward level
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <h3>Important Point Policy</h3>
+          <p>
+            Family and ESS staff have full control to add, deny, adjust, or remove points based on Hayden’s performance, behavior, follow-through, honesty, respect, school effort, household responsibility, safety, and overall participation. Points are earned, not handed out freely.
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Reward Menu</h2>
+        <p class="sub">
+          Rewards are meant to motivate long-term consistency. Larger rewards require sustained effort over time.
+        </p>
+
+        <div class="reward-list">
+          <div class="item">
+            <span class="reward-tag">40 Points</span>
+            <strong>Small Preferred Reward</strong>
+            A simple approved incentive such as a snack, drink, small item, or another basic preferred reward.
+          </div>
+
+          <div class="item">
+            <span class="reward-tag">75 Points</span>
+            <strong>$25 Raffle Entry</strong>
+            Hayden earns entry into a $25 raffle with fellow ESS clients. Winning is not guaranteed, but entry is earned through consistent positive effort.
+          </div>
+
+          <div class="item">
+            <span class="reward-tag">120 Points</span>
+            <strong>$100 Gift Card</strong>
+            Major reward earned only through steady, respectful, responsible, and consistent progress over time.
+          </div>
+        </div>
+
+        <h2 style="margin-top:22px;">Success Focus</h2>
+        <div class="step-list">
+          <div class="item"><span class="check">✔</span> Attend college classes consistently</div>
+          <div class="item"><span class="check">✔</span> Complete homework and school assignments</div>
+          <div class="item"><span class="check">✔</span> Communicate respectfully with family and staff</div>
+          <div class="item"><span class="check">✔</span> Complete chores and help around the house</div>
+          <div class="item"><span class="check">✔</span> Take initiative without waiting to be told every time</div>
+          <div class="item"><span class="check">✔</span> Stay engaged in ILS and complete tasks</div>
+        </div>
+
+        <p class="footer-note">
+          This page is meant to reinforce school consistency, household responsibility, respectful communication, stronger decision-making, and long-term independence skills.
+        </p>
+      </div>
+    </section>
+
+    <section class="card admin-section" id="admin">
+      <h2>Admin Point Entry</h2>
+      <p class="sub">This section is locked. Enter the admin PIN to update Hayden's points.</p>
+
+      <div class="admin-grid">
+        <div class="admin-panel">
+          <div id="pinLockWrap" class="locked-box">
+            <label for="pinInput">Admin PIN</label>
+            <input id="pinInput" type="password" inputmode="numeric" placeholder="Enter admin PIN" />
+            <div class="btn-row">
+              <button class="btn btn-primary" id="unlockBtn" type="button">Unlock Admin</button>
+            </div>
+            <p class="admin-note" id="pinMessage">Only authorized staff can edit points.</p>
+          </div>
+
+          <div id="adminControls" style="display:none; margin-top:14px;">
+            <div class="admin-list">
+              <div>
+                <label for="pointInput">Enter total points</label>
+                <input id="pointInput" type="number" min="0" step="1" placeholder="Enter Hayden's total points" />
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" id="savePointsBtn" type="button">Save Points</button>
+              <button class="btn btn-secondary" id="addOneBtn" type="button">+1 Point</button>
+              <button class="btn btn-secondary" id="addFiveBtn" type="button">+5 Points</button>
+              <button class="btn btn-danger" id="minusOneBtn" type="button">-1 Point</button>
+              <button class="btn btn-secondary" id="resetPointsBtn" type="button">Reset</button>
+              <button class="btn btn-secondary" id="lockBtn" type="button">Lock Admin</button>
+            </div>
+
+            <p class="admin-note">
+              This updates the visible progress bar and point total on the page. Reward targets are 40, 75, and 120 points.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const adminPin = '8523';
+    const targetPoints = 120;
+    const defaultPoints = 0;
+
+    const SUPABASE_URL = 'https://bqanjupmcgydvmfgvutx.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_J6Y49EQarV5pAzhOdokl7w_GVlPoPSb';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const fill = document.querySelector('.fill');
+    const pointDisplay = document.getElementById('heroPointDisplay');
+    const input = document.getElementById('pointInput');
+    const saveBtn = document.getElementById('savePointsBtn');
+    const addOneBtn = document.getElementById('addOneBtn');
+    const addFiveBtn = document.getElementById('addFiveBtn');
+    const minusOneBtn = document.getElementById('minusOneBtn');
+    const resetBtn = document.getElementById('resetPointsBtn');
+    const pinInput = document.getElementById('pinInput');
+    const unlockBtn = document.getElementById('unlockBtn');
+    const lockBtn = document.getElementById('lockBtn');
+    const pinMessage = document.getElementById('pinMessage');
+    const adminControls = document.getElementById('adminControls');
+
+    let haydenRowId = null;
+    let currentPoints = defaultPoints;
+
+    function renderPoints(points){
+      const safePoints = Math.max(0, Math.floor(Number(points) || 0));
+      currentPoints = safePoints;
+
+      if(input){
+        input.value = safePoints;
+      }
+
+      pointDisplay.textContent = safePoints + ' / ' + targetPoints + ' points';
+      const percent = Math.min((safePoints / targetPoints) * 100, 100);
+      fill.style.width = percent + '%';
+    }
+
+    async function loadHaydenPoints(){
+      const { data, error } = await supabaseClient
+        .from('participant_points')
+        .select('id, name, points, updated_at')
+        .eq('name', 'Hayden')
+        .order('updated_at', { ascending:false })
+        .limit(1);
+
+      if(error){
+        console.error('Error loading Hayden points:', error);
+        renderPoints(defaultPoints);
+        return;
+      }
+
+      if(data && data.length){
+        haydenRowId = data[0].id;
+        renderPoints(data[0].points);
+      } else {
+        renderPoints(defaultPoints);
+      }
+    }
+
+    async function setPoints(points){
+      const safePoints = Math.max(0, Math.floor(Number(points) || 0));
+
+      if(!haydenRowId){
+        await loadHaydenPoints();
+      }
+
+      if(!haydenRowId){
+        console.error('Hayden row not found in participant_points table.');
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('participant_points')
+        .update({
+          points: safePoints,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', haydenRowId);
+
+      if(error){
+        console.error('Error updating Hayden points:', error);
+        return;
+      }
+
+      renderPoints(safePoints);
+    }
+
+    function unlockAdmin(){
+      if(pinInput.value === adminPin){
+        adminControls.style.display = 'block';
+        pinMessage.textContent = 'Admin unlocked.';
+        pinMessage.style.color = 'var(--success)';
+        pinInput.value = '';
+        input.value = currentPoints;
+      } else {
+        adminControls.style.display = 'none';
+        pinMessage.textContent = 'Incorrect PIN.';
+        pinMessage.style.color = '#b42318';
+        pinInput.value = '';
+      }
+    }
+
+    function lockAdmin(){
+      adminControls.style.display = 'none';
+      pinMessage.textContent = 'Only authorized staff can edit points.';
+      pinMessage.style.color = 'var(--muted)';
+      pinInput.value = '';
+    }
+
+    function subscribeToHaydenPoints(){
+      supabaseClient
+        .channel('participant-points-live-hayden')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'participant_points'
+          },
+          (payload) => {
+            if(payload.new && payload.new.name === 'Hayden'){
+              haydenRowId = payload.new.id;
+              renderPoints(payload.new.points);
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    saveBtn.addEventListener('click', async () => {
+      await setPoints(input.value);
+    });
+
+    addOneBtn.addEventListener('click', async () => {
+      await setPoints(currentPoints + 1);
+    });
+
+    addFiveBtn.addEventListener('click', async () => {
+      await setPoints(currentPoints + 5);
+    });
+
+    minusOneBtn.addEventListener('click', async () => {
+      await setPoints(currentPoints - 1);
+    });
+
+    resetBtn.addEventListener('click', async () => {
+      await setPoints(0);
+    });
+
+    unlockBtn.addEventListener('click', unlockAdmin);
+    pinInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') unlockAdmin();
+    });
+    lockBtn.addEventListener('click', lockAdmin);
+
+    renderPoints(defaultPoints);
+    lockAdmin();
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadHaydenPoints();
+      subscribeToHaydenPoints();
+    });
+  </script>
+</body>
+</html>
