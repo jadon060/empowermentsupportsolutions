@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ESS Events!</title>
+
+  <style>
+    :root{
+      --bg:#f7f9ff;
+      --ink:#10233a;
+      --muted:#5f7187;
+      --card:#ffffff;
+      --line:#dbe4ee;
+      --blue:#1f5fa8;
+      --blue2:#4f8fe0;
+      --pink:#ff5fa2;
+      --purple:#7c3aed;
+      --orange:#f97316;
+      --green:#16a34a;
+      --yellow:#facc15;
+      --red:#ef4444;
+      --shadow:0 14px 35px rgba(16,35,58,.12);
+      --radius:24px;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255,95,162,.16), transparent 28%),
+        radial-gradient(circle at 88% 18%, rgba(79,143,224,.20), transparent 24%),
+        radial-gradient(circle at 80% 90%, rgba(250,204,21,.18), transparent 25%),
+        linear-gradient(180deg,#eef5ff 0%, #fbfdff 100%);
+      color:var(--ink);
+    }
+
+    .wrap{
+      max-width:1120px;
+      margin:0 auto;
+      padding:28px 18px 56px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:32px;
+      background:linear-gradient(135deg,#1f5fa8,#7c3aed,#ff5fa2);
+      color:#fff;
+      padding:38px 28px;
+      box-shadow:var(--shadow);
+      min-height:300px;
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 15% 22%, rgba(255,255,255,.20), transparent 23%),
+        radial-gradient(circle at 84% 20%, rgba(255,255,255,.18), transparent 22%),
+        radial-gradient(circle at 78% 82%, rgba(255,255,255,.14), transparent 24%);
+      pointer-events:none;
+    }
+
+    .hero::after{
+      content:"🎉";
+      position:absolute;
+      right:28px;
+      top:24px;
+      font-size:6rem;
+      opacity:.22;
+      transform:rotate(10deg);
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:2;
+      max-width:820px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.28);
+      padding:9px 14px;
+      border-radius:999px;
+      font-weight:900;
+      margin-bottom:16px;
+      backdrop-filter:blur(6px);
+    }
+
+    h1{
+      margin:0 0 12px;
+      font-size:clamp(2.4rem,6vw,4.6rem);
+      line-height:.95;
+      letter-spacing:-1.5px;
+    }
+
+    .hero p{
+      margin:0;
+      font-size:1.08rem;
+      line-height:1.7;
+      color:rgba(255,255,255,.95);
+      max-width:760px;
+    }
+
+    .hero-tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:22px;
+    }
+
+    .tag{
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.24);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:.94rem;
+      backdrop-filter:blur(4px);
+    }
+
+    .intro-card{
+      margin-top:22px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:24px;
+    }
+
+    .intro-card h2{
+      margin:0 0 10px;
+      font-size:1.55rem;
+    }
+
+    .intro-card p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.75;
+      font-size:1rem;
+    }
+
+    .section-title{
+      margin:34px 0 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:1.8rem;
+    }
+
+    .section-title span{
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .events-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:18px;
+    }
+
+    .event-card{
+      position:relative;
+      overflow:hidden;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:24px;
+      min-height:360px;
+    }
+
+    .event-card::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      right:0;
+      height:10px;
+    }
+
+    .event-card.birthday::before{
+      background:linear-gradient(90deg,#ff5fa2,#facc15);
+    }
+
+    .event-card.christmas::before{
+      background:linear-gradient(90deg,#16a34a,#ef4444);
+    }
+
+    .event-card.outing::before{
+      background:linear-gradient(90deg,#4f8fe0,#7c3aed);
+    }
+
+    .event-icon{
+      width:64px;
+      height:64px;
+      border-radius:22px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:2rem;
+      margin-bottom:16px;
+      box-shadow:0 10px 22px rgba(16,35,58,.10);
+    }
+
+    .birthday .event-icon{
+      background:#fff0f7;
+    }
+
+    .christmas .event-icon{
+      background:#eefcf2;
+    }
+
+    .outing .event-icon{
+      background:#eef5ff;
+    }
+
+    .event-card h3{
+      margin:0 0 10px;
+      font-size:1.35rem;
+      line-height:1.2;
+    }
+
+    .event-date{
+      display:inline-block;
+      background:#f8fafc;
+      border:1px solid #e5e7eb;
+      color:#334155;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:.86rem;
+      font-weight:900;
+      margin-bottom:14px;
+    }
+
+    .event-card p{
+      margin:0 0 16px;
+      color:var(--muted);
+      line-height:1.65;
+    }
+
+    .mini-list{
+      display:grid;
+      gap:10px;
+      margin-top:16px;
+    }
+
+    .mini-item{
+      background:#fbfdff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      color:#26364b;
+      line-height:1.45;
+      font-size:.95rem;
+    }
+
+    .mini-item strong{
+      color:var(--ink);
+    }
+
+    .wide-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-top:18px;
+    }
+
+    .info-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:24px;
+    }
+
+    .info-card h2{
+      margin:0 0 10px;
+      font-size:1.45rem;
+    }
+
+    .info-card p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .notice{
+      margin-top:22px;
+      background:linear-gradient(135deg,#fff7ed,#fffbea);
+      border:1px solid #fed7aa;
+      border-radius:24px;
+      padding:22px;
+      box-shadow:0 12px 28px rgba(249,115,22,.10);
+    }
+
+    .notice h2{
+      margin:0 0 10px;
+      color:#9a3412;
+      font-size:1.35rem;
+    }
+
+    .notice p{
+      margin:0;
+      color:#7c2d12;
+      line-height:1.7;
+      font-weight:700;
+    }
+
+    .news-section{
+      margin-top:22px;
+      background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+      border:1px solid #dbeafe;
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:26px;
+    }
+
+    .news-section h2{
+      margin:0 0 10px;
+      font-size:1.55rem;
+    }
+
+    .news-section p{
+      margin:0 0 18px;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .news-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+    }
+
+    .news-card{
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:20px;
+      padding:18px;
+      min-height:170px;
+    }
+
+    .news-card .news-icon{
+      font-size:1.8rem;
+      margin-bottom:8px;
+    }
+
+    .news-card strong{
+      display:block;
+      font-size:1.03rem;
+      margin-bottom:8px;
+    }
+
+    .news-card span{
+      display:block;
+      color:var(--muted);
+      line-height:1.55;
+      font-size:.95rem;
+    }
+
+    .footer{
+      margin-top:26px;
+      text-align:center;
+      color:var(--muted);
+      line-height:1.6;
+      font-weight:700;
+    }
+
+    .footer strong{
+      color:var(--ink);
+    }
+
+    @media (max-width:950px){
+      .events-grid,
+      .wide-grid,
+      .news-grid{
+        grid-template-columns:1fr;
+      }
+
+      .event-card{
+        min-height:auto;
+      }
+    }
+
+    @media (max-width:620px){
+      .wrap{
+        padding:20px 14px 44px;
+      }
+
+      .hero{
+        padding:30px 20px;
+        border-radius:26px;
+      }
+
+      .hero::after{
+        font-size:4.4rem;
+        right:16px;
+        top:18px;
+      }
+
+      .intro-card,
+      .info-card,
+      .news-section,
+      .notice{
+        padding:20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+
+    <section class="hero">
+      <div class="hero-content">
+        <div class="eyebrow">✨ Empowerment Support Solutions</div>
+        <h1>ESS Events!</h1>
+        <p>
+          ESS events are designed to celebrate participants, build community, create positive memories, and give each person something exciting to look forward to. Events may include birthday celebrations, holiday activities, annual outings, community updates, and public events connected to Regional Centers and DDS.
+        </p>
+
+        <div class="hero-tags">
+          <span class="tag">🎂 Birthdays</span>
+          <span class="tag">🎄 Holidays</span>
+          <span class="tag">🎢 Annual Outings</span>
+          <span class="tag">📰 Public News</span>
+          <span class="tag">🤝 Community Connection</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro-card">
+      <h2>What this page is for</h2>
+      <p>
+        This page gives participants and families a simple place to view upcoming ESS event ideas, annual traditions, holiday plans, participant celebrations, and public updates connected to DDS, Regional Centers, and disability-related community events. Details may change each year based on participant interest, safety planning, weather, transportation, staffing, and family coordination.
+      </p>
+    </section>
+
+    <div class="section-title">
+      <h2>Featured ESS Events</h2>
+      <span>Fun, safe, and participant-centered 🎉</span>
+    </div>
+
+    <section class="events-grid">
+
+      <article class="event-card birthday">
+        <div class="event-icon">🎂</div>
+        <h3>Participant Birthday Celebration</h3>
+        <div class="event-date">Celebrated during the participant’s birthday month</div>
+        <p>
+          ESS celebrates participant birthdays in a meaningful and personal way. The goal is to make each participant feel valued, included, and appreciated.
+        </p>
+
+        <div class="mini-list">
+          <div class="mini-item">
+            <strong>Great lunch:</strong> The participant is treated to a special lunch at an approved restaurant or preferred food location.
+          </div>
+          <div class="mini-item">
+            <strong>Birthday gifts:</strong> The participant may receive thoughtful gifts based on their interests, needs, and preferences.
+          </div>
+          <div class="mini-item">
+            <strong>Personalized celebration:</strong> Each birthday celebration may look different depending on the participant’s comfort level, schedule, and family input.
+          </div>
+        </div>
+      </article>
+
+      <article class="event-card christmas">
+        <div class="event-icon">🎄</div>
+        <h3>Christmas Event Vote</h3>
+        <div class="event-date">Participant vote planned before the holiday season</div>
+        <p>
+          For Christmas, ESS will allow participants to vote on what type of holiday celebration they would prefer. This keeps the event participant-centered and gives everyone a voice.
+        </p>
+
+        <div class="mini-list">
+          <div class="mini-item">
+            <strong>Option 1:</strong> A Christmas party with food, activities, music, and time together as a group.
+          </div>
+          <div class="mini-item">
+            <strong>Option 2:</strong> A personalized gift basket made around each participant’s likes, needs, and interests.
+          </div>
+          <div class="mini-item">
+            <strong>Participant choice:</strong> ESS will collect participant votes and use the results to plan the holiday event.
+          </div>
+        </div>
+      </article>
+
+      <article class="event-card outing">
+        <div class="event-icon">🎢</div>
+        <h3>Annual Participant Outing</h3>
+        <div class="event-date">Planned once per year, usually during late fall or early winter</div>
+        <p>
+          The annual participant outing is a special ESS tradition where participants get the chance to enjoy a major community outing together, free of charge to participants.
+        </p>
+
+        <div class="mini-list">
+          <div class="mini-item">
+            <strong>Possible locations:</strong> Disneyland, Knott’s Berry Farm, Six Flags, museums, aquariums, or other major community attractions.
+          </div>
+          <div class="mini-item">
+            <strong>Changes yearly:</strong> The location may rotate each year so participants can experience different places over time.
+          </div>
+          <div class="mini-item">
+            <strong>No cost to participants:</strong> ESS plans these outings so participants can enjoy the experience without paying for admission.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <section class="notice">
+      <h2>Safety & Coordination Comes First</h2>
+      <p>
+        Before any ESS event or outing, participants and families will receive detailed instructions for safety, transportation, meeting times, food planning, supervision, emergency contacts, what to bring, what not to bring, and any other important coordination details. ESS will make sure participants and families understand the plan before the event takes place.
+      </p>
+    </section>
+
+    <section class="wide-grid">
+      <div class="info-card">
+        <h2>Participant-Centered Planning</h2>
+        <p>
+          ESS events are planned with participant choice in mind. Some participants may enjoy large group events, while others may prefer quieter, more personalized celebrations. ESS will consider comfort level, support needs, accessibility, transportation, family input, and each person’s preferences when planning events.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <h2>Family & Support Team Updates</h2>
+        <p>
+          Families and support teams may receive updates before events, including dates, locations, expectations, permission details when needed, and any safety notes. ESS will also provide reminders as events get closer so everyone has enough time to prepare.
+        </p>
+      </div>
+    </section>
+
+    <section class="news-section">
+      <h2>Public News, DDS Updates & Community Events</h2>
+      <p>
+        This section is for public updates connected to DDS, Regional Centers, disability services, and community events. ESS may use this area to share general public news, event reminders, awareness days, and opportunities that may be helpful or meaningful for participants and families.
+      </p>
+
+      <div class="news-grid">
+        <div class="news-card">
+          <div class="news-icon">🏛️</div>
+          <strong>DDS Public Updates</strong>
+          <span>
+            General public updates from the Department of Developmental Services, including announcements, community information, program updates, and public meetings.
+          </span>
+        </div>
+
+        <div class="news-card">
+          <div class="news-icon">🤝</div>
+          <strong>Regional Center Events</strong>
+          <span>
+            Public events or announcements shared by Regional Centers, including workshops, fairs, trainings, family events, or community activities.
+          </span>
+        </div>
+
+        <div class="news-card">
+          <div class="news-icon">🌎</div>
+          <strong>Community Awareness Events</strong>
+          <span>
+            Public events connected to inclusion, disability awareness, Earth Day, health, safety, recreation, and community participation.
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section class="wide-grid">
+      <div class="info-card">
+        <h2>Examples of Public Event Topics</h2>
+        <p>
+          ESS may share information about public DDS-related events, Regional Center events, Earth Day activities, disability awareness events, community resource fairs, safety workshops, transportation trainings, and recreation opportunities that are open to participants or families.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <h2>Event Details May Change</h2>
+        <p>
+          Dates, locations, and event details may change depending on participant needs, scheduling, transportation, staffing, safety, weather, ticket availability, and family coordination. Final event details will always be shared before the event.
+        </p>
+      </div>
+    </section>
+
+    <div class="footer">
+      <strong>ESS Events!</strong><br>
+      Celebrating participants, building community, and creating safe, meaningful experiences. ✨
+    </div>
+
+  </main>
+</body>
+</html>
