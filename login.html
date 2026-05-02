@@ -108,6 +108,8 @@
     // Root-level pages
     const FAMILY_PW = "08052023";   // -> /families.html
     const STAFF_PW  = "05041993";   // -> /staff.html
+    const HAYDEN_PW = "0715";       // -> /Hayden_Hull.html
+
     // Admin lives under /portal
     const ADMIN_PW  = "10301993";   // -> /portal/admin.html
 
@@ -121,6 +123,12 @@
       if(val === ADMIN_PW){
         try { localStorage.setItem("ESS_Admin_Login","true"); } catch(e){}
         location.href = "/portal/admin.html";
+        return;
+      }
+
+      // Hayden charting page
+      if(val === HAYDEN_PW){
+        location.href = "/Hayden_Hull.html";
         return;
       }
 
