@@ -434,24 +434,6 @@
       margin-bottom:10px;
     }
 
-    .save-status{
-      margin-top:12px;
-      font-weight:800;
-      line-height:1.5;
-    }
-
-    .save-status.success{
-      color:var(--success);
-    }
-
-    .save-status.error{
-      color:var(--danger);
-    }
-
-    .save-status.pending{
-      color:var(--brand);
-    }
-
     @keyframes pulseCard{
       0%{
         transform:scale(1);
@@ -748,8 +730,6 @@
             <p class="admin-note">
               This updates the visible progress bar and point total on the page. Reward targets are 40, 75, and 120 points.
             </p>
-
-            <p class="save-status" id="saveStatus"></p>
           </div>
         </div>
       </div>
@@ -761,8 +741,6 @@
     const adminPin = '8523';
     const targetPoints = 120;
     const defaultPoints = 0;
-
-    const PARTICIPANT_NAME = 'Hayden';
 
     const SUPABASE_URL = 'https://bqanjupmcgydvmfgvutx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_J6Y49EQarV5pAzhOdokl7w_GVlPoPSb';
@@ -782,98 +760,71 @@
     const lockBtn = document.getElementById('lockBtn');
     const pinMessage = document.getElementById('pinMessage');
     const adminControls = document.getElementById('adminControls');
-    const saveStatus = document.getElementById('saveStatus');
 
-    let currentPoints = defaultPoints;
     let haydenRowId = null;
-
-    function setSaveStatus(message, type){
-      if(!saveStatus) return;
-
-      saveStatus.textContent = message || '';
-      saveStatus.className = 'save-status';
-
-      if(type){
-        saveStatus.classList.add(type);
-      }
-    }
-
-    function cleanPoints(points){
-      return Math.max(0, Math.floor(Number(points) || 0));
-    }
+    let currentPoints = defaultPoints;
 
     function renderPoints(points){
-      const safePoints = cleanPoints(points);
+      const safePoints = Math.max(0, Math.floor(Number(points) || 0));
       currentPoints = safePoints;
 
       if(input){
         input.value = safePoints;
       }
 
-      if(pointDisplay){
-        pointDisplay.textContent = safePoints + ' / ' + targetPoints + ' points';
-      }
-
-      if(fill){
-        const percent = Math.min((safePoints / targetPoints) * 100, 100);
-        fill.style.width = percent + '%';
-      }
+      pointDisplay.textContent = safePoints + ' / ' + targetPoints + ' points';
+      const percent = Math.min((safePoints / targetPoints) * 100, 100);
+      fill.style.width = percent + '%';
     }
 
     async function loadHaydenPoints(){
       const { data, error } = await supabaseClient
         .from('participant_points')
         .select('id, name, points, updated_at')
-        .eq('name', PARTICIPANT_NAME)
-        .maybeSingle();
+        .eq('name', 'Hayden')
+        .order('updated_at', { ascending:false })
+        .limit(1);
 
       if(error){
         console.error('Error loading Hayden points:', error);
         renderPoints(defaultPoints);
-        setSaveStatus('Could not load saved points. Check Supabase table permissions.', 'error');
         return;
       }
 
-      if(data){
-        haydenRowId = data.id;
-        renderPoints(data.points);
+      if(data && data.length){
+        haydenRowId = data[0].id;
+        renderPoints(data[0].points);
       } else {
-        haydenRowId = null;
         renderPoints(defaultPoints);
       }
     }
 
-    async function savePointsToSupabase(points){
-      const safePoints = cleanPoints(points);
+    async function setPoints(points){
+      const safePoints = Math.max(0, Math.floor(Number(points) || 0));
 
-      setSaveStatus('Saving points...', 'pending');
-
-      const payload = {
-        name: PARTICIPANT_NAME,
-        points: safePoints,
-        updated_at: new Date().toISOString()
-      };
-
-      const { data, error } = await supabaseClient
-        .from('participant_points')
-        .upsert(payload, { onConflict: 'name' })
-        .select('id, name, points, updated_at')
-        .single();
-
-      if(error){
-        console.error('Error saving Hayden points:', error);
-        setSaveStatus('Points did not save. Check Supabase RLS/policies and make sure the name column is unique.', 'error');
-        return false;
+      if(!haydenRowId){
+        await loadHaydenPoints();
       }
 
-      haydenRowId = data.id;
-      renderPoints(data.points);
-      setSaveStatus('Saved successfully ✅', 'success');
-      return true;
-    }
+      if(!haydenRowId){
+        console.error('Hayden row not found in participant_points table.');
+        return;
+      }
 
-    async function setPoints(points){
-      await savePointsToSupabase(points);
+      const { error } = await supabaseClient
+        .from('participant_points')
+        .update({
+          points: safePoints,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', haydenRowId);
+
+      if(error){
+        console.error('Error updating Hayden points:', error);
+        return;
+      }
+
+      renderPoints(safePoints);
     }
 
     function unlockAdmin(){
@@ -883,7 +834,6 @@
         pinMessage.style.color = 'var(--success)';
         pinInput.value = '';
         input.value = currentPoints;
-        setSaveStatus('', '');
       } else {
         adminControls.style.display = 'none';
         pinMessage.textContent = 'Incorrect PIN.';
@@ -897,7 +847,6 @@
       pinMessage.textContent = 'Only authorized staff can edit points.';
       pinMessage.style.color = 'var(--muted)';
       pinInput.value = '';
-      setSaveStatus('', '');
     }
 
     function subscribeToHaydenPoints(){
@@ -906,21 +855,18 @@
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'UPDATE',
             schema: 'public',
-            table: 'participant_points',
-            filter: 'name=eq.' + PARTICIPANT_NAME
+            table: 'participant_points'
           },
           (payload) => {
-            if(payload.new && payload.new.name === PARTICIPANT_NAME){
+            if(payload.new && payload.new.name === 'Hayden'){
               haydenRowId = payload.new.id;
               renderPoints(payload.new.points);
             }
           }
         )
-        .subscribe((status) => {
-          console.log('Supabase realtime status:', status);
-        });
+        .subscribe();
     }
 
     saveBtn.addEventListener('click', async () => {
@@ -944,13 +890,9 @@
     });
 
     unlockBtn.addEventListener('click', unlockAdmin);
-
     pinInput.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter'){
-        unlockAdmin();
-      }
+      if(e.key === 'Enter') unlockAdmin();
     });
-
     lockBtn.addEventListener('click', lockAdmin);
 
     renderPoints(defaultPoints);
