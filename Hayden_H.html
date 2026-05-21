@@ -5,7 +5,7 @@
   <title>ESS • Daily SDP Log (Hayden)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    html,body{margin:0;padding:0;background:#f7f7fb;color:#0f172a}
+    html,body{margin:0;padding:0;background:radial-gradient(circle at top left,#eef6ff 0,#f7f7fb 34%,#f7f7fb 100%);color:#0f172a;font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;}
     *,*::before,*::after{box-sizing:border-box}
 
     /* ⬇️ staff reference card (bigger) */
@@ -20,19 +20,20 @@
     .about-card{
       background:#fff;
       border:1px solid #e5e7eb;
-      border-radius:14px;
-      padding:18px 20px 20px;
+      border-radius:22px;
+      padding:22px 24px 24px;
       display:flex;
       gap:16px;
       width:100%;
-      box-shadow:0 2px 10px rgba(0,0,0,0.04);
+      box-shadow:0 14px 32px rgba(15,23,42,0.07);
     }
     .about-avatar{
       width:96px;
       height:96px;
       border-radius:999px;
       object-fit:cover;
-      border:3px solid #eef2ff;
+      border:4px solid #eef6ff;
+      box-shadow:0 8px 20px rgba(31,95,168,0.14);
       background:#e5e7eb;
       flex:0 0 auto;
     }
@@ -65,6 +66,249 @@
       .about-wrap{padding:0 1rem;}
       .about-card{flex-direction:column;align-items:flex-start;}
       .about-avatar{width:80px;height:80px;}
+    }
+
+
+    /* 📊 Hayden logistics dashboard */
+    .logistics-wrap{
+      max-width:980px;
+      margin:0.9rem auto 0.9rem;
+      padding:0 1.5rem;
+    }
+    .logistics-card{
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(135deg,#ffffff 0%,#f8fbff 62%,#eef6ff 100%);
+      border:1px solid #dbe7f5;
+      border-radius:24px;
+      padding:24px;
+      box-shadow:0 16px 38px rgba(15,23,42,0.08);
+    }
+    .logistics-card::before{
+      content:"";
+      position:absolute;
+      width:180px;
+      height:180px;
+      right:-70px;
+      top:-80px;
+      border-radius:999px;
+      background:rgba(31,95,168,0.08);
+      pointer-events:none;
+    }
+    .logistics-card::after{
+      content:"";
+      position:absolute;
+      width:120px;
+      height:120px;
+      right:80px;
+      bottom:-75px;
+      border-radius:999px;
+      background:rgba(34,197,94,0.08);
+      pointer-events:none;
+    }
+    .logistics-header{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+      margin-bottom:18px;
+    }
+    .logistics-title h3{
+      margin:0;
+      font-size:1.35rem;
+      letter-spacing:-0.02em;
+      color:#0f172a;
+    }
+    .logistics-title p{
+      margin:5px 0 0;
+      color:#64748b;
+      font-size:.92rem;
+      line-height:1.4;
+    }
+    .logistics-status-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:800;
+      font-size:.9rem;
+      white-space:nowrap;
+      border:1px solid #bbf7d0;
+      background:#ecfdf5;
+      color:#14532d;
+      box-shadow:0 8px 18px rgba(34,197,94,0.13);
+    }
+    .logistics-grid{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .logistics-box{
+      position:relative;
+      overflow:hidden;
+      background:rgba(255,255,255,0.9);
+      border:1px solid #dbe7f5;
+      border-radius:18px;
+      padding:16px;
+      box-shadow:0 9px 22px rgba(15,23,42,0.055);
+    }
+    .logistics-box::after{
+      content:"";
+      position:absolute;
+      right:-25px;
+      top:-25px;
+      width:75px;
+      height:75px;
+      border-radius:999px;
+      background:rgba(79,143,224,0.10);
+    }
+    .logistics-label{
+      display:block;
+      color:#64748b;
+      font-size:.72rem;
+      font-weight:850;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      margin-bottom:9px;
+    }
+    .logistics-number{
+      display:block;
+      color:#0f172a;
+      font-size:1.85rem;
+      line-height:1;
+      letter-spacing:-0.04em;
+      font-weight:900;
+    }
+    .logistics-small{
+      display:block;
+      margin-top:7px;
+      color:#64748b;
+      font-size:.82rem;
+    }
+    .logistics-progress-wrap{
+      position:relative;
+      z-index:1;
+      background:rgba(255,255,255,0.88);
+      border:1px solid #dbe7f5;
+      border-radius:18px;
+      padding:16px;
+      margin-bottom:14px;
+      box-shadow:0 9px 22px rgba(15,23,42,0.045);
+    }
+    .progress-topline{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:11px;
+      font-weight:900;
+      color:#0f172a;
+    }
+    .progress-pill{
+      background:#eff6ff;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      border-radius:999px;
+      padding:6px 11px;
+      font-size:.82rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .fun-progress-bar{
+      position:relative;
+      height:24px;
+      background:#e8eef7;
+      border-radius:999px;
+      overflow:hidden;
+      box-shadow:inset 0 2px 5px rgba(15,23,42,0.13);
+    }
+    .fun-progress-fill{
+      position:relative;
+      height:100%;
+      width:0%;
+      min-width:0;
+      border-radius:999px;
+      background:linear-gradient(90deg,#1f5fa8 0%,#4f8fe0 55%,#22c55e 100%);
+      box-shadow:0 8px 18px rgba(31,95,168,0.24);
+      transition:width .45s ease;
+    }
+    .fun-progress-fill::after{
+      content:"✨";
+      position:absolute;
+      right:8px;
+      top:50%;
+      transform:translateY(-50%);
+      font-size:12px;
+    }
+    .progress-glow{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(110deg,transparent 0%,rgba(255,255,255,.34) 45%,transparent 70%);
+    }
+    .staff-breakdown{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .staff-mini-card{
+      background:rgba(255,255,255,0.9);
+      border:1px solid #dbe7f5;
+      border-radius:18px;
+      padding:16px;
+      box-shadow:0 9px 22px rgba(15,23,42,0.045);
+    }
+    .staff-mini-card span{
+      display:block;
+      color:#64748b;
+      font-weight:850;
+      font-size:.84rem;
+      margin-bottom:7px;
+    }
+    .staff-mini-card strong{
+      display:block;
+      color:#0f172a;
+      font-size:1.25rem;
+      font-weight:900;
+    }
+    .logistics-alert{
+      position:relative;
+      z-index:1;
+      border-radius:18px;
+      padding:15px 16px;
+      background:linear-gradient(135deg,#ecfdf5,#f7fee7);
+      border:1px solid #bbf7d0;
+      color:#14532d;
+      font-size:.95rem;
+      font-weight:750;
+      box-shadow:0 10px 22px rgba(34,197,94,0.08);
+    }
+    .manual-note{
+      margin-top:10px;
+      color:#64748b;
+      font-size:.78rem;
+      line-height:1.35;
+    }
+    @media (max-width:800px){
+      .logistics-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+      .staff-breakdown{grid-template-columns:1fr;}
+      .logistics-header{flex-direction:column;}
+    }
+    @media (max-width:700px){
+      .logistics-wrap{padding:0 1rem;}
+    }
+    @media (max-width:520px){
+      .logistics-grid{grid-template-columns:1fr;}
+      .progress-topline{flex-direction:column;align-items:flex-start;}
+      .logistics-card{padding:20px;}
     }
 
     /* 🔗 quick-link buttons */
@@ -187,6 +431,75 @@
       </div>
     </div>
   </div>
+</div>
+
+
+<!-- 📊 Hayden live logistics dashboard — placed directly under facesheet -->
+<div class="logistics-wrap">
+  <section class="logistics-card" aria-label="Hayden monthly logistics">
+    <div class="logistics-header">
+      <div class="logistics-title">
+        <h3>📊 Hayden Monthly Logistics</h3>
+        <p>Live visual tracking for Hayden’s approved ILS hours. Hours are controlled manually from the admin side.</p>
+      </div>
+      <div class="logistics-status-badge" id="logisticsStatusBadge">🟢 On Track</div>
+    </div>
+
+    <div class="logistics-grid">
+      <div class="logistics-box">
+        <span class="logistics-label">Approved</span>
+        <strong class="logistics-number" id="monthlyApprovedHours">40</strong>
+        <span class="logistics-small">monthly hours</span>
+      </div>
+
+      <div class="logistics-box">
+        <span class="logistics-label">Completed</span>
+        <strong class="logistics-number" id="completedHours">13</strong>
+        <span class="logistics-small">hours completed</span>
+      </div>
+
+      <div class="logistics-box">
+        <span class="logistics-label">Remaining</span>
+        <strong class="logistics-number" id="remainingHours">27</strong>
+        <span class="logistics-small">hours left this month</span>
+      </div>
+
+      <div class="logistics-box">
+        <span class="logistics-label">Month</span>
+        <strong class="logistics-number" id="currentMonth">May 2026</strong>
+        <span class="logistics-small">active tracking period</span>
+      </div>
+    </div>
+
+    <div class="logistics-progress-wrap">
+      <div class="progress-topline">
+        <span id="progressText">13 of 40 hours completed</span>
+        <span class="progress-pill" id="progressPercent">32.5% used</span>
+      </div>
+      <div class="fun-progress-bar" aria-hidden="true">
+        <div class="fun-progress-fill" id="progressFill" style="width:32.5%;">
+          <span class="progress-glow"></span>
+        </div>
+      </div>
+      <div class="manual-note">Display only for staff/parent visibility. Update these numbers from the admin side when ready.</div>
+    </div>
+
+    <div class="staff-breakdown">
+      <div class="staff-mini-card">
+        <span>Robert’s Hours Completed</span>
+        <strong id="robertHours">13 / 38 hours</strong>
+      </div>
+
+      <div class="staff-mini-card">
+        <span>ESS Direct Hours Completed</span>
+        <strong id="essHours">0 / 2 hours</strong>
+      </div>
+    </div>
+
+    <div class="logistics-alert" id="hourAlert">
+      🟢 <strong>On Track:</strong> Hours are being used normally.
+    </div>
+  </section>
 </div>
 
 <!-- 🔗 Hayden quick-links bar -->
@@ -345,6 +658,109 @@ document.addEventListener('DOMContentLoaded', () => {
   const ess = sb.schema("ess");
 
   const $ = (id) => document.getElementById(id);
+
+
+  /*
+    Hayden Logistics Dashboard
+    These numbers are intentionally manual/display-only for now.
+    Later, your admin page can update these values through Supabase or a protected admin form.
+  */
+  const haydenLogistics = {
+    monthlyApprovedHours: 40,
+    completedHours: 13,
+    currentMonth: "May 2026",
+    robertMonthlyTarget: 38,
+    robertCompletedHours: 13,
+    essMonthlyTarget: 2,
+    essCompletedHours: 0
+  };
+
+  function setLogisticsAlert(statusType, title, message) {
+    const badge = $("logisticsStatusBadge");
+    const alert = $("hourAlert");
+    if (!badge || !alert) return;
+
+    const styles = {
+      onTrack: {
+        badge: "🟢 On Track",
+        bg: "#ecfdf5",
+        border: "#bbf7d0",
+        color: "#14532d",
+        shadow: "0 8px 18px rgba(34,197,94,0.13)",
+        alertBg: "linear-gradient(135deg,#ecfdf5,#f7fee7)"
+      },
+      behind: {
+        badge: "🟡 Behind Pace",
+        bg: "#fffbeb",
+        border: "#fde68a",
+        color: "#78350f",
+        shadow: "0 8px 18px rgba(245,158,11,0.13)",
+        alertBg: "linear-gradient(135deg,#fffbeb,#fff7ed)"
+      },
+      over: {
+        badge: "🔴 Over Limit",
+        bg: "#fef2f2",
+        border: "#fecaca",
+        color: "#7f1d1d",
+        shadow: "0 8px 18px rgba(239,68,68,0.13)",
+        alertBg: "linear-gradient(135deg,#fef2f2,#fff1f2)"
+      },
+      ready: {
+        badge: "🔵 Invoice Ready",
+        bg: "#eff6ff",
+        border: "#bfdbfe",
+        color: "#1e3a8a",
+        shadow: "0 8px 18px rgba(59,130,246,0.13)",
+        alertBg: "linear-gradient(135deg,#eff6ff,#eef6ff)"
+      }
+    };
+
+    const s = styles[statusType] || styles.onTrack;
+    badge.textContent = s.badge;
+    badge.style.background = s.bg;
+    badge.style.borderColor = s.border;
+    badge.style.color = s.color;
+    badge.style.boxShadow = s.shadow;
+
+    alert.innerHTML = `${title} <strong>${message}</strong>`;
+    alert.style.background = s.alertBg;
+    alert.style.borderColor = s.border;
+    alert.style.color = s.color;
+    alert.style.boxShadow = s.shadow;
+  }
+
+  function renderHaydenLogistics(data) {
+    const approved = Number(data.monthlyApprovedHours) || 0;
+    const completed = Math.max(0, Number(data.completedHours) || 0);
+    const remaining = Math.max(0, approved - completed);
+    const rawPercent = approved > 0 ? (completed / approved) * 100 : 0;
+    const visualPercent = Math.min(100, Math.max(0, rawPercent));
+
+    if ($("monthlyApprovedHours")) $("monthlyApprovedHours").textContent = approved;
+    if ($("completedHours")) $("completedHours").textContent = completed;
+    if ($("remainingHours")) $("remainingHours").textContent = remaining;
+    if ($("currentMonth")) $("currentMonth").textContent = data.currentMonth || "Current Month";
+    if ($("progressText")) $("progressText").textContent = `${completed} of ${approved} hours completed`;
+    if ($("progressPercent")) $("progressPercent").textContent = `${rawPercent.toFixed(1)}% used`;
+    if ($("progressFill")) $("progressFill").style.width = `${visualPercent}%`;
+    if ($("robertHours")) $("robertHours").textContent = `${Number(data.robertCompletedHours) || 0} / ${Number(data.robertMonthlyTarget) || 0} hours`;
+    if ($("essHours")) $("essHours").textContent = `${Number(data.essCompletedHours) || 0} / ${Number(data.essMonthlyTarget) || 0} hours`;
+
+    const robertOver = (Number(data.robertCompletedHours) || 0) > (Number(data.robertMonthlyTarget) || 0);
+    const essOver = (Number(data.essCompletedHours) || 0) > (Number(data.essMonthlyTarget) || 0);
+
+    if (completed > approved || robertOver || essOver) {
+      setLogisticsAlert("over", "🔴", "Over Limit Warning: Entered hours exceed the approved monthly amount.");
+    } else if (approved > 0 && completed >= approved) {
+      setLogisticsAlert("ready", "🔵", "Invoice Ready: Hours and notes are complete for this pay period.");
+    } else if (approved > 0 && completed < approved * 0.25) {
+      setLogisticsAlert("behind", "🟡", "Behind Pace: More hours should be scheduled soon.");
+    } else {
+      setLogisticsAlert("onTrack", "🟢", "On Track: Hours are being used normally.");
+    }
+  }
+
+  renderHaydenLogistics(haydenLogistics);
 
   const CLIENT_ID_INPUT = $("client_id");
   const STAFF_INPUT     = $("staff_id");
