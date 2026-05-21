@@ -391,7 +391,7 @@
                 <span class="small">opens page</span>
               </a>
 
-              <button type="button" class="hayden-hours-small-btn" id="openHaydenHoursModal">
+              <button type="button" class="hayden-hours-small-btn" id="openHaydenHoursModal" title="Waiting to sync…">
                 Hours
               </button>
             </div>
@@ -435,7 +435,7 @@
     <footer>© <span id="y"></span> Empowerment Support Solutions • Admin Portal</footer>
   </main>
 
-  <!-- 🦖 Hayden hours popup -->
+  <!-- 🦖 ADDED ONLY: Hayden hours popup -->
   <div class="hayden-modal-backdrop" id="haydenHoursModal" aria-hidden="true">
     <div class="hayden-modal" role="dialog" aria-modal="true" aria-labelledby="haydenModalTitle">
       <div class="hayden-modal-header">
@@ -492,7 +492,7 @@
       </div>
     </div>
   </div>
-  <!-- END Hayden hours popup -->
+  <!-- END ADDED ONLY: Hayden hours popup -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -508,9 +508,9 @@
     let visibleNotes = 3;
     const CHUNK = 3;
 
-    /* 🦖 Supabase + Hayden logistics setup */
+    /* 🦖 ADDED ONLY: Supabase + Hayden logistics setup */
     const ESS_SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
-    const ESS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
+    const ESS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
     const HAYDEN_CLIENT_ID = "6778cce6-c1e6-4384-a6c5-5a1f8c5d481f";
     const HAYDEN_LOGISTICS_TABLE = "client_logistics";
 
@@ -540,9 +540,7 @@
 
     function setHaydenStatus(msg){
       const el = document.getElementById("openHaydenHoursModal");
-      if(el && msg){
-        el.title = msg;
-      }
+      if(el && msg) el.title = msg;
     }
 
     function showHaydenError(msg){
@@ -558,7 +556,20 @@
     }
 
     function updateHaydenPreview(data){
-      return;
+      const approved = Number(data?.monthly_approved_hours ?? data?.monthlyApprovedHours ?? 40) || 40;
+      const completed = Number(data?.completed_hours ?? data?.completedHours ?? 0) || 0;
+      const remaining = Math.max(0, approved - completed);
+      const pct = approved > 0 ? Math.min(100, Math.max(0, (completed / approved) * 100)) : 0;
+
+      const approvedEl = document.getElementById("haydenPreviewApproved");
+      const completedEl = document.getElementById("haydenPreviewCompleted");
+      const remainingEl = document.getElementById("haydenPreviewRemaining");
+      const fillEl = document.getElementById("haydenPreviewFill");
+
+      if(approvedEl) approvedEl.textContent = approved.toFixed(approved % 1 ? 2 : 0);
+      if(completedEl) completedEl.textContent = completed.toFixed(completed % 1 ? 2 : 0);
+      if(remainingEl) remainingEl.textContent = remaining.toFixed(remaining % 1 ? 2 : 0);
+      if(fillEl) fillEl.style.width = `${pct}%`;
     }
 
     function populateHaydenForm(data){
@@ -577,6 +588,11 @@
       if(robertEl) robertEl.value = data?.robert_hours ?? 0;
       if(essEl) essEl.value = data?.ess_direct_hours ?? 0;
       if(robertTargetEl) robertTargetEl.value = data?.robert_target_hours ?? 38;
+
+      updateHaydenPreview({
+        monthly_approved_hours: approvedEl ? approvedEl.value : 40,
+        completed_hours: completedEl ? completedEl.value : 0
+      });
     }
 
     function openHaydenModal(){
@@ -661,6 +677,7 @@
           updated_at: new Date().toISOString()
         };
 
+        updateHaydenPreview(payload);
         setHaydenStatus("Saving…");
 
         const { error } = await essAdminSchema
@@ -732,6 +749,18 @@
           });
         }
 
+        ["haydenApprovedHours", "haydenCompletedHours", "haydenRobertHours", "haydenEssHours", "haydenRobertTarget"].forEach(id => {
+          const el = document.getElementById(id);
+          if(el){
+            el.addEventListener("input", () => {
+              updateHaydenPreview({
+                monthly_approved_hours: numVal("haydenApprovedHours", 40),
+                completed_hours: numVal("haydenCompletedHours", 0)
+              });
+            });
+          }
+        });
+
         if(monthEl){
           monthEl.addEventListener("change", loadHaydenHours);
         }
@@ -739,7 +768,7 @@
         setHaydenStatus("Setup issue");
       }
     }
-    /* END Supabase + Hayden logistics setup */
+    /* END ADDED ONLY: Supabase + Hayden logistics setup */
 
     function loadNotes(){ try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; } }
     function persist(notes){ localStorage.setItem(LS_KEY, JSON.stringify(notes)); }
