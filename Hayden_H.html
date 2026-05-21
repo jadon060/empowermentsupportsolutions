@@ -655,15 +655,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Keep the original ESS schema for daily logs, staff, drafts, and entries.
   const ess = sb.schema("ess");
+
+  // Use public schema for Hayden's live monthly logistics card.
+  const publicDb = sb;
 
   const $ = (id) => document.getElementById(id);
 
 
   /*
     Hayden Logistics Dashboard
-    These numbers are intentionally manual/display-only for now.
-    Later, your admin page can update these values through Supabase or a protected admin form.
+    These numbers are defaults only. The live values load from public.client_logistics.
   */
   const haydenLogistics = {
     monthlyApprovedHours: 40,
@@ -729,6 +733,11 @@ document.addEventListener('DOMContentLoaded', () => {
     alert.style.boxShadow = s.shadow;
   }
 
+  function formatHours(value) {
+    const n = Number(value) || 0;
+    return n % 1 === 0 ? String(n) : n.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+  }
+
   function renderHaydenLogistics(data) {
     const approved = Number(data.monthlyApprovedHours) || 0;
     const completed = Math.max(0, Number(data.completedHours) || 0);
@@ -736,15 +745,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const rawPercent = approved > 0 ? (completed / approved) * 100 : 0;
     const visualPercent = Math.min(100, Math.max(0, rawPercent));
 
-    if ($("monthlyApprovedHours")) $("monthlyApprovedHours").textContent = approved;
-    if ($("completedHours")) $("completedHours").textContent = completed;
-    if ($("remainingHours")) $("remainingHours").textContent = remaining;
+    if ($("monthlyApprovedHours")) $("monthlyApprovedHours").textContent = formatHours(approved);
+    if ($("completedHours")) $("completedHours").textContent = formatHours(completed);
+    if ($("remainingHours")) $("remainingHours").textContent = formatHours(remaining);
     if ($("currentMonth")) $("currentMonth").textContent = data.currentMonth || "Current Month";
-    if ($("progressText")) $("progressText").textContent = `${completed} of ${approved} hours completed`;
+    if ($("progressText")) $("progressText").textContent = `${formatHours(completed)} of ${formatHours(approved)} hours completed`;
     if ($("progressPercent")) $("progressPercent").textContent = `${rawPercent.toFixed(1)}% used`;
     if ($("progressFill")) $("progressFill").style.width = `${visualPercent}%`;
-    if ($("robertHours")) $("robertHours").textContent = `${Number(data.robertCompletedHours) || 0} / ${Number(data.robertMonthlyTarget) || 0} hours`;
-    if ($("essHours")) $("essHours").textContent = `${Number(data.essCompletedHours) || 0} / ${Number(data.essMonthlyTarget) || 0} hours`;
+    if ($("robertHours")) $("robertHours").textContent = `${formatHours(data.robertCompletedHours)} / ${formatHours(data.robertMonthlyTarget)} hours`;
+    if ($("essHours")) $("essHours").textContent = `${formatHours(data.essCompletedHours)} / ${formatHours(data.essMonthlyTarget)} hours`;
 
     const robertOver = (Number(data.robertCompletedHours) || 0) > (Number(data.robertMonthlyTarget) || 0);
     const essOver = (Number(data.essCompletedHours) || 0) > (Number(data.essMonthlyTarget) || 0);
@@ -764,7 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /*
     Hayden Live Logistics Sync
-    Reads Hayden's monthly logistics numbers from ess.client_logistics.
+    Reads Hayden's monthly logistics numbers from public.client_logistics.
     Admin Portal updates this same row, and this page refreshes live through Supabase realtime.
   */
   const HAYDEN_CLIENT_ID = "6778cce6-c1e6-4384-a6c5-5a1f8c5d481f";
@@ -813,7 +822,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthKey = getCurrentMonthKey();
 
     try{
-      const { data, error } = await ess
+      const { data, error } = await publicDb
         .from(HAYDEN_LOGISTICS_TABLE)
         .select("*")
         .eq("client_id", HAYDEN_CLIENT_ID)
@@ -822,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if(error){
         console.error("Hayden logistics load error:", error);
-        setLogisticsSyncNote("Live logistics could not load yet. Check Supabase table/RLS settings.");
+        setLogisticsSyncNote("Live logistics could not load yet. Check public.client_logistics table/RLS settings.");
         return;
       }
 
@@ -849,7 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
           "postgres_changes",
           {
             event: "*",
-            schema: "ess",
+            schema: "public",
             table: HAYDEN_LOGISTICS_TABLE,
             filter: `client_id=eq.${HAYDEN_CLIENT_ID}`
           },
