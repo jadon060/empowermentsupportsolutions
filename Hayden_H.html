@@ -481,7 +481,7 @@
           <span class="progress-glow"></span>
         </div>
       </div>
-      <div class="manual-note">Display only for staff/parent visibility. Update these numbers from the admin side when ready.</div>
+      <div class="manual-note" id="logisticsSyncNote">Live display for staff/parent visibility. Waiting for admin-side hours from Supabase…</div>
     </div>
 
     <div class="staff-breakdown">
@@ -761,6 +761,116 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   renderHaydenLogistics(haydenLogistics);
+
+  /*
+    Hayden Live Logistics Sync
+    Reads Hayden's monthly logistics numbers from ess.client_logistics.
+    Admin Portal updates this same row, and this page refreshes live through Supabase realtime.
+  */
+  const HAYDEN_CLIENT_ID = "6778cce6-c1e6-4384-a6c5-5a1f8c5d481f";
+  const HAYDEN_LOGISTICS_TABLE = "client_logistics";
+
+  function getCurrentMonthKey(){
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function monthLabelFromKey(monthKey){
+    if(!monthKey) return "Current Month";
+    const parts = String(monthKey).split("-");
+    const year = Number(parts[0]);
+    const month = Number(parts[1]) - 1;
+    if(!Number.isFinite(year) || !Number.isFinite(month)) return "Current Month";
+    return new Date(year, month, 1).toLocaleString(undefined, { month:"long", year:"numeric" });
+  }
+
+  function setLogisticsSyncNote(message){
+    const el = $("logisticsSyncNote");
+    if(el) el.textContent = message;
+  }
+
+  function mapClientLogisticsRow(row){
+    const approved = Number(row?.monthly_approved_hours ?? 40) || 40;
+    const completed = Number(row?.completed_hours ?? 0) || 0;
+    const robertHours = Number(row?.robert_hours ?? 0) || 0;
+    const essHours = Number(row?.ess_direct_hours ?? 0) || 0;
+    const robertTarget = Number(row?.robert_target_hours ?? 38) || 38;
+    const essTarget = Number(row?.ess_direct_target_hours ?? 2) || 2;
+    const monthKey = row?.month_key || getCurrentMonthKey();
+
+    return {
+      monthlyApprovedHours: approved,
+      completedHours: completed,
+      currentMonth: row?.month_label || monthLabelFromKey(monthKey),
+      robertMonthlyTarget: robertTarget,
+      robertCompletedHours: robertHours,
+      essMonthlyTarget: essTarget,
+      essCompletedHours: essHours
+    };
+  }
+
+  async function loadHaydenLiveLogistics(){
+    const monthKey = getCurrentMonthKey();
+
+    try{
+      const { data, error } = await ess
+        .from(HAYDEN_LOGISTICS_TABLE)
+        .select("*")
+        .eq("client_id", HAYDEN_CLIENT_ID)
+        .eq("month_key", monthKey)
+        .maybeSingle();
+
+      if(error){
+        console.error("Hayden logistics load error:", error);
+        setLogisticsSyncNote("Live logistics could not load yet. Check Supabase table/RLS settings.");
+        return;
+      }
+
+      if(data){
+        renderHaydenLogistics(mapClientLogisticsRow(data));
+        setLogisticsSyncNote("Live from admin hours control. Updates automatically when admin saves changes.");
+      }else{
+        renderHaydenLogistics({
+          ...haydenLogistics,
+          currentMonth: monthLabelFromKey(monthKey)
+        });
+        setLogisticsSyncNote("No admin hours saved for this month yet. Showing default tracking numbers.");
+      }
+    }catch(err){
+      console.error("Hayden logistics sync issue:", err);
+      setLogisticsSyncNote("Live logistics sync is not ready. Check Supabase connection.");
+    }
+  }
+
+  function subscribeToHaydenLiveLogistics(){
+    try{
+      sb.channel("hayden-live-logistics-page")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "ess",
+            table: HAYDEN_LOGISTICS_TABLE,
+            filter: `client_id=eq.${HAYDEN_CLIENT_ID}`
+          },
+          (payload) => {
+            const row = payload?.new;
+            if(!row) return;
+
+            if(row.month_key === getCurrentMonthKey()){
+              renderHaydenLogistics(mapClientLogisticsRow(row));
+              setLogisticsSyncNote("Live update received from admin hours control.");
+            }
+          }
+        )
+        .subscribe();
+    }catch(err){
+      console.error("Hayden realtime subscription issue:", err);
+    }
+  }
+
+  loadHaydenLiveLogistics();
+  subscribeToHaydenLiveLogistics();
 
   const CLIENT_ID_INPUT = $("client_id");
   const STAFF_INPUT     = $("staff_id");
