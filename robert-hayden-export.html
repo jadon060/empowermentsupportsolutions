@@ -1,1 +1,1234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ESS • Hayden Export Portal</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
 
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --border:#e5e7eb;
+      --border-soft:#e5e7eb;
+      --text:#0f172a;
+      --muted:#6b7280;
+      --accent:#111827;
+      --accent-soft:#e5e7eb;
+      --input-bg:#f9fafb;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      background:var(--bg);
+      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+      color:var(--text);
+    }
+
+    header{
+      background:#020617;
+      color:#fff;
+      padding:16px 20px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      box-shadow:0 8px 20px rgba(15,23,42,.45);
+    }
+
+    header img{height:40px;}
+
+    .wrap{
+      max-width:1100px;
+      margin:1.8rem auto 2.2rem;
+      padding:0 1.2rem;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:1.1rem 1.3rem 1.2rem;
+      margin-bottom:1.2rem;
+      box-shadow:0 10px 25px rgba(15,23,42,.08);
+    }
+
+    .card h2{
+      margin:0 0 .75rem;
+      font-size:1.15rem;
+      letter-spacing:.01em;
+    }
+
+    .card h3{
+      margin:0 0 .6rem;
+      font-size:1rem;
+    }
+
+    .locked-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:#dcfce7;
+      color:#166534;
+      border:1px solid #bbf7d0;
+      border-radius:999px;
+      padding:6px 11px;
+      font-size:.76rem;
+      font-weight:700;
+      margin-top:6px;
+    }
+
+    label{
+      font-size:.74rem;
+      font-weight:600;
+      display:block;
+      margin-bottom:3px;
+      letter-spacing:.03em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    input{
+      padding:7px 10px;
+      border:1px solid var(--border-soft);
+      border-radius:9px;
+      font-size:.8rem;
+      background:var(--input-bg);
+      outline:none;
+      min-width:0;
+      transition:border-color .15s, box-shadow .15s, background .15s;
+      width:100%;
+    }
+
+    input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(15,23,42,.25);
+      background:#fff;
+    }
+
+    button{
+      border:none;
+      border-radius:999px;
+      padding:8px 14px;
+      background:var(--accent);
+      color:#fff;
+      cursor:pointer;
+      font-size:.8rem;
+      font-weight:600;
+      letter-spacing:.02em;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      white-space:nowrap;
+      box-shadow:0 8px 18px rgba(15,23,42,.35);
+      transition:background .15s, box-shadow .15s, transform .1s, opacity .1s;
+    }
+
+    button:hover{
+      background:#020617;
+      box-shadow:0 10px 22px rgba(15,23,42,.45);
+      transform:translateY(-1px);
+    }
+
+    button:disabled{
+      opacity:.45;
+      cursor:default;
+      box-shadow:none;
+      transform:none;
+    }
+
+    button.btn-muted{
+      background:var(--accent-soft);
+      color:var(--text);
+      box-shadow:none;
+    }
+
+    button.btn-muted:hover{
+      background:#d1d5db;
+      box-shadow:none;
+      transform:none;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      border-radius:10px;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    thead{background:#f9fafb;}
+
+    th,td{
+      padding:7px 10px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      font-size:.76rem;
+      vertical-align:top;
+    }
+
+    th{
+      font-weight:600;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      font-size:.7rem;
+    }
+
+    tbody tr:last-child td{border-bottom:none;}
+
+    .flex{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .flex > div{
+      min-width:180px;
+      flex:1 1 auto;
+    }
+
+    .row-action-btn{
+      padding:6px 10px;
+      font-size:.72rem;
+      border-radius:999px;
+    }
+
+    .radio-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .radio-wrap input[type="radio"]{
+      min-width:auto;
+      transform:scale(1.05);
+      cursor:pointer;
+      width:auto;
+    }
+
+    .status{
+      font-size:.82rem;
+      color:var(--muted);
+      margin-top:8px;
+      line-height:1.4;
+    }
+
+    .status.good{
+      color:#166534;
+      font-weight:600;
+    }
+
+    .status.bad{
+      color:#b91c1c;
+      font-weight:600;
+    }
+
+    @media (max-width:720px){
+      header{align-items:flex-start;flex-direction:column;}
+      .wrap{padding:0 .8rem;}
+      .card{padding:.9rem 1rem;}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <img src="https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png" alt="ESS" onerror="this.style.display='none'">
+  <div>
+    <div style="font-weight:700;font-size:1.05rem;">Empowerment Support Solutions, LLC</div>
+    <div style="font-size:.72rem;opacity:.78;">Hayden Chart Export Portal</div>
+    <div class="locked-badge">🔒 Locked to Hayden only</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>Hayden export access</h2>
+    <div style="font-size:.88rem;line-height:1.45;color:#334155;">
+      This page is only for exporting Hayden's daily charts and weekly staff plans.
+    </div>
+    <div id="clientStatus" class="status">Loading Hayden profile…</div>
+  </div>
+
+  <div class="card">
+    <h2>Daily export — Hayden</h2>
+
+    <div class="flex">
+      <div>
+        <label for="serviceDate">Service Date</label>
+        <input id="serviceDate" type="date">
+      </div>
+
+      <div>
+        <label for="serviceCode">Service Code</label>
+        <input id="serviceCode" placeholder="e.g. 331 – ILS">
+      </div>
+
+      <div>
+        <label for="rcName">Regional Center</label>
+        <input id="rcName" placeholder="">
+      </div>
+
+      <div>
+        <label for="scName">Service Coordinator</label>
+        <input id="scName" placeholder="">
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button id="loadDay">Load Hayden Day</button>
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button id="exportDay" class="btn-muted" disabled>Export Selected Page</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Hayden day preview</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Date</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Hours</th>
+          <th>Modality</th>
+          <th>Domains</th>
+          <th>RC</th>
+          <th>SC</th>
+          <th>Staff Sig</th>
+          <th>Client Sig</th>
+          <th>Source</th>
+          <th>Export</th>
+        </tr>
+      </thead>
+      <tbody id="dayBody">
+        <tr><td colspan="13">No day loaded.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Weekly staff plans — Hayden</h2>
+
+    <div class="flex">
+      <div>
+        <label for="wk_weekDate">Week of</label>
+        <input id="wk_weekDate" type="date">
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button id="wk_load">Load Hayden Weekly Plans</button>
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button id="wk_export" class="btn-muted" disabled>Export Selected Weekly Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="wk_resultsCard" style="display:none;">
+    <h3>Weekly plans for Hayden</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Staff</th>
+          <th>Week Start</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+          <th>Sun</th>
+          <th>Signature</th>
+          <th>Export</th>
+        </tr>
+      </thead>
+      <tbody id="wk_body">
+        <tr><td colspan="12">No weekly plan loaded.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+(async () => {
+  const SUPABASE_URL = "https://bqanjupmcgydvmfgvutx.supabase.co";
+  const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk";
+
+  /*
+    IMPORTANT:
+    Leave this blank if Hayden exists inside your ess.clients table by name.
+    The page will auto-find him.
+
+    If it ever says "Could not find Hayden profile", paste Hayden's real client UUID here.
+    Example:
+    const HAYDEN_CLIENT_ID_OVERRIDE = "00000000-0000-0000-0000-000000000000";
+  */
+  const HAYDEN_CLIENT_ID_OVERRIDE = "";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const ess = sb.schema("ess");
+
+  const clientStatus = document.getElementById("clientStatus");
+
+  const dateInput = document.getElementById("serviceDate");
+  const serviceInput = document.getElementById("serviceCode");
+  const rcInput = document.getElementById("rcName");
+  const scInput = document.getElementById("scName");
+  const dayBody = document.getElementById("dayBody");
+  const btnLoad = document.getElementById("loadDay");
+  const btnExport = document.getElementById("exportDay");
+
+  const wk_weekDate = document.getElementById("wk_weekDate");
+  const wk_load = document.getElementById("wk_load");
+  const wk_export = document.getElementById("wk_export");
+  const wk_resultsCard = document.getElementById("wk_resultsCard");
+  const wk_body = document.getElementById("wk_body");
+
+  const LOGO_URL =
+    "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
+  const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
+
+  let HAYDEN_CLIENT_ID = "";
+  let HAYDEN_CLIENT_LABEL = "Hayden";
+
+  let currentDayData = null;
+  let currentWeeklyRows = [];
+  let selectedDayRowIndex = null;
+  let selectedWeeklyRowIndex = null;
+
+  function todayLocalISO() {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 10);
+  }
+
+  function parseYMDLocal(ymdValue) {
+    if (!ymdValue) return new Date();
+    const [y, m, d] = ymdValue.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  function formatYMD(ymdValue) {
+    if (!ymdValue) return "—";
+    const [y, m, d] = ymdValue.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    }).format(dt);
+  }
+
+  dateInput.value = todayLocalISO();
+  wk_weekDate.value = todayLocalISO();
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function makeClientLabel(c) {
+    let label = c.full_name;
+    if (!label) {
+      if (c.first_name && c.last_initial) {
+        label = `${c.first_name} ${c.last_initial}.`;
+      } else if (c.first_name) {
+        label = c.first_name;
+      } else {
+        label = c.id;
+      }
+    }
+    return label;
+  }
+
+  async function resolveHaydenClient() {
+    if (HAYDEN_CLIENT_ID_OVERRIDE.trim()) {
+      HAYDEN_CLIENT_ID = HAYDEN_CLIENT_ID_OVERRIDE.trim();
+      HAYDEN_CLIENT_LABEL = "Hayden";
+      clientStatus.className = "status good";
+      clientStatus.textContent = "Hayden profile locked by client ID override ✅";
+      return true;
+    }
+
+    try {
+      const { data: clients, error } = await ess
+        .from("clients")
+        .select("id, full_name, first_name, last_initial")
+        .order("full_name", { ascending: true });
+
+      if (error) throw error;
+
+      const list = clients || [];
+
+      const hayden = list.find((c) => {
+        const label = makeClientLabel(c).toLowerCase();
+        const first = String(c.first_name || "").toLowerCase();
+        const full = String(c.full_name || "").toLowerCase();
+        return label.includes("hayden") || first.includes("hayden") || full.includes("hayden");
+      });
+
+      if (!hayden) {
+        clientStatus.className = "status bad";
+        clientStatus.textContent =
+          "Could not auto-find Hayden in ess.clients. Paste Hayden's client UUID into HAYDEN_CLIENT_ID_OVERRIDE in the code.";
+        btnLoad.disabled = true;
+        wk_load.disabled = true;
+        return false;
+      }
+
+      HAYDEN_CLIENT_ID = hayden.id;
+      HAYDEN_CLIENT_LABEL = makeClientLabel(hayden);
+
+      clientStatus.className = "status good";
+      clientStatus.textContent = `Locked to: ${HAYDEN_CLIENT_LABEL} ✅`;
+      return true;
+    } catch (err) {
+      console.error("Hayden client lookup error:", err);
+      clientStatus.className = "status bad";
+      clientStatus.textContent =
+        "Error loading Hayden profile. Check Supabase connection or paste Hayden's client UUID into HAYDEN_CLIENT_ID_OVERRIDE.";
+      btnLoad.disabled = true;
+      wk_load.disabled = true;
+      return false;
+    }
+  }
+
+  const haydenReady = await resolveHaydenClient();
+  if (!haydenReady) return;
+
+  function splitNotes(raw) {
+    if (!raw) return { progress: "", observation: "", action: "" };
+
+    const P = "## Progress Notes:";
+    const O = "## Observation:";
+    const A = "## Action Plan:";
+
+    let progress = "";
+    let observation = "";
+    let action = "";
+
+    if (raw.includes(P)) {
+      const pIdx = raw.indexOf(P) + P.length;
+      const oIdx = raw.indexOf(O, pIdx);
+      const aIdx = raw.indexOf(A, oIdx > -1 ? oIdx : pIdx);
+
+      progress = raw.slice(
+        pIdx,
+        oIdx > -1 ? oIdx : aIdx > -1 ? aIdx : raw.length
+      ).trim();
+
+      if (oIdx > -1) {
+        observation = raw.slice(
+          oIdx + O.length,
+          aIdx > -1 ? aIdx : raw.length
+        ).trim();
+      }
+
+      if (aIdx > -1) {
+        action = raw.slice(aIdx + A.length).trim();
+      }
+
+      return { progress, observation, action };
+    }
+
+    return { progress: raw.trim(), observation: "", action: "" };
+  }
+
+  function to12h(t) {
+    if (!t) return "—";
+    const parts = t.split(":");
+    let h = parseInt(parts[0], 10);
+    const m = parts[1] ?? "00";
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${h}:${m.padStart(2, "0")} ${ampm}`;
+  }
+
+  function computeHours(start, end) {
+    if (!start || !end) return "";
+    const [sh, sm] = start.split(":").map(Number);
+    const [eh, em] = end.split(":").map(Number);
+    const diff = eh * 60 + (em || 0) - (sh * 60 + (sm || 0));
+    if (diff <= 0) return "";
+    return (diff / 60).toFixed(2);
+  }
+
+  function startOfWeekMonday(d) {
+    const nd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const day = nd.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    nd.setDate(nd.getDate() + diff);
+    nd.setHours(0, 0, 0, 0);
+    return nd;
+  }
+
+  function ymd(d) {
+    const copy = new Date(d);
+    copy.setMinutes(copy.getMinutes() - copy.getTimezoneOffset());
+    return copy.toISOString().slice(0, 10);
+  }
+
+  function normalizeDayRow(row, source) {
+    const start_time = row?.start_time || "";
+    const end_time = row?.end_time || "";
+
+    let hours = row && row.hours != null ? row.hours : "";
+
+    if ((hours === "" || hours == null) && start_time && end_time) {
+      const computed = computeHours(start_time, end_time);
+      if (computed) hours = computed;
+    }
+
+    return {
+      id: row?.id || null,
+      source,
+      start_time,
+      end_time,
+      hours,
+      modality: row?.modality || "",
+      domain: row?.activities
+        ? Array.isArray(row.activities)
+          ? row.activities.join(", ")
+          : row.activities
+        : "",
+      notes: row?.service_notes || row?.notes || "",
+      staff_signature: row?.staff_signature || "",
+      client_signature: row?.client_signature || "",
+      regional_center: row?.regional_center || "",
+      service_coordinator: row?.service_coordinator || "",
+      staffId: row?.staff_id || null,
+      signed_at: row?.signed_at || null,
+      submitted: row?.submitted || false,
+    };
+  }
+
+  function sortDayRows(rows) {
+    return [...rows].sort((a, b) => {
+      const aStart = a.start_time || "99:99";
+      const bStart = b.start_time || "99:99";
+      if (aStart !== bStart) return aStart.localeCompare(bStart);
+
+      const aEnd = a.end_time || "99:99";
+      const bEnd = b.end_time || "99:99";
+      if (aEnd !== bEnd) return aEnd.localeCompare(bEnd);
+
+      const aSource = a.source || "";
+      const bSource = b.source || "";
+      if (aSource !== bSource) return aSource.localeCompare(bSource);
+
+      const aSigned = a.signed_at || "";
+      const bSigned = b.signed_at || "";
+      return aSigned.localeCompare(bSigned);
+    });
+  }
+
+  function updateDayExportButtonState() {
+    btnExport.disabled = !(
+      currentDayData &&
+      Array.isArray(currentDayData.rows) &&
+      currentDayData.rows.length &&
+      selectedDayRowIndex !== null &&
+      currentDayData.rows[selectedDayRowIndex]
+    );
+  }
+
+  function updateWeeklyExportButtonState() {
+    wk_export.disabled = !(
+      Array.isArray(currentWeeklyRows) &&
+      currentWeeklyRows.length &&
+      selectedWeeklyRowIndex !== null &&
+      currentWeeklyRows[selectedWeeklyRowIndex]
+    );
+  }
+
+  function selectDayRow(idx) {
+    selectedDayRowIndex = idx;
+
+    const radios = document.querySelectorAll('input[name="dayExportSelect"]');
+    radios.forEach((radio) => {
+      radio.checked = Number(radio.value) === idx;
+    });
+
+    updateDayExportButtonState();
+  }
+
+  function selectWeeklyRow(idx) {
+    selectedWeeklyRowIndex = idx;
+
+    const radios = document.querySelectorAll('input[name="weeklyExportSelect"]');
+    radios.forEach((radio) => {
+      radio.checked = Number(radio.value) === idx;
+    });
+
+    updateWeeklyExportButtonState();
+  }
+
+  function renderDayTable() {
+    if (!currentDayData || !currentDayData.rows || !currentDayData.rows.length) {
+      dayBody.innerHTML = `<tr><td colspan="13">No Hayden data for this date.</td></tr>`;
+      selectedDayRowIndex = null;
+      updateDayExportButtonState();
+      return;
+    }
+
+    const { rows, date } = currentDayData;
+
+    dayBody.innerHTML = rows
+      .map(
+        (row, idx) => `
+      <tr>
+        <td class="radio-wrap">
+          <input
+            type="radio"
+            name="dayExportSelect"
+            value="${idx}"
+            ${selectedDayRowIndex === idx ? "checked" : ""}
+            onclick="window.__essSelectDayRow && window.__essSelectDayRow(${idx})"
+          >
+        </td>
+        <td>${formatYMD(date)}</td>
+        <td>${row.start_time ? to12h(row.start_time) : "—"}</td>
+        <td>${row.end_time ? to12h(row.end_time) : "—"}</td>
+        <td>${row.hours !== "" && row.hours != null ? Number(row.hours).toFixed(2) : "—"}</td>
+        <td>${escapeHtml(row.modality || "—")}</td>
+        <td>${escapeHtml(row.domain || "—")}</td>
+        <td>${escapeHtml(row.regional_center || "—")}</td>
+        <td>${escapeHtml(row.service_coordinator || "—")}</td>
+        <td>${row.staff_signature ? "✅" : "—"}</td>
+        <td>${row.client_signature ? "✅" : "—"}</td>
+        <td>${escapeHtml(row.source)}</td>
+        <td>
+          <button
+            class="row-action-btn btn-muted"
+            onclick="window.__essExportSingleDay && window.__essExportSingleDay(${idx})"
+          >
+            Export
+          </button>
+        </td>
+      </tr>
+    `
+      )
+      .join("");
+
+    updateDayExportButtonState();
+  }
+
+  async function loadDay() {
+    if (!HAYDEN_CLIENT_ID) {
+      alert("Hayden client ID is missing.");
+      return;
+    }
+
+    const serviceDate = dateInput.value;
+
+    if (!serviceDate) {
+      alert("Pick a service date.");
+      return;
+    }
+
+    const { data: officialRows = [], error: officialError } = await ess
+      .from("daily_entries")
+      .select("*")
+      .eq("client_id", HAYDEN_CLIENT_ID)
+      .eq("service_date", serviceDate);
+
+    if (officialError) {
+      alert("Error loading Hayden official entries: " + officialError.message);
+      return;
+    }
+
+    const { data: draftRows = [], error: draftError } = await ess
+      .from("daily_drafts")
+      .select("*")
+      .eq("client_id", HAYDEN_CLIENT_ID)
+      .eq("date", serviceDate);
+
+    if (draftError) {
+      alert("Error loading Hayden drafts: " + draftError.message);
+      return;
+    }
+
+    const normalizedRows = sortDayRows([
+      ...(officialRows || []).map((r) => normalizeDayRow(r, "official")),
+      ...(draftRows || []).map((r) => normalizeDayRow(r, "draft")),
+    ]);
+
+    if (!normalizedRows.length) {
+      currentDayData = null;
+      selectedDayRowIndex = null;
+      renderDayTable();
+      return;
+    }
+
+    currentDayData = {
+      clientId: HAYDEN_CLIENT_ID,
+      clientLabel: HAYDEN_CLIENT_LABEL,
+      date: serviceDate,
+      staffName: "Robert",
+      rows: normalizedRows,
+    };
+
+    selectedDayRowIndex = 0;
+    renderDayTable();
+  }
+
+  btnLoad.addEventListener("click", loadDay);
+
+  window.__essSelectDayRow = function (idx) {
+    selectDayRow(idx);
+  };
+
+  function openPrintWindow(title, htmlBody) {
+    const win = window.open("", "_blank", "width=900,height=1100");
+
+    win.document.write(`
+      <html>
+      <head>
+        <title>${title}</title>
+        <style>
+          body{
+            font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+            margin:0;
+            padding:0;
+            background:#fff;
+          }
+
+          .page{
+            width:8.5in;
+            min-height:11in;
+            margin:0 auto;
+            padding:0.5in;
+            box-sizing:border-box;
+          }
+
+          .header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:16px;
+          }
+
+          .header-left{max-width:70%;}
+          .logo{height:90px;object-fit:contain;}
+
+          .box{
+            border:1px solid #e5e7eb;
+            border-radius:8px;
+            padding:8px 10px;
+            margin-bottom:10px;
+          }
+
+          img.sig{
+            width:180px;
+            height:50px;
+            object-fit:contain;
+            border-bottom:1px solid #000;
+          }
+
+          .section-title{
+            font-weight:600;
+            font-size:11px;
+            margin-top:6px;
+            margin-bottom:3px;
+          }
+
+          .note-box{
+            border:1px solid #e5e7eb;
+            border-radius:6px;
+            padding:4px 6px;
+            min-height:40px;
+            font-size:11px;
+            white-space:pre-wrap;
+            word-break:break-word;
+            overflow-wrap:anywhere;
+            max-width:100%;
+          }
+
+          table{
+            width:100%;
+            border-collapse:collapse;
+            font-size:11px;
+          }
+
+          th,td{
+            border:1px solid #e5e7eb;
+            padding:6px;
+            vertical-align:top;
+          }
+
+          .head{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:14px;
+          }
+
+          .sig{
+            width:180px;
+            height:50px;
+            object-fit:contain;
+            border-bottom:1px solid #000;
+          }
+
+          @media print {
+            body{background:#fff;}
+            .page{margin:0;}
+          }
+        </style>
+      </head>
+      <body>${htmlBody}</body>
+      </html>
+    `);
+
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 400);
+  }
+
+  function exportSingleDay(idx) {
+    if (!currentDayData || !currentDayData.rows || !currentDayData.rows[idx]) return;
+
+    selectedDayRowIndex = idx;
+    updateDayExportButtonState();
+
+    const businessName = "Empowerment Support Solutions, LLC";
+    const serviceCode = serviceInput.value || "SDP Service Code";
+    const { clientLabel, date, staffName } = currentDayData;
+    const row = currentDayData.rows[idx];
+
+    const { progress, observation, action } = splitNotes(row.notes);
+
+    const start12 = row.start_time ? to12h(row.start_time) : "—";
+    const end12 = row.end_time ? to12h(row.end_time) : "—";
+
+    const hoursStr =
+      row.hours !== "" && row.hours !== null
+        ? Number(row.hours).toFixed(2)
+        : "—";
+
+    const regionalCenterDisplay = row.regional_center || rcInput.value || "—";
+    const serviceCoordinatorDisplay = row.service_coordinator || scInput.value || "—";
+
+    openPrintWindow(
+      `ESS_${clientLabel.replace(/\s+/g, "_")}_${date}_${idx + 1}.pdf`,
+      `
+      <div class="page">
+        <div class="header">
+          <div class="header-left">
+            <div style="font-size:15px;font-weight:700;">${businessName}</div>
+            <div style="font-size:11px;">SDP – Daily Service Log (Unified: RC / SC / FMS)</div>
+            <div style="font-size:11px;margin-top:4px;"><strong>Client:</strong> ${escapeHtml(clientLabel)}</div>
+            <div style="font-size:11px;"><strong>Service Date:</strong> ${formatYMD(date)}</div>
+            <div style="font-size:11px;"><strong>Staff:</strong> ${escapeHtml(staffName || "—")}</div>
+            <div style="font-size:11px;"><strong>Service Code:</strong> ${escapeHtml(serviceCode)}</div>
+            <div style="font-size:11px;"><strong>Regional Center:</strong> ${escapeHtml(regionalCenterDisplay)}</div>
+            <div style="font-size:11px;"><strong>Service Coordinator:</strong> ${escapeHtml(serviceCoordinatorDisplay)}</div>
+          </div>
+
+          <div>
+            <img src="${LOGO_URL}" class="logo" onerror="this.style.display='none'">
+            <div style="font-size:10px;color:#94a3b8;text-align:right;margin-top:4px;">ESS • Hayden daily export</div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div style="font-size:11.5px;margin-bottom:4px;">
+            <strong>Time In:</strong> ${start12} &nbsp;
+            <strong>Time Out:</strong> ${end12} &nbsp;
+            <strong>Hours:</strong> ${hoursStr}
+          </div>
+
+          <div style="font-size:11.5px;margin-bottom:4px;">
+            <strong>Location / Modality:</strong> ${escapeHtml(row.modality || "—")}
+          </div>
+
+          <div style="font-size:11.5px;margin-bottom:4px;">
+            <strong>Service / Domain:</strong> ${escapeHtml(row.domain || "—")}
+          </div>
+
+          <div style="font-size:11.5px;margin-bottom:6px;">
+            <strong>Source:</strong> ${escapeHtml(row.source || "—")}
+          </div>
+
+          <div class="section-title">Description / Progress:</div>
+          <div class="note-box">${escapeHtml(progress || "—")}</div>
+
+          <div class="section-title">Observation:</div>
+          <div class="note-box">${escapeHtml(observation || "—")}</div>
+
+          <div class="section-title">Action Plan:</div>
+          <div class="note-box">${escapeHtml(action || "—")}</div>
+
+          <div style="display:flex;gap:20px;margin-top:10px;align-items:flex-end;">
+            <div>
+              <div style="font-size:10.5px;font-weight:600;">Staff Signature:</div>
+              ${
+                row.staff_signature
+                  ? `<img class="sig" src="${row.staff_signature}">`
+                  : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
+              }
+            </div>
+
+            <div>
+              <div style="font-size:10.5px;font-weight:600;">Participant / Parent:</div>
+              ${
+                row.client_signature
+                  ? `<img class="sig" src="${row.client_signature}">`
+                  : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
+              }
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;font-size:9.5px;line-height:1.35;">
+          I certify that the services listed above were actually provided to the participant in accordance with the participant’s Individual Program Plan (IPP) and Self-Determination Program Spending Plan, and that the hours and dates reported are accurate.
+        </div>
+
+        <div style="margin-top:14px;font-size:9px;color:#6b7280;">
+          ${businessName} • ${CONTACT_LINE}
+        </div>
+      </div>
+      `
+    );
+  }
+
+  function exportSelectedDay() {
+    if (selectedDayRowIndex === null) {
+      alert("Select one day entry first.");
+      return;
+    }
+
+    exportSingleDay(selectedDayRowIndex);
+  }
+
+  window.__essExportSingleDay = function (idx) {
+    exportSingleDay(idx);
+  };
+
+  btnExport.addEventListener("click", exportSelectedDay);
+
+  async function staffNameById(id) {
+    if (!id) return "";
+
+    const { data } = await ess
+      .from("staff")
+      .select("full_name")
+      .eq("id", id)
+      .maybeSingle();
+
+    return data?.full_name || id;
+  }
+
+  function renderWeeklyTable() {
+    if (!currentWeeklyRows.length) {
+      wk_resultsCard.style.display = "block";
+      wk_body.innerHTML = `<tr><td colspan="12">No weekly plans for Hayden and this week.</td></tr>`;
+      selectedWeeklyRowIndex = null;
+      updateWeeklyExportButtonState();
+      return;
+    }
+
+    wk_resultsCard.style.display = "block";
+
+    wk_body.innerHTML = currentWeeklyRows
+      .map(
+        (r, idx) => `
+      <tr>
+        <td class="radio-wrap">
+          <input
+            type="radio"
+            name="weeklyExportSelect"
+            value="${idx}"
+            ${selectedWeeklyRowIndex === idx ? "checked" : ""}
+            onclick="window.__essSelectWeeklyRow && window.__essSelectWeeklyRow(${idx})"
+          >
+        </td>
+        <td>${escapeHtml(r.__staff_name)}</td>
+        <td>${escapeHtml(r.week_start)}</td>
+        <td>${escapeHtml(r.mon_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.tue_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.wed_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.thu_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.fri_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.sat_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${escapeHtml(r.sun_text || "").replace(/\n/g,"<br>")}</td>
+        <td>${r.staff_signature ? "✅" : "—"}</td>
+        <td>
+          <button
+            class="row-action-btn btn-muted"
+            onclick="window.__essExportSingleWeekly && window.__essExportSingleWeekly(${idx})"
+          >
+            Export
+          </button>
+        </td>
+      </tr>
+    `
+      )
+      .join("");
+
+    updateWeeklyExportButtonState();
+  }
+
+  async function loadWeekly() {
+    if (!HAYDEN_CLIENT_ID) {
+      alert("Hayden client ID is missing.");
+      return;
+    }
+
+    const picked = wk_weekDate.value
+      ? parseYMDLocal(wk_weekDate.value)
+      : new Date();
+
+    const monday = startOfWeekMonday(picked);
+    const mondayStr = ymd(monday);
+
+    const sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 6);
+    const sundayStr = ymd(sunday);
+
+    const { data, error } = await ess
+      .from("weekly_staff_plans")
+      .select("*")
+      .eq("client_id", HAYDEN_CLIENT_ID)
+      .gte("week_start", mondayStr)
+      .lte("week_start", sundayStr);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    let rows = data || [];
+
+    if (!rows.length) {
+      currentWeeklyRows = [];
+      selectedWeeklyRowIndex = null;
+      renderWeeklyTable();
+      return;
+    }
+
+    for (const r of rows) {
+      r.__staff_name = await staffNameById(r.staff_id);
+    }
+
+    currentWeeklyRows = rows;
+    selectedWeeklyRowIndex = 0;
+    renderWeeklyTable();
+  }
+
+  wk_load.addEventListener("click", loadWeekly);
+
+  window.__essSelectWeeklyRow = function (idx) {
+    selectWeeklyRow(idx);
+  };
+
+  function exportSingleWeekly(idx) {
+    if (!currentWeeklyRows.length || !currentWeeklyRows[idx]) return;
+
+    selectedWeeklyRowIndex = idx;
+    updateWeeklyExportButtonState();
+
+    const clientLabel = HAYDEN_CLIENT_LABEL || "Hayden";
+    const row = currentWeeklyRows[idx];
+    const weekStart = row.week_start;
+
+    openPrintWindow(
+      `ESS_${clientLabel.replace(/\s+/g,"_")}_weekly_${weekStart}_${idx + 1}.pdf`,
+      `
+      <div class="page">
+        <div class="head">
+          <div>
+            <h2>Weekly Staff Plan</h2>
+            <div><strong>Client:</strong> ${escapeHtml(clientLabel)}</div>
+            <div><strong>Week start:</strong> ${escapeHtml(weekStart)}</div>
+            <div><strong>Staff:</strong> ${escapeHtml(row.__staff_name || "—")}</div>
+          </div>
+
+          <div>
+            <img src="${LOGO_URL}" style="height:70px;" onerror="this.style.display='none'">
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Mon</th>
+              <th>Tue</th>
+              <th>Wed</th>
+              <th>Thu</th>
+              <th>Fri</th>
+              <th>Sat</th>
+              <th>Sun</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>${escapeHtml(row.mon_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.tue_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.wed_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.thu_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.fri_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.sat_text || "").replace(/\n/g,"<br>")}</td>
+              <td>${escapeHtml(row.sun_text || "").replace(/\n/g,"<br>")}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top:16px;">
+          <div style="font-size:10.5px;font-weight:600;margin-bottom:4px;">Staff Signature:</div>
+          ${
+            row.staff_signature
+              ? `<img class="sig" src="${row.staff_signature}">`
+              : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
+          }
+        </div>
+
+        <p style="margin-top:14px;font-size:10px;color:#6b7280;">${CONTACT_LINE}</p>
+      </div>
+      `
+    );
+  }
+
+  function exportSelectedWeekly() {
+    if (selectedWeeklyRowIndex === null) {
+      alert("Select one weekly plan first.");
+      return;
+    }
+
+    exportSingleWeekly(selectedWeeklyRowIndex);
+  }
+
+  window.__essExportSingleWeekly = function (idx) {
+    exportSingleWeekly(idx);
+  };
+
+  wk_export.addEventListener("click", exportSelectedWeekly);
+
+})();
+</script>
+</body>
+</html>
