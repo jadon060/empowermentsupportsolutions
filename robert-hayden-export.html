@@ -65,20 +65,6 @@
       font-size:1rem;
     }
 
-    .locked-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      background:#dcfce7;
-      color:#166534;
-      border:1px solid #bbf7d0;
-      border-radius:999px;
-      padding:6px 11px;
-      font-size:.76rem;
-      font-weight:700;
-      margin-top:6px;
-    }
-
     label{
       font-size:.74rem;
       font-weight:600;
@@ -240,7 +226,6 @@
   <div>
     <div style="font-weight:700;font-size:1.05rem;">Empowerment Support Solutions, LLC</div>
     <div style="font-size:.72rem;opacity:.78;">Hayden Chart Export Portal</div>
-    <div class="locked-badge">🔒 Locked to Hayden only</div>
   </div>
 </header>
 
@@ -249,7 +234,7 @@
   <div class="card">
     <h2>Hayden export access</h2>
     <div style="font-size:.88rem;line-height:1.45;color:#334155;">
-      This page is only for exporting Hayden's daily charts and weekly staff plans.
+      This page is only for exporting Hayden's daily session notes.
     </div>
     <div id="clientStatus" class="status">Loading Hayden profile…</div>
   </div>
@@ -316,52 +301,6 @@
     </table>
   </div>
 
-  <div class="card">
-    <h2>Weekly staff plans — Hayden</h2>
-
-    <div class="flex">
-      <div>
-        <label for="wk_weekDate">Week of</label>
-        <input id="wk_weekDate" type="date">
-      </div>
-
-      <div>
-        <label>&nbsp;</label>
-        <button id="wk_load">Load Hayden Weekly Plans</button>
-      </div>
-
-      <div>
-        <label>&nbsp;</label>
-        <button id="wk_export" class="btn-muted" disabled>Export Selected Weekly Plan</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card" id="wk_resultsCard" style="display:none;">
-    <h3>Weekly plans for Hayden</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Select</th>
-          <th>Staff</th>
-          <th>Week Start</th>
-          <th>Mon</th>
-          <th>Tue</th>
-          <th>Wed</th>
-          <th>Thu</th>
-          <th>Fri</th>
-          <th>Sat</th>
-          <th>Sun</th>
-          <th>Signature</th>
-          <th>Export</th>
-        </tr>
-      </thead>
-      <tbody id="wk_body">
-        <tr><td colspan="12">No weekly plan loaded.</td></tr>
-      </tbody>
-    </table>
-  </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -396,12 +335,6 @@
   const btnLoad = document.getElementById("loadDay");
   const btnExport = document.getElementById("exportDay");
 
-  const wk_weekDate = document.getElementById("wk_weekDate");
-  const wk_load = document.getElementById("wk_load");
-  const wk_export = document.getElementById("wk_export");
-  const wk_resultsCard = document.getElementById("wk_resultsCard");
-  const wk_body = document.getElementById("wk_body");
-
   const LOGO_URL =
     "https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png";
   const CONTACT_LINE = "(626) 596-6155 • empowermentess@gmail.com";
@@ -410,20 +343,12 @@
   let HAYDEN_CLIENT_LABEL = "Hayden";
 
   let currentDayData = null;
-  let currentWeeklyRows = [];
   let selectedDayRowIndex = null;
-  let selectedWeeklyRowIndex = null;
 
   function todayLocalISO() {
     const d = new Date();
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     return d.toISOString().slice(0, 10);
-  }
-
-  function parseYMDLocal(ymdValue) {
-    if (!ymdValue) return new Date();
-    const [y, m, d] = ymdValue.split("-").map(Number);
-    return new Date(y, m - 1, d);
   }
 
   function formatYMD(ymdValue) {
@@ -438,7 +363,6 @@
   }
 
   dateInput.value = todayLocalISO();
-  wk_weekDate.value = todayLocalISO();
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -468,7 +392,7 @@
       HAYDEN_CLIENT_ID = HAYDEN_CLIENT_ID_OVERRIDE.trim();
       HAYDEN_CLIENT_LABEL = "Hayden";
       clientStatus.className = "status good";
-      clientStatus.textContent = "Hayden profile locked by client ID override ✅";
+      clientStatus.textContent = "Hayden profile loaded ✅";
       return true;
     }
 
@@ -494,7 +418,6 @@
         clientStatus.textContent =
           "Could not auto-find Hayden in ess.clients. Paste Hayden's client UUID into HAYDEN_CLIENT_ID_OVERRIDE in the code.";
         btnLoad.disabled = true;
-        wk_load.disabled = true;
         return false;
       }
 
@@ -502,7 +425,7 @@
       HAYDEN_CLIENT_LABEL = makeClientLabel(hayden);
 
       clientStatus.className = "status good";
-      clientStatus.textContent = `Locked to: ${HAYDEN_CLIENT_LABEL} ✅`;
+      clientStatus.textContent = `Client loaded: ${HAYDEN_CLIENT_LABEL} ✅`;
       return true;
     } catch (err) {
       console.error("Hayden client lookup error:", err);
@@ -510,7 +433,6 @@
       clientStatus.textContent =
         "Error loading Hayden profile. Check Supabase connection or paste Hayden's client UUID into HAYDEN_CLIENT_ID_OVERRIDE.";
       btnLoad.disabled = true;
-      wk_load.disabled = true;
       return false;
     }
   }
@@ -574,21 +496,6 @@
     const diff = eh * 60 + (em || 0) - (sh * 60 + (sm || 0));
     if (diff <= 0) return "";
     return (diff / 60).toFixed(2);
-  }
-
-  function startOfWeekMonday(d) {
-    const nd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const day = nd.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    nd.setDate(nd.getDate() + diff);
-    nd.setHours(0, 0, 0, 0);
-    return nd;
-  }
-
-  function ymd(d) {
-    const copy = new Date(d);
-    copy.setMinutes(copy.getMinutes() - copy.getTimezoneOffset());
-    return copy.toISOString().slice(0, 10);
   }
 
   function normalizeDayRow(row, source) {
@@ -655,15 +562,6 @@
     );
   }
 
-  function updateWeeklyExportButtonState() {
-    wk_export.disabled = !(
-      Array.isArray(currentWeeklyRows) &&
-      currentWeeklyRows.length &&
-      selectedWeeklyRowIndex !== null &&
-      currentWeeklyRows[selectedWeeklyRowIndex]
-    );
-  }
-
   function selectDayRow(idx) {
     selectedDayRowIndex = idx;
 
@@ -673,17 +571,6 @@
     });
 
     updateDayExportButtonState();
-  }
-
-  function selectWeeklyRow(idx) {
-    selectedWeeklyRowIndex = idx;
-
-    const radios = document.querySelectorAll('input[name="weeklyExportSelect"]');
-    radios.forEach((radio) => {
-      radio.checked = Number(radio.value) === idx;
-    });
-
-    updateWeeklyExportButtonState();
   }
 
   function renderDayTable() {
@@ -1029,204 +916,6 @@
   };
 
   btnExport.addEventListener("click", exportSelectedDay);
-
-  async function staffNameById(id) {
-    if (!id) return "";
-
-    const { data } = await ess
-      .from("staff")
-      .select("full_name")
-      .eq("id", id)
-      .maybeSingle();
-
-    return data?.full_name || id;
-  }
-
-  function renderWeeklyTable() {
-    if (!currentWeeklyRows.length) {
-      wk_resultsCard.style.display = "block";
-      wk_body.innerHTML = `<tr><td colspan="12">No weekly plans for Hayden and this week.</td></tr>`;
-      selectedWeeklyRowIndex = null;
-      updateWeeklyExportButtonState();
-      return;
-    }
-
-    wk_resultsCard.style.display = "block";
-
-    wk_body.innerHTML = currentWeeklyRows
-      .map(
-        (r, idx) => `
-      <tr>
-        <td class="radio-wrap">
-          <input
-            type="radio"
-            name="weeklyExportSelect"
-            value="${idx}"
-            ${selectedWeeklyRowIndex === idx ? "checked" : ""}
-            onclick="window.__essSelectWeeklyRow && window.__essSelectWeeklyRow(${idx})"
-          >
-        </td>
-        <td>${escapeHtml(r.__staff_name)}</td>
-        <td>${escapeHtml(r.week_start)}</td>
-        <td>${escapeHtml(r.mon_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${escapeHtml(r.tue_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${escapeHtml(r.wed_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${escapeHtml(r.thu_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${escapeHtml(r.fri_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${escapeHtml(r.sat_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${escapeHtml(r.sun_text || "").replace(/\n/g,"<br>")}</td>
-        <td>${r.staff_signature ? "✅" : "—"}</td>
-        <td>
-          <button
-            class="row-action-btn btn-muted"
-            onclick="window.__essExportSingleWeekly && window.__essExportSingleWeekly(${idx})"
-          >
-            Export
-          </button>
-        </td>
-      </tr>
-    `
-      )
-      .join("");
-
-    updateWeeklyExportButtonState();
-  }
-
-  async function loadWeekly() {
-    if (!HAYDEN_CLIENT_ID) {
-      alert("Hayden client ID is missing.");
-      return;
-    }
-
-    const picked = wk_weekDate.value
-      ? parseYMDLocal(wk_weekDate.value)
-      : new Date();
-
-    const monday = startOfWeekMonday(picked);
-    const mondayStr = ymd(monday);
-
-    const sunday = new Date(monday);
-    sunday.setDate(sunday.getDate() + 6);
-    const sundayStr = ymd(sunday);
-
-    const { data, error } = await ess
-      .from("weekly_staff_plans")
-      .select("*")
-      .eq("client_id", HAYDEN_CLIENT_ID)
-      .gte("week_start", mondayStr)
-      .lte("week_start", sundayStr);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    let rows = data || [];
-
-    if (!rows.length) {
-      currentWeeklyRows = [];
-      selectedWeeklyRowIndex = null;
-      renderWeeklyTable();
-      return;
-    }
-
-    for (const r of rows) {
-      r.__staff_name = await staffNameById(r.staff_id);
-    }
-
-    currentWeeklyRows = rows;
-    selectedWeeklyRowIndex = 0;
-    renderWeeklyTable();
-  }
-
-  wk_load.addEventListener("click", loadWeekly);
-
-  window.__essSelectWeeklyRow = function (idx) {
-    selectWeeklyRow(idx);
-  };
-
-  function exportSingleWeekly(idx) {
-    if (!currentWeeklyRows.length || !currentWeeklyRows[idx]) return;
-
-    selectedWeeklyRowIndex = idx;
-    updateWeeklyExportButtonState();
-
-    const clientLabel = HAYDEN_CLIENT_LABEL || "Hayden";
-    const row = currentWeeklyRows[idx];
-    const weekStart = row.week_start;
-
-    openPrintWindow(
-      `ESS_${clientLabel.replace(/\s+/g,"_")}_weekly_${weekStart}_${idx + 1}.pdf`,
-      `
-      <div class="page">
-        <div class="head">
-          <div>
-            <h2>Weekly Staff Plan</h2>
-            <div><strong>Client:</strong> ${escapeHtml(clientLabel)}</div>
-            <div><strong>Week start:</strong> ${escapeHtml(weekStart)}</div>
-            <div><strong>Staff:</strong> ${escapeHtml(row.__staff_name || "—")}</div>
-          </div>
-
-          <div>
-            <img src="${LOGO_URL}" style="height:70px;" onerror="this.style.display='none'">
-          </div>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Mon</th>
-              <th>Tue</th>
-              <th>Wed</th>
-              <th>Thu</th>
-              <th>Fri</th>
-              <th>Sat</th>
-              <th>Sun</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <td>${escapeHtml(row.mon_text || "").replace(/\n/g,"<br>")}</td>
-              <td>${escapeHtml(row.tue_text || "").replace(/\n/g,"<br>")}</td>
-              <td>${escapeHtml(row.wed_text || "").replace(/\n/g,"<br>")}</td>
-              <td>${escapeHtml(row.thu_text || "").replace(/\n/g,"<br>")}</td>
-              <td>${escapeHtml(row.fri_text || "").replace(/\n/g,"<br>")}</td>
-              <td>${escapeHtml(row.sat_text || "").replace(/\n/g,"<br>")}</td>
-              <td>${escapeHtml(row.sun_text || "").replace(/\n/g,"<br>")}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div style="margin-top:16px;">
-          <div style="font-size:10.5px;font-weight:600;margin-bottom:4px;">Staff Signature:</div>
-          ${
-            row.staff_signature
-              ? `<img class="sig" src="${row.staff_signature}">`
-              : `<div style="width:180px;height:50px;border-bottom:1px solid #000;"></div>`
-          }
-        </div>
-
-        <p style="margin-top:14px;font-size:10px;color:#6b7280;">${CONTACT_LINE}</p>
-      </div>
-      `
-    );
-  }
-
-  function exportSelectedWeekly() {
-    if (selectedWeeklyRowIndex === null) {
-      alert("Select one weekly plan first.");
-      return;
-    }
-
-    exportSingleWeekly(selectedWeeklyRowIndex);
-  }
-
-  window.__essExportSingleWeekly = function (idx) {
-    exportSingleWeekly(idx);
-  };
-
-  wk_export.addEventListener("click", exportSelectedWeekly);
 
 })();
 </script>
