@@ -1019,12 +1019,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!staffUuid) return null;
     const dayDate = ymd(addDays(current,i));
 
-    let { data: official } = await ess.from("daily_entries")
+    let { data: officialRows, error: officialError } = await ess.from("daily_entries")
       .select("*")
       .eq("client_id", getClientId())
       .eq("staff_id", staffUuid)
       .eq("service_date", dayDate)
-      .maybeSingle();
+      .order("signed_at", { ascending:false })
+      .limit(1);
+
+    if (officialError) {
+      console.error("Official day load failed:", officialError);
+    }
+
+    const official = Array.isArray(officialRows) ? officialRows[0] : null;
 
     if (official) {
       return {
@@ -1191,9 +1198,135 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  /* ESS Hayden duplicate guard + official-hours autosync. Code-only change; no visual layout changes. */
+  let submitInFlight = false;
+
+  function numericHours(value){
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function monthKeyFromDate(dateText){
+    return String(dateText || ymd(new Date())).slice(0,7);
+  }
+
+  function monthLabelForSync(monthKey){
+    const parts = String(monthKey || '').split('-');
+    const year = Number(parts[0]);
+    const month = Number(parts[1]) - 1;
+    if(!Number.isFinite(year) || !Number.isFinite(month)) return "Current Month";
+    return new Date(year, month, 1).toLocaleString(undefined, { month:"long", year:"numeric" });
+  }
+
+  async function insertOfficialDailyEntry(baseEntry){
+    let { error } = await ess.from("daily_entries").insert(baseEntry);
+
+    if (error && (error.message || '').toLowerCase().includes("could not find the 'hours' column")) {
+      const { error: e2 } = await ess.from("daily_entries").insert({
+        ...baseEntry,
+        hours: undefined
+      });
+      if (e2) throw e2;
+      return;
+    }
+
+    if (error && String(error.message||'').includes('activities_allowed')) {
+      const { error: e3 } = await ess.from("daily_entries").insert({
+        ...baseEntry,
+        activities: null
+      });
+      if (e3) throw e3;
+      return;
+    }
+
+    if (error) throw error;
+  }
+
+  async function syncHaydenLogisticsFromEntries(anchorDate){
+    const monthKey = monthKeyFromDate(anchorDate);
+    const startDate = `${monthKey}-01`;
+    const endDateObj = new Date(Number(monthKey.slice(0,4)), Number(monthKey.slice(5,7)), 0);
+    const endDate = ymd(endDateObj);
+
+    const { data: entries, error } = await ess.from("daily_entries")
+      .select("hours, staff_id, service_date")
+      .eq("client_id", getClientId())
+      .gte("service_date", startDate)
+      .lte("service_date", endDate);
+
+    if (error) {
+      console.error("Hayden monthly hours sync read failed:", error);
+      toast("Submitted, but hours sync needs admin check ⚠️");
+      return;
+    }
+
+    const staffIds = [...new Set((entries || []).map(e => e.staff_id).filter(Boolean))];
+    const staffNameMap = new Map();
+
+    if (staffIds.length) {
+      const { data: staffRows, error: staffError } = await ess.from("staff")
+        .select("id, full_name")
+        .in("id", staffIds);
+
+      if (staffError) {
+        console.error("Staff lookup for hours sync failed:", staffError);
+      }
+
+      (staffRows || []).forEach(row => staffNameMap.set(row.id, row.full_name || ""));
+    }
+
+    let completed = 0;
+    let robertHours = 0;
+    let essHours = 0;
+
+    (entries || []).forEach(entry => {
+      const hrs = numericHours(entry.hours);
+      completed += hrs;
+
+      const staffName = String(staffNameMap.get(entry.staff_id) || "").toLowerCase();
+      if (staffName.includes("robert")) robertHours += hrs;
+      else essHours += hrs;
+    });
+
+    const approved = 40;
+    const logisticsPayload = {
+      client_id: getClientId(),
+      client_name: "Hayden H.",
+      month_key: monthKey,
+      month_label: monthLabelForSync(monthKey),
+      monthly_approved_hours: approved,
+      completed_hours: completed,
+      remaining_hours: Math.max(0, approved - completed),
+      robert_hours: robertHours,
+      robert_target_hours: 38,
+      ess_direct_hours: essHours,
+      ess_direct_target_hours: 2
+    };
+
+    const { error: syncError } = await publicDb
+      .from(HAYDEN_LOGISTICS_TABLE)
+      .upsert(logisticsPayload, { onConflict:"client_id,month_key" });
+
+    if (syncError) {
+      console.error("Hayden monthly hours sync write failed:", syncError);
+      toast("Submitted, but visual chart sync failed ⚠️");
+      return;
+    }
+
+    renderHaydenLogistics(mapClientLogisticsRow(logisticsPayload));
+    setLogisticsSyncNote("Auto-synced from submitted official charts.");
+  }
+
   async function submitDay(){
+    if (submitInFlight) return;
     if (activeIndex == null) return;
     if (!getStaffName()){ toast("Type staff name first"); return; }
+
+    submitInFlight = true;
+    const originalSubmitText = w_submitDay.textContent;
+    w_submitDay.disabled = true;
+    w_submitDay.textContent = "Submitting...";
+    w_error.style.display = "none";
 
     const payload = buildPayload();
 
@@ -1204,78 +1337,82 @@ document.addEventListener('DOMContentLoaded', () => {
       w_error.style.display='block';
       w_error.textContent = e.message;
       toast('Staff error ❌');
+      submitInFlight = false;
+      w_submitDay.disabled = false;
+      w_submitDay.textContent = originalSubmitText;
       return;
     }
 
-    const baseEntry = {
-      client_id: getClientId(),
-      staff_id: staffUuid,
-      service_date: payload.date,
-      start_time: payload.start_time || null,
-      end_time: payload.end_time || null,
-      modality: payload.modality || 'Remote',
-      service_notes: payload.notes || null,
-      activities: payload.activities ? [payload.activities] : null,
-      staff_signature: payload.staff_signature || null,
-      client_signature: payload.client_signature || null,
-      regional_center: payload.regional_center || null,
-      service_coordinator: payload.service_coordinator || null,
-      signed_at: new Date().toISOString(),
-      hours: payload.hours !== '' ? Number(payload.hours) : null
-    };
+    try {
+      const { data: existingRows, error: existingError } = await ess.from("daily_entries")
+        .select("id, signed_at")
+        .eq("client_id", getClientId())
+        .eq("staff_id", staffUuid)
+        .eq("service_date", payload.date)
+        .limit(25);
 
-    let { error } = await ess.from("daily_entries").insert(baseEntry);
+      if (existingError) throw existingError;
 
-    if (error && (error.message || '').toLowerCase().includes("could not find the 'hours' column")) {
-      const { error: e2 } = await ess.from("daily_entries").insert({
-        ...baseEntry,
-        hours: undefined
-      });
-      if (e2) {
-        w_error.style.display='block';
-        w_error.textContent = 'Submit failed: ' + e2.message;
-        toast('Submit failed ❌');
-        return;
+      if ((existingRows || []).length > 0) {
+        const ok = confirm("A chart already exists for this date. Click OK only if this is a separate second session for the same day. Click Cancel to avoid duplicate hours.");
+        if (!ok) {
+          toast("Duplicate submission stopped ✅");
+          return;
+        }
       }
-    } else if (error && String(error.message||'').includes('activities_allowed')) {
-      const { error: e3 } = await ess.from("daily_entries").insert({
-        ...baseEntry,
-        activities: null
-      });
-      if (e3) {
-        w_error.style.display='block';
-        w_error.textContent = 'Submit failed: ' + e3.message;
-        toast('Submit failed ❌');
-        return;
-      }
-    } else if (error) {
+
+      const baseEntry = {
+        client_id: getClientId(),
+        staff_id: staffUuid,
+        service_date: payload.date,
+        start_time: payload.start_time || null,
+        end_time: payload.end_time || null,
+        modality: payload.modality || 'Remote',
+        service_notes: payload.notes || null,
+        activities: payload.activities ? [payload.activities] : null,
+        staff_signature: payload.staff_signature || null,
+        client_signature: payload.client_signature || null,
+        regional_center: payload.regional_center || null,
+        service_coordinator: payload.service_coordinator || null,
+        signed_at: new Date().toISOString(),
+        hours: payload.hours !== '' ? Number(payload.hours) : null
+      };
+
+      await insertOfficialDailyEntry(baseEntry);
+
+      await ess.from("daily_drafts").upsert({
+        client_id: getClientId(),
+        staff_id: staffUuid,
+        week_start: ymd(current),
+        day_index: activeIndex,
+        date: payload.date,
+        hours: payload.hours !== '' ? Number(payload.hours) : null,
+        activities: payload.activities || null,
+        notes: payload.notes || null,
+        start_time: payload.start_time || null,
+        end_time: payload.end_time || null,
+        modality: payload.modality || 'Remote',
+        staff_signature: payload.staff_signature || null,
+        client_signature: payload.client_signature || null,
+        regional_center: payload.regional_center || null,
+        service_coordinator: payload.service_coordinator || null,
+        submitted: true
+      }, { onConflict: "client_id,staff_id,week_start,day_index" });
+
+      await syncHaydenLogisticsFromEntries(payload.date);
+
+      toast("Day submitted + hours synced ✅");
+      setTimeout(markDotsFromServer, 200);
+    } catch (e) {
+      console.error(e);
       w_error.style.display='block';
-      w_error.textContent = 'Submit failed: ' + error.message;
+      w_error.textContent = 'Submit failed: ' + (e.message || e);
       toast('Submit failed ❌');
-      return;
+    } finally {
+      submitInFlight = false;
+      w_submitDay.disabled = false;
+      w_submitDay.textContent = originalSubmitText;
     }
-
-    await ess.from("daily_drafts").upsert({
-      client_id: getClientId(),
-      staff_id: staffUuid,
-      week_start: ymd(current),
-      day_index: activeIndex,
-      date: payload.date,
-      hours: payload.hours !== '' ? Number(payload.hours) : null,
-      activities: payload.activities || null,
-      notes: payload.notes || null,
-      start_time: payload.start_time || null,
-      end_time: payload.end_time || null,
-      modality: payload.modality || 'Remote',
-      staff_signature: payload.staff_signature || null,
-      client_signature: payload.client_signature || null,
-      regional_center: payload.regional_center || null,
-      service_coordinator: payload.service_coordinator || null,
-      submitted: true
-    }, { onConflict: "client_id,staff_id,week_start,day_index" });
-
-    toast('Day submitted (official) ✅');
-    setTimeout(markDotsFromServer, 200);
   }
 
   function shiftWeek(delta){ current=addDays(current,7*delta); renderWeek(); }
