@@ -823,10 +823,118 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+
+  function numericHours(value){
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function isEssDirectStaffName(name){
+    const s = String(name || "").toLowerCase();
+    return s.includes("ess") ||
+           s.includes("empowerment") ||
+           s.includes("jay") ||
+           s.includes("jadon") ||
+           s.includes("j negrette") ||
+           s.includes("luis") ||
+           s.includes("staff direct");
+  }
+
+  function ymdFromDateObj(d){
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
+  async function syncHaydenLogisticsFromOfficialEntries(monthKey = getCurrentMonthKey()){
+    const startDate = `${monthKey}-01`;
+    const endDateObj = new Date(Number(monthKey.slice(0,4)), Number(monthKey.slice(5,7)), 0);
+    const endDate = ymdFromDateObj(endDateObj);
+
+    const { data: entries, error } = await ess.from("daily_entries")
+      .select("hours, staff_id, service_date")
+      .eq("client_id", HAYDEN_CLIENT_ID)
+      .gte("service_date", startDate)
+      .lte("service_date", endDate);
+
+    if (error) {
+      console.error("Hayden official-hours reconcile read failed:", error);
+      setLogisticsSyncNote("Official hours could not auto-sync yet. Check ess.daily_entries access.");
+      return null;
+    }
+
+    if (!entries || entries.length === 0) {
+      return null;
+    }
+
+    const staffIds = [...new Set(entries.map(e => e.staff_id).filter(Boolean))];
+    const staffNameMap = new Map();
+
+    if (staffIds.length) {
+      const { data: staffRows, error: staffError } = await ess.from("staff")
+        .select("id, full_name")
+        .in("id", staffIds);
+
+      if (staffError) {
+        console.error("Hayden staff lookup during reconcile failed:", staffError);
+      }
+
+      (staffRows || []).forEach(row => staffNameMap.set(row.id, row.full_name || ""));
+    }
+
+    let completed = 0;
+    let robertHours = 0;
+    let essHours = 0;
+
+    entries.forEach(entry => {
+      const hrs = numericHours(entry.hours);
+      completed += hrs;
+
+      const staffName = staffNameMap.get(entry.staff_id) || "";
+      if (isEssDirectStaffName(staffName)) {
+        essHours += hrs;
+      } else {
+        robertHours += hrs;
+      }
+    });
+
+    const approved = 40;
+    const logisticsPayload = {
+      client_id: HAYDEN_CLIENT_ID,
+      client_name: "Hayden H.",
+      month_key: monthKey,
+      month_label: monthLabelFromKey(monthKey),
+      monthly_approved_hours: approved,
+      completed_hours: completed,
+      remaining_hours: Math.max(0, approved - completed),
+      robert_hours: robertHours,
+      robert_target_hours: 38,
+      ess_direct_hours: essHours,
+      ess_direct_target_hours: 2
+    };
+
+    const { error: syncError } = await publicDb
+      .from(HAYDEN_LOGISTICS_TABLE)
+      .upsert(logisticsPayload, { onConflict:"client_id,month_key" });
+
+    if (syncError) {
+      console.error("Hayden official-hours reconcile write failed:", syncError);
+      setLogisticsSyncNote("Auto-calculated from official charts, but Supabase visual row could not be updated.");
+    } else {
+      setLogisticsSyncNote("Auto-synced from official submitted charts.");
+    }
+
+    return logisticsPayload;
+  }
+
   async function loadHaydenLiveLogistics(){
     const monthKey = getCurrentMonthKey();
 
     try{
+      const officialPayload = await syncHaydenLogisticsFromOfficialEntries(monthKey);
+      if (officialPayload) {
+        renderHaydenLogistics(mapClientLogisticsRow(officialPayload));
+        return;
+      }
+
       const { data, error } = await publicDb
         .from(HAYDEN_LOGISTICS_TABLE)
         .select("*")
@@ -1198,25 +1306,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  /* ESS Hayden duplicate guard + official-hours autosync. Code-only change; no visual layout changes. */
   let submitInFlight = false;
-
-  function numericHours(value){
-    const n = Number(value);
-    return Number.isFinite(n) ? n : 0;
-  }
-
-  function monthKeyFromDate(dateText){
-    return String(dateText || ymd(new Date())).slice(0,7);
-  }
-
-  function monthLabelForSync(monthKey){
-    const parts = String(monthKey || '').split('-');
-    const year = Number(parts[0]);
-    const month = Number(parts[1]) - 1;
-    if(!Number.isFinite(year) || !Number.isFinite(month)) return "Current Month";
-    return new Date(year, month, 1).toLocaleString(undefined, { month:"long", year:"numeric" });
-  }
 
   async function insertOfficialDailyEntry(baseEntry){
     let { error } = await ess.from("daily_entries").insert(baseEntry);
@@ -1240,81 +1330,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (error) throw error;
-  }
-
-  async function syncHaydenLogisticsFromEntries(anchorDate){
-    const monthKey = monthKeyFromDate(anchorDate);
-    const startDate = `${monthKey}-01`;
-    const endDateObj = new Date(Number(monthKey.slice(0,4)), Number(monthKey.slice(5,7)), 0);
-    const endDate = ymd(endDateObj);
-
-    const { data: entries, error } = await ess.from("daily_entries")
-      .select("hours, staff_id, service_date")
-      .eq("client_id", getClientId())
-      .gte("service_date", startDate)
-      .lte("service_date", endDate);
-
-    if (error) {
-      console.error("Hayden monthly hours sync read failed:", error);
-      toast("Submitted, but hours sync needs admin check ⚠️");
-      return;
-    }
-
-    const staffIds = [...new Set((entries || []).map(e => e.staff_id).filter(Boolean))];
-    const staffNameMap = new Map();
-
-    if (staffIds.length) {
-      const { data: staffRows, error: staffError } = await ess.from("staff")
-        .select("id, full_name")
-        .in("id", staffIds);
-
-      if (staffError) {
-        console.error("Staff lookup for hours sync failed:", staffError);
-      }
-
-      (staffRows || []).forEach(row => staffNameMap.set(row.id, row.full_name || ""));
-    }
-
-    let completed = 0;
-    let robertHours = 0;
-    let essHours = 0;
-
-    (entries || []).forEach(entry => {
-      const hrs = numericHours(entry.hours);
-      completed += hrs;
-
-      const staffName = String(staffNameMap.get(entry.staff_id) || "").toLowerCase();
-      if (staffName.includes("robert")) robertHours += hrs;
-      else essHours += hrs;
-    });
-
-    const approved = 40;
-    const logisticsPayload = {
-      client_id: getClientId(),
-      client_name: "Hayden H.",
-      month_key: monthKey,
-      month_label: monthLabelForSync(monthKey),
-      monthly_approved_hours: approved,
-      completed_hours: completed,
-      remaining_hours: Math.max(0, approved - completed),
-      robert_hours: robertHours,
-      robert_target_hours: 38,
-      ess_direct_hours: essHours,
-      ess_direct_target_hours: 2
-    };
-
-    const { error: syncError } = await publicDb
-      .from(HAYDEN_LOGISTICS_TABLE)
-      .upsert(logisticsPayload, { onConflict:"client_id,month_key" });
-
-    if (syncError) {
-      console.error("Hayden monthly hours sync write failed:", syncError);
-      toast("Submitted, but visual chart sync failed ⚠️");
-      return;
-    }
-
-    renderHaydenLogistics(mapClientLogisticsRow(logisticsPayload));
-    setLogisticsSyncNote("Auto-synced from submitted official charts.");
   }
 
   async function submitDay(){
@@ -1399,7 +1414,10 @@ document.addEventListener('DOMContentLoaded', () => {
         submitted: true
       }, { onConflict: "client_id,staff_id,week_start,day_index" });
 
-      await syncHaydenLogisticsFromEntries(payload.date);
+      const syncedPayload = await syncHaydenLogisticsFromOfficialEntries(payload.date.slice(0,7));
+      if (syncedPayload) {
+        renderHaydenLogistics(mapClientLogisticsRow(syncedPayload));
+      }
 
       toast("Day submitted + hours synced ✅");
       setTimeout(markDotsFromServer, 200);
