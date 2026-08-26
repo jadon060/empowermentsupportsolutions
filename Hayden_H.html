@@ -645,8 +645,12 @@
       </div>
     </div>
 
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+    <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;flex-wrap:wrap;margin-top:12px;">
+      <button id="w_saveDraft" class="btn">💾 Save Draft</button>
       <button id="w_submitDay" class="btn btn--primary">Submit Day (Official)</button>
+    </div>
+    <div style="margin-top:8px;text-align:right;color:#64748b;font-size:12px;line-height:1.4;">
+      Save Draft keeps the chart here so you can return later for a signature. Draft hours do not count as completed until officially submitted. 🟡 Draft • 🟢 Official
     </div>
   </div>
 
@@ -1074,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const w_hours=$("w_hours"), w_domain=$("w_domain"), w_notes=$("w_notes");
   const w_obs=$("w_obs"), w_plan=$("w_plan");
   const w_rc=$("w_rc"), w_sc=$("w_sc");
-  const w_submitDay=$("w_submitDay");
+  const w_saveDraft=$("w_saveDraft"), w_submitDay=$("w_submitDay");
   const w_toast=$("w_toast"), w_error=$("w_error");
 
   const staffSigCanvas = $("staffSig");
@@ -1265,7 +1269,8 @@ document.addEventListener('DOMContentLoaded', () => {
         continue;
       }
       const srv = await fetchServerDay(i);
-      dot.style.background = srv ? "#22c55e" : "#e5e7eb";
+      dot.style.background = srv?.source === "official" ? "#22c55e" : (srv?.source === "draft" ? "#f59e0b" : "#e5e7eb");
+      dot.title = srv?.source === "official" ? "Officially submitted" : (srv?.source === "draft" ? "Draft saved" : "No chart saved");
     }
   }
 
@@ -1374,6 +1379,62 @@ document.addEventListener('DOMContentLoaded', () => {
       staff_signature: staffSigData || null,
       client_signature: clientSigData || null
     };
+  }
+
+  let draftSaveInFlight = false;
+
+  async function saveDraft(){
+    if (draftSaveInFlight) return;
+    if (activeIndex == null) return;
+    if (!getStaffName()){ toast("Type staff name first"); return; }
+
+    draftSaveInFlight = true;
+    const originalDraftText = w_saveDraft.textContent;
+    w_saveDraft.disabled = true;
+    w_saveDraft.textContent = "Saving...";
+    w_error.style.display = "none";
+
+    try {
+      const staffUuid = await getOrCreateStaffUuid();
+      const existing = await fetchServerDay(activeIndex);
+      if (existing?.source === "official") {
+        toast("This day is already officially submitted ✅");
+        return;
+      }
+
+      const payload = buildPayload();
+      const { error } = await ess.from("daily_drafts").upsert({
+        client_id: getClientId(),
+        staff_id: staffUuid,
+        week_start: ymd(current),
+        day_index: activeIndex,
+        date: payload.date,
+        hours: payload.hours !== '' ? Number(payload.hours) : null,
+        activities: payload.activities || null,
+        notes: payload.notes || null,
+        start_time: payload.start_time || null,
+        end_time: payload.end_time || null,
+        modality: payload.modality || 'Remote',
+        staff_signature: payload.staff_signature || null,
+        client_signature: payload.client_signature || null,
+        regional_center: payload.regional_center || null,
+        service_coordinator: payload.service_coordinator || null,
+        submitted: false
+      }, { onConflict: "client_id,staff_id,week_start,day_index" });
+
+      if (error) throw error;
+      toast("Draft saved ✅ You can finish it later.");
+      await markDotsFromServer();
+    } catch (e) {
+      console.error("Hayden draft save failed:", e);
+      w_error.style.display = 'block';
+      w_error.textContent = 'Draft save failed: ' + (e.message || e);
+      toast('Draft save failed ❌');
+    } finally {
+      draftSaveInFlight = false;
+      w_saveDraft.disabled = false;
+      w_saveDraft.textContent = originalDraftText;
+    }
   }
 
   let submitInFlight = false;
@@ -1580,6 +1641,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   w_prevWeek.addEventListener('click',()=>shiftWeek(-1));
   w_nextWeek.addEventListener('click',()=>shiftWeek(1));
+  w_saveDraft.addEventListener('click',saveDraft);
   w_submitDay.addEventListener('click',submitDay);
 
   STAFF_INPUT.addEventListener('change', async () => {
@@ -1587,6 +1649,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const staffUuid = await getOrCreateStaffUuid();
       const syncedPayload = await syncHaydenLogisticsForStaff(staffUuid, getStaffName(), getCurrentMonthKey());
       if (syncedPayload) renderHaydenLogistics(mapClientLogisticsRow(syncedPayload));
+      if (activeIndex !== null) await openDay(activeIndex);
+      await markDotsFromServer();
     } catch (err) {
       console.error("Hayden staff change sync failed:", err);
     }
@@ -1597,6 +1661,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const staffUuid = await getOrCreateStaffUuid();
       const syncedPayload = await syncHaydenLogisticsForStaff(staffUuid, getStaffName(), getCurrentMonthKey());
       if (syncedPayload) renderHaydenLogistics(mapClientLogisticsRow(syncedPayload));
+      if (activeIndex !== null) await openDay(activeIndex);
+      await markDotsFromServer();
     } catch (err) {
       console.error("Hayden staff blur sync failed:", err);
     }
