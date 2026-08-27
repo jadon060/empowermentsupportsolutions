@@ -1,0 +1,110 @@
+name: ESS draft schema compatibility fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/draft-schema-compat.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify and patch draft saving
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess, re, sys
+
+          expected = {
+              'Hayden_H.html': 'ff5110ebb460c1c985fa5f0ad259e05884f655a4',
+              'omar-v.html': '246ffe4ea8d7fefba15083a3dc33d9cd762cedb8',
+          }
+
+          helper = '''  function getMissingDailyDraftColumn(error){
+    const message=String(error?.message||error||'');
+    const match=message.match(/Could not find the '([^']+)' column of 'daily_drafts'/i);
+    return match ? match[1] : null;
+  }
+
+  async function upsertDailyDraftCompatible(payload,options={onConflict:'client_id,staff_id,week_start,day_index'}){
+    const draftPayload={...payload};
+    const removed=[];
+    for(let attempt=0;attempt<16;attempt++){
+      const result=await ess.from('daily_drafts').upsert(draftPayload,options);
+      if(!result.error){
+        if(removed.length)console.warn('daily_drafts compatibility: omitted unsupported columns',removed);
+        return result;
+      }
+      const missing=getMissingDailyDraftColumn(result.error);
+      if(!missing || !(missing in draftPayload))return result;
+      delete draftPayload[missing];
+      removed.push(missing);
+    }
+    return {error:new Error('Draft save could not match the current daily_drafts schema.')};
+  }
+
+'''
+
+          for file, want_sha in expected.items():
+              got = subprocess.check_output(['git','hash-object',file], text=True).strip()
+              if got != want_sha:
+                  raise SystemExit(f'{file}: refusing to patch unexpected blob {got}; expected {want_sha}')
+
+              p=Path(file)
+              text=p.read_text()
+              if 'function upsertDailyDraftCompatible' in text:
+                  raise SystemExit(f'{file}: compatibility helper already exists unexpectedly')
+
+              if file == 'Hayden_H.html':
+                  old='await ess.from("daily_drafts").upsert('
+                  marker='  let draftSaveInFlight = false;'
+              else:
+                  old="await ess.from('daily_drafts').upsert("
+                  marker='  let draftSaveInFlight=false;'
+
+              count=text.count(old)
+              if count != 2:
+                  raise SystemExit(f'{file}: expected exactly 2 daily_drafts upsert calls, found {count}')
+              if text.count(marker) != 1:
+                  raise SystemExit(f'{file}: draft marker mismatch')
+
+              text=text.replace(old,'await upsertDailyDraftCompatible(')
+              text=text.replace(marker,helper+marker,1)
+
+              if text.count('function upsertDailyDraftCompatible') != 1:
+                  raise SystemExit(f'{file}: helper insertion failed')
+              if old in text:
+                  raise SystemExit(f'{file}: raw daily_drafts upsert call remains')
+
+              p.write_text(text)
+
+              scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', text, flags=re.S|re.I)
+              inline=[s for s in scripts if s.strip()]
+              if not inline:
+                  raise SystemExit(f'{file}: no inline script found')
+              js=Path('/tmp')/(file.replace('.html','.js'))
+              js.write_text(inline[-1])
+              subprocess.check_call(['node','--check',str(js)])
+
+          subprocess.check_call(['git','diff','--check'])
+          PY
+
+      - name: Commit verified fix and clean workflow
+        shell: bash
+        run: |
+          git config user.name "ESS verified patch"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/draft-schema-compat.yml
+          git add Hayden_H.html omar-v.html
+          git diff --cached --check
+          git commit -m "Make Omar and Hayden draft saving schema-compatible"
+          git push origin main
