@@ -25,7 +25,7 @@
   const CONFIG={omar:{id:'521dd725-2fa6-4d78-9fcc-e5447dc727cb',name:'Omar V.',short:'Omar',pin:'0125',service:'331 – ILS'},jeremy:{id:'e083501e-86d5-41e8-b840-c3ba5b6dc9c9',name:'Jeremy N.',short:'Jeremy',pin:'0926',service:'331 – ILS'}};
   const key=new URLSearchParams(location.search).get('client')||'jeremy',cfg=CONFIG[key]||CONFIG.jeremy;
   const SUPABASE_URL='https://bqanjupmcgydvmfgvutx.supabase.co';
-  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJi cWFuanVwbWNneWR2bWZndnV0eCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzYwODEyODc0LCJleHAiOjIwNzYzODg4NzR9.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk'.replace('Ji cW','JicW');
+  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk';
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY),ess=sb.schema('ess'),$=id=>document.getElementById(id),dateInput=$('serviceDate'),serviceInput=$('serviceCode'),rcInput=$('rcName'),scInput=$('scName'),dayBody=$('dayBody'),btnLoad=$('loadDay'),btnExport=$('exportDay');
   const LOGO_URL='https://raw.githubusercontent.com/jadon060/empowermentsupportsolutions/main/logo%20full.png',CONTACT_LINE='(626) 596-6155 • empowermentess@gmail.com';
   let currentDayData=null,selectedDayRowIndex=null,currentLang='en';
