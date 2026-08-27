@@ -33,8 +33,8 @@
       const val=(document.getElementById("pw").value||"").trim(),err=document.getElementById("err");
       if(!val){err.textContent="Please enter a password or PIN.";return;}
       if(val===ADMIN_PW){try{localStorage.setItem("ESS_Admin_Login","true")}catch(e){} location.href="/portal/admin.html";return;}
-      if(val===OMAR_PW){try{sessionStorage.setItem("ESS_EXPORT_OMAR","true")}catch(e){} location.href="/omar-portal.html";return;}
-      if(val===JEREMY_PW){try{sessionStorage.setItem("ESS_EXPORT_JEREMY","true")}catch(e){} location.href="/jeremy-portal.html";return;}
+      if(val===OMAR_PW){try{sessionStorage.setItem("ESS_EXPORT_OMAR","true")}catch(e){} location.href="/omar-v.html";return;}
+      if(val===JEREMY_PW){try{sessionStorage.setItem("ESS_EXPORT_JEREMY","true")}catch(e){} location.href="/jeremy-n.html";return;}
       if(val===HAYDEN_PW){location.href="/Hayden_H.html";return;}
       if(val===FAMILY_PW){location.href="/families.html";return;}
       if(val===STAFF_PW){location.href="/staff.html";return;}
