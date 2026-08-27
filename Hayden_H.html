@@ -1381,6 +1381,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  function getMissingDailyDraftColumn(error){
+    const message=String(error?.message||error||'');
+    const match=message.match(/Could not find the '([^']+)' column of 'daily_drafts'/i);
+    return match ? match[1] : null;
+  }
+
+  async function upsertDailyDraftCompatible(payload,options={onConflict:'client_id,staff_id,week_start,day_index'}){
+    const draftPayload={...payload};
+    const removed=[];
+    for(let attempt=0;attempt<16;attempt++){
+      const result=await ess.from('daily_drafts').upsert(draftPayload,options);
+      if(!result.error){
+        if(removed.length)console.warn('daily_drafts compatibility: omitted unsupported columns',removed);
+        return result;
+      }
+      const missing=getMissingDailyDraftColumn(result.error);
+      if(!missing || !(missing in draftPayload))return result;
+      delete draftPayload[missing];
+      removed.push(missing);
+    }
+    return {error:new Error('Draft save could not match the current daily_drafts schema.')};
+  }
+
   let draftSaveInFlight = false;
 
   async function saveDraft(){
@@ -1403,7 +1426,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const payload = buildPayload();
-      const { error } = await ess.from("daily_drafts").upsert({
+      const { error } = await upsertDailyDraftCompatible({
         client_id: getClientId(),
         staff_id: staffUuid,
         week_start: ymd(current),
@@ -1589,7 +1612,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       await insertOfficialDailyEntry(baseEntry);
 
-      await ess.from("daily_drafts").upsert({
+      await upsertDailyDraftCompatible({
         client_id: getClientId(),
         staff_id: staffUuid,
         week_start: ymd(current),
