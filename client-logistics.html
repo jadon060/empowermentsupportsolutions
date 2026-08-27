@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ESS • Monthly Logistics</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:transparent;color:#0f172a;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .logistics-wrap{max-width:980px;margin:0 auto;padding:0}.logistics-card{position:relative;overflow:hidden;background:linear-gradient(135deg,#fff 0%,#f8fbff 62%,#eef6ff 100%);border:1px solid #dbe7f5;border-radius:24px;padding:24px;box-shadow:0 16px 38px rgba(15,23,42,.08)}
+    .logistics-card:before{content:"";position:absolute;width:180px;height:180px;right:-70px;top:-80px;border-radius:999px;background:rgba(31,95,168,.08)}.logistics-card:after{content:"";position:absolute;width:120px;height:120px;right:80px;bottom:-75px;border-radius:999px;background:rgba(34,197,94,.08)}
+    .header,.grid,.progress,.breakdown,.alert{position:relative;z-index:1}.header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.header h2{margin:0;font-size:1.35rem;letter-spacing:-.02em}.header p{margin:5px 0 0;color:#64748b;font-size:.92rem}.badge{display:inline-flex;align-items:center;border-radius:999px;padding:10px 14px;font-weight:800;font-size:.9rem;border:1px solid #bbf7d0;background:#ecfdf5;color:#14532d;white-space:nowrap}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}.box,.mini{background:rgba(255,255,255,.92);border:1px solid #dbe7f5;border-radius:18px;padding:16px;box-shadow:0 9px 22px rgba(15,23,42,.05)}.label{display:block;color:#64748b;font-size:.72rem;font-weight:850;text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px}.num{display:block;font-size:1.85rem;line-height:1;font-weight:900;letter-spacing:-.04em}.small{display:block;margin-top:7px;color:#64748b;font-size:.82rem}
+    .progress{background:rgba(255,255,255,.88);border:1px solid #dbe7f5;border-radius:18px;padding:16px;margin-bottom:14px}.topline{display:flex;justify-content:space-between;gap:12px;margin-bottom:11px;font-weight:900}.pill{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:999px;padding:6px 11px;font-size:.82rem;white-space:nowrap}.bar{height:24px;background:#e8eef7;border-radius:999px;overflow:hidden;box-shadow:inset 0 2px 5px rgba(15,23,42,.13)}.fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#1f5fa8,#4f8fe0 55%,#22c55e);transition:width .4s ease}.note{margin-top:10px;color:#64748b;font-size:.78rem;line-height:1.4}
+    .breakdown{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}.mini span{display:block;color:#64748b;font-weight:850;font-size:.84rem;margin-bottom:7px}.mini strong{font-size:1.25rem}.alert{border-radius:18px;padding:15px 16px;background:linear-gradient(135deg,#ecfdf5,#f7fee7);border:1px solid #bbf7d0;color:#14532d;font-size:.95rem;font-weight:750}.manual{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:.82rem;font-weight:800;display:none}
+    @media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.breakdown{grid-template-columns:1fr}.header{flex-direction:column}}@media(max-width:520px){.grid{grid-template-columns:1fr}.topline{flex-direction:column}.logistics-card{padding:20px}}
+  </style>
+</head>
+<body>
+<div class="logistics-wrap"><section class="logistics-card">
+  <div class="header"><div><h2 id="title">📊 Monthly Logistics</h2><p id="subtitle">Live visual tracking of approved service hours.</p></div><div class="badge" id="badge">🟢 On Track</div></div>
+  <div class="grid">
+    <div class="box"><span class="label">Approved</span><strong class="num" id="approved">0</strong><span class="small">monthly hours</span></div>
+    <div class="box"><span class="label">Completed</span><strong class="num" id="completed">0</strong><span class="small">official hours completed</span></div>
+    <div class="box"><span class="label">Remaining</span><strong class="num" id="remaining">0</strong><span class="small">hours left this month</span></div>
+    <div class="box"><span class="label">Month</span><strong class="num" id="month" style="font-size:1.45rem">Current Month</strong><span class="small">active tracking period</span></div>
+  </div>
+  <div class="progress"><div class="topline"><span id="progressText">0 hours completed</span><span class="pill" id="percent">0.0% used</span></div><div class="bar"><div class="fill" id="fill"></div></div><div class="note" id="syncNote">Loading officially submitted charts…</div><div class="manual" id="manualNote">🔒 Admin manual-hours override is active for this month.</div></div>
+  <div class="breakdown"><div class="mini"><span>Staff Hours Completed</span><strong id="staffHours">0 hours</strong></div><div class="mini"><span>ESS Direct Hours Completed</span><strong id="essHours">0 hours</strong></div></div>
+  <div class="alert" id="alert">🟢 <strong>On Track:</strong> Hours are being used normally.</div>
+</section></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{
+ const CONFIG={
+  omar:{id:'521dd725-2fa6-4d78-9fcc-e5447dc727cb',name:'Omar V.',short:'Omar',approved:122},
+  jeremy:{id:'e083501e-86d5-41e8-b840-c3ba5b6dc9c9',name:'Jeremy N.',short:'Jeremy',approved:40}
+ };
+ const key=new URLSearchParams(location.search).get('client')||'jeremy', cfg=CONFIG[key]||CONFIG.jeremy;
+ const SUPABASE_URL='https://bqanjupmcgydvmfgvutx.supabase.co';
+ const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk';
+ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY),ess=sb.schema('ess'),$=id=>document.getElementById(id);
+ $('title').textContent='📊 '+cfg.short+' Monthly Logistics'; $('subtitle').textContent='Live visual tracking for '+cfg.short+'’s approved SDP hours.';
+ const fmt=v=>{const n=Number(v)||0;return n%1===0?String(n):n.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')};
+ const monthKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
+ const monthLabel=k=>{const [y,m]=k.split('-').map(Number);return new Date(y,m-1,1).toLocaleString(undefined,{month:'long',year:'numeric'})};
+ const bounds=k=>{const [y,m]=k.split('-').map(Number),last=new Date(y,m,0).getDate();return{first:`${y}-${String(m).padStart(2,'0')}-01`,last:`${y}-${String(m).padStart(2,'0')}-${String(last).padStart(2,'0')}`}};
+ const isDirect=name=>{const s=String(name||'').toLowerCase();return s.includes('empowerment')||s.includes('ess')||s.includes('jadon')||s.includes('jay ')||s==='jay'};
+ function status(type,msg){const styles={on:['🟢 On Track','#ecfdf5','#bbf7d0','#14532d'],behind:['🟡 Behind Pace','#fffbeb','#fde68a','#78350f'],over:['🔴 Over Limit','#fef2f2','#fecaca','#7f1d1d'],ready:['🔵 Invoice Ready','#eff6ff','#bfdbfe','#1e3a8a']},s=styles[type]||styles.on;$('badge').textContent=s[0];$('badge').style.background=s[1];$('badge').style.borderColor=s[2];$('badge').style.color=s[3];$('alert').innerHTML=msg;$('alert').style.background=s[1];$('alert').style.borderColor=s[2];$('alert').style.color=s[3]}
+ function render(row,manual=false){const approved=Math.max(0,Number(row.monthly_approved_hours??cfg.approved)||0),completed=Math.max(0,Number(row.completed_hours)||0),essHours=Math.max(0,Number(row.ess_direct_hours)||0),staff=Math.max(0,Number(row.robert_hours??(completed-essHours))||0),remaining=Math.max(0,approved-completed),pct=approved?completed/approved*100:0;$('approved').textContent=fmt(approved);$('completed').textContent=fmt(completed);$('remaining').textContent=fmt(remaining);$('month').textContent=row.month_label||monthLabel(monthKey());$('progressText').textContent=`${fmt(completed)} of ${fmt(approved)} hours completed`;$('percent').textContent=`${pct.toFixed(1)}% used`;$('fill').style.width=Math.min(100,pct)+'%';$('staffHours').textContent=fmt(staff)+' hours';$('essHours').textContent=fmt(essHours)+' hours';$('manualNote').style.display=manual?'block':'none';if(completed>approved)status('over','🔴 <strong>Over Limit Warning:</strong> Completed hours exceed the monthly approved amount.');else if(completed>=approved)status('ready','🔵 <strong>Invoice Ready:</strong> Approved hours are complete for this month.');else if(completed<approved*.25)status('behind','🟡 <strong>Behind Pace:</strong> More hours should be scheduled soon.');else status('on','🟢 <strong>On Track:</strong> Hours are being used normally.')}
+ async function officialRow(mk){const b=bounds(mk);const {data:entries,error}=await ess.from('daily_entries').select('total_minutes,staff_id,service_date').eq('client_id',cfg.id).gte('service_date',b.first).lte('service_date',b.last);if(error)throw error;const ids=[...new Set((entries||[]).map(x=>x.staff_id).filter(Boolean))],names=new Map();if(ids.length){const r=await ess.from('staff').select('id,full_name').in('id',ids);if(!r.error)(r.data||[]).forEach(x=>names.set(x.id,x.full_name||''))}let completed=0,direct=0,staff=0;(entries||[]).forEach(x=>{const h=(Number(x.total_minutes)||0)/60;completed+=h;if(isDirect(names.get(x.staff_id)))direct+=h;else staff+=h});return{client_id:cfg.id,client_name:cfg.name,month_key:mk,month_label:monthLabel(mk),monthly_approved_hours:cfg.approved,completed_hours:completed,remaining_hours:Math.max(0,cfg.approved-completed),robert_hours:staff,robert_target_hours:cfg.approved,ess_direct_hours:direct,ess_direct_target_hours:0,manual_override:false}}
+ async function load(){const mk=monthKey();try{const saved=await sb.from('client_logistics').select('*').eq('client_id',cfg.id).eq('month_key',mk).maybeSingle();if(saved.error)throw saved.error;if(saved.data?.manual_override){render(saved.data,true);$('syncNote').textContent='Manual hours saved by ESS Admin. Automatic official-chart totals are paused until the override is released.';return}const row=await officialRow(mk);const write=await sb.from('client_logistics').upsert(row,{onConflict:'client_id,month_key'});if(write.error)console.warn(write.error);render(row,false);$('syncNote').textContent='Live from officially submitted daily charts. Drafts do not count toward completed hours.'}catch(e){console.error(e);const fallback={month_label:monthLabel(mk),monthly_approved_hours:cfg.approved,completed_hours:0,remaining_hours:cfg.approved,robert_hours:0,ess_direct_hours:0};render(fallback,false);$('syncNote').textContent='Live reconciliation could not load. Refresh the page or check Supabase access.'}}
+ load();
+ try{sb.channel('client-logistics-'+key).on('postgres_changes',{event:'*',schema:'public',table:'client_logistics',filter:`client_id=eq.${cfg.id}`},p=>{if(p.new?.month_key===monthKey()){render(p.new,!!p.new.manual_override);$('syncNote').textContent=p.new.manual_override?'Manual hours saved by ESS Admin. Automatic official-chart totals are paused until the override is released.':'Live logistics update received.'}}).subscribe()}catch(e){}
+})();
+</script>
+</body></html>
