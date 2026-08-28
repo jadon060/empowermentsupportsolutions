@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <title>ESS • Omar Medication Assistance</title>
+  <style>
+    :root{
+      --ess:#1b7ea0;--ess2:#2fb6a6;--ess-dark:#0f4f68;--ink:#0f172a;--muted:#64748b;
+      --bg:#f4f8fb;--card:#fff;--line:#dbe7ef;--soft:#edf7fa;--green:#166534;--green-bg:#ecfdf5;
+      --yellow:#854d0e;--yellow-bg:#fffbeb;--red:#991b1b;--red-bg:#fef2f2;--blue:#1d4ed8;--blue-bg:#eff6ff;
+    }
+    *{box-sizing:border-box}html,body{margin:0;padding:0;background:radial-gradient(circle at top left,#e8f7fa 0,#f4f8fb 34%,#f8fafc 100%);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{min-height:100vh}.hidden{display:none!important}
+    .gate{position:fixed;inset:0;z-index:999;background:linear-gradient(145deg,#eff9fb,#f8fafc);display:grid;place-items:center;padding:20px}
+    .gatebox{width:min(430px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 24px 70px rgba(15,23,42,.18)}
+    .gatehead{padding:24px;background:linear-gradient(120deg,var(--ess),var(--ess2));color:#fff;text-align:center}.gatehead h2{margin:0 0 6px}.gatehead p{margin:0;opacity:.9;font-size:.9rem}.gatebody{padding:24px}.gatebody input{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;text-align:center;font-size:1.15rem;letter-spacing:.18em}.gatebody button{width:100%;margin-top:10px}.gate-err{min-height:22px;color:var(--red);font-size:.85rem;margin-top:8px;text-align:center}
+    header{background:linear-gradient(120deg,var(--ess),var(--ess2),var(--ess));background-size:220% 220%;color:#fff;box-shadow:0 10px 30px rgba(15,79,104,.22)}
+    .head-inner{max-width:1120px;margin:auto;padding:18px 20px;display:flex;align-items:center;gap:14px}.head-inner img{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:14px;padding:5px}.head-title h1{margin:0;font-size:1.35rem}.head-title p{margin:4px 0 0;font-size:.86rem;opacity:.9}.head-spacer{flex:1}.back-btn{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.45);padding:9px 13px;border-radius:999px;font-weight:800;font-size:.84rem;background:rgba(255,255,255,.10)}
+    main{max-width:1120px;margin:22px auto 46px;padding:0 18px}.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .card{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 14px 34px rgba(15,23,42,.07)}
+    .card h2,.card h3{margin:0}.card-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}.card-title p{margin:5px 0 0;color:var(--muted);font-size:.88rem;line-height:1.45}
+    .sync{display:flex;align-items:center;gap:10px;border-radius:16px;padding:12px 14px;margin-bottom:16px;border:1px solid #bfdbfe;background:var(--blue-bg);color:#1e3a8a;font-weight:800;font-size:.9rem}.sync.bad{background:var(--red-bg);border-color:#fecaca;color:var(--red)}.sync.good{background:var(--green-bg);border-color:#bbf7d0;color:#14532d}.sync small{font-weight:600;opacity:.8;margin-left:auto}
+    .safety{border-left:5px solid var(--ess);background:#f0fbfd;padding:14px 16px;border-radius:14px;color:#164e63;font-size:.9rem;line-height:1.5}.safety strong{color:#0e3f50}
+    .med-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.med-card{border:1px solid var(--line);border-radius:18px;padding:16px;background:#fff;position:relative;overflow:hidden}.med-card::after{content:"";position:absolute;width:90px;height:90px;border-radius:999px;right:-38px;top:-38px;background:rgba(47,182,166,.10)}.med-top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}.med-name{font-size:1.05rem;font-weight:900}.med-strength{font-weight:900;color:var(--ess-dark)}.sub{color:var(--muted);font-size:.82rem;margin-top:3px}.tag{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:.72rem;font-weight:900;border:1px solid #cbd5e1;background:#f8fafc;white-space:nowrap}.tag.prn{background:#fff7ed;border-color:#fed7aa;color:#9a3412}.tag.scheduled{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}.instructions{margin-top:12px;font-size:.88rem;line-height:1.5;color:#334155}.combo-note{margin-top:10px;background:#f8fafc;border:1px dashed #cbd5e1;padding:9px 10px;border-radius:12px;font-size:.8rem;color:#475569}
+    .refill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.refill-card{border:1px solid var(--line);border-radius:18px;padding:15px;background:#fff}.refill-head{display:flex;justify-content:space-between;gap:8px}.refill-name{font-weight:900}.metric{font-size:1.45rem;font-weight:950;margin:10px 0 2px}.metric-sub{color:var(--muted);font-size:.78rem}.status-pill{display:inline-flex;border-radius:999px;padding:5px 9px;font-weight:900;font-size:.72rem}.status-pill.good{background:var(--green-bg);color:var(--green);border:1px solid #bbf7d0}.status-pill.warn{background:var(--yellow-bg);color:var(--yellow);border:1px solid #fde68a}.status-pill.urgent{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}.status-pill.setup{background:var(--blue-bg);color:var(--blue);border:1px solid #bfdbfe}.refill-action{margin-top:10px;font-size:.82rem;line-height:1.45;color:#475569}
+    .today-table,.history-table{width:100%;border-collapse:separate;border-spacing:0;min-width:720px}.table-scroll{overflow:auto;border:1px solid var(--line);border-radius:16px}.today-table th,.today-table td,.history-table th,.history-table td{padding:10px 11px;border-bottom:1px solid #e8eef3;text-align:left;font-size:.8rem;vertical-align:top}.today-table th,.history-table th{background:#f8fafc;color:#64748b;text-transform:uppercase;letter-spacing:.05em;font-size:.68rem;position:sticky;top:0;z-index:1}.today-table tr:last-child td,.history-table tr:last-child td{border-bottom:0}.empty{text-align:center;color:var(--muted);padding:28px!important}
+    .form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.field label{display:block;color:#64748b;font-size:.72rem;font-weight:850;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:10px;background:#fff;color:var(--ink);font:inherit;font-size:.88rem;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ess);box-shadow:0 0 0 3px rgba(27,126,160,.12)}.field textarea{min-height:92px;resize:vertical}.span-2{grid-column:span 2}.span-4{grid-column:1/-1}
+    button,.btn{border:0;border-radius:12px;padding:10px 14px;background:var(--ess-dark);color:#fff;font-weight:850;cursor:pointer;font-size:.86rem;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px}button:hover,.btn:hover{filter:brightness(.96)}button:disabled{opacity:.5;cursor:not-allowed}.btn-secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}.actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end;margin-top:14px}.form-note{font-size:.78rem;color:var(--muted);line-height:1.45;margin-top:8px}
+    .workflow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.workflow-step{border-radius:16px;border:1px solid var(--line);padding:13px;background:#fff}.workflow-step strong{display:block;margin-bottom:5px}.workflow-step p{margin:0;color:#475569;font-size:.82rem;line-height:1.4}.workflow-step.red{border-color:#fecaca;background:#fffafa}.workflow-step.yellow{border-color:#fde68a;background:#fffdf5}.workflow-step.blue{border-color:#bfdbfe;background:#f8fbff}
+    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:1000;background:#0f172a;color:#fff;border-radius:12px;padding:11px 15px;box-shadow:0 12px 35px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s;font-size:.86rem}.toast.show{opacity:1}.toast.error{background:#991b1b}
+    .muted{color:var(--muted)}.nowrap{white-space:nowrap}
+    @media(max-width:900px){.grid-2,.grid-3,.med-list,.refill-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.span-4{grid-column:1/-1}.workflow{grid-template-columns:1fr}.head-inner{align-items:flex-start}.back-btn{white-space:nowrap}}
+    @media(max-width:600px){main{padding:0 12px}.head-inner{padding:15px 13px}.head-inner img{width:46px;height:46px}.head-title h1{font-size:1.05rem}.head-title p{font-size:.75rem}.back-btn{padding:8px 10px;font-size:.75rem}.card{padding:16px;border-radius:18px}.form-grid{grid-template-columns:1fr}.span-2,.span-4{grid-column:1}.actions>*{flex:1 1 100%}.sync{align-items:flex-start;flex-wrap:wrap}.sync small{margin-left:0;width:100%}}
+  </style>
+</head>
+<body>
+<div class="gate" id="gate">
+  <div class="gatebox">
+    <div class="gatehead"><h2>🔒 Omar Medication Page</h2><p>Private ESS participant information</p></div>
+    <div class="gatebody">
+      <p style="text-align:center;color:#475569;margin-top:0">Enter Omar's participant PIN to continue.</p>
+      <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN" autocomplete="off" />
+      <button id="unlock">Access Medication Page</button>
+      <div class="gate-err" id="pinErr"></div>
+      <div style="text-align:center"><a href="/login.html" style="color:var(--ess);font-weight:800;text-decoration:none">← Back to ESS Login</a></div>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="head-inner">
+    <img src="/ESS%20Logo.png" alt="ESS logo" onerror="this.style.display='none'" />
+    <div class="head-title"><h1>Omar • Medication Assistance & Tracking</h1><p>Empowerment Support Solutions, LLC • Cloud-synced medication record</p></div>
+    <div class="head-spacer"></div>
+    <a class="back-btn" href="/omar-v.html">← Omar Profile</a>
+  </div>
+</header>
+
+<main>
+  <div id="syncBar" class="sync"><span>☁️</span><span id="syncText">Connecting to ESS cloud…</span><small id="syncTime">Supabase</small></div>
+
+  <div class="safety" style="margin-bottom:16px">
+    <strong>Medication safety:</strong> This page is for ESS medication assistance and documentation. The current pharmacy label/prescriber order controls. Staff should never change a medication, dose, timing, or substitute a medication based only on this page. If a label or order changes, notify ESS management and update the medication plan before using the new directions.
+  </div>
+
+  <section class="card" style="margin-bottom:16px">
+    <div class="card-title"><div><h2>💊 Current Medication Plan</h2><p>Loaded directly from Omar's ESS Supabase record. Medication directions are read-only here.</p></div></div>
+    <div id="medList" class="med-list"><div class="empty">Loading medication plan…</div></div>
+  </section>
+
+  <section class="card" style="margin-bottom:16px">
+    <div class="card-title"><div><h2>📦 Refill Readiness</h2><p>Estimates are based on the current pill count and documented use. They are planning alerts, not pharmacy guarantees.</p></div><button class="btn-secondary" id="openInventoryBtn">Update Count / Refill</button></div>
+    <div id="refillGrid" class="refill-grid"><div class="empty">Loading refill status…</div></div>
+  </section>
+
+  <section class="card" style="margin-bottom:16px">
+    <div class="card-title"><div><h2>✅ Today's Medication Check</h2><p>Quick view of scheduled medication documentation for today. PRN medication is shown separately and is only used when needed.</p></div></div>
+    <div class="table-scroll"><table class="today-table"><thead><tr><th>Medication</th><th>Schedule</th><th>Directions</th><th>Today's status</th><th>Last charted</th></tr></thead><tbody id="todayBody"><tr><td colspan="5" class="empty">Loading today's record…</td></tr></tbody></table></div>
+  </section>
+
+  <section class="card" style="margin-bottom:16px">
+    <div class="card-title"><div><h2>📝 Record Medication Assistance</h2><p>One simple entry per medication event. Saving writes directly to Supabase and updates the refill estimate when a pill count exists.</p></div></div>
+    <form id="marForm">
+      <div class="form-grid">
+        <div class="field"><label for="serviceDate">Date</label><input id="serviceDate" type="date" required /></div>
+        <div class="field"><label for="staffName">Staff name</label><input id="staffName" type="text" placeholder="e.g., Ivan" required /></div>
+        <div class="field span-2"><label for="medicationSelect">Medication</label><select id="medicationSelect" required><option value="">Select medication…</option></select></div>
+        <div class="field"><label for="periodSelect">Scheduled period</label><select id="periodSelect"><option value="morning">Morning</option><option value="bedtime" selected>Bedtime</option><option value="other">Other</option></select></div>
+        <div class="field"><label for="statusSelect">Status</label><select id="statusSelect"><option value="taken">Taken / assisted</option><option value="refused">Refused</option><option value="held">Held per authorized direction</option><option value="missed">Missed</option><option value="not_needed">Not needed (PRN only)</option></select></div>
+        <div class="field"><label for="tabletsTaken">Tablets used</label><input id="tabletsTaken" type="number" min="0" step="0.5" value="1" /></div>
+        <div class="field"><label for="prnReason">PRN reason</label><input id="prnReason" type="text" placeholder="Required if PRN was taken" /></div>
+        <div class="field span-4"><label for="marNotes">Notes</label><textarea id="marNotes" placeholder="Optional: response, refusal details, pharmacy issue, authorized hold instructions, etc."></textarea></div>
+      </div>
+      <div class="form-note" id="formHelp">Select a medication and record exactly what occurred. For a scheduled medication that was not taken, use Refused, Held, or Missed instead of Taken.</div>
+      <div class="actions"><button type="submit" id="saveMarBtn">☁️ Save Medication Entry</button></div>
+    </form>
+  </section>
+
+  <section class="card" id="inventoryCard" style="margin-bottom:16px">
+    <div class="card-title"><div><h2>🔢 Update Pill Count / Refill</h2><p>Use this after counting pills, correcting a count, or picking up a refill. This creates an audit event in Supabase.</p></div></div>
+    <form id="inventoryForm">
+      <div class="form-grid">
+        <div class="field span-2"><label for="inventoryMed">Medication</label><select id="inventoryMed" required><option value="">Select medication…</option></select></div>
+        <div class="field"><label for="inventoryType">Update type</label><select id="inventoryType"><option value="count">Pill count</option><option value="refill">Refill picked up</option><option value="correction">Count correction</option></select></div>
+        <div class="field"><label for="inventoryStaff">Staff name</label><input id="inventoryStaff" type="text" placeholder="e.g., Ivan" required /></div>
+        <div class="field"><label for="quantityAfter">Current pills on hand</label><input id="quantityAfter" type="number" min="0" step="0.5" required placeholder="e.g., 24" /></div>
+        <div class="field"><label for="quantityAdded">Pills added at refill</label><input id="quantityAdded" type="number" min="0" step="0.5" placeholder="e.g., 30" /></div>
+        <div class="field"><label for="refillsRemaining">Refills remaining</label><input id="refillsRemaining" type="number" min="0" step="1" placeholder="Leave blank if unknown" /></div>
+        <div class="field"><label for="dispensedOn">Refill / fill date</label><input id="dispensedOn" type="date" /></div>
+        <div class="field span-4"><label for="inventoryNotes">Notes</label><textarea id="inventoryNotes" placeholder="Optional: pharmacy contacted, refill requested, bottle count corrected, etc."></textarea></div>
+      </div>
+      <div class="form-note">For refill estimates to work, enter the actual current pill count. For PRN medication, estimates use recent documented use and may vary.</div>
+      <div class="actions"><button type="submit" id="saveInventoryBtn">☁️ Save Inventory Update</button></div>
+    </form>
+  </section>
+
+  <section class="card" style="margin-bottom:16px">
+    <div class="card-title"><div><h2>📋 Medication Assistance Record</h2><p>Recent cloud-saved entries across staff and devices. Records are kept as an audit trail.</p></div><button class="btn-secondary" id="refreshBtn">↻ Refresh</button></div>
+    <div class="table-scroll"><table class="history-table"><thead><tr><th>Date</th><th>Medication</th><th>Schedule</th><th>Status</th><th>Tablets</th><th>Staff</th><th>PRN reason / notes</th><th>Cloud time</th></tr></thead><tbody id="historyBody"><tr><td colspan="8" class="empty">Loading medication record…</td></tr></tbody></table></div>
+  </section>
+
+  <section class="card">
+    <div class="card-title"><div><h2>🚦 ESS Refill Workflow</h2><p>Use these prompts so a refill is handled before the medication supply runs out.</p></div></div>
+    <div class="workflow">
+      <div class="workflow-step blue"><strong>🔵 Set up / verify count</strong><p>If the count is blank, count the pills and save the current quantity. The page cannot estimate a refill date without a reliable starting count.</p></div>
+      <div class="workflow-step yellow"><strong>🟡 7 days or fewer estimated</strong><p>Start the refill process: notify ESS management/family as appropriate, contact the pharmacy, and document the request. Check whether refills remain.</p></div>
+      <div class="workflow-step red"><strong>🔴 3 days or fewer / 0 refills</strong><p>Escalate the refill the same day. Contact the pharmacy/prescriber or authorized responsible party. Do not change the dose or substitute medication to stretch the supply.</p></div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{
+  const CLIENT_ID='521dd725-2fa6-4d78-9fcc-e5447dc727cb';
+  const OMAR_PIN='0125';
+  const SESSION_KEY='ESS_EXPORT_OMAR';
+  const SUPABASE_URL='https://bqanjupmcgydvmfgvutx.supabase.co';
+  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk';
+  const $=id=>document.getElementById(id);
+  const gate=$('gate'),pin=$('pin'),pinErr=$('pinErr');
+  let sb=null,ess=null,meds=[],logs=[],cloudReady=false,realtimeChannel=null;
+
+  function unlock(){
+    if((pin.value||'').trim()===OMAR_PIN){try{sessionStorage.setItem(SESSION_KEY,'true')}catch(e){}gate.classList.add('hidden');pinErr.textContent='';start();}
+    else pinErr.textContent='Incorrect PIN. Please try again.';
+  }
+  $('unlock').addEventListener('click',unlock);pin.addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
+
+  function todayISO(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
+  function fmtDate(v){if(!v)return'—';const p=String(v).slice(0,10).split('-').map(Number);if(p.length!==3)return v;return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}).format(new Date(p[0],p[1]-1,p[2]))}
+  function fmtDateTime(v){if(!v)return'—';const d=new Date(v);if(Number.isNaN(d.getTime()))return'—';return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(d)}
+  function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+  function medLabel(m){return `${m.medication_name} ${m.strength}`}
+  function cleanNumber(v){if(v===null||v===undefined||v==='')return null;const n=Number(v);return Number.isFinite(n)?n:null}
+  function num(v){const n=Number(v);return Number.isFinite(n)?n:0}
+  function showToast(msg,error=false){const t=$('toast');t.textContent=msg;t.classList.toggle('error',error);t.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove('show'),2600)}
+  function setSync(ok,msg){cloudReady=ok;const b=$('syncBar');b.classList.toggle('good',ok);b.classList.toggle('bad',!ok);$('syncText').textContent=msg;$('syncTime').textContent=ok?`Last sync ${new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}`:'No local fallback';$('saveMarBtn').disabled=!ok;$('saveInventoryBtn').disabled=!ok}
+  function statusChip(status){const map={taken:['good','Taken / assisted'],refused:['urgent','Refused'],held:['warn','Held'],missed:['urgent','Missed'],not_needed:['setup','Not needed (PRN)']};const x=map[status]||['setup','Not charted'];return `<span class="status-pill ${x[0]}">${esc(x[1])}</span>`}
+
+  function renderMedications(){
+    const el=$('medList');
+    if(!meds.length){el.innerHTML='<div class="empty">No active medications found in Supabase.</div>';return}
+    el.innerHTML=meds.map(m=>{
+      const combo=m.medication_name.toLowerCase().includes('quetiapine')?'<div class="combo-note">Quetiapine total at bedtime: <strong>500 mg</strong> when the 400 mg + 100 mg tablets are used together per the current bottle labels.</div>':'';
+      return `<article class="med-card"><div class="med-top"><div><div class="med-name">${esc(m.medication_name)} <span class="med-strength">${esc(m.strength)}</span></div><div class="sub">${m.brand_name?`Generic for ${esc(m.brand_name)} • `:''}${esc(m.route||'By mouth')} • ${esc(m.form||'tablet')}</div></div><span class="tag ${m.schedule_type==='prn'?'prn':'scheduled'}">${m.schedule_type==='prn'?'PRN / As needed':'Scheduled'}</span></div><div class="instructions"><strong>${esc(m.schedule_label)}</strong><br>${esc(m.instructions)}</div>${combo}</article>`
+    }).join('')
+  }
+
+  function recentUsagePerDay(med){
+    const cutoff=new Date();cutoff.setDate(cutoff.getDate()-14);cutoff.setHours(0,0,0,0);
+    const relevant=logs.filter(l=>l.medication_id===med.id&&l.status==='taken'&&new Date(`${l.service_date}T12:00:00`)>=cutoff);
+    const total=relevant.reduce((s,l)=>s+num(l.tablets_taken),0);
+    return total/14;
+  }
+  function refillInfo(m){
+    const qty=cleanNumber(m.quantity_on_hand);
+    const fixed=m.schedule_type==='scheduled'&&cleanNumber(m.tablets_per_dose)!=null&&cleanNumber(m.doses_per_day)!=null?num(m.tablets_per_dose)*num(m.doses_per_day):null;
+    const rate=fixed&&fixed>0?fixed:recentUsagePerDay(m);
+    if(qty===null)return{cls:'setup',label:'Count needed',metric:'—',sub:'No pill count saved',action:'Count the medication and save the current pills on hand to activate refill estimates.'};
+    if(qty===0)return{cls:'urgent',label:'Out / verify now',metric:'0',sub:'pills on hand',action:'Contact ESS management and the pharmacy/prescriber or authorized responsible party now. Verify the actual supply before any medication is due.'};
+    if(!rate||rate<=0){return{cls:m.refills_remaining===0?'warn':'setup',label:m.refills_remaining===0?'0 refills recorded':'PRN / variable use',metric:String(qty),sub:'pills on hand',action:m.refills_remaining===0?'No refills are recorded. Check with the pharmacy before the supply becomes low.':'PRN use varies. Keep the count current; the estimate will improve as actual use is documented.'}}
+    const days=qty/rate,runout=new Date();runout.setHours(12,0,0,0);runout.setDate(runout.getDate()+Math.max(0,Math.floor(days)));
+    const contact=new Date(runout);contact.setDate(contact.getDate()-7);
+    let cls='good',label='Stocked';if(days<=3){cls='urgent';label='Refill now'}else if(days<=7){cls='warn';label='Refill soon'}else if(m.refills_remaining===0&&days<=14){cls='warn';label='No refills recorded'}
+    const action=days<=3?`About ${Math.max(0,Math.floor(days))} day(s) estimated. Escalate refill today.`:days<=7?`About ${Math.floor(days)} day(s) estimated. Start refill process now.`:`Estimated run-out ${fmtDate(runout.toISOString().slice(0,10))}. Aim to start refill by ${fmtDate(contact.toISOString().slice(0,10))}.`;
+    return{cls,label,metric:String(qty),sub:`pills on hand • ~${Math.max(0,Math.floor(days))} days`,action};
+  }
+  function renderRefills(){
+    const el=$('refillGrid');if(!meds.length){el.innerHTML='<div class="empty">No medication inventory found.</div>';return}
+    el.innerHTML=meds.map(m=>{const r=refillInfo(m);const refills=m.refills_remaining==null?'unknown':m.refills_remaining;return `<div class="refill-card"><div class="refill-head"><div><div class="refill-name">${esc(medLabel(m))}</div><div class="sub">Refills remaining: ${esc(refills)}</div></div><span class="status-pill ${r.cls}">${esc(r.label)}</span></div><div class="metric">${esc(r.metric)}</div><div class="metric-sub">${esc(r.sub)}</div><div class="refill-action">${esc(r.action)}</div></div>`}).join('')
+  }
+
+  function renderToday(){
+    const today=todayISO(),todayLogs=logs.filter(l=>l.service_date===today),body=$('todayBody');
+    if(!meds.length){body.innerHTML='<tr><td colspan="5" class="empty">No active medications found.</td></tr>';return}
+    body.innerHTML=meds.map(m=>{
+      const mine=todayLogs.filter(l=>l.medication_id===m.id).sort((a,b)=>new Date(b.recorded_at)-new Date(a.recorded_at));const latest=mine[0];
+      const schedule=m.schedule_type==='prn'?`${m.schedule_label} (only when needed)`:m.schedule_label;
+      return `<tr><td><strong>${esc(medLabel(m))}</strong>${m.schedule_type==='prn'?'<br><span class="tag prn" style="margin-top:4px">PRN</span>':''}</td><td>${esc(schedule)}</td><td>${esc(m.instructions)}</td><td>${latest?statusChip(latest.status):'<span class="status-pill setup">Not charted today</span>'}</td><td>${latest?fmtDateTime(latest.recorded_at):'—'}</td></tr>`
+    }).join('')
+  }
+
+  function renderHistory(){
+    const body=$('historyBody');
+    if(!logs.length){body.innerHTML='<tr><td colspan="8" class="empty">No medication entries yet.</td></tr>';return}
+    const byId=new Map(meds.map(m=>[m.id,m]));
+    body.innerHTML=logs.slice(0,120).map(l=>{const m=byId.get(l.medication_id);const notes=[l.prn_reason?`PRN: ${l.prn_reason}`:'',l.notes||''].filter(Boolean).join(' • ');return `<tr><td class="nowrap">${fmtDate(l.service_date)}</td><td><strong>${esc(m?medLabel(m):'Medication')}</strong></td><td>${esc(l.scheduled_period||'—')}</td><td>${statusChip(l.status)}</td><td>${l.status==='taken'?esc(l.tablets_taken):'0'}</td><td>${esc(l.staff_name)}</td><td>${esc(notes||'—')}</td><td class="nowrap">${fmtDateTime(l.recorded_at)}</td></tr>`}).join('')
+  }
+
+  function fillMedicationSelects(){
+    const opts='<option value="">Select medication…</option>'+meds.map(m=>`<option value="${esc(m.id)}">${esc(medLabel(m))} — ${esc(m.schedule_label)}</option>`).join('');
+    $('medicationSelect').innerHTML=opts;$('inventoryMed').innerHTML=opts;
+  }
+
+  function adjustMarDefaults(){
+    const m=meds.find(x=>x.id===$('medicationSelect').value);if(!m)return;
+    if(m.schedule_type==='prn'){
+      $('formHelp').textContent='PRN medication: if it was taken, document the reason. If it was not needed, use “Not needed (PRN only)” only when your ESS workflow calls for a PRN check.';
+      if($('periodSelect').value==='morning')$('tabletsTaken').value='1';else if($('periodSelect').value==='bedtime')$('tabletsTaken').value='2';
+    }else{
+      $('periodSelect').value=String(m.schedule_label||'').toLowerCase().includes('bed')?'bedtime':'other';
+      $('tabletsTaken').value=m.tablets_per_dose??1;
+      $('formHelp').textContent='Scheduled medication: record exactly what occurred. If it was not taken, choose Refused, Held, or Missed; tablets used will be saved as 0.';
+    }
+    adjustStatusFields();
+  }
+  function adjustStatusFields(){const status=$('statusSelect').value,isTaken=status==='taken';$('tabletsTaken').disabled=!isTaken;if(!isTaken)$('tabletsTaken').value='0';else if(Number($('tabletsTaken').value)<=0)adjustMarDefaults()}
+  $('medicationSelect').addEventListener('change',adjustMarDefaults);$('periodSelect').addEventListener('change',()=>{const m=meds.find(x=>x.id===$('medicationSelect').value);if(m?.schedule_type==='prn'&&$('statusSelect').value==='taken')$('tabletsTaken').value=$('periodSelect').value==='bedtime'?'2':'1'});$('statusSelect').addEventListener('change',adjustStatusFields);
+
+  async function loadAll(showSuccess=false){
+    if(!ess)return;
+    try{
+      const since=new Date();since.setDate(since.getDate()-45);const sinceISO=since.toISOString().slice(0,10);
+      const [mRes,lRes]=await Promise.all([
+        ess.from('medication_orders').select('*').eq('client_id',CLIENT_ID).eq('active',true).order('display_order',{ascending:true}),
+        ess.from('medication_logs').select('*').eq('client_id',CLIENT_ID).gte('service_date',sinceISO).order('service_date',{ascending:false}).order('recorded_at',{ascending:false})
+      ]);
+      if(mRes.error)throw mRes.error;if(lRes.error)throw lRes.error;
+      meds=mRes.data||[];logs=lRes.data||[];renderMedications();renderRefills();renderToday();renderHistory();fillMedicationSelects();setSync(true,'ESS cloud connected • medication data is synced across devices');if(showSuccess)showToast('Medication page refreshed from Supabase ✅');
+    }catch(e){console.error(e);setSync(false,`Cloud connection problem: ${e.message||'Unable to load medication data'}`);showToast('Could not sync medication data. Nothing was saved locally.',true)}
+  }
+
+  $('marForm').addEventListener('submit',async e=>{
+    e.preventDefault();if(!cloudReady)return showToast('Cloud is not connected. Entry was not saved.',true);
+    const med=meds.find(m=>m.id===$('medicationSelect').value),status=$('statusSelect').value,staff=$('staffName').value.trim(),date=$('serviceDate').value,period=$('periodSelect').value,prn=$('prnReason').value.trim(),notes=$('marNotes').value.trim();
+    if(!med||!staff||!date)return showToast('Date, staff name, and medication are required.',true);
+    if(status==='not_needed'&&med.schedule_type!=='prn')return showToast('“Not needed” is only for PRN medication.',true);
+    const tablets=status==='taken'?Number($('tabletsTaken').value):0;if(status==='taken'&&(!Number.isFinite(tablets)||tablets<=0))return showToast('Enter the number of tablets actually used.',true);
+    if(med.schedule_type==='prn'&&status==='taken'&&!prn)return showToast('Enter the PRN reason before saving.',true);
+    $('saveMarBtn').disabled=true;
+    try{
+      const {error}=await ess.rpc('record_omar_medication_log',{p_medication_id:med.id,p_service_date:date,p_scheduled_period:period,p_status:status,p_tablets_taken:tablets,p_staff_name:staff,p_prn_reason:prn||null,p_notes:notes||null});if(error)throw error;
+      showToast('Medication entry saved to Supabase ✅');$('prnReason').value='';$('marNotes').value='';await loadAll();
+    }catch(err){console.error(err);showToast(err.message||'Medication entry could not be saved.',true)}finally{$('saveMarBtn').disabled=!cloudReady}
+  });
+
+  $('inventoryForm').addEventListener('submit',async e=>{
+    e.preventDefault();if(!cloudReady)return showToast('Cloud is not connected. Inventory was not saved.',true);
+    const med=meds.find(m=>m.id===$('inventoryMed').value),type=$('inventoryType').value,staff=$('inventoryStaff').value.trim(),q=Number($('quantityAfter').value),added=$('quantityAdded').value===''?null:Number($('quantityAdded').value),refills=$('refillsRemaining').value===''?null:Number($('refillsRemaining').value),fill=$('dispensedOn').value||null,notes=$('inventoryNotes').value.trim();
+    if(!med||!staff||!Number.isFinite(q)||q<0)return showToast('Medication, staff name, and current pill count are required.',true);
+    if(type==='refill'&&(added===null||!Number.isFinite(added)||added<0))return showToast('For a refill, enter how many pills were added.',true);
+    $('saveInventoryBtn').disabled=true;
+    try{
+      const {error}=await ess.rpc('record_omar_medication_inventory',{p_medication_id:med.id,p_event_type:type,p_quantity_after:q,p_quantity_added:added,p_refills_remaining_after:refills,p_staff_name:staff,p_dispensed_on:fill,p_notes:notes||null});if(error)throw error;
+      showToast('Medication count/refill saved to Supabase ✅');$('quantityAfter').value='';$('quantityAdded').value='';$('refillsRemaining').value='';$('inventoryNotes').value='';await loadAll();
+    }catch(err){console.error(err);showToast(err.message||'Inventory update could not be saved.',true)}finally{$('saveInventoryBtn').disabled=!cloudReady}
+  });
+
+  $('inventoryType').addEventListener('change',()=>{const isRefill=$('inventoryType').value==='refill';$('quantityAdded').disabled=!isRefill;$('dispensedOn').disabled=!isRefill;if(isRefill&&!$('dispensedOn').value)$('dispensedOn').value=todayISO()});
+  $('openInventoryBtn').addEventListener('click',()=>{$('inventoryCard').scrollIntoView({behavior:'smooth',block:'start'})});$('refreshBtn').addEventListener('click',()=>loadAll(true));
+
+  function subscribeRealtime(){
+    try{
+      if(realtimeChannel)sb.removeChannel(realtimeChannel);
+      realtimeChannel=sb.channel('omar-medication-cloud')
+        .on('postgres_changes',{event:'*',schema:'ess',table:'medication_orders',filter:`client_id=eq.${CLIENT_ID}`},()=>loadAll())
+        .on('postgres_changes',{event:'*',schema:'ess',table:'medication_logs',filter:`client_id=eq.${CLIENT_ID}`},()=>loadAll())
+        .on('postgres_changes',{event:'*',schema:'ess',table:'medication_inventory_events',filter:`client_id=eq.${CLIENT_ID}`},()=>loadAll())
+        .subscribe();
+    }catch(e){console.warn('Realtime unavailable',e)}
+  }
+  async function start(){
+    if(sb)return;
+    $('serviceDate').value=todayISO();$('dispensedOn').value=todayISO();$('inventoryType').dispatchEvent(new Event('change'));
+    if(!window.supabase){setSync(false,'Supabase library did not load. Medication charting is disabled.');return}
+    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);ess=sb.schema('ess');await loadAll();subscribeRealtime();
+  }
+
+  try{if(sessionStorage.getItem(SESSION_KEY)==='true'){gate.classList.add('hidden');start()}}catch(e){}
+})();
+</script>
+</body>
+</html>
