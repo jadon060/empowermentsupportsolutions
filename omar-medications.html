@@ -12,12 +12,12 @@
       --yellow:#854d0e;--yellow-bg:#fffbeb;--red:#991b1b;--red-bg:#fef2f2;--blue:#1d4ed8;--blue-bg:#eff6ff;
     }
     *{box-sizing:border-box}html,body{margin:0;padding:0;background:radial-gradient(circle at top left,#e8f7fa 0,#f4f8fb 34%,#f8fafc 100%);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{min-height:100vh}.hidden{display:none!important}
+    body{min-height:100vh}.hidden{display:none!important}.svg-sprite{position:absolute;width:0;height:0;overflow:hidden}.icon{width:18px;height:18px;display:inline-block;vertical-align:-3px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}.icon--sm{width:16px;height:16px}.icon--lg{width:21px;height:21px}.title-row{display:flex;align-items:center;gap:10px}.title-icon{width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--soft);color:var(--ess-dark);border:1px solid #d5edf2;flex:0 0 auto}.workflow-icon{width:32px;height:32px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:9px}.workflow-step.blue .workflow-icon{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}.workflow-step.yellow .workflow-icon{background:#fffbeb;color:#a16207;border:1px solid #fde68a}.workflow-step.red .workflow-icon{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
     .gate{position:fixed;inset:0;z-index:999;background:linear-gradient(145deg,#eff9fb,#f8fafc);display:grid;place-items:center;padding:20px}
     .gatebox{width:min(430px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 24px 70px rgba(15,23,42,.18)}
-    .gatehead{padding:24px;background:linear-gradient(120deg,var(--ess),var(--ess2));color:#fff;text-align:center}.gatehead h2{margin:0 0 6px}.gatehead p{margin:0;opacity:.9;font-size:.9rem}.gatebody{padding:24px}.gatebody input{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;text-align:center;font-size:1.15rem;letter-spacing:.18em}.gatebody button{width:100%;margin-top:10px}.gate-err{min-height:22px;color:var(--red);font-size:.85rem;margin-top:8px;text-align:center}
+    .gatehead{padding:24px;background:linear-gradient(120deg,var(--ess),var(--ess2));color:#fff;text-align:center}.gatehead h2{margin:0 0 6px;display:flex;align-items:center;justify-content:center;gap:9px}.gatehead p{margin:0;opacity:.9;font-size:.9rem}.gatebody{padding:24px}.gatebody input{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;text-align:center;font-size:1.15rem;letter-spacing:.18em}.gatebody button{width:100%;margin-top:10px}.gate-err{min-height:22px;color:var(--red);font-size:.85rem;margin-top:8px;text-align:center}
     header{background:linear-gradient(120deg,var(--ess),var(--ess2),var(--ess));background-size:220% 220%;color:#fff;box-shadow:0 10px 30px rgba(15,79,104,.22)}
-    .head-inner{max-width:1120px;margin:auto;padding:18px 20px;display:flex;align-items:center;gap:14px}.head-inner img{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:14px;padding:5px}.head-title h1{margin:0;font-size:1.35rem}.head-title p{margin:4px 0 0;font-size:.86rem;opacity:.9}.head-spacer{flex:1}.back-btn{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.45);padding:9px 13px;border-radius:999px;font-weight:800;font-size:.84rem;background:rgba(255,255,255,.10)}
+    .head-inner{max-width:1120px;margin:auto;padding:18px 20px;display:flex;align-items:center;gap:14px}.head-inner img{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:14px;padding:5px}.head-title h1{margin:0;font-size:1.35rem}.head-title p{margin:4px 0 0;font-size:.86rem;opacity:.9}.head-spacer{flex:1}.back-btn{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.45);padding:9px 13px;border-radius:999px;font-weight:800;font-size:.84rem;background:rgba(255,255,255,.10);display:inline-flex;align-items:center;gap:6px}
     main{max-width:1120px;margin:22px auto 46px;padding:0 18px}.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
     .card{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 14px 34px rgba(15,23,42,.07)}
     .card h2,.card h3{margin:0}.card-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}.card-title p{margin:5px 0 0;color:var(--muted);font-size:.88rem;line-height:1.45}
@@ -36,15 +36,33 @@
   </style>
 </head>
 <body>
+<svg class="svg-sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H7a5 5 0 0 1-.5-9.97A7 7 0 0 1 20 11a4 4 0 0 1-2.5 8Z"/><path d="m9 14 2 2 4-4"/></symbol>
+  <symbol id="i-pill" viewBox="0 0 24 24"><path d="M10.5 5.5a4.95 4.95 0 0 1 7 7l-5 5a4.95 4.95 0 0 1-7-7Z"/><path d="m8.5 15.5 7-7"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5"/><path d="M12 12v9"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></symbol>
+  <symbol id="i-clipboard-pen" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="m9 15 5.5-5.5 2 2L11 17H9Z"/></symbol>
+  <symbol id="i-count" viewBox="0 0 24 24"><path d="M9 3 7 21"/><path d="M17 3l-2 18"/><path d="M4 9h16"/><path d="M3 15h16"/></symbol>
+  <symbol id="i-clipboard-list" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="M9 10h6M9 14h6M9 18h4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M18.5 9A7 7 0 0 0 6.4 6.4L4 9"/><path d="M5.5 15A7 7 0 0 0 17.6 17.6L20 15"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3a3 3 0 0 0 3-3V9a3 3 0 0 1 3-3"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 4.2 2.8 17a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h12l2 2v14H5Z"/><path d="M8 4v6h8V4"/><path d="M8 20v-6h8v6"/></symbol>
+</svg>
+
 <div class="gate" id="gate">
   <div class="gatebox">
-    <div class="gatehead"><h2>🔒 Omar Medication Page</h2><p>Private ESS participant information</p></div>
+    <div class="gatehead"><h2><svg class="icon icon--lg"><use href="#i-lock"></use></svg>Omar Medication Page</h2><p>Private ESS participant information</p></div>
     <div class="gatebody">
       <p style="text-align:center;color:#475569;margin-top:0">Enter Omar's participant PIN to continue.</p>
       <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN" autocomplete="off" />
       <button id="unlock">Access Medication Page</button>
       <div class="gate-err" id="pinErr"></div>
-      <div style="text-align:center"><a href="/login.html" style="color:var(--ess);font-weight:800;text-decoration:none">← Back to ESS Login</a></div>
+      <div style="text-align:center"><a href="/login.html" style="color:var(--ess);font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:5px"><svg class="icon icon--sm"><use href="#i-arrow-left"></use></svg>Back to ESS Login</a></div>
     </div>
   </div>
 </div>
@@ -52,36 +70,36 @@
 <header>
   <div class="head-inner">
     <img src="/ESS%20Logo.png" alt="ESS logo" onerror="this.style.display='none'" />
-    <div class="head-title"><h1>Omar • Medication Assistance & Tracking</h1><p>Empowerment Support Solutions, LLC • Cloud-synced medication record</p></div>
+    <div class="head-title"><h1>Omar • Medication Assistance & Tracking</h1><p>Empowerment Support Solutions, LLC • Secure synced medication record</p></div>
     <div class="head-spacer"></div>
-    <a class="back-btn" href="/omar-v.html">← Omar Profile</a>
+    <a class="back-btn" href="/omar-v.html"><svg class="icon icon--sm"><use href="#i-arrow-left"></use></svg>Omar Profile</a>
   </div>
 </header>
 
 <main>
-  <div id="syncBar" class="sync"><span>☁️</span><span id="syncText">Connecting to ESS cloud…</span><small id="syncTime">Supabase</small></div>
+  <div id="syncBar" class="sync"><svg class="icon"><use href="#i-cloud"></use></svg><span id="syncText">Connecting to ESS medication record…</span><small id="syncTime">Secure sync</small></div>
 
   <div class="safety" style="margin-bottom:16px">
     <strong>Medication safety:</strong> This page is for ESS medication assistance and documentation. The current pharmacy label/prescriber order controls. Staff should never change a medication, dose, timing, or substitute a medication based only on this page. If a label or order changes, notify ESS management and update the medication plan before using the new directions.
   </div>
 
   <section class="card" style="margin-bottom:16px">
-    <div class="card-title"><div><h2>💊 Current Medication Plan</h2><p>Loaded directly from Omar's ESS Supabase record. Medication directions are read-only here.</p></div></div>
+    <div class="card-title"><div><div class="title-row"><span class="title-icon"><svg class="icon icon--lg"><use href="#i-pill"></use></svg></span><h2>Current Medication Plan</h2></div><p>Medication directions are read-only on this page.</p></div></div>
     <div id="medList" class="med-list"><div class="empty">Loading medication plan…</div></div>
   </section>
 
   <section class="card" style="margin-bottom:16px">
-    <div class="card-title"><div><h2>📦 Refill Readiness</h2><p>Estimates are based on the current pill count and documented use. They are planning alerts, not pharmacy guarantees.</p></div><button class="btn-secondary" id="openInventoryBtn">Update Count / Refill</button></div>
+    <div class="card-title"><div><div class="title-row"><span class="title-icon"><svg class="icon icon--lg"><use href="#i-package"></use></svg></span><h2>Refill Readiness</h2></div><p>Estimates are based on the current pill count and documented use. They are planning alerts, not pharmacy guarantees.</p></div><button class="btn-secondary" id="openInventoryBtn">Update Count / Refill</button></div>
     <div id="refillGrid" class="refill-grid"><div class="empty">Loading refill status…</div></div>
   </section>
 
   <section class="card" style="margin-bottom:16px">
-    <div class="card-title"><div><h2>✅ Today's Medication Check</h2><p>Quick view of scheduled medication documentation for today. PRN medication is shown separately and is only used when needed.</p></div></div>
+    <div class="card-title"><div><div class="title-row"><span class="title-icon"><svg class="icon icon--lg"><use href="#i-check-circle"></use></svg></span><h2>Today's Medication Check</h2></div><p>Quick view of scheduled medication documentation for today. PRN medication is shown separately and is only used when needed.</p></div></div>
     <div class="table-scroll"><table class="today-table"><thead><tr><th>Medication</th><th>Schedule</th><th>Directions</th><th>Today's status</th><th>Last charted</th></tr></thead><tbody id="todayBody"><tr><td colspan="5" class="empty">Loading today's record…</td></tr></tbody></table></div>
   </section>
 
   <section class="card" style="margin-bottom:16px">
-    <div class="card-title"><div><h2>📝 Record Medication Assistance</h2><p>One simple entry per medication event. Saving writes directly to Supabase and updates the refill estimate when a pill count exists.</p></div></div>
+    <div class="card-title"><div><div class="title-row"><span class="title-icon"><svg class="icon icon--lg"><use href="#i-clipboard-pen"></use></svg></span><h2>Record Medication Assistance</h2></div><p>One simple entry per medication event. Saving updates Omar's secure medication record and refill estimate when a pill count exists.</p></div></div>
     <form id="marForm">
       <div class="form-grid">
         <div class="field"><label for="serviceDate">Date</label><input id="serviceDate" type="date" required /></div>
@@ -94,12 +112,12 @@
         <div class="field span-4"><label for="marNotes">Notes</label><textarea id="marNotes" placeholder="Optional: response, refusal details, pharmacy issue, authorized hold instructions, etc."></textarea></div>
       </div>
       <div class="form-note" id="formHelp">Select a medication and record exactly what occurred. For a scheduled medication that was not taken, use Refused, Held, or Missed instead of Taken.</div>
-      <div class="actions"><button type="submit" id="saveMarBtn">☁️ Save Medication Entry</button></div>
+      <div class="actions"><button type="submit" id="saveMarBtn"><svg class="icon icon--sm"><use href="#i-save"></use></svg>Save Medication Entry</button></div>
     </form>
   </section>
 
   <section class="card" id="inventoryCard" style="margin-bottom:16px">
-    <div class="card-title"><div><h2>🔢 Update Pill Count / Refill</h2><p>Use this after counting pills, correcting a count, or picking up a refill. This creates an audit event in Supabase.</p></div></div>
+    <div class="card-title"><div><div class="title-row"><span class="title-icon"><svg class="icon icon--lg"><use href="#i-count"></use></svg></span><h2>Update Pill Count / Refill</h2></div><p>Use this after counting pills, correcting a count, or picking up a refill. Each update is added to the medication audit history.</p></div></div>
     <form id="inventoryForm">
       <div class="form-grid">
         <div class="field span-2"><label for="inventoryMed">Medication</label><select id="inventoryMed" required><option value="">Select medication…</option></select></div>
@@ -112,21 +130,21 @@
         <div class="field span-4"><label for="inventoryNotes">Notes</label><textarea id="inventoryNotes" placeholder="Optional: pharmacy contacted, refill requested, bottle count corrected, etc."></textarea></div>
       </div>
       <div class="form-note">For refill estimates to work, enter the actual current pill count. For PRN medication, estimates use recent documented use and may vary.</div>
-      <div class="actions"><button type="submit" id="saveInventoryBtn">☁️ Save Inventory Update</button></div>
+      <div class="actions"><button type="submit" id="saveInventoryBtn"><svg class="icon icon--sm"><use href="#i-save"></use></svg>Save Inventory Update</button></div>
     </form>
   </section>
 
   <section class="card" style="margin-bottom:16px">
-    <div class="card-title"><div><h2>📋 Medication Assistance Record</h2><p>Recent cloud-saved entries across staff and devices. Records are kept as an audit trail.</p></div><button class="btn-secondary" id="refreshBtn">↻ Refresh</button></div>
-    <div class="table-scroll"><table class="history-table"><thead><tr><th>Date</th><th>Medication</th><th>Schedule</th><th>Status</th><th>Tablets</th><th>Staff</th><th>PRN reason / notes</th><th>Cloud time</th></tr></thead><tbody id="historyBody"><tr><td colspan="8" class="empty">Loading medication record…</td></tr></tbody></table></div>
+    <div class="card-title"><div><div class="title-row"><span class="title-icon"><svg class="icon icon--lg"><use href="#i-clipboard-list"></use></svg></span><h2>Medication Assistance Record</h2></div><p>Recent saved entries across staff and devices. Records are kept as an audit trail.</p></div><button class="btn-secondary" id="refreshBtn"><svg class="icon icon--sm"><use href="#i-refresh"></use></svg>Refresh</button></div>
+    <div class="table-scroll"><table class="history-table"><thead><tr><th>Date</th><th>Medication</th><th>Schedule</th><th>Status</th><th>Tablets</th><th>Staff</th><th>PRN reason / notes</th><th>Saved time</th></tr></thead><tbody id="historyBody"><tr><td colspan="8" class="empty">Loading medication record…</td></tr></tbody></table></div>
   </section>
 
   <section class="card">
-    <div class="card-title"><div><h2>🚦 ESS Refill Workflow</h2><p>Use these prompts so a refill is handled before the medication supply runs out.</p></div></div>
+    <div class="card-title"><div><div class="title-row"><span class="title-icon"><svg class="icon icon--lg"><use href="#i-route"></use></svg></span><h2>ESS Refill Workflow</h2></div><p>Use these prompts so a refill is handled before the medication supply runs out.</p></div></div>
     <div class="workflow">
-      <div class="workflow-step blue"><strong>🔵 Set up / verify count</strong><p>If the count is blank, count the pills and save the current quantity. The page cannot estimate a refill date without a reliable starting count.</p></div>
-      <div class="workflow-step yellow"><strong>🟡 7 days or fewer estimated</strong><p>Start the refill process: notify ESS management/family as appropriate, contact the pharmacy, and document the request. Check whether refills remain.</p></div>
-      <div class="workflow-step red"><strong>🔴 3 days or fewer / 0 refills</strong><p>Escalate the refill the same day. Contact the pharmacy/prescriber or authorized responsible party. Do not change the dose or substitute medication to stretch the supply.</p></div>
+      <div class="workflow-step blue"><span class="workflow-icon"><svg class="icon"><use href="#i-info"></use></svg></span><strong>Set up / verify count</strong><p>If the count is blank, count the pills and save the current quantity. The page cannot estimate a refill date without a reliable starting count.</p></div>
+      <div class="workflow-step yellow"><span class="workflow-icon"><svg class="icon"><use href="#i-clock"></use></svg></span><strong>7 days or fewer estimated</strong><p>Start the refill process: notify ESS management/family as appropriate, contact the pharmacy, and document the request. Check whether refills remain.</p></div>
+      <div class="workflow-step red"><span class="workflow-icon"><svg class="icon"><use href="#i-alert"></use></svg></span><strong>3 days or fewer / 0 refills</strong><p>Escalate the refill the same day. Contact the pharmacy/prescriber or authorized responsible party. Do not change the dose or substitute medication to stretch the supply.</p></div>
     </div>
   </section>
 </main>
@@ -163,7 +181,7 @@
 
   function renderMedications(){
     const el=$('medList');
-    if(!meds.length){el.innerHTML='<div class="empty">No active medications found in Supabase.</div>';return}
+    if(!meds.length){el.innerHTML='<div class="empty">No active medications found.</div>';return}
     el.innerHTML=meds.map(m=>{
       const combo=m.medication_name.toLowerCase().includes('quetiapine')?'<div class="combo-note">Quetiapine total at bedtime: <strong>500 mg</strong> when the 400 mg + 100 mg tablets are used together per the current bottle labels.</div>':'';
       return `<article class="med-card"><div class="med-top"><div><div class="med-name">${esc(m.medication_name)} <span class="med-strength">${esc(m.strength)}</span></div><div class="sub">${m.brand_name?`Generic for ${esc(m.brand_name)} • `:''}${esc(m.route||'By mouth')} • ${esc(m.form||'tablet')}</div></div><span class="tag ${m.schedule_type==='prn'?'prn':'scheduled'}">${m.schedule_type==='prn'?'PRN / As needed':'Scheduled'}</span></div><div class="instructions"><strong>${esc(m.schedule_label)}</strong><br>${esc(m.instructions)}</div>${combo}</article>`
@@ -240,8 +258,8 @@
         ess.from('medication_logs').select('*').eq('client_id',CLIENT_ID).gte('service_date',sinceISO).order('service_date',{ascending:false}).order('recorded_at',{ascending:false})
       ]);
       if(mRes.error)throw mRes.error;if(lRes.error)throw lRes.error;
-      meds=mRes.data||[];logs=lRes.data||[];renderMedications();renderRefills();renderToday();renderHistory();fillMedicationSelects();setSync(true,'ESS cloud connected • medication data is synced across devices');if(showSuccess)showToast('Medication page refreshed from Supabase ✅');
-    }catch(e){console.error(e);setSync(false,`Cloud connection problem: ${e.message||'Unable to load medication data'}`);showToast('Could not sync medication data. Nothing was saved locally.',true)}
+      meds=mRes.data||[];logs=lRes.data||[];renderMedications();renderRefills();renderToday();renderHistory();fillMedicationSelects();setSync(true,'ESS medication record connected • updates sync across approved devices');if(showSuccess)showToast('Medication page refreshed.');
+    }catch(e){console.error(e);setSync(false,`Connection problem: ${e.message||'Unable to load medication data'}`);showToast('Could not sync medication data. Nothing was saved locally.',true)}
   }
 
   $('marForm').addEventListener('submit',async e=>{
@@ -254,7 +272,7 @@
     $('saveMarBtn').disabled=true;
     try{
       const {error}=await ess.rpc('record_omar_medication_log',{p_medication_id:med.id,p_service_date:date,p_scheduled_period:period,p_status:status,p_tablets_taken:tablets,p_staff_name:staff,p_prn_reason:prn||null,p_notes:notes||null});if(error)throw error;
-      showToast('Medication entry saved to Supabase ✅');$('prnReason').value='';$('marNotes').value='';await loadAll();
+      showToast('Medication entry saved.');$('prnReason').value='';$('marNotes').value='';await loadAll();
     }catch(err){console.error(err);showToast(err.message||'Medication entry could not be saved.',true)}finally{$('saveMarBtn').disabled=!cloudReady}
   });
 
@@ -266,7 +284,7 @@
     $('saveInventoryBtn').disabled=true;
     try{
       const {error}=await ess.rpc('record_omar_medication_inventory',{p_medication_id:med.id,p_event_type:type,p_quantity_after:q,p_quantity_added:added,p_refills_remaining_after:refills,p_staff_name:staff,p_dispensed_on:fill,p_notes:notes||null});if(error)throw error;
-      showToast('Medication count/refill saved to Supabase ✅');$('quantityAfter').value='';$('quantityAdded').value='';$('refillsRemaining').value='';$('inventoryNotes').value='';await loadAll();
+      showToast('Medication count/refill saved.');$('quantityAfter').value='';$('quantityAdded').value='';$('refillsRemaining').value='';$('inventoryNotes').value='';await loadAll();
     }catch(err){console.error(err);showToast(err.message||'Inventory update could not be saved.',true)}finally{$('saveInventoryBtn').disabled=!cloudReady}
   });
 
@@ -286,7 +304,7 @@
   async function start(){
     if(sb)return;
     $('serviceDate').value=todayISO();$('dispensedOn').value=todayISO();$('inventoryType').dispatchEvent(new Event('change'));
-    if(!window.supabase){setSync(false,'Supabase library did not load. Medication charting is disabled.');return}
+    if(!window.supabase){setSync(false,'Medication data service did not load. Medication charting is disabled.');return}
     sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);ess=sb.schema('ess');await loadAll();subscribeRealtime();
   }
 
