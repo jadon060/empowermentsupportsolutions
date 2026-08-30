@@ -39,8 +39,8 @@
     </div>
 
     <div class="staff-breakdown">
-      <div class="staff-mini-card"><span>Staff Hours Completed</span><strong id="staffHours">0 / 80 hours</strong></div>
-      <div class="staff-mini-card"><span>ESS Direct Hours Completed</span><strong id="essHours">0 hours</strong></div>
+      <div class="staff-mini-card"><span>Staff Hours Completed</span><strong id="staffHours">0 / 0 hours</strong></div>
+      <div class="staff-mini-card"><span>ESS Direct Hours Completed</span><strong id="essHours">0 / 80 hours</strong></div>
     </div>
 
     <div class="logistics-alert" id="hourAlert">🟢 <strong>On Track:</strong> Hours are being used normally.</div>
@@ -93,8 +93,10 @@
     const completed=Math.max(0,Number(row?.completed_hours)||0);
     const direct=Math.max(0,Number(row?.ess_direct_hours)||0);
     const staff=Math.max(0,Number(row?.robert_hours??(completed-direct))||0);
-    const targetValue=Number(row?.robert_target_hours??approved);
-    const staffTarget=Number.isFinite(targetValue)?Math.max(0,targetValue):approved;
+    const rawStaffTarget=Number(row?.robert_target_hours??0);
+    const staffTarget=Number.isFinite(rawStaffTarget)?Math.max(0,rawStaffTarget):0;
+    const rawDirectTarget=Number(row?.ess_direct_target_hours??approved);
+    const directTarget=Number.isFinite(rawDirectTarget)?Math.max(0,rawDirectTarget):approved;
     const remaining=Math.max(0,approved-completed);
     const pct=approved?(completed/approved*100):0;
     $('monthlyApprovedHours').textContent=fmt(approved);
@@ -105,7 +107,7 @@
     $('progressPercent').textContent=`${pct.toFixed(1)}% used`;
     $('progressFill').style.width=Math.min(100,pct)+'%';
     $('staffHours').textContent=`${fmt(staff)} / ${fmt(staffTarget)} hours`;
-    $('essHours').textContent=`${fmt(direct)} hours`;
+    $('essHours').textContent=`${fmt(direct)} / ${fmt(directTarget)} hours`;
     $('manualBadge').style.display=manual?'block':'none';
     if(completed>approved)setStatus('over');else if(approved>0&&completed>=approved)setStatus('ready');else{
       const now=new Date(),last=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),expected=approved*(now.getDate()/last);
@@ -125,7 +127,7 @@
     }
     let completed=0,direct=0,staff=0;
     (entries||[]).forEach(row=>{const h=hoursFromRow(row);completed+=h;if(isDirect(staffNames.get(row.staff_id)))direct+=h;else staff+=h});
-    return {client_id:CLIENT_ID,client_name:CLIENT_NAME,month_key:mk,month_label:monthLabel(mk),monthly_approved_hours:APPROVED,completed_hours:completed,remaining_hours:Math.max(0,APPROVED-completed),robert_hours:staff,robert_target_hours:APPROVED,ess_direct_hours:direct,ess_direct_target_hours:0,manual_override:false};
+    return {client_id:CLIENT_ID,client_name:CLIENT_NAME,month_key:mk,month_label:monthLabel(mk),monthly_approved_hours:APPROVED,completed_hours:completed,remaining_hours:Math.max(0,APPROVED-completed),robert_hours:staff,robert_target_hours:0,ess_direct_hours:direct,ess_direct_target_hours:APPROVED,manual_override:false};
   }
 
   async function load(){
@@ -145,7 +147,7 @@
       $('logisticsSyncNote').textContent='Live from officially submitted daily charts. Drafts do not count toward completed hours.';
     }catch(err){
       console.error('Eric logistics:',err);
-      const fallback={month_label:monthLabel(mk),monthly_approved_hours:APPROVED,completed_hours:0,remaining_hours:APPROVED,robert_hours:0,robert_target_hours:APPROVED,ess_direct_hours:0};
+      const fallback={month_label:monthLabel(mk),monthly_approved_hours:APPROVED,completed_hours:0,remaining_hours:APPROVED,robert_hours:0,robert_target_hours:0,ess_direct_hours:0,ess_direct_target_hours:APPROVED};
       render(fallback,false);
       $('logisticsSyncNote').textContent='Hours could not sync yet. Manual hours can still be entered from the ESS Admin Portal.';
     }
