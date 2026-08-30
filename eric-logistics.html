@@ -1,1 +1,162 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eric Logistics</title><link rel="stylesheet" href="client-portal.css"></head><body data-client-name="Eric" data-client-id="4dab500d-c3c8-4f0e-8673-3c537c9cc0b5" data-default-approved="80"><div class="logistics-wrap"><section class="logistics-card"><div class="logistics-header"><div class="logistics-title"><h3>📊 Eric Monthly Logistics</h3><p>Visual tracking for Eric’s approved ILS hours.</p></div><div class="logistics-status-badge" id="logisticsStatusBadge">🟢 On Track</div></div><div class="logistics-grid"><div class="logistics-box"><span class="logistics-label">Approved</span><strong class="logistics-number" id="monthlyApprovedHours">80</strong><span class="logistics-small">monthly hours</span></div><div class="logistics-box"><span class="logistics-label">Completed</span><strong class="logistics-number" id="completedHours">0</strong><span class="logistics-small">hours completed</span></div><div class="logistics-box"><span class="logistics-label">Remaining</span><strong class="logistics-number" id="remainingHours">80</strong><span class="logistics-small">hours left this month</span></div><div class="logistics-box"><span class="logistics-label">Month</span><strong class="logistics-number" id="currentMonth">Current Month</strong><span class="logistics-small">active tracking period</span></div></div><div class="logistics-progress-wrap"><div class="progress-topline"><span id="progressText">0 of 80 hours completed</span><span class="progress-pill" id="progressPercent">0.0% used</span></div><div class="fun-progress-bar"><div class="fun-progress-fill" id="progressFill"></div></div><div class="manual-note" id="logisticsSyncNote">Admin controlled logistics display.</div></div><div class="staff-breakdown"><div class="staff-mini-card"><span>Staff Hours Completed</span><strong id="staffHours">0 hours</strong></div><div class="staff-mini-card"><span>ESS Direct Hours Completed</span><strong id="essHours">0 hours</strong></div></div><div class="logistics-alert" id="hourAlert">🟢 <strong>On Track:</strong> Hours are being used normally.</div></section></div><div class="quick-links"><a class="quick-link-btn" href="Eric_L.html">← Back to Eric Portal</a></div></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Eric Monthly Logistics</title>
+  <link rel="stylesheet" href="/client-portal.css" />
+  <style>
+    html,body{background:transparent!important}
+    .logistics-wrap{padding:0!important;margin:0 auto!important}
+    .fun-progress-fill{position:relative}
+    .fun-progress-fill::after{content:"✨";position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:12px}
+    .sync-manual{margin-top:10px;padding:9px 11px;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:.79rem;font-weight:800;display:none}
+  </style>
+</head>
+<body>
+<div class="logistics-wrap">
+  <section class="logistics-card" aria-label="Eric monthly logistics">
+    <div class="logistics-header">
+      <div class="logistics-title">
+        <h3>📊 Eric Monthly Logistics</h3>
+        <p>Live visual tracking for Eric’s approved ILS hours.</p>
+      </div>
+      <div class="logistics-status-badge" id="logisticsStatusBadge">🟢 On Track</div>
+    </div>
+
+    <div class="logistics-grid">
+      <div class="logistics-box"><span class="logistics-label">Approved</span><strong class="logistics-number" id="monthlyApprovedHours">80</strong><span class="logistics-small">monthly hours</span></div>
+      <div class="logistics-box"><span class="logistics-label">Completed</span><strong class="logistics-number" id="completedHours">0</strong><span class="logistics-small">hours completed</span></div>
+      <div class="logistics-box"><span class="logistics-label">Remaining</span><strong class="logistics-number" id="remainingHours">80</strong><span class="logistics-small">hours left this month</span></div>
+      <div class="logistics-box"><span class="logistics-label">Month</span><strong class="logistics-number" id="currentMonth" style="font-size:1.45rem">Current Month</strong><span class="logistics-small">active tracking period</span></div>
+    </div>
+
+    <div class="logistics-progress-wrap">
+      <div class="progress-topline"><span id="progressText">0 of 80 hours completed</span><span class="progress-pill" id="progressPercent">0.0% used</span></div>
+      <div class="fun-progress-bar" aria-hidden="true"><div class="fun-progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="manual-note" id="logisticsSyncNote">Loading Eric’s current hours…</div>
+      <div class="sync-manual" id="manualBadge">🔒 ESS Admin manual-hours override is active for this month.</div>
+    </div>
+
+    <div class="staff-breakdown">
+      <div class="staff-mini-card"><span>Staff Hours Completed</span><strong id="staffHours">0 / 80 hours</strong></div>
+      <div class="staff-mini-card"><span>ESS Direct Hours Completed</span><strong id="essHours">0 hours</strong></div>
+    </div>
+
+    <div class="logistics-alert" id="hourAlert">🟢 <strong>On Track:</strong> Hours are being used normally.</div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{
+  const CLIENT_ID='4dab500d-c3c8-4f0e-8673-3c537c9cc0b5';
+  const CLIENT_NAME='Eric L.';
+  const APPROVED=80;
+  const SUPABASE_URL='https://bqanjupmcgydvmfgvutx.supabase.co';
+  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  const ess=sb.schema('ess');
+  const $=id=>document.getElementById(id);
+
+  const fmt=v=>{const n=Number(v)||0;return n%1===0?String(n):n.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')};
+  const monthKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
+  const monthLabel=k=>{const [y,m]=String(k).split('-').map(Number);return new Date(y,m-1,1).toLocaleString(undefined,{month:'long',year:'numeric'})};
+  const monthBounds=k=>{const [y,m]=String(k).split('-').map(Number);const last=new Date(y,m,0).getDate();return{first:`${y}-${String(m).padStart(2,'0')}-01`,last:`${y}-${String(m).padStart(2,'0')}-${String(last).padStart(2,'0')}`}};
+  const isDirect=name=>{const s=String(name||'').trim().toLowerCase();return s.includes('empowerment')||s.includes('jadon')||s==='jay'||s.startsWith('jay ')||s.includes(' ess')||s.startsWith('ess ')};
+
+  function hoursFromRow(row){
+    const direct=Number(row?.hours);
+    if(Number.isFinite(direct)&&direct>=0) return direct;
+    const mins=Number(row?.total_minutes);
+    if(Number.isFinite(mins)&&mins>=0) return mins/60;
+    const start=String(row?.start_time||''),end=String(row?.end_time||'');
+    if(/^\d\d:\d\d/.test(start)&&/^\d\d:\d\d/.test(end)){
+      const [sh,sm]=start.slice(0,5).split(':').map(Number),[eh,em]=end.slice(0,5).split(':').map(Number);
+      let minutes=(eh*60+em)-(sh*60+sm);if(minutes<0)minutes+=1440;return Math.max(0,minutes/60);
+    }
+    return 0;
+  }
+
+  function setStatus(kind){
+    const badge=$('logisticsStatusBadge'),alert=$('hourAlert');
+    const states={on:['🟢 On Track','#ecfdf5','#bbf7d0','#14532d','🟢 <strong>On Track:</strong> Hours are being used normally.'],behind:['🟡 Behind Pace','#fffbeb','#fde68a','#78350f','🟡 <strong>Behind Pace:</strong> Consider scheduling additional hours this month.'],ready:['🔵 Complete','#eff6ff','#bfdbfe','#1e3a8a','🔵 <strong>Monthly Hours Complete:</strong> Eric has reached the approved monthly hours.'],over:['🔴 Over Limit','#fef2f2','#fecaca','#7f1d1d','🔴 <strong>Over Limit Warning:</strong> Completed hours exceed the approved monthly amount.']};
+    const s=states[kind]||states.on;badge.textContent=s[0];badge.style.background=s[1];badge.style.borderColor=s[2];badge.style.color=s[3];alert.innerHTML=s[4];alert.style.background=s[1];alert.style.borderColor=s[2];alert.style.color=s[3];
+  }
+
+  function render(row,manual){
+    const approved=Math.max(0,Number(row?.monthly_approved_hours??APPROVED)||0);
+    const completed=Math.max(0,Number(row?.completed_hours)||0);
+    const direct=Math.max(0,Number(row?.ess_direct_hours)||0);
+    const staff=Math.max(0,Number(row?.robert_hours??(completed-direct))||0);
+    const staffTarget=Math.max(0,Number(row?.robert_target_hours??approved)||approved);
+    const remaining=Math.max(0,approved-completed);
+    const pct=approved?(completed/approved*100):0;
+    $('monthlyApprovedHours').textContent=fmt(approved);
+    $('completedHours').textContent=fmt(completed);
+    $('remainingHours').textContent=fmt(remaining);
+    $('currentMonth').textContent=row?.month_label||monthLabel(monthKey());
+    $('progressText').textContent=`${fmt(completed)} of ${fmt(approved)} hours completed`;
+    $('progressPercent').textContent=`${pct.toFixed(1)}% used`;
+    $('progressFill').style.width=Math.min(100,pct)+'%';
+    $('staffHours').textContent=`${fmt(staff)} / ${fmt(staffTarget)} hours`;
+    $('essHours').textContent=`${fmt(direct)} hours`;
+    $('manualBadge').style.display=manual?'block':'none';
+    if(completed>approved)setStatus('over');else if(approved>0&&completed>=approved)setStatus('ready');else{
+      const now=new Date(),last=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),expected=approved*(now.getDate()/last);
+      setStatus(completed+approved*.12<expected?'behind':'on');
+    }
+  }
+
+  async function buildAutomaticRow(mk){
+    const b=monthBounds(mk);
+    const {data:entries,error}=await ess.from('daily_entries').select('*').eq('client_id',CLIENT_ID).gte('service_date',b.first).lte('service_date',b.last);
+    if(error) throw error;
+    const ids=[...new Set((entries||[]).map(x=>x.staff_id).filter(Boolean))];
+    const staffNames=new Map();
+    if(ids.length){
+      const r=await ess.from('staff').select('id,full_name').in('id',ids);
+      if(!r.error)(r.data||[]).forEach(x=>staffNames.set(x.id,x.full_name||''));
+    }
+    let completed=0,direct=0,staff=0;
+    (entries||[]).forEach(row=>{const h=hoursFromRow(row);completed+=h;if(isDirect(staffNames.get(row.staff_id)))direct+=h;else staff+=h});
+    return {client_id:CLIENT_ID,client_name:CLIENT_NAME,month_key:mk,month_label:monthLabel(mk),monthly_approved_hours:APPROVED,completed_hours:completed,remaining_hours:Math.max(0,APPROVED-completed),robert_hours:staff,robert_target_hours:APPROVED,ess_direct_hours:direct,ess_direct_target_hours:0,manual_override:false};
+  }
+
+  async function load(){
+    const mk=monthKey();
+    try{
+      const saved=await sb.from('client_logistics').select('*').eq('client_id',CLIENT_ID).eq('month_key',mk).maybeSingle();
+      if(saved.error) throw saved.error;
+      if(saved.data?.manual_override){
+        render(saved.data,true);
+        $('logisticsSyncNote').textContent='Live from ESS Admin manual hours. Changes appear here automatically when saved.';
+        return;
+      }
+      const row=await buildAutomaticRow(mk);
+      const write=await sb.from('client_logistics').upsert(row,{onConflict:'client_id,month_key'});
+      if(write.error) console.warn('Eric logistics save:',write.error);
+      render(row,false);
+      $('logisticsSyncNote').textContent='Live from officially submitted daily charts. Drafts do not count toward completed hours.';
+    }catch(err){
+      console.error('Eric logistics:',err);
+      const fallback={month_label:monthLabel(mk),monthly_approved_hours:APPROVED,completed_hours:0,remaining_hours:APPROVED,robert_hours:0,robert_target_hours:APPROVED,ess_direct_hours:0};
+      render(fallback,false);
+      $('logisticsSyncNote').textContent='Hours could not sync yet. Manual hours can still be entered from the ESS Admin Portal.';
+    }
+  }
+
+  load();
+  try{
+    sb.channel('eric-client-logistics').on('postgres_changes',{event:'*',schema:'public',table:'client_logistics',filter:`client_id=eq.${CLIENT_ID}`},payload=>{
+      const row=payload.new;
+      if(row?.month_key===monthKey()){
+        render(row,!!row.manual_override);
+        $('logisticsSyncNote').textContent=row.manual_override?'Live from ESS Admin manual hours. Changes appear here automatically when saved.':'Live logistics update received.';
+      }
+    }).subscribe();
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
