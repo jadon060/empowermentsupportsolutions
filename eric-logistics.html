@@ -63,13 +63,17 @@
   const monthKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
   const monthLabel=k=>{const [y,m]=String(k).split('-').map(Number);return new Date(y,m-1,1).toLocaleString(undefined,{month:'long',year:'numeric'})};
   const monthBounds=k=>{const [y,m]=String(k).split('-').map(Number);const last=new Date(y,m,0).getDate();return{first:`${y}-${String(m).padStart(2,'0')}-01`,last:`${y}-${String(m).padStart(2,'0')}-${String(last).padStart(2,'0')}`}};
-  const isDirect=name=>{const s=String(name||'').trim().toLowerCase();return s.includes('empowerment')||s.includes('jadon')||s==='jay'||s.startsWith('jay ')||s.includes(' ess')||s.startsWith('ess ')};
+  const isDirect=name=>{const s=String(name||'').trim().toLowerCase();return s.includes('empowerment')||s.includes('jadon')||s==='jay'||s.startsWith('jay ')||s==='ess'||s.includes(' ess')||s.startsWith('ess ')};
 
   function hoursFromRow(row){
-    const direct=Number(row?.hours);
-    if(Number.isFinite(direct)&&direct>=0) return direct;
-    const mins=Number(row?.total_minutes);
-    if(Number.isFinite(mins)&&mins>=0) return mins/60;
+    if(row?.hours!==null&&row?.hours!==undefined&&row?.hours!==''){
+      const direct=Number(row.hours);
+      if(Number.isFinite(direct)&&direct>=0) return direct;
+    }
+    if(row?.total_minutes!==null&&row?.total_minutes!==undefined&&row?.total_minutes!==''){
+      const mins=Number(row.total_minutes);
+      if(Number.isFinite(mins)&&mins>=0) return mins/60;
+    }
     const start=String(row?.start_time||''),end=String(row?.end_time||'');
     if(/^\d\d:\d\d/.test(start)&&/^\d\d:\d\d/.test(end)){
       const [sh,sm]=start.slice(0,5).split(':').map(Number),[eh,em]=end.slice(0,5).split(':').map(Number);
@@ -89,7 +93,8 @@
     const completed=Math.max(0,Number(row?.completed_hours)||0);
     const direct=Math.max(0,Number(row?.ess_direct_hours)||0);
     const staff=Math.max(0,Number(row?.robert_hours??(completed-direct))||0);
-    const staffTarget=Math.max(0,Number(row?.robert_target_hours??approved)||approved);
+    const targetValue=Number(row?.robert_target_hours??approved);
+    const staffTarget=Number.isFinite(targetValue)?Math.max(0,targetValue):approved;
     const remaining=Math.max(0,approved-completed);
     const pct=approved?(completed/approved*100):0;
     $('monthlyApprovedHours').textContent=fmt(approved);
