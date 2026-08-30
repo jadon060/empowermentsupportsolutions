@@ -45,7 +45,7 @@
       frame.scrolling='no';
       frame.style.cssText='display:block;width:100%;height:620px;border:0;background:transparent;overflow:hidden;';
       mount.appendChild(frame);
-      quick.insertAdjacentElement('afterend',mount);
+      quick.insertAdjacentElement('beforebegin',mount);
 
       const resizeLogistics=()=>{
         setFrameHeight(frame,480,1800);
