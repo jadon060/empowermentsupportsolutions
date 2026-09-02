@@ -51,10 +51,18 @@
 <section class="daily-card">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px"><h2 style="margin:0">📅 Daily SDP Log – Omar</h2><span class="pill">Daily submissions → Admin export</span></div>
   <div class="row" style="margin-bottom:10px"><input type="hidden" id="client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" /><div><label class="label">Client</label><input type="text" class="input" value="Omar V." readonly style="background:#e5e7eb;cursor:not-allowed"></div><div><label for="staff_id" class="label">Staff (type your name)</label><input id="staff_id" type="text" class="input" placeholder="e.g., Ivan" required /></div></div>
+  <div id="w_draftTray" hidden style="margin:0 0 12px;padding:12px 14px;border:1px solid #fcd34d;border-radius:12px;background:#fffbeb">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap">
+      <strong style="font-size:14px;color:#92400e">🟡 Unfinished drafts</strong>
+      <span style="font-size:12px;color:#78350f">Saved online and available on every device.</span>
+    </div>
+    <div id="w_draftList" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
+  </div>
   <div class="weekbar"><button id="w_prevWeek" class="btn btn--icon">◀</button><div><div id="w_range" style="font-weight:700;color:#0f172a">Mon — Sun</div><div style="color:#6b7280;font-size:13px">Week of <span id="w_startTxt"></span> to <span id="w_endTxt"></span></div></div><button id="w_nextWeek" class="btn btn--icon">▶</button><div class="spacer"></div></div>
   <div id="w_days" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:14px"></div>
   <div id="w_panel" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px">
     <div id="w_panelDate" style="color:#6b7280;margin-bottom:10px"></div>
+    <div id="w_recordState" aria-live="polite" style="margin:-2px 0 12px;font-size:13px;font-weight:700;color:#475569">New chart — not saved yet.</div>
     <div class="row"><div><label for="w_start" class="label">Start Time</label><input id="w_start" type="time" class="input"></div><div><label for="w_end" class="label">End Time</label><input id="w_end" type="time" class="input"></div><div><label for="w_modality" class="label">Modality / Location</label><select id="w_modality" class="select"><option value="Home">Home</option><option value="Community">Community</option><option value="Remote" selected>Remote</option></select></div></div>
     <div class="row" style="margin-top:12px"><div><label for="w_hours" class="label">Hours Worked</label><input id="w_hours" type="number" min="0" step="0.25" placeholder="e.g., 3.5" class="input"></div><div><label for="w_domain" class="label">Domain (service codes worked on)</label><input id="w_domain" type="text" placeholder="e.g., Money Mgmt, Hygiene, Safety…" class="input"></div></div>
     <div class="row" style="margin-top:12px"><div><label for="w_rc" class="label">Regional Center</label><input id="w_rc" type="text" class="input" placeholder="e.g., SGPRC"></div><div><label for="w_sc" class="label">Service Coordinator</label><input id="w_sc" type="text" class="input" placeholder="e.g., Imani"></div></div>
@@ -68,6 +76,6 @@
   <div id="w_error"></div><div id="w_toast"></div>
 </section>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/client-portal-hayden-format.js"></script>
+<script src="/client-portal-hayden-format.js?v=20260902-draft-workflow"></script>
 </body>
 </html>

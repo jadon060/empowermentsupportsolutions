@@ -234,7 +234,7 @@
   <div class="card">
     <h2>Hayden export access</h2>
     <div style="font-size:.88rem;line-height:1.45;color:#334155;">
-      This page is only for exporting Hayden's daily session notes.
+      Only officially submitted charts appear here. Unfinished drafts stay on Hayden's chart.
     </div>
     <div id="clientStatus" class="status">Loading Hayden profile…</div>
   </div>
@@ -575,7 +575,7 @@
 
   function renderDayTable() {
     if (!currentDayData || !currentDayData.rows || !currentDayData.rows.length) {
-      dayBody.innerHTML = `<tr><td colspan="13">No Hayden data for this date.</td></tr>`;
+      dayBody.innerHTML = `<tr><td colspan="13">No officially submitted Hayden chart for this date.</td></tr>`;
       selectedDayRowIndex = null;
       updateDayExportButtonState();
       return;
@@ -647,21 +647,9 @@
       return;
     }
 
-    const { data: draftRows = [], error: draftError } = await ess
-      .from("daily_drafts")
-      .select("*")
-      .eq("client_id", HAYDEN_CLIENT_ID)
-      .eq("date", serviceDate);
-
-    if (draftError) {
-      alert("Error loading Hayden drafts: " + draftError.message);
-      return;
-    }
-
-    const normalizedRows = sortDayRows([
-      ...(officialRows || []).map((r) => normalizeDayRow(r, "official")),
-      ...(draftRows || []).map((r) => normalizeDayRow(r, "draft")),
-    ]);
+    const normalizedRows = sortDayRows(
+      (officialRows || []).map((r) => normalizeDayRow(r, "official"))
+    );
 
     if (!normalizedRows.length) {
       currentDayData = null;

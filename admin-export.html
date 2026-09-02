@@ -207,6 +207,7 @@
   <!-- DAILY -->
   <div class="card">
     <h2>Daily export</h2>
+    <div style="font-size:.88rem;line-height:1.45;color:#334155;margin-bottom:12px;">Only officially submitted charts appear here. Unfinished drafts stay on the participant chart.</div>
     <div class="flex">
       <div>
         <label for="clientSelect">Client</label>
@@ -617,7 +618,7 @@
 
   function renderDayTable() {
     if (!currentDayData || !currentDayData.rows || !currentDayData.rows.length) {
-      dayBody.innerHTML = `<tr><td colspan="14">No data for this date.</td></tr>`;
+      dayBody.innerHTML = `<tr><td colspan="14">No officially submitted chart for this date.</td></tr>`;
       selectedDayRowIndex = null;
       updateDayExportButtonState();
       return;
@@ -692,23 +693,9 @@
       filteredOfficialRows = filteredOfficialRows.filter((r) => r.staff_id === staffIdFilter);
     }
 
-    const { data: draftRows = [] } = await ess
-      .from("daily_drafts")
-      .select("*")
-      .eq("client_id", clientId)
-      .eq("date", serviceDate);
-
-    let filteredDraftRows = draftRows || [];
-    if (staffIdFilter) {
-      filteredDraftRows = filteredDraftRows.filter(
-        (r) => !r.staff_id || r.staff_id === staffIdFilter
-      );
-    }
-
-    const normalizedRows = sortDayRows([
-      ...filteredOfficialRows.map((r) => normalizeDayRow(r, "official")),
-      ...filteredDraftRows.map((r) => normalizeDayRow(r, "draft")),
-    ]);
+    const normalizedRows = sortDayRows(
+      filteredOfficialRows.map((r) => normalizeDayRow(r, "official"))
+    );
 
     if (!normalizedRows.length) {
       currentDayData = null;

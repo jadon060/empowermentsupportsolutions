@@ -552,6 +552,14 @@
     </div>
   </div>
 
+  <div id="w_draftTray" hidden style="margin:0 0 12px;padding:12px 14px;border:1px solid #fcd34d;border-radius:12px;background:#fffbeb;">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;">
+      <strong style="font-size:14px;color:#92400e;">🟡 Unfinished drafts</strong>
+      <span style="font-size:12px;color:#78350f;">Saved online and available on every device.</span>
+    </div>
+    <div id="w_draftList" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"></div>
+  </div>
+
   <!-- week select -->
   <div class="weekbar">
     <button id="w_prevWeek" class="btn btn--icon">◀</button>
@@ -567,6 +575,7 @@
 
   <div id="w_panel" style="display:none;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:12px;">
     <div id="w_panelDate" style="color:#6b7280;margin-bottom:10px;"></div>
+    <div id="w_recordState" aria-live="polite" style="margin:-2px 0 12px;font-size:13px;font-weight:700;color:#475569;">New chart — not saved yet.</div>
 
     <div class="row">
       <div>
@@ -1073,13 +1082,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const w_days=$("w_days"), w_range=$("w_range"), w_startTxt=$("w_startTxt"), w_endTxt=$("w_endTxt");
   const w_prevWeek=$("w_prevWeek"), w_nextWeek=$("w_nextWeek");
-  const w_panel=$("w_panel"), w_panelDate=$("w_panelDate");
+  const w_panel=$("w_panel"), w_panelDate=$("w_panelDate"), w_recordState=$("w_recordState");
   const w_start=$("w_start"), w_end=$("w_end"), w_modality=$("w_modality");
   const w_hours=$("w_hours"), w_domain=$("w_domain"), w_notes=$("w_notes");
   const w_obs=$("w_obs"), w_plan=$("w_plan");
   const w_rc=$("w_rc"), w_sc=$("w_sc");
   const w_saveDraft=$("w_saveDraft"), w_submitDay=$("w_submitDay");
-  const w_toast=$("w_toast"), w_error=$("w_error");
+  const w_toast=$("w_toast"), w_error=$("w_error"), w_draftTray=$("w_draftTray"), w_draftList=$("w_draftList");
 
   const staffSigCanvas = $("staffSig");
   const clientSigCanvas = $("clientSig");
@@ -1195,11 +1204,123 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let current = startOfWeekMonday(new Date());
   let activeIndex = null;
+  let draftTrayRows = [];
+
+  function parseYmdLocal(value){
+    const [year, month, day] = String(value || "").split("-").map(Number);
+    return new Date(year, month - 1, day, 12, 0, 0, 0);
+  }
+
+  function setRecordState(source){
+    if (!w_recordState) return;
+    if (source === "draft") {
+      w_recordState.textContent = "🟡 Draft loaded — editable and saved online.";
+      w_recordState.style.color = "#92400e";
+    } else if (source === "official") {
+      w_recordState.textContent = "🟢 Official chart loaded.";
+      w_recordState.style.color = "#166534";
+    } else {
+      w_recordState.textContent = "New chart — not saved yet.";
+      w_recordState.style.color = "#475569";
+    }
+  }
+
+  async function loadDraftTray(){
+    if (!w_draftTray || !w_draftList) return;
+
+    const { data, error } = await ess.from("daily_drafts")
+      .select("id,staff_id,date,week_start,day_index,updated_at")
+      .eq("client_id", getClientId())
+      .eq("submitted", false)
+      .order("updated_at", { ascending:false })
+      .limit(50);
+
+    if (error) {
+      console.error("Unfinished Hayden draft list failed:", error);
+      return;
+    }
+
+    const rows = Array.isArray(data) ? data : [];
+    const staffIds = [...new Set(rows.map(row => row.staff_id).filter(Boolean))];
+    const staffNames = new Map();
+    if (staffIds.length) {
+      const staff = await ess.from("staff").select("id,full_name").in("id", staffIds);
+      if (!staff.error) {
+        (staff.data || []).forEach(row => staffNames.set(row.id, row.full_name || ""));
+      }
+    }
+
+    draftTrayRows = rows.map(row => ({ ...row, staff_name:staffNames.get(row.staff_id) || "" }));
+    w_draftList.replaceChildren();
+    if (!draftTrayRows.length) {
+      w_draftTray.hidden = true;
+      return;
+    }
+
+    for (const row of draftTrayRows) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn";
+      button.dataset.draftId = row.id;
+      button.textContent = `Continue ${fmt(parseYmdLocal(row.date))}${row.staff_name ? ` • ${row.staff_name}` : ""}`;
+      w_draftList.appendChild(button);
+    }
+    w_draftTray.hidden = false;
+  }
+
+  function continueDraft(draftId){
+    const row = draftTrayRows.find(item => item.id === draftId);
+    if (!row) return;
+    const draftDate = parseYmdLocal(row.date);
+    const dayIndex = draftDate.getDay() === 0 ? 6 : draftDate.getDay() - 1;
+    STAFF_INPUT.value = row.staff_name || row.staff_id;
+    if (row.staff_name) staffUuidCache.set(row.staff_name, row.staff_id);
+    current = startOfWeekMonday(draftDate);
+    renderWeek(dayIndex);
+    toast("Draft opened — continue editing ✅");
+    setTimeout(() => w_panel.scrollIntoView({ behavior:"smooth", block:"start" }), 80);
+  }
+
+  w_draftList?.addEventListener("click", event => {
+    const button = event.target.closest("[data-draft-id]");
+    if (button) continueDraft(button.dataset.draftId);
+  });
 
   async function fetchServerDay(i){
     const staffUuid = await getOrCreateStaffUuid();
     if (!staffUuid) return null;
     const dayDate = ymd(addDays(current,i));
+
+    const draftResult = await ess.from("daily_drafts")
+      .select("*")
+      .eq("client_id", getClientId())
+      .eq("staff_id", staffUuid)
+      .eq("date", dayDate)
+      .eq("submitted", false)
+      .order("updated_at", { ascending:false })
+      .limit(1);
+
+    if (draftResult.error) {
+      console.error("Draft day load failed:", draftResult.error);
+    }
+
+    const draft = Array.isArray(draftResult.data) ? draftResult.data[0] : null;
+    if (draft) {
+      return {
+        source: "draft",
+        hours: draft.hours ?? null,
+        activities: draft.activities || "",
+        notes: draft.notes || "",
+        start_time: draft.start_time || "",
+        end_time: draft.end_time || "",
+        modality: draft.modality || "Remote",
+        staff_signature: draft.staff_signature || null,
+        client_signature: draft.client_signature || null,
+        regional_center: draft.regional_center || "",
+        service_coordinator: draft.service_coordinator || "",
+        date: dayDate
+      };
+    }
 
     let { data: officialRows, error: officialError } = await ess.from("daily_entries")
       .select("*")
@@ -1232,30 +1353,6 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
 
-    let { data: draft } = await ess.from("daily_drafts")
-      .select("*")
-      .eq("client_id", getClientId())
-      .eq("staff_id", staffUuid)
-      .eq("date", dayDate)
-      .maybeSingle();
-
-    if (draft) {
-      return {
-        source: "draft",
-        hours: draft.hours ?? null,
-        activities: draft.activities || "",
-        notes: draft.notes || "",
-        start_time: draft.start_time || "",
-        end_time: draft.end_time || "",
-        modality: draft.modality || "Remote",
-        staff_signature: draft.staff_signature || null,
-        client_signature: draft.client_signature || null,
-        regional_center: draft.regional_center || "",
-        service_coordinator: draft.service_coordinator || "",
-        date: dayDate
-      };
-    }
-
     return null;
   }
 
@@ -1274,7 +1371,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function renderWeek(){
+  function renderWeek(preferredIndex = null){
     const start=new Date(current), end=addDays(start,6);
     end.setHours(23,59,59,999);
     w_startTxt.textContent=fmt(start); w_endTxt.textContent=fmt(end);
@@ -1296,7 +1393,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const today=new Date();
     const inRange=+today>=+start && +today<=+end;
-    openDay(inRange ? (today.getDay()===0?6:today.getDay()-1) : 0);
+    const defaultIndex = inRange ? (today.getDay()===0?6:today.getDay()-1) : 0;
+    const targetIndex = Number.isInteger(preferredIndex) && preferredIndex >= 0 && preferredIndex <= 6
+      ? preferredIndex
+      : defaultIndex;
+    openDay(targetIndex);
     setTimeout(markDotsFromServer, 200);
   }
 
@@ -1352,6 +1453,7 @@ document.addEventListener('DOMContentLoaded', () => {
       clientSigData = srv.client_signature || null;
       staffSigCtx  = initSignatureCanvas(staffSigCanvas,  staffSigData);
       clientSigCtx = initSignatureCanvas(clientSigCanvas, clientSigData);
+      setRecordState(srv.source);
     } else {
       w_hours.value=w_domain.value=w_notes.value=w_obs.value=w_plan.value=w_start.value=w_end.value='';
       w_modality.value='Remote';
@@ -1361,6 +1463,7 @@ document.addEventListener('DOMContentLoaded', () => {
       clientSigData=null;
       staffSigCtx  = initSignatureCanvas(staffSigCanvas,  null);
       clientSigCtx = initSignatureCanvas(clientSigCanvas, null);
+      setRecordState(null);
     }
   }
 
@@ -1446,8 +1549,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }, { onConflict: "client_id,staff_id,week_start,day_index" });
 
       if (error) throw error;
-      toast("Draft saved ✅ You can finish it later.");
-      await markDotsFromServer();
+      setRecordState("draft");
+      toast("Draft saved online ✅ You can finish it on any device.");
+      await Promise.all([markDotsFromServer(), loadDraftTray()]);
     } catch (e) {
       console.error("Hayden draft save failed:", e);
       w_error.style.display = 'block';
@@ -1612,7 +1716,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       await insertOfficialDailyEntry(baseEntry);
 
-      await upsertDailyDraftCompatible({
+      const draftResult = await upsertDailyDraftCompatible({
         client_id: getClientId(),
         staff_id: staffUuid,
         week_start: ymd(current),
@@ -1631,6 +1735,10 @@ document.addEventListener('DOMContentLoaded', () => {
         submitted: true
       }, { onConflict: "client_id,staff_id,week_start,day_index" });
 
+      if (draftResult.error) {
+        console.error("Draft completion marker failed:", draftResult.error);
+      }
+
       let syncedPayload = await applySubmittedHoursDirectlyToVisualRow(payload.hours, getStaffName(), payload.date.slice(0,7));
 
       if (!syncedPayload) {
@@ -1647,6 +1755,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         toast("Day submitted, but visual sync failed ⚠️");
       }
+      setRecordState("official");
+      await loadDraftTray();
       setTimeout(markDotsFromServer, 200);
     } catch (e) {
       console.error(e);
@@ -1688,6 +1798,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function refreshHaydenForStaff(){
+    await loadDraftTray();
     if(!getStaffName())return;
     try {
       const staffUuid = await getOrCreateStaffUuid();
@@ -1707,10 +1818,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let chartRealtimeRefreshTimer=null;
   async function handleHaydenChartRealtime(payload){
-    if(!getStaffName())return;
     clearTimeout(chartRealtimeRefreshTimer);
     chartRealtimeRefreshTimer=setTimeout(async()=>{
       try{
+        await loadDraftTray();
+        if(!getStaffName())return;
         const staffUuid=await getOrCreateStaffUuid();
         const row=(payload && payload.new && Object.keys(payload.new).length)?payload.new:(payload?.old||{});
         if(row.staff_id && row.staff_id!==staffUuid)return;
@@ -1730,6 +1842,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .subscribe();
 
   renderWeek();
+  loadDraftTray();
 });
 </script>
 </body>
