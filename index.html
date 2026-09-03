@@ -28,11 +28,11 @@
     .nav-links{display:flex;align-items:center;gap:24px}
     .nav-links>a{color:#33485b;font-size:.91rem;font-weight:700;text-decoration:none;white-space:nowrap}
     .nav-links>a:hover{color:var(--blue)}
-    .nav-actions{display:flex;gap:10px}
+    .nav-actions{display:flex;align-items:center;gap:10px}
     .nav-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid var(--line);border-radius:999px;color:var(--navy);background:var(--white);font-size:.88rem;font-weight:800;text-decoration:none;transition:.2s ease}
     .nav-button.primary{border-color:var(--blue);color:var(--white);background:var(--blue)}
     .nav-button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(16,45,79,.1)}
-    .language-switcher{position:fixed;right:12px;bottom:12px;z-index:1100;display:flex;gap:4px;padding:5px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 8px 26px rgba(16,45,79,.16)}
+    .language-switcher{display:flex;flex:0 0 auto;gap:3px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--white)}
     .language-switcher button{min-width:38px;min-height:34px;border:0;border-radius:999px;color:var(--muted);background:transparent;cursor:pointer;font:800 .75rem/1 ui-sans-serif,system-ui,sans-serif}
     .language-switcher button.active{color:var(--white);background:var(--blue)}
     #google_translate_element{display:none}
@@ -48,22 +48,23 @@
     .button:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(16,45,79,.14)}
     .hero-note{display:flex;align-items:center;gap:10px;margin-top:26px!important;color:#476073!important;font-size:.9rem!important;font-weight:700}
     .hero-note:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(15,157,115,.12)}
-    .hero-media{position:relative;min-height:530px}
-    .video-card{position:absolute;top:0;left:0;right:58px;overflow:hidden;padding:10px;border:1px solid rgba(255,255,255,.8);border-radius:28px;background:rgba(255,255,255,.92);box-shadow:var(--shadow)}
+    .hero-media{min-width:0}
+    .video-card{overflow:hidden;padding:10px;border:1px solid rgba(255,255,255,.8);border-radius:28px;background:rgba(255,255,255,.92);box-shadow:var(--shadow)}
     .video-frame{position:relative;overflow:hidden;width:100%;aspect-ratio:16/9;border-radius:20px;background:#dbe8ef}
     .video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
     .video-caption{display:flex;justify-content:space-between;gap:16px;padding:13px 11px 5px;color:var(--muted);font-size:.84rem;font-weight:700}
     .video-caption strong{color:var(--navy)}
-    .hero-photo{position:absolute;right:0;bottom:0;width:43%;height:250px;overflow:hidden;padding:8px;border-radius:24px;background:var(--white);box-shadow:0 22px 48px rgba(16,45,79,.2);transform:rotate(2deg)}
-    .hero-photo img{width:100%;height:100%;display:block;border-radius:17px;object-fit:cover;object-position:center 34%}
-    .media-tag{position:absolute;left:-22px;bottom:70px;width:205px;padding:14px 18px;border-left:4px solid var(--green);border-radius:12px;color:var(--navy);background:var(--white);box-shadow:0 16px 38px rgba(16,45,79,.14);font-size:.84rem;font-weight:800;line-height:1.35}
+    .hero-lower{display:grid;grid-template-columns:.82fr 1.18fr;gap:14px;margin-top:14px;align-items:stretch}
+    .hero-photo{height:220px;overflow:hidden;padding:8px;border:1px solid var(--line);border-radius:22px;background:var(--white);box-shadow:0 15px 34px rgba(16,45,79,.12)}
+    .hero-photo img{width:100%;height:100%;display:block;border-radius:15px;object-fit:contain;background:#eef4f7}
+    .media-tag{display:flex;align-items:center;padding:22px;border-left:4px solid var(--green);border-radius:18px;color:var(--navy);background:var(--white);box-shadow:0 15px 34px rgba(16,45,79,.1);font-size:.94rem;font-weight:800;line-height:1.45}
     .trust-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--white)}
     .trust-grid{display:grid;grid-template-columns:repeat(3,1fr)}
     .trust-item{padding:25px 28px;text-align:center}
     .trust-item+.trust-item{border-left:1px solid var(--line)}
     .trust-item strong{display:block;color:var(--navy);font-size:1rem}
     .trust-item span{color:var(--muted);font-size:.86rem}
-    .about{padding:clamp(76px,9vw,126px) 0}
+    .about{padding:clamp(62px,7vw,92px) 0 56px}
     .about-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:82px;align-items:start}
     .about-copy h2{margin:0 0 22px;color:var(--navy);font-size:clamp(2.25rem,4.5vw,4rem);line-height:1.03;letter-spacing:-.05em}
     .about-copy p{margin:0 0 17px;color:var(--muted);font-size:1.05rem}
@@ -72,7 +73,7 @@
     .promise-number{display:grid;place-items:center;width:52px;height:52px;border-radius:15px;color:var(--blue);background:var(--pale);font-weight:900}
     .promise h3{margin:1px 0 4px;color:var(--navy);font-size:1.05rem}
     .promise p{margin:0;color:var(--muted);font-size:.93rem}
-    .services{padding:clamp(76px,8vw,112px) 0;background:var(--surface)}
+    .services{padding:56px 0 clamp(64px,7vw,92px);background:var(--surface)}
     .service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
     .service-card{position:relative;min-height:285px;padding:30px;border:1px solid var(--line);border-radius:22px;background:var(--white);box-shadow:0 14px 35px rgba(16,45,79,.055);transition:.2s ease}
     .service-card:hover{transform:translateY(-5px);box-shadow:0 20px 44px rgba(16,45,79,.1)}
@@ -80,16 +81,19 @@
     .service-card h3{margin:42px 0 12px;color:var(--navy);font-size:1.35rem;line-height:1.2}
     .service-card p{margin:0;color:var(--muted);font-size:.94rem}
     .service-card a{position:absolute;inset:0;border-radius:inherit;text-indent:-9999px}
-    .moments{padding:clamp(76px,9vw,126px) 0}
+    .moments{padding:clamp(62px,7vw,92px) 0 56px}
     .moments-header{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:32px}
     .moments-header .section-heading{margin-bottom:0}
     .moments-grid{display:grid;grid-template-columns:1.15fr .85fr .85fr;grid-template-rows:245px 245px;gap:16px}
     .moment{position:relative;overflow:hidden;margin:0;border-radius:20px;background:#dfe9ef}
     .moment:first-child{grid-row:1/3}
-    .moment img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .5s ease}
+    .moment img{width:100%;height:100%;display:block;object-fit:contain;background:#edf3f6;transition:transform .5s ease}
     .moment:hover img{transform:scale(1.035)}
     .moment:nth-child(1) img{object-position:center 42%}.moment:nth-child(2) img{object-position:center 38%}.moment:nth-child(3) img{object-position:center 30%}.moment:nth-child(4) img{object-position:center 42%}
     .moment figcaption{position:absolute;left:14px;bottom:14px;padding:7px 11px;border-radius:999px;color:var(--white);background:rgba(16,45,79,.84);font-size:.76rem;font-weight:800;backdrop-filter:blur(7px)}
+    .community-button{border-color:transparent;color:var(--white);background:linear-gradient(135deg,var(--green-dark),#168aa2);box-shadow:0 12px 26px rgba(8,122,89,.2)}
+    .community-button span{margin-left:10px;font-size:1.15rem;transition:transform .2s ease}
+    .community-button:hover span{transform:translateX(4px)}
     .testimonial-section{padding:0 0 clamp(82px,9vw,128px)}
     .testimonial-card{position:relative;overflow:hidden;padding:clamp(38px,6vw,72px);border-radius:28px;color:var(--white);background:linear-gradient(125deg,var(--navy),#174f76 62%,#117d6a);box-shadow:var(--shadow)}
     .testimonial-card:after{content:"“";position:absolute;right:32px;top:-44px;color:rgba(255,255,255,.09);font-family:Georgia,serif;font-size:15rem;line-height:1}
@@ -107,30 +111,30 @@
     .instagram-icon{width:34px;height:34px;border-radius:9px;object-fit:cover}
     footer{padding:28px 0;background:#071a2d;color:#89a3b7;font-size:.82rem}
     .footer-row{display:flex;justify-content:space-between;align-items:center;gap:22px}.footer-row p{margin:0}.footer-row a{color:#b6cad8;text-decoration:none}.footer-row a:hover{text-decoration:underline}
-    @media(max-width:1020px){.nav-links{display:none}.hero-grid{grid-template-columns:1fr;gap:50px}.hero-copy{max-width:720px}.hero-media{width:min(720px,100%);min-height:535px}.about-grid{gap:48px}.service-grid{grid-template-columns:1fr 1fr}.service-card:last-child{grid-column:1/-1;min-height:230px}}
-    @media(max-width:760px){.container{width:min(100% - 28px,1160px)}.site-header{position:static}.nav-wrap{min-height:72px;gap:10px}.brand img{width:61px;height:44px}.brand-name{font-size:.78rem}.brand-name span{font-size:.67rem}.nav-actions .nav-button:first-child{display:none}.nav-button{min-height:40px;padding:8px 14px}.hero{padding-top:46px}.hero-copy h1{font-size:clamp(2.8rem,14vw,4.1rem)}.hero-media{min-height:440px}.video-card{right:16px}.video-caption span:last-child{display:none}.hero-photo{width:44%;height:190px}.media-tag{left:4px;bottom:40px;width:170px;padding:11px 14px;font-size:.74rem}.trust-grid{grid-template-columns:1fr;padding:8px 0}.trust-item{padding:16px 14px}.trust-item+.trust-item{border-left:0;border-top:1px solid var(--line)}.about-grid{grid-template-columns:1fr;gap:34px}.service-grid{grid-template-columns:1fr}.service-card,.service-card:last-child{grid-column:auto;min-height:auto}.service-card h3{margin-top:24px}.moments-header{align-items:start;flex-direction:column}.moments-grid{grid-template-columns:1fr 1fr;grid-template-rows:320px 205px 205px}.moment:first-child{grid-column:1/-1;grid-row:auto}.contact-grid{grid-template-columns:1fr;gap:36px}.footer-row{align-items:flex-start;flex-direction:column}}
-    @media(max-width:470px){.brand-name{display:none}.hero-media{min-height:380px}.video-card{right:0}.video-caption{font-size:.76rem}.hero-photo{width:48%;height:155px}.media-tag{bottom:25px;width:153px}.moments-grid{grid-template-columns:1fr;grid-template-rows:310px repeat(3,230px)}.moment:first-child{grid-column:auto}}
+    @media(max-width:1020px){.nav-links{display:none}.hero-grid{grid-template-columns:1fr;gap:44px}.hero-copy{max-width:720px}.hero-media{width:min(720px,100%)}.about-grid{gap:48px}.service-grid{grid-template-columns:1fr 1fr}.service-card:last-child{grid-column:1/-1;min-height:230px}}
+    @media(max-width:760px){.container{width:min(100% - 28px,1160px)}.site-header{position:static}.nav-wrap{min-height:92px;gap:8px}.brand img{width:122px;height:76px}.brand-name{display:none}.nav-actions{gap:6px}.nav-actions .nav-button:first-child{display:none}.nav-button{min-height:42px;padding:8px 15px}.language-switcher button{min-width:34px;min-height:32px}.hero{padding:38px 0 42px}.hero-copy h1{font-size:clamp(2.8rem,14vw,4.1rem)}.video-caption{font-size:.78rem}.video-caption span:last-child{display:none}.hero-lower{grid-template-columns:.85fr 1.15fr;gap:10px;margin-top:10px}.hero-photo{height:178px;padding:6px;border-radius:18px}.media-tag{padding:16px;font-size:.79rem;border-radius:16px}.trust-grid{grid-template-columns:1fr;padding:4px 0}.trust-item{padding:13px 14px}.trust-item+.trust-item{border-left:0;border-top:1px solid var(--line)}.about{padding:42px 0 34px}.about-grid{grid-template-columns:1fr;gap:28px}.services{padding:34px 0 48px}.service-grid{grid-template-columns:1fr}.service-card,.service-card:last-child{grid-column:auto;min-height:auto}.service-card h3{margin-top:24px}.moments{padding:42px 0 36px}.moments-header{align-items:start;flex-direction:column;gap:22px;margin-bottom:26px}.moments-grid{grid-template-columns:1fr 1fr;grid-template-rows:300px 205px 205px}.moment:first-child{grid-column:1/-1;grid-row:auto}.testimonial-section{padding:0 0 54px}.contact-grid{grid-template-columns:1fr;gap:36px}.footer-row{align-items:flex-start;flex-direction:column}}
+    @media(max-width:470px){.container{width:min(100% - 24px,1160px)}.brand img{width:112px;height:72px}.nav-wrap{min-height:88px}.nav-button{padding:8px 13px}.language-switcher button{min-width:31px}.hero-lower{grid-template-columns:1fr}.hero-photo{height:240px}.media-tag{min-height:94px}.moments-grid{grid-template-columns:1fr;grid-template-rows:285px repeat(4,250px)}.moment:first-child{grid-column:auto}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition-duration:.01ms!important}}
   </style>
 </head>
 <body>
-  <div class="language-switcher" aria-label="Site language">
-    <button id="btn-en" type="button" aria-label="View in English">EN</button>
-    <button id="btn-es" type="button" aria-label="View in Spanish">ES</button>
-  </div>
   <div id="google_translate_element"></div>
 
   <header class="site-header">
     <div class="container nav-wrap">
-      <a class="brand" href="#top" aria-label="Empowerment Support Solutions home">
+      <a class="brand" href="#top" aria-label="Empowerment Support Solutions, LLC home">
         <img src="logo%20full.png" alt="Empowerment Support Solutions, LLC logo">
-        <span class="brand-name">Empowerment Support Solutions<span>Person-centered support</span></span>
+        <span class="brand-name">Empowerment Support Solutions, LLC<span>Person-centered support</span></span>
       </a>
       <nav class="nav-links" aria-label="Main navigation">
         <a href="#about">Our Approach</a><a href="#services">Services</a><a href="#community">Community</a><a href="#contact">Contact</a>
       </nav>
       <div class="nav-actions">
         <a class="nav-button" href="careers/careers.html?_ts=1">Careers</a>
+        <div class="language-switcher" aria-label="Site language">
+          <button id="btn-en" type="button" aria-label="View in English">EN</button>
+          <button id="btn-es" type="button" aria-label="View in Spanish">ES</button>
+        </div>
         <a class="nav-button primary" href="/login.html">Login</a>
       </div>
     </div>
@@ -146,13 +150,15 @@
           <div class="hero-actions"><a class="button primary" href="#services">Explore Our Services</a><a class="button" href="#contact">Contact Us</a></div>
           <p class="hero-note">Serving individuals and families across Southern California</p>
         </div>
-        <div class="hero-media" aria-label="Meet Empowerment Support Solutions">
+        <div class="hero-media" aria-label="Meet Empowerment Support Solutions, LLC">
           <div class="video-card">
-            <div class="video-frame"><iframe src="https://player.vimeo.com/video/1123978843?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" title="Meet Empowerment Support Solutions"></iframe></div>
-            <div class="video-caption"><strong>Meet Empowerment Support Solutions</strong><span>See what person-centered support looks like</span></div>
+            <div class="video-frame"><iframe src="https://player.vimeo.com/video/1123978843?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" title="Meet Empowerment Support Solutions, LLC"></iframe></div>
+            <div class="video-caption"><strong>Meet Empowerment Support Solutions, LLC</strong><span>See what person-centered support looks like</span></div>
           </div>
-          <div class="media-tag">Real people. Real goals. Support that meets each person where they are.</div>
-          <div class="hero-photo"><img src="609684D2-13E2-4D55-A130-8A3EDCA9B798.jpeg?v=20260714" alt="Participant and support professional enjoying basketball in the community"></div>
+          <div class="hero-lower">
+            <div class="media-tag">Real people. Real goals. Support that meets each person where they are.</div>
+            <div class="hero-photo"><img src="609684D2-13E2-4D55-A130-8A3EDCA9B798.jpeg?v=20260714" alt="Participant and support professional enjoying basketball in the community"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -170,7 +176,7 @@
         <div class="about-copy">
           <p class="eyebrow">Our Approach</p>
           <h2>The individual leads. We help build the path.</h2>
-          <p>At Empowerment Support Solutions, we put each participant's voice, choices and goals at the center of every service.</p>
+          <p>At Empowerment Support Solutions, LLC, we put each participant's voice, choices and goals at the center of every service.</p>
           <p>We listen first, then shape practical support around what is important <em>to</em> the person and important <em>for</em> them—from daily living and community access to employment readiness, relationships and personal wellness.</p>
         </div>
         <div class="promise-list">
@@ -196,19 +202,20 @@
       <div class="container">
         <div class="moments-header">
           <div class="section-heading"><p class="eyebrow">In the Community</p><h2>Support that shows up in real life.</h2><p>Meaningful progress happens through everyday experiences, relationships and time spent doing what matters to the person.</p></div>
-          <a class="button" href="Events.html">View Community Events</a>
+          <a class="button community-button" href="Events.html">View Community Events <span aria-hidden="true">→</span></a>
         </div>
         <div class="moments-grid">
           <figure class="moment"><img src="AD75A7E6-A756-42FE-8E5A-C754CC39262E.jpeg" alt="Community outing at the Los Angeles Zoo" loading="lazy"><figcaption>Community access</figcaption></figure>
           <figure class="moment"><img src="Screenshot%202026-01-21%20112803.png" alt="Participants and staff sharing a meal" loading="lazy"><figcaption>Relationships</figcaption></figure>
           <figure class="moment"><img src="C33C0C1B-30F5-42B1-B23C-B9E9A68DC2D0.jpeg" alt="Participant and support professional traveling in the community" loading="lazy"><figcaption>Mobility</figcaption></figure>
           <figure class="moment"><img src="3EBA9BE1-B923-4DD6-BDE4-804122AB8F8A.jpeg" alt="Participant and support professional together" loading="lazy"><figcaption>Trusted support</figcaption></figure>
+          <figure class="moment"><img src="unnamed.jpg" alt="Ivan and Omar together in the community" loading="lazy"><figcaption>One-on-one support</figcaption></figure>
         </div>
       </div>
     </section>
 
     <section class="testimonial-section" aria-label="Participant testimonial">
-      <div class="container"><div class="testimonial-card"><blockquote>“I finally have a staff that cares and helps me the way I want to be helped. I am loving Empowerment Support Solutions and can't wait for our yearly trip!”</blockquote><cite>— Veronica, Empowerment Support Solutions participant</cite></div></div>
+      <div class="container"><div class="testimonial-card"><blockquote>“I finally have a staff that cares and helps me the way I want to be helped. I am loving Empowerment Support Solutions, LLC and can't wait for our yearly trip!”</blockquote><cite>— Veronica, Empowerment Support Solutions, LLC participant</cite></div></div>
     </section>
 
     <section id="contact" class="contact">
@@ -216,8 +223,8 @@
         <div class="contact-copy">
           <p class="eyebrow" style="color:#78dbc0">Let's Connect</p>
           <h2>Ready to talk about support built around your goals?</h2>
-          <p>Reach out to learn more about our services and how Empowerment Support Solutions can work alongside your chosen team.</p>
-          <a class="instagram-link" href="https://www.instagram.com/empowermentess/" target="_blank" rel="noopener noreferrer" aria-label="Follow Empowerment Support Solutions on Instagram"><img class="instagram-icon" src="new-Instagram-icon-png-full-colour-900x900.png" alt="Instagram" loading="lazy"><span>@empowermentess</span></a>
+          <p>Reach out to learn more about our services and how Empowerment Support Solutions, LLC can work alongside your chosen team.</p>
+          <a class="instagram-link" href="https://www.instagram.com/empowermentess/" target="_blank" rel="noopener noreferrer" aria-label="Follow Empowerment Support Solutions, LLC on Instagram"><img class="instagram-icon" src="new-Instagram-icon-png-full-colour-900x900.png" alt="Instagram" loading="lazy"><span>@empowermentess</span></a>
         </div>
         <div class="contact-details">
           <a class="contact-link" href="tel:+16265966155"><span>Call us</span>626-596-6155</a>
