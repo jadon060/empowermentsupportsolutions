@@ -1,140 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Empowerment Support Solutions, LLC provides person-centered services for adults with developmental disabilities through California's Self-Determination Program.">
   <title>Empowerment Support Solutions, LLC</title>
-  <link rel="icon" href="logo full.png" type="image/png" />
+  <link rel="icon" href="logo%20full.png" type="image/png">
   <style>
-    :root{
-      --brand:#2c3e50;
-      --brand-2:#0f4c81;
-      --bg:linear-gradient(180deg,#f9fbff 0%,#f3f6fc 100%);
-      --card:#fff;
-      --text:#2a2a2a;
-      --accent:#4c8cd7;
-      --header-a:#1b7ea0;
-      --header-b:#2fb6a6;
-    }
+    :root{--navy:#102d4f;--blue:#145d94;--pale:#eaf5fb;--green:#0f9d73;--green-dark:#087a59;--ink:#152536;--muted:#5c6b79;--line:#dce7ee;--white:#fff;--surface:#f6fafc;--shadow:0 24px 60px rgba(16,45,79,.12)}
     *{box-sizing:border-box}
-    body{margin:0;font-family:"Segoe UI",Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;scroll-behavior:smooth}
-    header{background:linear-gradient(120deg,var(--header-a),var(--header-b),var(--header-a));background-size:300% 300%;animation:gradientPulse 10s ease-in-out infinite;color:#fff;text-align:center;padding:18px 22px;padding-top:calc(60px + env(safe-area-inset-top));box-shadow:0 3px 12px rgba(0,0,0,.15);position:relative}
-    header h1{margin:0;font-size:1.55rem;letter-spacing:.2px;line-height:1.15}
-    .header-inner{display:flex;align-items:center;justify-content:center;gap:14px;max-width:1200px;margin:0 auto}
-    @keyframes gradientPulse{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    .login-btn{position:fixed;right:16px;bottom:16px;background:var(--accent);color:#fff;font-weight:600;font-size:.9rem;padding:9px 15px;border-radius:8px;text-decoration:none;border:none;box-shadow:0 4px 10px rgba(0,0,0,.25);transition:all .25s ease;z-index:9999}
-    .login-btn:hover{background:#336fb4;transform:translateY(-3px)}
-    .careers-btn{position:absolute;left:16px;top:16px;background:var(--accent);color:#fff;font-weight:600;font-size:.9rem;padding:9px 15px;border-radius:8px;text-decoration:none;border:none;box-shadow:0 4px 10px rgba(0,0,0,.25);transition:background .25s ease,transform .25s ease;z-index:2}
-    .careers-btn:hover{background:#336fb4;transform:translateY(-3px)}
-    .logo-center{display:block;margin:26px auto 10px;max-width:260px;height:auto;filter:drop-shadow(0 3px 8px rgba(0,0,0,.1))}
-    .section{max-width:1200px;margin:25px auto;padding:20px;background:rgba(255,255,255,.8);border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.05)}
-    .section h2{color:var(--brand-2);margin-bottom:12px;font-size:1.8rem;border-left:6px solid var(--accent);padding-left:10px}
-    .service-cards{display:grid;grid-template-columns:repeat(3,minmax(300px,1fr));gap:24px;align-items:stretch}
-    .card{background:var(--card);border-radius:12px;padding:22px;box-shadow:0 4px 15px rgba(0,0,0,.08);transition:transform .25s ease,box-shadow .25s ease;border-top:4px solid var(--accent);height:100%}
-    .card:hover{transform:translateY(-5px);box-shadow:0 8px 22px rgba(0,0,0,.12)}
-    .card-link{display:block;text-decoration:none;color:inherit;height:100%}
-    .card-link:focus-visible{outline:3px solid rgba(76,140,215,.85);outline-offset:4px;border-radius:12px}
-    .sdp-title{white-space:nowrap;font-size:clamp(1.05rem,1.2vw + .9rem,1.35rem);letter-spacing:.1px}
-    .cta-row{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;margin-top:15px}
-    .cta-button,.events-button{display:inline-block;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:1rem;transition:transform .25s ease,box-shadow .25s ease,filter .25s ease;box-shadow:0 4px 12px rgba(0,0,0,.14)}
-    .cta-button{background:var(--brand-2)}
-    .events-button{background:linear-gradient(135deg,#20b486,#1b7ea0)}
-    .cta-button:hover,.events-button:hover{transform:translateY(-2px);box-shadow:0 7px 18px rgba(0,0,0,.18)}
-    .team-photo-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;width:100%;max-width:1000px;margin:10px auto 20px;align-items:stretch;justify-content:center}
-    .team-photo{width:100%;height:260px;display:block;object-fit:contain;object-position:center;margin:0;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,.12);background:#fff}
-    .testimonial{max-width:720px;margin:0 auto 10px;padding:0 16px;text-align:center;color:#444;font-style:italic}
-    .testimonial cite{display:block;margin-top:6px;font-style:normal;color:#666;font-size:.95rem}
-    footer{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;text-align:center;padding:40px 20px;margin-top:50px;box-shadow:0 -4px 12px rgba(0,0,0,.08)}
-    footer h2{margin-top:0;font-size:1.5rem}
-    footer a{color:#9fd0ff;text-decoration:none}
-    footer a:hover{text-decoration:underline}
-    .trust-badge{display:inline-block;margin:15px 0;background:#1f4e99;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:.9rem;transition:background .25s ease}
-    .trust-badge:hover{background:#173d78}
-    .instagram-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 10px;color:#fff;font-weight:700;text-decoration:none}
-    .instagram-icon{width:38px;height:38px;border-radius:10px;object-fit:cover;display:block;box-shadow:0 4px 12px rgba(0,0,0,.22)}
-    .copyright{margin-top:18px;font-size:.9rem;color:#d6d6d6}
-    .translate-toggle{position:fixed;top:calc(8px + env(safe-area-inset-top));right:12px;z-index:9999;display:flex;gap:6px;font:14px/1.2 system-ui,Arial,sans-serif}
-    .translate-toggle button{border:1px solid #d0d7de;background:#fff;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:13px;transition:all .2s}
-    .translate-toggle button:hover{background:#f1f5fb}
-    .translate-toggle button.active{outline:2px solid var(--accent);background:#eef4ff}
+    html{scroll-behavior:smooth}
+    body{margin:0;color:var(--ink);background:var(--white);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    img{max-width:100%}a{color:inherit}button,a{-webkit-tap-highlight-color:transparent}
+    :focus-visible{outline:3px solid rgba(20,93,148,.38);outline-offset:4px}
+    .container{width:min(1160px,calc(100% - 40px));margin-inline:auto}
+    .eyebrow{display:inline-flex;align-items:center;gap:9px;margin:0 0 16px;color:var(--blue);font-size:.78rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .eyebrow:before{content:"";width:28px;height:2px;background:var(--green);border-radius:99px}
+    .section-heading{max-width:700px;margin-bottom:38px}
+    .section-heading h2{margin:0 0 13px;color:var(--navy);font-size:clamp(2rem,4vw,3.25rem);line-height:1.08;letter-spacing:-.045em}
+    .section-heading p{margin:0;color:var(--muted);font-size:1.05rem}
+    .site-header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.94);border-bottom:1px solid rgba(220,231,238,.85);backdrop-filter:blur(14px)}
+    .nav-wrap{min-height:82px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand{display:inline-flex;align-items:center;gap:12px;min-width:0;text-decoration:none}
+    .brand img{width:78px;height:55px;object-fit:contain;flex:0 0 auto}
+    .brand-name{color:var(--navy);font-weight:800;font-size:.97rem;line-height:1.15;letter-spacing:-.015em}
+    .brand-name span{display:block;color:var(--green-dark);font-size:.78rem;font-weight:700;margin-top:3px}
+    .nav-links{display:flex;align-items:center;gap:24px}
+    .nav-links>a{color:#33485b;font-size:.91rem;font-weight:700;text-decoration:none;white-space:nowrap}
+    .nav-links>a:hover{color:var(--blue)}
+    .nav-actions{display:flex;gap:10px}
+    .nav-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid var(--line);border-radius:999px;color:var(--navy);background:var(--white);font-size:.88rem;font-weight:800;text-decoration:none;transition:.2s ease}
+    .nav-button.primary{border-color:var(--blue);color:var(--white);background:var(--blue)}
+    .nav-button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(16,45,79,.1)}
+    .language-switcher{position:fixed;right:12px;bottom:12px;z-index:1100;display:flex;gap:4px;padding:5px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 8px 26px rgba(16,45,79,.16)}
+    .language-switcher button{min-width:38px;min-height:34px;border:0;border-radius:999px;color:var(--muted);background:transparent;cursor:pointer;font:800 .75rem/1 ui-sans-serif,system-ui,sans-serif}
+    .language-switcher button.active{color:var(--white);background:var(--blue)}
     #google_translate_element{display:none}
-    #last-updated{margin-top:20px;font-size:.9rem;color:#d6d6d6}
-    @media(max-width:1024px){.service-cards{grid-template-columns:repeat(2,minmax(260px,1fr))}.team-photo-row{grid-template-columns:repeat(2,minmax(0,1fr));max-width:760px}.team-photo{height:240px}}
-    @media(max-width:640px){.service-cards{grid-template-columns:1fr}.team-photo-row{grid-template-columns:1fr;max-width:420px}.team-photo{height:auto;max-height:420px}.logo-center{max-width:190px}.login-btn,.careers-btn{font-size:.8rem;padding:7px 12px}header h1{font-size:1.25rem}}
+    .hero{position:relative;overflow:hidden;padding:clamp(56px,7vw,94px) 0 60px;background:radial-gradient(circle at 88% 8%,rgba(15,157,115,.14),transparent 30%),linear-gradient(145deg,#f4faff 0%,#fff 58%,#eefaf6 100%)}
+    .hero:before{content:"";position:absolute;width:300px;height:300px;left:-150px;bottom:-180px;border:54px solid rgba(20,93,148,.055);border-radius:50%}
+    .hero-grid{position:relative;display:grid;grid-template-columns:minmax(0,.92fr) minmax(520px,1.08fr);gap:68px;align-items:center}
+    .hero-copy h1{max-width:620px;margin:0;color:var(--navy);font-size:clamp(3rem,6.1vw,5.6rem);line-height:.96;letter-spacing:-.065em}
+    .hero-copy h1 span{color:var(--green-dark)}
+    .hero-copy>p:not(.eyebrow){max-width:590px;margin:25px 0 0;color:var(--muted);font-size:clamp(1.05rem,1.5vw,1.22rem)}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+    .button{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:12px 22px;border:1px solid var(--navy);border-radius:999px;color:var(--navy);background:transparent;font-size:.94rem;font-weight:800;text-decoration:none;transition:.2s ease}
+    .button.primary{border-color:var(--blue);color:var(--white);background:linear-gradient(135deg,var(--blue),#187aa0);box-shadow:0 12px 26px rgba(20,93,148,.22)}
+    .button:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(16,45,79,.14)}
+    .hero-note{display:flex;align-items:center;gap:10px;margin-top:26px!important;color:#476073!important;font-size:.9rem!important;font-weight:700}
+    .hero-note:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(15,157,115,.12)}
+    .hero-media{position:relative;min-height:530px}
+    .video-card{position:absolute;top:0;left:0;right:58px;overflow:hidden;padding:10px;border:1px solid rgba(255,255,255,.8);border-radius:28px;background:rgba(255,255,255,.92);box-shadow:var(--shadow)}
+    .video-frame{position:relative;overflow:hidden;width:100%;aspect-ratio:16/9;border-radius:20px;background:#dbe8ef}
+    .video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .video-caption{display:flex;justify-content:space-between;gap:16px;padding:13px 11px 5px;color:var(--muted);font-size:.84rem;font-weight:700}
+    .video-caption strong{color:var(--navy)}
+    .hero-photo{position:absolute;right:0;bottom:0;width:43%;height:250px;overflow:hidden;padding:8px;border-radius:24px;background:var(--white);box-shadow:0 22px 48px rgba(16,45,79,.2);transform:rotate(2deg)}
+    .hero-photo img{width:100%;height:100%;display:block;border-radius:17px;object-fit:cover;object-position:center 34%}
+    .media-tag{position:absolute;left:-22px;bottom:70px;width:205px;padding:14px 18px;border-left:4px solid var(--green);border-radius:12px;color:var(--navy);background:var(--white);box-shadow:0 16px 38px rgba(16,45,79,.14);font-size:.84rem;font-weight:800;line-height:1.35}
+    .trust-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--white)}
+    .trust-grid{display:grid;grid-template-columns:repeat(3,1fr)}
+    .trust-item{padding:25px 28px;text-align:center}
+    .trust-item+.trust-item{border-left:1px solid var(--line)}
+    .trust-item strong{display:block;color:var(--navy);font-size:1rem}
+    .trust-item span{color:var(--muted);font-size:.86rem}
+    .about{padding:clamp(76px,9vw,126px) 0}
+    .about-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:82px;align-items:start}
+    .about-copy h2{margin:0 0 22px;color:var(--navy);font-size:clamp(2.25rem,4.5vw,4rem);line-height:1.03;letter-spacing:-.05em}
+    .about-copy p{margin:0 0 17px;color:var(--muted);font-size:1.05rem}
+    .promise-list{display:grid;gap:14px}
+    .promise{display:grid;grid-template-columns:52px 1fr;gap:17px;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--white);box-shadow:0 10px 28px rgba(16,45,79,.055)}
+    .promise-number{display:grid;place-items:center;width:52px;height:52px;border-radius:15px;color:var(--blue);background:var(--pale);font-weight:900}
+    .promise h3{margin:1px 0 4px;color:var(--navy);font-size:1.05rem}
+    .promise p{margin:0;color:var(--muted);font-size:.93rem}
+    .services{padding:clamp(76px,8vw,112px) 0;background:var(--surface)}
+    .service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .service-card{position:relative;min-height:285px;padding:30px;border:1px solid var(--line);border-radius:22px;background:var(--white);box-shadow:0 14px 35px rgba(16,45,79,.055);transition:.2s ease}
+    .service-card:hover{transform:translateY(-5px);box-shadow:0 20px 44px rgba(16,45,79,.1)}
+    .service-index{color:var(--green);font-size:.78rem;font-weight:900;letter-spacing:.1em}
+    .service-card h3{margin:42px 0 12px;color:var(--navy);font-size:1.35rem;line-height:1.2}
+    .service-card p{margin:0;color:var(--muted);font-size:.94rem}
+    .service-card a{position:absolute;inset:0;border-radius:inherit;text-indent:-9999px}
+    .moments{padding:clamp(76px,9vw,126px) 0}
+    .moments-header{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:32px}
+    .moments-header .section-heading{margin-bottom:0}
+    .moments-grid{display:grid;grid-template-columns:1.15fr .85fr .85fr;grid-template-rows:245px 245px;gap:16px}
+    .moment{position:relative;overflow:hidden;margin:0;border-radius:20px;background:#dfe9ef}
+    .moment:first-child{grid-row:1/3}
+    .moment img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .5s ease}
+    .moment:hover img{transform:scale(1.035)}
+    .moment:nth-child(1) img{object-position:center 42%}.moment:nth-child(2) img{object-position:center 38%}.moment:nth-child(3) img{object-position:center 30%}.moment:nth-child(4) img{object-position:center 42%}
+    .moment figcaption{position:absolute;left:14px;bottom:14px;padding:7px 11px;border-radius:999px;color:var(--white);background:rgba(16,45,79,.84);font-size:.76rem;font-weight:800;backdrop-filter:blur(7px)}
+    .testimonial-section{padding:0 0 clamp(82px,9vw,128px)}
+    .testimonial-card{position:relative;overflow:hidden;padding:clamp(38px,6vw,72px);border-radius:28px;color:var(--white);background:linear-gradient(125deg,var(--navy),#174f76 62%,#117d6a);box-shadow:var(--shadow)}
+    .testimonial-card:after{content:"“";position:absolute;right:32px;top:-44px;color:rgba(255,255,255,.09);font-family:Georgia,serif;font-size:15rem;line-height:1}
+    .testimonial-card blockquote{position:relative;z-index:1;max-width:850px;margin:0;font-size:clamp(1.45rem,3vw,2.4rem);line-height:1.32;letter-spacing:-.025em;font-weight:650}
+    .testimonial-card cite{position:relative;z-index:1;display:block;margin-top:24px;color:#cfe9e4;font-size:.94rem;font-style:normal;font-weight:800}
+    .contact{padding:clamp(70px,8vw,104px) 0;background:#0c233c;color:var(--white)}
+    .contact-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:70px;align-items:end}
+    .contact h2{max-width:720px;margin:0 0 16px;font-size:clamp(2.2rem,5vw,4.35rem);line-height:1.04;letter-spacing:-.05em}
+    .contact-copy>p{max-width:650px;margin:0;color:#bed0de;font-size:1.05rem}
+    .contact-details{display:grid;gap:12px}
+    .contact-link{display:block;padding:16px 18px;border:1px solid rgba(255,255,255,.16);border-radius:14px;color:var(--white);background:rgba(255,255,255,.055);font-weight:800;text-decoration:none}
+    .contact-link span{display:block;color:#90aabd;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase}
+    .contact-link:hover{background:rgba(255,255,255,.1)}
+    .instagram-link{display:inline-flex;align-items:center;gap:10px;margin-top:17px;color:#d8e8f2;font-weight:800;text-decoration:none}
+    .instagram-icon{width:34px;height:34px;border-radius:9px;object-fit:cover}
+    footer{padding:28px 0;background:#071a2d;color:#89a3b7;font-size:.82rem}
+    .footer-row{display:flex;justify-content:space-between;align-items:center;gap:22px}.footer-row p{margin:0}.footer-row a{color:#b6cad8;text-decoration:none}.footer-row a:hover{text-decoration:underline}
+    @media(max-width:1020px){.nav-links{display:none}.hero-grid{grid-template-columns:1fr;gap:50px}.hero-copy{max-width:720px}.hero-media{width:min(720px,100%);min-height:535px}.about-grid{gap:48px}.service-grid{grid-template-columns:1fr 1fr}.service-card:last-child{grid-column:1/-1;min-height:230px}}
+    @media(max-width:760px){.container{width:min(100% - 28px,1160px)}.site-header{position:static}.nav-wrap{min-height:72px;gap:10px}.brand img{width:61px;height:44px}.brand-name{font-size:.78rem}.brand-name span{font-size:.67rem}.nav-actions .nav-button:first-child{display:none}.nav-button{min-height:40px;padding:8px 14px}.hero{padding-top:46px}.hero-copy h1{font-size:clamp(2.8rem,14vw,4.1rem)}.hero-media{min-height:440px}.video-card{right:16px}.video-caption span:last-child{display:none}.hero-photo{width:44%;height:190px}.media-tag{left:4px;bottom:40px;width:170px;padding:11px 14px;font-size:.74rem}.trust-grid{grid-template-columns:1fr;padding:8px 0}.trust-item{padding:16px 14px}.trust-item+.trust-item{border-left:0;border-top:1px solid var(--line)}.about-grid{grid-template-columns:1fr;gap:34px}.service-grid{grid-template-columns:1fr}.service-card,.service-card:last-child{grid-column:auto;min-height:auto}.service-card h3{margin-top:24px}.moments-header{align-items:start;flex-direction:column}.moments-grid{grid-template-columns:1fr 1fr;grid-template-rows:320px 205px 205px}.moment:first-child{grid-column:1/-1;grid-row:auto}.contact-grid{grid-template-columns:1fr;gap:36px}.footer-row{align-items:flex-start;flex-direction:column}}
+    @media(max-width:470px){.brand-name{display:none}.hero-media{min-height:380px}.video-card{right:0}.video-caption{font-size:.76rem}.hero-photo{width:48%;height:155px}.media-tag{bottom:25px;width:153px}.moments-grid{grid-template-columns:1fr;grid-template-rows:310px repeat(3,230px)}.moment:first-child{grid-column:auto}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition-duration:.01ms!important}}
   </style>
 </head>
 <body>
-  <div class="translate-toggle" aria-label="Site language">
-    <button id="btn-en" type="button">EN</button>
-    <button id="btn-es" type="button">ES</button>
+  <div class="language-switcher" aria-label="Site language">
+    <button id="btn-en" type="button" aria-label="View in English">EN</button>
+    <button id="btn-es" type="button" aria-label="View in Spanish">ES</button>
   </div>
   <div id="google_translate_element"></div>
 
-  <header>
-    <a href="https://empowermentss.com/careers/careers.html?_ts=1" class="careers-btn">Careers</a>
-    <div class="header-inner"><div><h1>Empowerment Support Solutions, LLC</h1></div></div>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="#top" aria-label="Empowerment Support Solutions home">
+        <img src="logo%20full.png" alt="Empowerment Support Solutions, LLC logo">
+        <span class="brand-name">Empowerment Support Solutions<span>Person-centered support</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#about">Our Approach</a><a href="#services">Services</a><a href="#community">Community</a><a href="#contact">Contact</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="nav-button" href="careers/careers.html?_ts=1">Careers</a>
+        <a class="nav-button primary" href="/login.html">Login</a>
+      </div>
+    </div>
   </header>
 
-  <img src="logo full.png" alt="ESS Logo" class="logo-center" loading="lazy">
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">California Self-Determination Program</p>
+          <h1 id="hero-title">Support built around the <span>person.</span></h1>
+          <p>Individualized services for adults with developmental disabilities—shaped by each person's voice, goals, routines and vision for a meaningful life.</p>
+          <div class="hero-actions"><a class="button primary" href="#services">Explore Our Services</a><a class="button" href="#contact">Contact Us</a></div>
+          <p class="hero-note">Serving individuals and families across Southern California</p>
+        </div>
+        <div class="hero-media" aria-label="Meet Empowerment Support Solutions">
+          <div class="video-card">
+            <div class="video-frame"><iframe src="https://player.vimeo.com/video/1123978843?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" title="Meet Empowerment Support Solutions"></iframe></div>
+            <div class="video-caption"><strong>Meet Empowerment Support Solutions</strong><span>See what person-centered support looks like</span></div>
+          </div>
+          <div class="media-tag">Real people. Real goals. Support that meets each person where they are.</div>
+          <div class="hero-photo"><img src="609684D2-13E2-4D55-A130-8A3EDCA9B798.jpeg?v=20260714" alt="Participant and support professional enjoying basketball in the community"></div>
+        </div>
+      </div>
+    </section>
 
-  <div style="text-align:center;margin:12px 0">
-    <iframe src="https://player.vimeo.com/video/1123978843?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" width="560" height="315" style="max-width:100%;border-radius:10px" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" title="ESS Intro Video"></iframe>
-    <br>
-    <div class="cta-row">
-      <a href="#contact" class="cta-button">Contact Us Today</a>
-      <a href="Events.html" class="events-button">See ESS Events</a>
+    <section class="trust-strip" aria-label="Our commitments">
+      <div class="container trust-grid">
+        <div class="trust-item"><strong>Person-Centered</strong><span>Every plan begins with the individual</span></div>
+        <div class="trust-item"><strong>Community-Based</strong><span>Support where real life happens</span></div>
+        <div class="trust-item"><strong>Family Collaborative</strong><span>Clear communication and shared goals</span></div>
+      </div>
+    </section>
+
+    <section id="about" class="about">
+      <div class="container about-grid">
+        <div class="about-copy">
+          <p class="eyebrow">Our Approach</p>
+          <h2>The individual leads. We help build the path.</h2>
+          <p>At Empowerment Support Solutions, we put each participant's voice, choices and goals at the center of every service.</p>
+          <p>We listen first, then shape practical support around what is important <em>to</em> the person and important <em>for</em> them—from daily living and community access to employment readiness, relationships and personal wellness.</p>
+        </div>
+        <div class="promise-list">
+          <article class="promise"><div class="promise-number">01</div><div><h3>Individualized from the start</h3><p>Services reflect personal strengths, routines, preferences and long-term goals—not a one-size-fits-all program.</p></div></article>
+          <article class="promise"><div class="promise-number">02</div><div><h3>Consistent, dependable support</h3><p>We prioritize trust, follow-through and staff who understand the person they are working alongside.</p></div></article>
+          <article class="promise"><div class="promise-number">03</div><div><h3>Built through collaboration</h3><p>We work closely with families, Independent Facilitators, FMS providers and regional center teams.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="services">
+      <div class="container">
+        <div class="section-heading"><p class="eyebrow">What We Do</p><h2>Practical support for everyday life.</h2><p>Flexible services designed to strengthen confidence, independence and meaningful participation in the community.</p></div>
+        <div class="service-grid">
+          <article class="service-card"><span class="service-index">SERVICE 01</span><h3>Personalized Living Support</h3><p>One-on-one guidance with daily living, home routines, money management, meal preparation, safety, mobility and greater independence.</p></article>
+          <article class="service-card"><span class="service-index">SERVICE 02</span><h3>Self-Determination Services</h3><p>Support aligned with the participant's spending plan, individual goals and chosen team through California's Self-Determination Program.</p><a href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener noreferrer" aria-label="Learn about California's Self-Determination Program">Learn more</a></article>
+          <article class="service-card"><span class="service-index">SERVICE 03</span><h3>Dedicated Staff</h3><p>Reliable support professionals trained to follow person-centered practices, honor individual routines and collaborate with families.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="community" class="moments">
+      <div class="container">
+        <div class="moments-header">
+          <div class="section-heading"><p class="eyebrow">In the Community</p><h2>Support that shows up in real life.</h2><p>Meaningful progress happens through everyday experiences, relationships and time spent doing what matters to the person.</p></div>
+          <a class="button" href="Events.html">View Community Events</a>
+        </div>
+        <div class="moments-grid">
+          <figure class="moment"><img src="AD75A7E6-A756-42FE-8E5A-C754CC39262E.jpeg" alt="Community outing at the Los Angeles Zoo" loading="lazy"><figcaption>Community access</figcaption></figure>
+          <figure class="moment"><img src="Screenshot%202026-01-21%20112803.png" alt="Participants and staff sharing a meal" loading="lazy"><figcaption>Relationships</figcaption></figure>
+          <figure class="moment"><img src="C33C0C1B-30F5-42B1-B23C-B9E9A68DC2D0.jpeg" alt="Participant and support professional traveling in the community" loading="lazy"><figcaption>Mobility</figcaption></figure>
+          <figure class="moment"><img src="3EBA9BE1-B923-4DD6-BDE4-804122AB8F8A.jpeg" alt="Participant and support professional together" loading="lazy"><figcaption>Trusted support</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="testimonial-section" aria-label="Participant testimonial">
+      <div class="container"><div class="testimonial-card"><blockquote>“I finally have a staff that cares and helps me the way I want to be helped. I am loving Empowerment Support Solutions and can't wait for our yearly trip!”</blockquote><cite>— Veronica, Empowerment Support Solutions participant</cite></div></div>
+    </section>
+
+    <section id="contact" class="contact">
+      <div class="container contact-grid">
+        <div class="contact-copy">
+          <p class="eyebrow" style="color:#78dbc0">Let's Connect</p>
+          <h2>Ready to talk about support built around your goals?</h2>
+          <p>Reach out to learn more about our services and how Empowerment Support Solutions can work alongside your chosen team.</p>
+          <a class="instagram-link" href="https://www.instagram.com/empowermentess/" target="_blank" rel="noopener noreferrer" aria-label="Follow Empowerment Support Solutions on Instagram"><img class="instagram-icon" src="new-Instagram-icon-png-full-colour-900x900.png" alt="Instagram" loading="lazy"><span>@empowermentess</span></a>
+        </div>
+        <div class="contact-details">
+          <a class="contact-link" href="tel:+16265966155"><span>Call us</span>626-596-6155</a>
+          <a class="contact-link" href="mailto:empowermentess@gmail.com"><span>Email us</span>empowermentess@gmail.com</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <p>© 2026 Empowerment Support Solutions, LLC. All rights reserved.</p>
+      <p><a href="https://bizfileonline.sos.ca.gov/search/business" target="_blank" rel="noopener noreferrer">Verify with the California Secretary of State</a> · Updated <span id="lu-text"></span></p>
     </div>
-  </div>
-
-  <section id="about" class="section">
-    <h2>About Us</h2>
-    <p>At Empowerment Support Solutions (ESS), we believe that every individual deserves the opportunity to thrive in their own unique way. Our work is rooted in <strong>Person-Centered Thinking (PCT)</strong>, which means we put the voice, choice, and goals of the participant at the center of everything we do. We listen first, then design supports that reflect what is important <em>to</em> and important <em>for</em> the person.</p>
-    <p>Whether it’s developing daily living skills, connecting with the community, or building independence, we tailor our services to meet the specific needs of each participant. We recognize that every journey is different, and our role is to walk alongside individuals and families to make sure services are not just provided, but are meaningful, respectful, and empowering.</p>
-    <p>ESS is committed to flexibility, reliability, and collaboration. We work hand-in-hand with families, Independent Facilitators, and regional center teams to ensure that supports are not only effective but also aligned with the participant’s life vision. Our mission is simple: <strong>supporting people to live their best lives, their way</strong>.</p>
-  </section>
-
-  <section id="services" class="section">
-    <h2>Our Services</h2>
-    <div class="service-cards">
-      <div class="card"><h3>Personalized Living Support</h3><p>Daily one-on-one support designed around each participant’s strengths, preferences and goals, helping people build confidence, skills and independence at their own pace.</p></div>
-      <a class="card-link" href="https://www.dds.ca.gov/initiatives/sdp/" target="_blank" rel="noopener noreferrer" aria-label="Learn about the Self-Determination Program (DDS official page)"><div class="card"><h3 class="sdp-title">Self Determination Program</h3><p>We partner with Independent Facilitators and FMS providers to ensure services are not only delivered smoothly but also connected to the person’s vision of a meaningful life.</p></div></a>
-      <div class="card"><h3>Staff Placement</h3><p>We provide dependable staff you can count on that are trained to follow PCT practices, honor individual routines and collaborate closely with families for consistency and trust.</p></div>
-    </div>
-  </section>
-
-  <section id="team" class="section" aria-label="ESS Team Photo & Testimonial" style="text-align:center">
-    <div class="team-photo-row">
-      <img src="Screenshot%202026-01-21%20112803.png" alt="ESS team photo" class="team-photo" loading="lazy">
-      <img src="unnamed.jpg" alt="ESS additional photo" class="team-photo" loading="lazy">
-      <img src="photo4.png" alt="ESS additional team photo" class="team-photo" loading="lazy">
-      <img src="3EBA9BE1-B923-4DD6-BDE4-804122AB8F8A.jpeg" alt="ESS community photo" class="team-photo" loading="lazy">
-      <img src="AD75A7E6-A756-42FE-8E5A-C754CC39262E.jpeg" alt="ESS community photo" class="team-photo" loading="lazy">
-      <img src="C33C0C1B-30F5-42B1-B23C-B9E9A68DC2D0.jpeg" alt="ESS community photo" class="team-photo" loading="lazy">
-      <img src="609684D2-13E2-4D55-A130-8A3EDCA9B798.jpeg?v=20260714" alt="ESS basketball community photo" class="team-photo">
-    </div>
-    <p class="testimonial">“I finally have a staff that cares and helps me the way I want to be helped. I am loving ESS oh and can't wait for our yearly trip!”<cite>- Veronica, ESS Participant</cite></p>
-  </section>
-
-  <footer id="contact">
-    <h2>Contact Us</h2>
-    <p><strong>Phone:</strong> 626-596-6155</p>
-    <p><strong>Email:</strong> <a href="mailto:Empowermentess@gmail.com">empowermentess@gmail.com</a></p>
-    <a class="instagram-link" href="https://www.instagram.com/empowermentess/" target="_blank" rel="noopener noreferrer" aria-label="Follow Empowerment Support Solutions on Instagram"><img class="instagram-icon" src="new-Instagram-icon-png-full-colour-900x900.png" alt="Instagram icon" loading="lazy"><span>@empowermentess</span></a>
-    <p><a href="https://bizfileonline.sos.ca.gov/search/business" target="_blank" class="trust-badge">Verify with CA Secretary of State (Search: Empowerment Support Solutions LLC)</a></p>
-    <p id="last-updated">Last updated: <span id="lu-text"></span></p>
-    <p class="copyright">© 2025 Empowerment Support Solutions, LLC. All rights reserved.</p>
   </footer>
-
-  <a href="/login.html" class="login-btn">Login</a>
 
   <script>
     function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:'en',includedLanguages:'es',autoDisplay:false},'google_translate_element');setActiveFromCookie()}
-    function setLang(lang){var val=(lang==='es')?'/en/es':'/es/en';document.cookie='googtrans='+val+';path=/';var hostParts=window.location.hostname.split('.');if(hostParts.length>1){var rootDomain=hostParts.slice(-2).join('.');document.cookie='googtrans='+val+';domain=.'+rootDomain+';path=/'}location.reload()}
-    function setActiveFromCookie(){var c=document.cookie;var isES=/googtrans=\/en\/es/.test(c);document.getElementById('btn-en').classList.toggle('active',!isES);document.getElementById('btn-es').classList.toggle('active',isES)}
+    function setLang(lang){var value=lang==='es'?'/en/es':'/es/en';document.cookie='googtrans='+value+';path=/';var hostParts=window.location.hostname.split('.');if(hostParts.length>1){var rootDomain=hostParts.slice(-2).join('.');document.cookie='googtrans='+value+';domain=.'+rootDomain+';path=/'}location.reload()}
+    function setActiveFromCookie(){var isSpanish=/googtrans=\/en\/es/.test(document.cookie);document.getElementById('btn-en').classList.toggle('active',!isSpanish);document.getElementById('btn-es').classList.toggle('active',isSpanish)}
     document.getElementById('btn-en').addEventListener('click',function(){setLang('en')});
     document.getElementById('btn-es').addEventListener('click',function(){setLang('es')});
-    (function(){var s=document.createElement('script');s.src='//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';document.head.appendChild(s)})();
-    const d=new Date(document.lastModified);const opts={year:'numeric',month:'long',day:'numeric'};document.getElementById('lu-text').textContent=d.toLocaleDateString('en-US',opts);
+    (function(){var script=document.createElement('script');script.src='//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';document.head.appendChild(script)})();
+    var modified=new Date(document.lastModified);document.getElementById('lu-text').textContent=modified.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
   </script>
 </body>
 </html>
