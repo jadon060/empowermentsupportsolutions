@@ -702,7 +702,7 @@
               <button class="btn btn-secondary" id="lockBtn" type="button">Lock Admin</button>
             </div>
 
-            <p class="admin-note">
+            <p class="admin-note" id="saveStatus" aria-live="polite">
               This updates the visible progress bar and point total on the page. Reward targets are 40, 75, and 120 points.
             </p>
           </div>
@@ -711,11 +711,18 @@
     </section>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const storageKey = 'omar-incentive-points';
+    const legacyStorageKey = 'omar-incentive-points';
     const adminPin = '8523';
+    const participantName = 'Omar';
     const targetPoints = 120;
     const defaultPoints = 0;
+
+    const SUPABASE_URL = 'https://bqanjupmcgydvmfgvutx.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_J6Y49EQarV5pAzhOdokl7w_GVlPoPSb';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const fill = document.querySelector('.fill');
     const pointDisplay = document.getElementById('heroPointDisplay');
@@ -730,16 +737,26 @@
     const lockBtn = document.getElementById('lockBtn');
     const pinMessage = document.getElementById('pinMessage');
     const adminControls = document.getElementById('adminControls');
+    const saveStatus = document.getElementById('saveStatus');
 
-    function getPoints(){
-      const saved = localStorage.getItem(storageKey);
+    let omarRowId = null;
+    let currentPoints = defaultPoints;
+
+    function setStatus(message, color){
+      if(!saveStatus) return;
+      saveStatus.textContent = message;
+      saveStatus.style.color = color || 'var(--muted)';
+    }
+
+    function getLegacyPoints(){
+      const saved = localStorage.getItem(legacyStorageKey);
       const points = Number(saved);
       return Number.isFinite(points) && points >= 0 ? points : defaultPoints;
     }
 
-    function setPoints(points){
+    function renderPoints(points){
       const safePoints = Math.max(0, Math.floor(Number(points) || 0));
-      localStorage.setItem(storageKey, safePoints);
+      currentPoints = safePoints;
 
       if(input){
         input.value = safePoints;
@@ -750,13 +767,111 @@
       fill.style.width = percent + '%';
     }
 
+    async function loadOmarPoints(){
+      const { data, error } = await supabaseClient
+        .from('participant_points')
+        .select('id, name, points, updated_at')
+        .eq('name', participantName)
+        .order('updated_at', { ascending:false })
+        .limit(1);
+
+      if(error){
+        console.error('Error loading Omar points:', error);
+        setStatus('Could not load the saved points. Check the connection and try again.', 'var(--danger)');
+        return;
+      }
+
+      if(data && data.length){
+        omarRowId = data[0].id;
+        renderPoints(data[0].points);
+        localStorage.setItem(legacyStorageKey, String(currentPoints));
+        setStatus('Points are synced across devices.', 'var(--success)');
+        return;
+      }
+
+      try {
+        await ensureOmarRowExists(getLegacyPoints());
+        await loadOmarPoints();
+      } catch (createError) {
+        console.error('Error creating Omar points row:', createError);
+        setStatus('Could not set up point syncing. Please try again.', 'var(--danger)');
+      }
+    }
+
+    async function ensureOmarRowExists(startingPoints = defaultPoints){
+      if(omarRowId) return omarRowId;
+
+      const { data: existing, error: existingError } = await supabaseClient
+        .from('participant_points')
+        .select('id, name, points, updated_at')
+        .eq('name', participantName)
+        .order('updated_at', { ascending:false })
+        .limit(1);
+
+      if(existingError) throw existingError;
+
+      if(existing && existing.length){
+        omarRowId = existing[0].id;
+        return omarRowId;
+      }
+
+      const { data: inserted, error: insertError } = await supabaseClient
+        .from('participant_points')
+        .insert({
+          name: participantName,
+          points: Math.max(0, Math.floor(Number(startingPoints) || 0)),
+          updated_at: new Date().toISOString()
+        })
+        .select('id, name, points, updated_at')
+        .limit(1);
+
+      if(insertError) throw insertError;
+      if(!inserted || !inserted.length) throw new Error('Omar points row was not created.');
+
+      omarRowId = inserted[0].id;
+      return omarRowId;
+    }
+
+    async function setPoints(points){
+      const safePoints = Math.max(0, Math.floor(Number(points) || 0));
+      const actionButtons = [saveBtn, addOneBtn, addFiveBtn, minusOneBtn, resetBtn];
+
+      actionButtons.forEach((button) => { button.disabled = true; });
+      setStatus('Saving points...', 'var(--brand)');
+
+      try {
+        await ensureOmarRowExists(safePoints);
+
+        const { data, error } = await supabaseClient
+          .from('participant_points')
+          .update({
+            points: safePoints,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', omarRowId)
+          .select('id, name, points, updated_at');
+
+        if(error) throw error;
+        if(!data || !data.length) throw new Error('The points update did not return a saved row.');
+
+        renderPoints(data[0].points);
+        localStorage.setItem(legacyStorageKey, String(currentPoints));
+        setStatus('Points saved and synced across devices.', 'var(--success)');
+      } catch (error) {
+        console.error('Error saving Omar points:', error);
+        setStatus('Points were not saved. Check the connection and try again.', 'var(--danger)');
+      } finally {
+        actionButtons.forEach((button) => { button.disabled = false; });
+      }
+    }
+
     function unlockAdmin(){
       if(pinInput.value === adminPin){
         adminControls.style.display = 'block';
         pinMessage.textContent = 'Admin unlocked.';
         pinMessage.style.color = 'var(--success)';
         pinInput.value = '';
-        input.value = getPoints();
+        input.value = currentPoints;
       } else {
         adminControls.style.display = 'none';
         pinMessage.textContent = 'Incorrect PIN.';
@@ -772,11 +887,50 @@
       pinInput.value = '';
     }
 
-    saveBtn.addEventListener('click', () => setPoints(input.value));
-    addOneBtn.addEventListener('click', () => setPoints(getPoints() + 1));
-    addFiveBtn.addEventListener('click', () => setPoints(getPoints() + 5));
-    minusOneBtn.addEventListener('click', () => setPoints(getPoints() - 1));
-    resetBtn.addEventListener('click', () => setPoints(0));
+    function handleRealtimePayload(payload){
+      if(payload && payload.new && payload.new.name === participantName){
+        omarRowId = payload.new.id;
+        renderPoints(payload.new.points);
+        localStorage.setItem(legacyStorageKey, String(currentPoints));
+        setStatus('Points synced live from another device.', 'var(--success)');
+      }
+    }
+
+    function subscribeToOmarPoints(){
+      supabaseClient
+        .channel('participant-points-live-omar')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'participant_points',
+            filter: 'name=eq.Omar'
+          },
+          handleRealtimePayload
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'participant_points',
+            filter: 'name=eq.Omar'
+          },
+          handleRealtimePayload
+        )
+        .subscribe((status) => {
+          if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT'){
+            setStatus('Live sync is reconnecting. Saved points will still load on refresh.', 'var(--danger)');
+          }
+        });
+    }
+
+    saveBtn.addEventListener('click', async () => { await setPoints(input.value); });
+    addOneBtn.addEventListener('click', async () => { await setPoints(currentPoints + 1); });
+    addFiveBtn.addEventListener('click', async () => { await setPoints(currentPoints + 5); });
+    minusOneBtn.addEventListener('click', async () => { await setPoints(currentPoints - 1); });
+    resetBtn.addEventListener('click', async () => { await setPoints(0); });
 
     unlockBtn.addEventListener('click', unlockAdmin);
     pinInput.addEventListener('keydown', (e) => {
@@ -784,8 +938,18 @@
     });
     lockBtn.addEventListener('click', lockAdmin);
 
-    setPoints(getPoints());
+    window.addEventListener('focus', loadOmarPoints);
+    document.addEventListener('visibilitychange', () => {
+      if(document.visibilityState === 'visible') loadOmarPoints();
+    });
+
+    renderPoints(getLegacyPoints());
     lockAdmin();
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadOmarPoints();
+      subscribeToOmarPoints();
+    });
   </script>
 </body>
 </html>
