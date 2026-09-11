@@ -555,7 +555,8 @@ document.addEventListener('DOMContentLoaded', () => {
       .select("*")
       .eq("client_id", getClientId())
       .eq("staff_id", staffUuid)
-      .eq("date", dayDate);
+      .eq("date", dayDate)
+      .eq("submitted", false);
 
     const officialRows = Array.isArray(officialRes.data) ? officialRes.data.map(row => normalizeEntry(row, "official")) : [];
     const draftRows = Array.isArray(draftRes.data) ? draftRes.data.map(row => normalizeEntry(row, "draft")) : [];
@@ -564,17 +565,51 @@ document.addEventListener('DOMContentLoaded', () => {
     return all;
   }
 
+  let dayStatusRequestId = 0;
+  const DAY_STATUS = {
+    none: { color:"#e5e7eb", title:"No chart saved" },
+    draft: { color:"#f59e0b", title:"Unfinished draft" },
+    submitted: { color:"#22c55e", title:"All charts submitted" }
+  };
+
+  async function fetchWeekDayStatuses(weekStart){
+    const weekEnd = ymd(addDays(new Date(`${weekStart}T12:00:00`), 6));
+    const [officialResult, draftResult] = await Promise.all([
+      ess.from("daily_entries").select("service_date")
+        .eq("client_id", getClientId()).gte("service_date", weekStart).lte("service_date", weekEnd),
+      ess.from("daily_drafts").select("date,submitted")
+        .eq("client_id", getClientId()).gte("date", weekStart).lte("date", weekEnd)
+    ]);
+    if (officialResult.error) throw officialResult.error;
+    if (draftResult.error) throw draftResult.error;
+
+    const statuses = new Map();
+    (officialResult.data || []).forEach(row=>{
+      if (row.service_date) statuses.set(row.service_date, "submitted");
+    });
+    (draftResult.data || []).forEach(row=>{
+      if (row.date && row.submitted === false) statuses.set(row.date, "draft");
+    });
+    return statuses;
+  }
+
   async function markDotsFromServer(){
-    for (let i=0;i<7;i++){
-      const dot = document.getElementById("w_dot"+i);
-      if (!dot) continue;
-      const staff = getStaffName();
-      if (!staff){
-        dot.style.background = "#e5e7eb";
-        continue;
+    const requestId = ++dayStatusRequestId;
+    const weekStart = ymd(current);
+    try {
+      const statuses = await fetchWeekDayStatuses(weekStart);
+      if (requestId !== dayStatusRequestId || weekStart !== ymd(current)) return;
+      for (let i=0;i<7;i++){
+        const dot = document.getElementById("w_dot"+i);
+        if (!dot) continue;
+        const status = statuses.get(ymd(addDays(current,i))) || "none";
+        const meta = DAY_STATUS[status];
+        dot.style.background = meta.color;
+        dot.title = meta.title;
+        dot.dataset.status = status;
       }
-      const srv = await fetchServerDayEntries(i);
-      dot.style.background = srv.length ? "#22c55e" : "#e5e7eb";
+    } catch (error) {
+      console.error("Participant day-status lookup failed", error);
     }
   }
 
@@ -829,6 +864,20 @@ document.addEventListener('DOMContentLoaded', () => {
       loadEntryIntoForm(currentDayEntries[idx]);
     }
   });
+
+  let dayStatusRealtimeTimer = null;
+  const refreshDayStatuses = ()=>{
+    clearTimeout(dayStatusRealtimeTimer);
+    dayStatusRealtimeTimer = setTimeout(markDotsFromServer, 180);
+  };
+  try {
+    sb.channel(`client-chart-status-${getClientId()}`)
+      .on('postgres_changes',{event:'*',schema:'ess',table:'daily_drafts',filter:`client_id=eq.${getClientId()}`},refreshDayStatuses)
+      .on('postgres_changes',{event:'*',schema:'ess',table:'daily_entries',filter:`client_id=eq.${getClientId()}`},refreshDayStatuses)
+      .subscribe();
+  } catch (error) {
+    console.error("Participant day-status live sync failed", error);
+  }
 
   renderWeek();
 });

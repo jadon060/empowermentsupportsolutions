@@ -1414,18 +1414,51 @@ document.addEventListener('DOMContentLoaded', () => {
     return null;
   }
 
+  let dayStatusRequestId = 0;
+  const DAY_STATUS = {
+    none: { color:"#e5e7eb", title:"No chart saved" },
+    draft: { color:"#f59e0b", title:"Unfinished draft" },
+    submitted: { color:"#22c55e", title:"All charts submitted" }
+  };
+
+  async function fetchWeekDayStatuses(weekStart){
+    const weekEnd = ymd(addDays(parseYmdLocal(weekStart), 6));
+    const [officialResult, draftResult] = await Promise.all([
+      ess.from("daily_entries").select("service_date")
+        .eq("client_id", getClientId()).gte("service_date", weekStart).lte("service_date", weekEnd),
+      ess.from("daily_drafts").select("date,submitted")
+        .eq("client_id", getClientId()).gte("date", weekStart).lte("date", weekEnd)
+    ]);
+    if (officialResult.error) throw officialResult.error;
+    if (draftResult.error) throw draftResult.error;
+
+    const statuses = new Map();
+    (officialResult.data || []).forEach(row=>{
+      if (row.service_date) statuses.set(row.service_date, "submitted");
+    });
+    (draftResult.data || []).forEach(row=>{
+      if (row.date && row.submitted === false) statuses.set(row.date, "draft");
+    });
+    return statuses;
+  }
+
   async function markDotsFromServer(){
-    for (let i=0;i<7;i++){
-      const dot = document.getElementById("w_dot"+i);
-      if (!dot) continue;
-      const staff = getStaffName();
-      if (!staff){
-        dot.style.background = "#e5e7eb";
-        continue;
+    const requestId = ++dayStatusRequestId;
+    const weekStart = ymd(current);
+    try {
+      const statuses = await fetchWeekDayStatuses(weekStart);
+      if (requestId !== dayStatusRequestId || weekStart !== ymd(current)) return;
+      for (let i=0;i<7;i++){
+        const dot = document.getElementById("w_dot"+i);
+        if (!dot) continue;
+        const status = statuses.get(ymd(addDays(current,i))) || "none";
+        const meta = DAY_STATUS[status];
+        dot.style.background = meta.color;
+        dot.title = meta.title;
+        dot.dataset.status = status;
       }
-      const srv = await fetchServerDay(i);
-      dot.style.background = srv?.source === "official" ? "#22c55e" : (srv?.source === "draft" ? "#f59e0b" : "#e5e7eb");
-      dot.title = srv?.source === "official" ? "Officially submitted" : (srv?.source === "draft" ? "Draft saved" : "No chart saved");
+    } catch (error) {
+      console.error("Participant day-status lookup failed", error);
     }
   }
 
@@ -1812,7 +1845,7 @@ document.addEventListener('DOMContentLoaded', () => {
     clearTimeout(chartRealtimeRefreshTimer);
     chartRealtimeRefreshTimer=setTimeout(async()=>{
       try{
-        await loadDraftTray();
+        await Promise.all([loadDraftTray(), markDotsFromServer()]);
         const row=(payload && payload.new && Object.keys(payload.new).length)?payload.new:(payload?.old||{});
         const changedDate=row.date||row.service_date||'';
         const changedMonth=changedDate ? changedDate.slice(0,7) : getCurrentMonthKey();
@@ -1824,7 +1857,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!getStaffName())return;
         const staffUuid=await getOrCreateStaffUuid();
         if(row.staff_id && row.staff_id!==staffUuid)return;
-        await markDotsFromServer();
         if(activeIndex!==null){
           const activeDate=ymd(addDays(current,activeIndex));
           if(!changedDate || changedDate===activeDate)await openDay(activeIndex);
