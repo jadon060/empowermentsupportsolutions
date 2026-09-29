@@ -919,11 +919,41 @@ document.addEventListener('DOMContentLoaded', () => {
            s.includes("staff direct");
   }
 
+  async function readHaydenLogisticsRow(monthKey){
+    const { data, error } = await publicDb.from(HAYDEN_LOGISTICS_TABLE)
+      .select("*").eq("client_id", HAYDEN_CLIENT_ID).eq("month_key", monthKey).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+
+  async function saveAutomaticHaydenLogistics(payload){
+    const saved = await readHaydenLogisticsRow(payload.month_key);
+    if (saved?.manual_override) return saved;
+
+    if (saved) {
+      // A manual override may be saved while chart totals are being calculated.
+      const { data, error } = await publicDb.from(HAYDEN_LOGISTICS_TABLE)
+        .update(payload).eq("client_id", HAYDEN_CLIENT_ID)
+        .eq("month_key", payload.month_key).eq("manual_override", false).select("*");
+      if (error) throw error;
+      return data?.[0] || await readHaydenLogisticsRow(payload.month_key);
+    }
+
+    const { error } = await publicDb.from(HAYDEN_LOGISTICS_TABLE).insert(payload);
+    if (error && error.code !== "23505") throw error;
+    return await readHaydenLogisticsRow(payload.month_key);
+  }
+
   function ymdFromDateObj(d){
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   }
 
   async function syncHaydenLogisticsFromOfficialEntries(monthKey = getCurrentMonthKey()){
+    const saved = await readHaydenLogisticsRow(monthKey);
+    if (saved?.manual_override) {
+      setLogisticsSyncNote("Manual admin hours are active for this month. Official charts remain saved without changing the tracker.");
+      return saved;
+    }
     const { data: rawEntries, error } = await readHaydenOfficialEntries(monthKey);
 
     if (error) {
@@ -987,18 +1017,15 @@ document.addEventListener('DOMContentLoaded', () => {
       admin_note: null
     };
 
-    const { error: syncError } = await publicDb
-      .from(HAYDEN_LOGISTICS_TABLE)
-      .upsert(logisticsPayload, { onConflict:"client_id,month_key" });
-
-    if (syncError) {
+    try {
+      const row = await saveAutomaticHaydenLogistics(logisticsPayload);
+      setLogisticsSyncNote(row?.manual_override ? "Manual admin hours are active for this month." : "Auto-synced from official submitted charts.");
+      return row;
+    } catch (syncError) {
       console.error("Hayden official-hours reconcile write failed:", syncError);
       setLogisticsSyncNote("Auto-calculated from official charts, but Supabase visual row could not be updated.");
-    } else {
-      setLogisticsSyncNote("Auto-synced from official submitted charts.");
+      return null;
     }
-
-    return logisticsPayload;
   }
 
   async function syncHaydenLogisticsForStaff(staffUuid, staffName, monthKey = getCurrentMonthKey()){
@@ -1016,16 +1043,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const staffMonthHours = staffEntries.reduce((sum, entry) => sum + hoursFromOfficialEntry(entry), 0);
     const isEssDirect = isEssDirectStaffName(staffName);
 
-    const { data: currentRow, error: currentRowError } = await publicDb
-      .from(HAYDEN_LOGISTICS_TABLE)
-      .select("*")
-      .eq("client_id", HAYDEN_CLIENT_ID)
-      .eq("month_key", monthKey)
-      .maybeSingle();
-
-    if (currentRowError) {
-      console.error("Hayden visual row read failed:", currentRowError);
-    }
+    const currentRow = await readHaydenLogisticsRow(monthKey);
+    if (currentRow?.manual_override) return currentRow;
 
     const approved = Number(currentRow?.monthly_approved_hours ?? 40) || 40;
     const currentRobert = Number(currentRow?.robert_hours ?? 0) || 0;
@@ -1052,24 +1071,27 @@ document.addEventListener('DOMContentLoaded', () => {
       admin_note: null
     };
 
-    const { error: syncError } = await publicDb
-      .from(HAYDEN_LOGISTICS_TABLE)
-      .upsert(logisticsPayload, { onConflict:"client_id,month_key" });
-
-    if (syncError) {
+    try {
+      const row = await saveAutomaticHaydenLogistics(logisticsPayload);
+      setLogisticsSyncNote(row?.manual_override ? "Manual admin hours are active for this month." : "Auto-synced from this staff member’s official submitted charts.");
+      return row;
+    } catch (syncError) {
       console.error("Hayden staff-scoped sync write failed:", syncError);
       setLogisticsSyncNote("Official chart saved, but monthly visual row could not be updated. Check public.client_logistics RLS/upsert.");
       return null;
     }
-
-    setLogisticsSyncNote("Auto-synced from this staff member’s official submitted charts.");
-    return logisticsPayload;
   }
 
   async function loadHaydenLiveLogistics(){
     const monthKey = getCurrentMonthKey();
 
     try{
+      const saved = await readHaydenLogisticsRow(monthKey);
+      if (saved?.manual_override) {
+        renderHaydenLogistics(mapClientLogisticsRow(saved));
+        setLogisticsSyncNote("Manual admin hours are active for this month. Automatic chart totals are paused.");
+        return;
+      }
       const officialPayload = await syncHaydenLogisticsFromOfficialEntries(monthKey);
       if (officialPayload) {
         renderHaydenLogistics(mapClientLogisticsRow(officialPayload));
