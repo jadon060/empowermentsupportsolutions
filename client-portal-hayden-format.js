@@ -41,7 +41,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(ids.length){const {data,error}=await ess.from('staff').select('id,full_name').in('id',ids);if(!error)(data||[]).forEach(r=>names.set(r.id,r.full_name||''))}
     let staffHours=0,essHours=0;entries.forEach(e=>{const h=hoursFromEntry(e);if(isEssDirectStaffName(names.get(e.staff_id)||''))essHours+=h;else staffHours+=h});
     const completed=staffHours+essHours,payload={client_id:CLIENT_ID,client_name:CLIENT_NAME,month_key:mk,month_label:monthLabel(mk),monthly_approved_hours:APPROVED,completed_hours:completed,remaining_hours:Math.max(0,APPROVED-completed),robert_hours:staffHours,ess_direct_hours:essHours};
-    const {error}=await publicDb.from(LOGISTICS_TABLE).upsert(payload,{onConflict:'client_id,month_key'});if(error)console.error(`${CLIENT_SHORT} logistics write failed`,error);
+    let write;
+    if(saved){write=await publicDb.from(LOGISTICS_TABLE).update(payload).eq('client_id',CLIENT_ID).eq('month_key',mk).eq('manual_override',false)}
+    else {write=await publicDb.from(LOGISTICS_TABLE).insert(payload)}
+    if(write.error&&write.error.code!=='23505')console.error(`${CLIENT_SHORT} logistics write failed`,write.error);
     const persisted=await readLogisticsRow(mk).catch(()=>null), row=persisted||payload;renderLogistics(row);if(!row.manual_override)$('logisticsSyncNote').textContent=`Auto-synced from ${CLIENT_SHORT}’s officially submitted daily charts. Saved drafts do not count.`;return row;
   }
   async function loadLogistics(){try{await syncLogistics(monthKey())}catch(e){console.error(`${CLIENT_SHORT} logistics load issue`,e);const saved=await readLogisticsRow(monthKey()).catch(()=>null);renderLogistics(saved||{monthly_approved_hours:APPROVED,completed_hours:0,remaining_hours:APPROVED,month_key:monthKey(),month_label:monthLabel(monthKey()),robert_hours:0,ess_direct_hours:0});$('logisticsSyncNote').textContent='Live logistics could not fully reconcile. Showing the latest saved monthly values.'}}
