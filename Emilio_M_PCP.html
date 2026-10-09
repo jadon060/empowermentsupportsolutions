@@ -204,6 +204,21 @@
       opacity:0.7;
       cursor:default;
     }
+    .save-status{
+      margin:0 0 18px;
+      padding:10px 14px;
+      border:1px solid #bfdbfe;
+      border-radius:12px;
+      background:#eff6ff;
+      color:#1e3a8a;
+      font-size:13px;
+      font-weight:600;
+    }
+    .save-status.error{
+      border-color:#fecaca;
+      background:#fef2f2;
+      color:#991b1b;
+    }
 
     footer{
       background:#020617;
@@ -219,7 +234,7 @@
 
     @media print{
       body{background:#fff;}
-      #submitPCP, #exportPCP, .clear-btn{display:none !important;}
+      #submitPCP, #exportPCP, .clear-btn, .save-status{display:none !important;}
       .wrap{
         max-width:8.5in;
         margin:0 auto;
@@ -248,7 +263,7 @@
          alt="ESS Logo">
     <div>
       <div class="top-title">Empowerment Support Solutions, LLC</div>
-      <div class="top-sub">SDP • Person-Centered Plan (PCP) for Emilio M. • SGPRC</div>
+      <div class="top-sub">SDP • Person-Centered Plan (PCP) for Emilio M. • SCLARC</div>
     </div>
   </div>
   <div class="top-right">
@@ -257,6 +272,7 @@
 </div>
 
 <div class="wrap">
+  <div id="saveStatus" class="save-status" role="status" aria-live="polite">Loading Emilio M.’s saved PCP…</div>
 
   <!-- SECTION 1 — PCP OVERVIEW -->
   <h2 class="section-heading">Section 1 — PCP Overview</h2>
@@ -268,7 +284,7 @@
 
     <div class="grid-2">
       <div>
-        <label for="pcp_conducted_by">PCP conducted by (John Doe)</label>
+        <label for="pcp_conducted_by">PCP conducted by (ESS representative)</label>
         <textarea id="pcp_conducted_by" class="short"></textarea>
       </div>
       <div>
@@ -384,8 +400,8 @@
     </div>
   </div>
 
-  <!-- SECTION 4 — SGPRC LIFE AREAS -->
-  <h2 class="section-heading">Section 4 — SGPRC Life Areas & Outcomes</h2>
+  <!-- SECTION 4 — SCLARC LIFE AREAS -->
+  <h2 class="section-heading">Section 4 — SCLARC Life Areas & Outcomes</h2>
 
   <div class="card">
     <div class="card-header">
@@ -526,7 +542,7 @@
     <label>Current barriers</label><textarea id="outcome1_barriers" class="short"></textarea>
     <label>Teaching & support strategies</label><textarea id="outcome1_strategies"></textarea>
     <label>Progress measurement</label><textarea id="outcome1_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome1_staff"></textarea>
+    <label>ESS Staff responsibilities</label><textarea id="outcome1_staff"></textarea>
     <label>Timeline / expected progress</label><textarea id="outcome1_timeline" class="short"></textarea>
   </div>
 
@@ -540,7 +556,7 @@
     <label>Current barriers</label><textarea id="outcome2_barriers" class="short"></textarea>
     <label>Teaching & support strategies</label><textarea id="outcome2_strategies"></textarea>
     <label>Progress measurement</label><textarea id="outcome2_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome2_staff"></textarea>
+    <label>ESS Staff responsibilities</label><textarea id="outcome2_staff"></textarea>
     <label>Timeline / expected progress</label><textarea id="outcome2_timeline" class="short"></textarea>
   </div>
 
@@ -554,7 +570,7 @@
     <label>Current barriers</label><textarea id="outcome3_barriers" class="short"></textarea>
     <label>Teaching & support strategies</label><textarea id="outcome3_strategies"></textarea>
     <label>Progress measurement</label><textarea id="outcome3_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome3_staff"></textarea>
+    <label>ESS Staff responsibilities</label><textarea id="outcome3_staff"></textarea>
     <label>Timeline / expected progress</label><textarea id="outcome3_timeline" class="short"></textarea>
   </div>
 
@@ -568,7 +584,7 @@
     <label>Current barriers</label><textarea id="outcome4_barriers" class="short"></textarea>
     <label>Teaching & support strategies</label><textarea id="outcome4_strategies"></textarea>
     <label>Progress measurement</label><textarea id="outcome4_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome4_staff"></textarea>
+    <label>ESS Staff responsibilities</label><textarea id="outcome4_staff"></textarea>
     <label>Timeline / expected progress</label><textarea id="outcome4_timeline" class="short"></textarea>
   </div>
 
@@ -582,7 +598,7 @@
     <label>Current barriers</label><textarea id="outcome5_barriers" class="short"></textarea>
     <label>Teaching & support strategies</label><textarea id="outcome5_strategies"></textarea>
     <label>Progress measurement</label><textarea id="outcome5_measure" class="short"></textarea>
-    <label>ESS Staff responsibilities (John Doe)</label><textarea id="outcome5_staff"></textarea>
+    <label>ESS Staff responsibilities</label><textarea id="outcome5_staff"></textarea>
     <label>Timeline / expected progress</label><textarea id="outcome5_timeline" class="short"></textarea>
   </div>
 
@@ -594,7 +610,7 @@
       <div class="card-sub">Shows why ESS is needed alongside family and community.</div>
     </div>
 
-    <label>Natural supports (e.g., John Doe)</label>
+    <label>Natural supports selected by Emilio M.</label>
     <textarea id="natural_supports"></textarea>
 
     <label>Paid supports (ESS Staff)</label>
@@ -672,7 +688,7 @@
       </div>
 
       <div class="sig-box">
-        <div class="sig-label">ESS Staff Signature (John Doe)</div>
+        <div class="sig-label">ESS Staff Signature</div>
         <canvas id="sig_staff" class="sig-canvas"></canvas>
         <button class="clear-btn" type="button" id="clearStaff">Clear</button>
       </div>
@@ -680,12 +696,12 @@
   </div>
 
   <button id="exportPCP" type="button">Export PCP as PDF</button>
-  <button id="submitPCP" type="button">Submit PCP</button>
+  <button id="submitPCP" type="button">Save PCP</button>
 </div>
 
 <footer>
   <span>Empowerment Support Solutions, LLC</span>
-  <span>Self-Determination Program • Person-Centered Planning (PCP Compliant) • SGPRC</span>
+  <span>Self-Determination Program • Person-Centered Planning (PCP Compliant) • SCLARC</span>
 </footer>
 
 <script>
@@ -819,8 +835,7 @@
   const canvasEmilioM = setupSignatureCanvas("sig_emilio_m", "clearEmilioM");
   const canvasStaff    = setupSignatureCanvas("sig_staff", "clearStaff");
 
-  function collectPCPData(){
-    const ids = [
+  const PCP_FIELD_IDS = [
       "pcp_conducted_by","pcp_format","pcp_date","pcp_location",
       "pcp_participants","pcp_summary",
       "like_admire","strengths","communication","important_to","important_for",
@@ -860,14 +875,73 @@
       "natural_supports","paid_supports","justification","hours_needed",
       "risk_behavior","risk_medical","risk_env","risk_comm","crisis_plan",
       "mitigation","future_pref","future_goals","future_comm","future_long"
-    ];
+  ];
 
+  const saveStatus = document.getElementById("saveStatus");
+  let savedRecordExists = false;
+
+  function setSaveStatus(message, isError = false){
+    saveStatus.textContent = message;
+    saveStatus.classList.toggle("error", isError);
+  }
+
+  function collectPCPData(){
     const data = {};
-    ids.forEach(id => {
+    PCP_FIELD_IDS.forEach(id => {
       const el = document.getElementById(id);
       data[id] = el ? el.value.trim() : "";
     });
     return data;
+  }
+
+  function populatePCPData(data){
+    PCP_FIELD_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if(el && Object.prototype.hasOwnProperty.call(data || {}, id)){
+        el.value = data[id] || "";
+      }
+    });
+  }
+
+  function restoreSignature(canvas, dataUrl){
+    if(!dataUrl) return;
+    const img = new Image();
+    img.onload = () => {
+      const rect = canvas.getBoundingClientRect();
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.drawImage(img, 0, 0, rect.width, rect.height);
+    };
+    img.src = dataUrl;
+  }
+
+  async function loadSavedPCP(){
+    try{
+      const { data, error } = await db
+        .from("pcp_entries")
+        .select("pcp_data,signature_base64")
+        .eq("client_id", CLIENT_ID)
+        .limit(1)
+        .maybeSingle();
+
+      if(error) throw error;
+      if(!data){
+        setSaveStatus("No saved PCP was found. Complete the form and select Save PCP.");
+        return;
+      }
+
+      populatePCPData(data.pcp_data || {});
+      let signatures = {};
+      try{ signatures = JSON.parse(data.signature_base64 || "{}"); }catch(_){}
+      restoreSignature(canvasEmilioM, signatures.emilio_m_signature || "");
+      restoreSignature(canvasStaff, signatures.staff_signature || "");
+      savedRecordExists = true;
+      document.getElementById("submitPCP").textContent = "Save Updates";
+      setSaveStatus("Saved PCP loaded from the ESS server record. Changes are not saved until you select Save Updates.");
+    }catch(error){
+      console.error("Supabase load error:", error);
+      setSaveStatus("The saved PCP could not be loaded. Use the editable Word copy and contact the ESS administrator.", true);
+    }
   }
 
   document.getElementById("submitPCP").addEventListener("click", async () => {
@@ -875,7 +949,7 @@
 
     try{
       btn.disabled = true;
-      btn.textContent = "Submitting…";
+      btn.textContent = "Saving…";
 
       const pcpData = collectPCPData();
       const sigEmilioM = getSignatureBase64(canvasEmilioM);
@@ -890,29 +964,44 @@
         })
       };
 
-      const { data, error } = await db
-        .from("pcp_entries")
-        .insert(record)
-        .select();
+      let result;
+      if(savedRecordExists){
+        result = await db
+          .from("pcp_entries")
+          .update(record)
+          .eq("client_id", CLIENT_ID)
+          .select();
+      }else{
+        result = await db
+          .from("pcp_entries")
+          .insert(record)
+          .select();
+      }
 
-      if(error){
-        console.error("Supabase insert error:", error);
-        alert("Error saving PCP: " + (error.message || "Unknown error"));
+      if(result.error){
+        console.error("Supabase save error:", result.error);
+        alert("Error saving PCP: " + (result.error.message || "Unknown error"));
         btn.disabled = false;
-        btn.textContent = "Submit PCP";
+        btn.textContent = savedRecordExists ? "Save Updates" : "Save PCP";
         return;
       }
 
-      alert("PCP successfully submitted.");
-      btn.textContent = "Submitted ✔";
+      savedRecordExists = true;
+      setSaveStatus("PCP saved successfully. Reopening this page will load the saved responses.");
+      alert("PCP saved successfully.");
+      btn.textContent = "Saved ✔";
+      btn.disabled = false;
+      setTimeout(() => { btn.textContent = "Save Updates"; }, 1800);
 
     }catch(err){
       console.error("Unexpected submit error:", err);
       alert("Unexpected error submitting PCP.");
       btn.disabled = false;
-      btn.textContent = "Submit PCP";
+      btn.textContent = savedRecordExists ? "Save Updates" : "Save PCP";
     }
   });
+
+  loadSavedPCP();
 
   // ✅ Export: triggers print dialog (Save as PDF). Keeps signatures because canvas now works.
   document.getElementById("exportPCP").addEventListener("click", () => {
