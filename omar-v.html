@@ -5,6 +5,22 @@
   <title>ESS • Daily SDP Log (Omar)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/client-portal-hayden-format.css" />
+  <style>
+    .service-hours-wrap{max-width:1120px;margin:0 auto 18px;padding:0 18px}
+    .service-hours-card{background:linear-gradient(135deg,#fff 0%,#f8fbff 62%,#eef6ff 100%);border:1px solid #dbe7f5;border-radius:20px;padding:20px;box-shadow:0 12px 28px rgba(15,23,42,.07);color:#0f172a}
+    .service-hours-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
+    .service-hours-head h2{margin:0;font-size:1.2rem;color:#2c3e50}.service-hours-head p{margin:5px 0 0;color:#64748b;font-size:.88rem}
+    .service-hours-month{width:auto;min-width:155px;border:1px solid #cbd5e1;border-radius:10px;padding:9px 11px;background:#fff;color:#0f172a;font:inherit}
+    .service-hours-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .service-hours-item,.service-hours-total{background:rgba(255,255,255,.92);border:1px solid #dbe7f5;border-radius:15px;padding:14px}
+    .service-hours-code{font-weight:850;color:#1e3a8a}.service-hours-desc{min-height:38px;color:#475569;font-size:.84rem;margin:4px 0 12px}
+    .service-hours-numbers{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:.83rem;color:#334155}.service-hours-numbers strong{font-size:1rem;color:#0f172a}
+    .service-hours-bar{height:12px;border-radius:999px;background:#e8eef7;overflow:hidden;margin:9px 0}.service-hours-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#1f5fa8,#4f8fe0 55%,#22c55e);transition:width .25s ease}
+    .service-hours-state{font-size:.78rem;font-weight:750;color:#166534}.service-hours-state.warning{color:#92400e}.service-hours-state.reached,.service-hours-state.over{color:#b91c1c}
+    .service-hours-total{margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#eff6ff}.service-hours-total strong{font-size:1.08rem}.service-hours-note{font-size:.8rem;line-height:1.45;color:#64748b;margin:10px 2px 0}.service-hours-uncategorized{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;background:#fffbeb;border:1px solid #fde68a;color:#78350f;font-size:.82rem}
+    @media(max-width:760px){.service-hours-grid{grid-template-columns:1fr 1fr}.service-hours-head{flex-direction:column}.service-hours-month{width:100%}}
+    @media(max-width:520px){.service-hours-wrap{padding:0 12px}.service-hours-card{padding:16px}.service-hours-grid{grid-template-columns:1fr}.service-hours-desc{min-height:0}.service-hours-total{align-items:flex-start;flex-direction:column}}
+  </style>
 </head>
 <body data-client-id="521dd725-2fa6-4d78-9fcc-e5447dc727cb" data-client-name="Omar V." data-client-short="Omar" data-approved-hours="122" data-staff-hours-label="Staff Hours Completed" data-ess-hours-label="ESS Direct Hours Completed">
 <div class="about-wrap">
@@ -48,6 +64,8 @@
   <a href="/omar-medications.html" class="quick-link-btn quick-link-btn--secondary"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto"><path d="M10.5 5.5a4.95 4.95 0 0 1 7 7l-5 5a4.95 4.95 0 0 1-7-7Z"></path><path d="m8.5 15.5 7-7"></path></svg><span>Medication Tracking</span></a>
 </div>
 
+<div class="service-hours-wrap"><section id="serviceHoursTracker" class="service-hours-card" aria-labelledby="serviceHoursTitle"></section></div>
+
 <section class="daily-card">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px"><h2 style="margin:0">📅 Daily SDP Log – Omar</h2><span class="pill">Daily submissions → Admin export</span></div>
   <div class="row" style="margin-bottom:10px"><input type="hidden" id="client_id" value="521dd725-2fa6-4d78-9fcc-e5447dc727cb" /><div><label class="label">Client</label><input type="text" class="input" value="Omar V." readonly style="background:#e5e7eb;cursor:not-allowed"></div><div><label for="staff_id" class="label">Staff (type your name)</label><input id="staff_id" type="text" class="input" placeholder="e.g., Ivan" required /></div></div>
@@ -64,7 +82,8 @@
     <div id="w_panelDate" style="color:#6b7280;margin-bottom:10px"></div>
     <div id="w_recordState" aria-live="polite" style="margin:-2px 0 12px;font-size:13px;font-weight:700;color:#475569">New chart — not saved yet.</div>
     <div class="row"><div><label for="w_start" class="label">Start Time</label><input id="w_start" type="time" class="input"></div><div><label for="w_end" class="label">End Time</label><input id="w_end" type="time" class="input"></div><div><label for="w_modality" class="label">Modality / Location</label><select id="w_modality" class="select"><option value="Home">Home</option><option value="Community">Community</option><option value="Remote" selected>Remote</option></select></div></div>
-    <div class="row" style="margin-top:12px"><div><label for="w_hours" class="label">Hours Worked</label><input id="w_hours" type="number" min="0" step="0.25" placeholder="e.g., 3.5" class="input"></div><div><label for="w_domain" class="label">Domain (service codes worked on)</label><input id="w_domain" type="text" placeholder="e.g., Money Mgmt, Hygiene, Safety…" class="input"></div></div>
+    <div class="row" style="margin-top:12px"><div><label for="w_hours" class="label">Hours Worked</label><input id="w_hours" type="number" min="0" step="0.25" placeholder="e.g., 3.5" class="input"></div><div><label for="w_serviceCategory" class="label">Monthly Service Category</label><select id="w_serviceCategory" class="select" required><option value="">Select service category</option><option value="334">334 — Individual Training &amp; Education</option><option value="335-A">335-A — Employment Exploration / Community Readiness</option><option value="335-B">335-B — Employment Training / Job Readiness</option></select></div></div>
+    <div class="row" style="margin-top:12px"><div><label for="w_domain" class="label">Service Domains / Goals Worked On</label><input id="w_domain" type="text" placeholder="e.g., Money Mgmt, Hygiene, Safety…" class="input"></div></div>
     <div class="row" style="margin-top:12px"><div><label for="w_rc" class="label">Regional Center</label><input id="w_rc" type="text" class="input" placeholder="e.g., SGPRC"></div><div><label for="w_sc" class="label">Service Coordinator</label><input id="w_sc" type="text" class="input" placeholder="e.g., Imani"></div></div>
     <div style="margin-top:12px"><label for="w_notes" class="label">Progress Notes</label><textarea id="w_notes" class="textarea" placeholder="what/where/with whom, goals"></textarea></div>
     <div style="margin-top:12px"><label for="w_obs" class="label">Observation</label><textarea id="w_obs" class="textarea" placeholder="reaction/response to today's services"></textarea></div>
@@ -76,6 +95,8 @@
   <div id="w_error"></div><div id="w_toast"></div>
 </section>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/client-portal-hayden-format.js?v=20260911-day-status"></script>
+<script src="/omar-service-hours.js?v=20261015"></script>
+<script src="/client-portal-hayden-format.js?v=20261015-service-category"></script>
 </body>
 </html>
+
