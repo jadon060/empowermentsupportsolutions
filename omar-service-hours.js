@@ -82,6 +82,7 @@
     return { label: 'Within monthly allocation', className: '' };
   };
   let aggregate = { month: '', categories: Object.create(null), total: 0, uncategorized: 0 };
+  let loadSequence = 0;
 
   function render(data) {
     const totalPct = AUTHORIZED_TOTAL ? data.total / AUTHORIZED_TOTAL * 100 : 0;
@@ -143,11 +144,15 @@
 
   async function loadMonth(key = monthPicker.value || currentMonth()) {
     if (!/^\d{4}-\d{2}$/.test(key)) return null;
+    const request = ++loadSequence;
     monthPicker.value = key;
-    status.textContent = 'Loading official session records…';
+    status.textContent = navigator.onLine === false ? 'Offline — waiting to synchronize saved session records…' : 'Loading official session records…';
     const next = await readMonth(key);
+    if (request !== loadSequence || key !== monthPicker.value) return null;
     if (!next) {
-      status.textContent = 'Could not load Omar’s official session records. Refresh the page or check ESS database access.';
+      status.textContent = navigator.onLine === false
+        ? 'Offline — saved totals are not confirmed. Reconnect to load this month’s records.'
+        : 'Could not load Omar’s official session records. Totals are unavailable; retry or check ESS database access.';
       status.className = 'service-hours-note service-hours-state over';
       return null;
     }
@@ -163,7 +168,10 @@
     if (!item || !Number.isFinite(amount) || amount <= 0) return true;
     const month = String(serviceDate || '').slice(0, 7);
     const data = aggregate.month === month ? aggregate : await readMonth(month);
-    if (!data) return true;
+    if (!data) {
+      window.alert('Could not verify the latest saved monthly totals. The session was not submitted. Reconnect and try again.');
+      return false;
+    }
     const warnings = [];
     if ((data.categories[item.id] || 0) + amount > item.authorized) {
       warnings.push(`${item.code} would exceed its ${item.authorized}-hour monthly allocation.`);
@@ -179,13 +187,26 @@
   window.ESSOmarServiceHours = { refresh: () => loadMonth(monthPicker.value), warnSession };
 
   loadMonth();
+  const refreshSelectedMonth = () => { if (navigator.onLine !== false) loadMonth(monthPicker.value); };
+  window.addEventListener('online', refreshSelectedMonth);
+  window.addEventListener('focus', refreshSelectedMonth);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshSelectedMonth(); });
+  // Periodic refetch is a fallback for dropped Realtime events or reconnection races.
+  window.setInterval(refreshSelectedMonth, 60000);
   try {
     sb.channel('omar-service-hours')
       .on('postgres_changes', {
         event: '*', schema: 'ess', table: 'daily_entries', filter: `client_id=eq.${CLIENT_ID}`
       }, () => loadMonth(monthPicker.value))
-      .subscribe();
+      .subscribe((channelStatus) => {
+        if (channelStatus === 'CHANNEL_ERROR' || channelStatus === 'TIMED_OUT' || channelStatus === 'CLOSED') {
+          status.textContent = 'Live sync is reconnecting. Saved totals will be checked again automatically.';
+          status.className = 'service-hours-note service-hours-state warning';
+        }
+      });
   } catch (error) {
     console.warn('Omar service tracker live refresh subscription unavailable', error);
+    status.textContent = 'Live sync is unavailable. Saved totals will be checked automatically.';
+    status.className = 'service-hours-note service-hours-state warning';
   }
 })();
