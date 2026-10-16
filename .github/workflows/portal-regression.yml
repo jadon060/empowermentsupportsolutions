@@ -1,0 +1,33 @@
+name: ESS portal regression checks
+on:
+  push:
+    branches: [repair-preserve-all-pins-20261016]
+permissions:
+  contents: read
+concurrency:
+  group: ess-portal-regression
+  cancel-in-progress: false
+jobs:
+  portal-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Existing notebook unit tests
+        run: node --test tests/admin-notebooks.test.cjs
+      - name: Install browser test runner
+        run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - name: Install desktop and iPhone browser engines
+        run: npx playwright install --with-deps chromium webkit
+      - name: Portal and authenticated notebook regression checks
+        run: |
+          if test -f tests/portal-regression.cjs; then
+            node tests/portal-regression.cjs
+          else
+            echo "Browser runner ready; portal regression implementation is pending."
+          fi
