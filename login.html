@@ -45,7 +45,7 @@
     async function adminClient() {
       if (!window.ESSAdminSession?.client) {
         if (!window.supabase) await loadScript('/portal/vendor/supabase-2.117.3.js');
-        await loadScript('/portal/admin-session.js?v=20261016-pin-session');
+        await loadScript('/portal/admin-session.js?v=20261016-isolated-v2');
       }
       if (!window.ESSAdminSession?.client) throw new Error('Secure ESS connection unavailable.');
       return window.ESSAdminSession.client;
