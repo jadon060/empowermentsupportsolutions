@@ -46,7 +46,7 @@
   const initials=name=>name.split(/\s+/).filter(Boolean).map(s=>s[0]).slice(0,2).join('');
   function el(tag,text,className) {const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(className)n.className=className;return n;}
   function button(text,fn,cls='text-button') {const b=el('button',text,cls);b.type='button';b.addEventListener('click',fn);return b;}
-  const state={clients:KNOWN.slice(),client:KNOWN[0],month:localDate().slice(0,7),months:new Map(),rows:[],employees:[],teamRows:null,teamGeneration:0,admin:false,busy:false,loading:false,generation:0,authGeneration:0,historyGeneration:0,historyOffset:0,historyLoading:false,sessionId:null,channel:null,editing:null,pendingInsert:null,formBaseline:''};
+  const state={clients:KNOWN.slice(),client:KNOWN[0],month:localDate().slice(0,7),months:new Map(),rows:[],employees:[],teamRows:null,teamGeneration:0,admin:false,busy:false,loading:false,generation:0,authGeneration:0,historyGeneration:0,historyOffset:0,historyLoading:false,sessionId:null,channel:null,editing:null,pendingInsert:null,formBaseline:'',authLinkRequest:null};
   let sb;
   $('year').textContent=new Date().getFullYear();
   $('month').value=state.month;
@@ -240,13 +240,30 @@
     document.body.classList.add('admin-checking');state.employees=[];state.teamRows=null;$('team-cards').replaceChildren();state.rows=[];summary(false);empty('Opening your admin session…');$('history-list').replaceChildren(el('p','Opening history…','muted small'));$('more-history').hidden=true;$('entry-dialog').close();controls();
     if(!session){
       let legacyAdmin=false;try{legacyAdmin=localStorage.getItem('ESS_Admin_Login')==='true';}catch{}
-      if(legacyAdmin){document.body.classList.remove('admin-checking');state.admin=false;status('Notebook access unavailable');empty('Private staff-hour notebooks need an authorized cloud session. No records are exposed without it.');message('Your ESS portal login is active, but the secure notebook session could not be restored. Contact ESS support to reconnect it.',true);controls();return;}
+      if(legacyAdmin){
+        document.body.classList.remove('admin-checking');state.admin=false;status('Secure sign-in link needed');
+        empty('Open the one-time ESS admin sign-in link on this device to load the staff hours notebook and employee overview.');controls();
+        if(state.authLinkRequest){await state.authLinkRequest;return;}
+        const key='ESS_Admin_Notebook_Link_Sent_At',now=Date.now(),cooldown=10*60*1000;let last=0;
+        try{last=Number(localStorage.getItem(key)||0);}catch{}
+        if(now-last<cooldown){message('A one-time sign-in link was already sent to the ESS admin email. Open the latest link on this device. If it expired, reload this page after 10 minutes to request another.',false);return;}
+        state.authLinkRequest=(async()=>{
+          try{
+            try{localStorage.setItem(key,String(now));}catch{}
+            const {error}=await sb.auth.signInWithOtp({email:window.ESSAdminSession.email,options:{shouldCreateUser:false,emailRedirectTo:location.origin+'/login.html?admin=1&recovery=1'}});
+            if(error)throw error;
+            message('A one-time secure link was sent to the existing ESS admin email. Open it on this device; your login screen and PIN remain unchanged.',false);
+          }catch(error){try{localStorage.removeItem(key);}catch{}message('Could not send the secure sign-in link: '+(error.message||'Connection unavailable. Reload to retry.'),true);}
+          finally{state.authLinkRequest=null;}
+        })();
+        await state.authLinkRequest;return;
+      }
       location.replace('/login.html');return;
     }
     try {
       const {data,error}=await sb.rpc('staff_hours_admin_access');if(error)throw error;
       if(sessionId!==state.sessionId||ticket!==state.authGeneration)return;
-      if(!data){let legacyAdmin=false;try{legacyAdmin=localStorage.getItem('ESS_Admin_Login')==='true';}catch{}if(legacyAdmin){document.body.classList.remove('admin-checking');state.admin=false;status('Notebook access unavailable');empty('Private staff-hour notebooks need an authorized cloud session. No records are exposed without it.');message('Your ESS portal login is active, but the secure notebook session could not be restored. Contact ESS support to reconnect it.',true);controls();return;}location.replace('/login.html');return;}
+      if(!data){document.body.classList.remove('admin-checking');state.admin=false;status('Admin access not authorized');empty('The signed-in ESS account does not have administrator access to this notebook.');message('The ESS admin account is signed in, but its administrator permission could not be confirmed.',true);controls();return;}
       state.admin=true;try{localStorage.setItem('ESS_Admin_Login','true');}catch{}
       await fetchClients();if(ticket!==state.authGeneration)return;await Promise.all([loadEntries(),loadTeam()]);if(ticket!==state.authGeneration||!state.admin)return;
       document.body.classList.remove('admin-checking');
