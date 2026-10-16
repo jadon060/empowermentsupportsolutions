@@ -47,7 +47,7 @@ test('client notebooks use scoped admin-only roster RPC instead of direct table 
   assert.match(js, /sb\.rpc\('admin_notebook_clients'\)/);
   assert.doesNotMatch(js, /sb\.schema\('ess'\)\.from\('clients'\)/);
   const dashboard = read('portal/admin.html');
-  assert.match(dashboard, /admin-notebooks\.js\?v=20261016-client-rpc-fix/);
+  assert.match(dashboard, /admin-notebooks\.js\?v=20261016-organizer-v1/);
 });
 
 test('admin session is isolated from shared public charting clients', () => {
@@ -91,4 +91,47 @@ test('iPhone cache-busting loads restored charting assets', () => {
   assert.match(read('jeremy-n.html'), /client-portal-hayden-format\.js\?v=20261016-anon-restored/);
   assert.match(read('Eric_L.html'), /Eric_L_chart\.html\?v=20261016-anon-restored/);
   assert.match(read('Eric_L.html'), /eric-logistics\.html\?v=20261016-anon-restored/);
+});
+
+test('manual client-hours editor remains available for all existing client notebooks', () => {
+  const dashboard=read('portal/admin.html');
+  const notebooks=read('portal/admin-notebooks.js');
+  const editor=read('portal/client-hours-admin.html');
+  assert.match(dashboard,/id="manual-hours-link"/);
+  assert.match(notebooks,/Manual client hours ↗/);
+  assert.match(notebooks,/client-hours-admin\.html\?client=/);
+  for(const name of ['omar','jeremy','hayden','eric'])assert.match(editor,new RegExp(name+':\\{id:'));
+  assert.match(editor,/Save Manual Override/);
+  assert.match(editor,/Return to Automatic Sync/);
+  assert.match(editor,/persistSession:false,autoRefreshToken:false,detectSessionInUrl:false/);
+});
+
+test('My Notes and simple pinned to-dos use one Admin Auth session with no second sign-in', () => {
+  const dashboard=read('portal/admin.html');
+  const organizer=read('portal/admin-organizer.js');
+  const notebooks=read('portal/admin-notebooks.js');
+  assert.match(dashboard,/id="todoText"/);
+  assert.match(dashboard,/id="pinTodo"/);
+  assert.match(dashboard,/id="todoList"/);
+  assert.match(dashboard,/Cloud synced/);
+  assert.match(dashboard,/admin-organizer\.js\?v=/);
+  assert.match(organizer,/window\.ESSAdminSession/);
+  assert.match(organizer,/staff_hours_admin_access/);
+  assert.match(organizer,/admin_private_notes/);
+  assert.match(organizer,/admin_todo_items/);
+  assert.match(organizer,/note_text/);
+  assert.match(organizer,/done:check\.checked/);
+  assert.match(organizer,/deleted_at:new Date\(\)\.toISOString\(\)/);
+  assert.doesNotMatch(organizer,/signInWithOtp|resetPasswordForEmail/);
+  assert.doesNotMatch(notebooks,/function saveNotes\(/);
+});
+
+test('legacy device notes are merged without overwriting records or deleting local backup',()=>{
+  const organizer=read('portal/admin-organizer.js');
+  assert.match(organizer,/ESS_Admin_PrivateNotes_v1/);
+  assert.match(organizer,/ESS_Admin_PrivateNotes_CloudMigrated_v1/);
+  assert.match(organizer,/ignoreDuplicates:true/);
+  assert.match(organizer,/migrateLocal/);
+  assert.doesNotMatch(organizer,/localStorage\.removeItem\(LEGACY_KEY\)/);
+  assert.doesNotMatch(organizer,/localStorage\.setItem\(LEGACY_KEY/);
 });

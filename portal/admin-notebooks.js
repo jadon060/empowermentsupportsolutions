@@ -73,9 +73,10 @@
       const card=el('article',undefined,'client-card');card.append(el('span',initials(c.name),'initials'),el('h3',c.name),el('p','ESS client workspace'));
       const links=el('div',undefined,'client-card-links');
       if(c.portal){const a=el('a','Open portal ↗');a.href=c.portal;links.append(a);}else links.append(el('span','Client notebook'));
-      links.append(button('Hours log →',()=>{selectClient(c.id);$('staff-log').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}));card.append(links);cards.push(card);
+      links.append(button('Hours log →',()=>{selectClient(c.id);$('staff-log').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}));if(c.key){const manual=el('a','Manual client hours ↗');manual.href='/portal/client-hours-admin.html?client='+encodeURIComponent(c.key);links.append(manual);}card.append(links);cards.push(card);
     }
     const strip=$('client-tabs'),left=strip.scrollLeft;strip.replaceChildren(...tabs);strip.scrollLeft=left;const selected=strip.querySelector('[aria-selected=true]');if(selected){const a=selected.getBoundingClientRect(),b=strip.getBoundingClientRect();if(a.left<b.left)strip.scrollLeft-=b.left-a.left;else if(a.right>b.right)strip.scrollLeft+=a.right-b.right;}$('client-cards').replaceChildren(...cards);$('client-count').textContent=state.clients.length+' client workspaces';
+    const manual=$('manual-hours-link');if(manual){manual.hidden=!state.client.key;if(state.client.key)manual.href='/portal/client-hours-admin.html?client='+encodeURIComponent(state.client.key);}
     $('notebook-panel').setAttribute('aria-labelledby','tab-'+state.client.id);controls();
   }
   function selectClient(id) {
@@ -269,17 +270,8 @@
   // Poll while visible as a fallback if realtime is temporarily unavailable.
   setInterval(()=>{if(!document.hidden&&state.admin&&!state.busy&&!state.loading&&!$('entry-dialog').open)fetchClients().then(()=>Promise.all([loadEntries(true),loadTeam()])).catch(()=>status('Sync unavailable'));},30000);
 
-  // Preserve the existing private notes collection and its import/export functions.
-  const NOTE_KEY='ESS_Admin_PrivateNotes_v1';let editingNote=null;
-  function notes(){try{const rows=JSON.parse(localStorage.getItem(NOTE_KEY)||'[]');return Array.isArray(rows)?rows:[];}catch{return [];}}
-  function saveNotes(rows){localStorage.setItem(NOTE_KEY,JSON.stringify(rows));}
-  function renderNotes(){const q=$('search').value.toLowerCase();$('notesList').replaceChildren(...notes().filter(n=>String(n.text||'').toLowerCase().includes(q)).map(n=>{const row=el('div',undefined,'note-row'),content=el('div');content.append(el('div',String(n.created||''),'note-meta'),el('div',String(n.text||''),'note-content'));const actions=el('div',undefined,'note-actions');actions.append(button('Edit',()=>{editingNote=n.id;$('noteText').value=n.text;$('saveNote').textContent='Update note';}),button('Delete',()=>{try{saveNotes(notes().filter(x=>String(x.id)!==String(n.id)));renderNotes();}catch(error){$('saveStatus').textContent=error.message;}},'text-button danger'));row.append(content,actions);return row;}));}
-  function saveNote(){let text=$('noteText').value.trim();if(!text)return;try{const rows=notes(),stamp=new Date().toLocaleString(undefined,{month:'short',day:'2-digit',hour:'numeric',minute:'2-digit'});if(editingNote!==null){const n=rows.find(n=>String(n.id)===String(editingNote));if(n)n.text=text;}else{if($('prependTs').checked)text=stamp+' — '+text;rows.unshift({id:crypto.randomUUID(),created:stamp,text});}saveNotes(rows);editingNote=null;$('noteText').value='';$('saveNote').textContent='Save note';$('saveStatus').textContent='Saved on this device';renderNotes();}catch(error){$('saveStatus').textContent='Could not save: '+error.message;}}
-  $('saveNote').addEventListener('click',saveNote);$('noteText').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();saveNote();}});$('search').addEventListener('input',renderNotes);
-  $('clearAll').addEventListener('click',()=>{if(confirm('Clear all notes on this device?')){try{saveNotes([]);renderNotes();}catch(error){$('saveStatus').textContent=error.message;}}});
-  $('exportJson').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(notes(),null,2)],{type:'application/json'})),a=el('a');a.href=url;a.download='ess-admin-notes.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
-  $('importFile').addEventListener('change',async event=>{const file=event.target.files[0];if(!file)return;try{const rows=JSON.parse(await file.text());if(!Array.isArray(rows)||rows.some(n=>!n||typeof n.text!=='string'))throw new Error('Choose a valid ESS notes export.');if(confirm('Replace this device’s notes with the imported notes?')){saveNotes(rows.map(n=>({id:n.id||crypto.randomUUID(),created:String(n.created||''),text:n.text})));renderNotes();}}catch(error){$('saveStatus').textContent=error.message;}event.target.value='';});
-  renderClients();renderNotes();
+  // Notes and pinned to-dos are handled by admin-organizer.js using the same authenticated Admin session.
+  renderClients();
   if(!window.ESSAdminSession?.client){document.querySelector('.session-loading').textContent='Secure connection could not load. Reload this page.';return;}
   sb=window.ESSAdminSession.client;
   // Run outside the auth callback to avoid Supabase's callback lock.
