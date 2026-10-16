@@ -41,3 +41,11 @@ test('notebook only uses existing admin session, never sends email links', () =>
   assert.match(js, /location\.replace\('\/login\.html\?admin=1'\)/);
   assert.match(js, /\$\('add-entry'\)\.addEventListener\('click',\(\)=>openEntry\(\)\)/);
 });
+
+test('client notebooks use scoped admin-only roster RPC instead of direct table SELECT', () => {
+  const js = read('portal/admin-notebooks.js');
+  assert.match(js, /sb\.rpc\('admin_notebook_clients'\)/);
+  assert.doesNotMatch(js, /sb\.schema\('ess'\)\.from\('clients'\)/);
+  const dashboard = read('portal/admin.html');
+  assert.match(dashboard, /admin-notebooks\.js\?v=20261016-client-rpc-fix/);
+});
