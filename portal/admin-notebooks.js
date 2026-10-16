@@ -85,7 +85,8 @@
     renderClients();loadEntries();
   }
   async function fetchClients() {
-    const {data,error}=await sb.schema('ess').from('clients').select('id,first_name,last_initial,full_name').order('created_at');
+    // Fetch only the admin-authorized client roster through a restricted, read-only RPC.
+    const {data,error}=await sb.rpc('admin_notebook_clients');
     if(error)throw error;
     const clients=resolveClients(data||[]);if(!clients.length)throw new Error('No ESS clients found.');
     state.clients=clients;state.client=clients.find(c=>c.id===state.client.id)||clients[0];renderClients();
