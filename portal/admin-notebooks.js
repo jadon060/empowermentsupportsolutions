@@ -97,9 +97,9 @@
     if(state.busy)return;
     const ticket=++state.generation,clientId=state.client.id,month=state.month;
     state.rows=[];state.historyGeneration++;state.historyLoading=false;state.historyOffset=0;
-    $('history-list').replaceChildren(el('p',state.admin?'Open history to load saved changes.':'Sign in to view history.','muted small'));$('more-history').hidden=true;
+    $('history-list').replaceChildren(el('p',state.admin?'Open history to load saved changes.':'History appears after Admin PIN sign-in.','muted small'));$('more-history').hidden=true;
     $('notebook-title').textContent=state.client.name;$('notebook-initials').textContent=initials(state.client.name);$('table-caption').textContent=state.client.name+' staff hours for '+month;
-    summary(false);empty(state.admin?'Loading this notebook…':'Sign in to view your saved entries.');if(!quiet)message('');
+    summary(false);empty(state.admin?'Loading this notebook…':'Enter your existing Admin PIN to open this notebook.');if(!quiet)message('');
     if(!state.admin){state.loading=false;controls();return;}
     state.loading=true;status('Loading…');controls();
     try {
@@ -239,34 +239,9 @@
     if(state.channel){sb.removeChannel(state.channel);state.channel=null;}
     document.body.classList.add('admin-checking');state.employees=[];state.teamRows=null;$('team-cards').replaceChildren();state.rows=[];summary(false);empty('Opening your admin session…');$('history-list').replaceChildren(el('p','Opening history…','muted small'));$('more-history').hidden=true;$('entry-dialog').close();controls();
     if(!session){
-      let legacyAdmin=false;try{legacyAdmin=localStorage.getItem('ESS_Admin_Login')==='true';}catch{}
-      if(legacyAdmin){
-        document.body.classList.remove('admin-checking');state.admin=false;status('Secure sign-in link needed');
-        empty('Open the one-time ESS admin sign-in link on this device to load the staff hours notebook and employee overview.');controls();
-        if(state.authLinkRequest){await state.authLinkRequest;return;}
-        const key='ESS_Admin_Notebook_Link_Sent_At',cooldownKey='ESS_Admin_Notebook_Link_Cooldown',now=Date.now();let last=0,cooldown=10*60*1000;
-        try{last=Number(localStorage.getItem(key)||0);cooldown=Number(localStorage.getItem(cooldownKey)||cooldown);}catch{}
-        if(now-last<cooldown){const minutes=Math.max(1,Math.ceil((cooldown-(now-last))/60000));message('A recent secure sign-in email request is still within the email provider’s cooldown. Check the ESS admin inbox and junk folder for the latest link. Another request can be made in about '+minutes+' minute'+(minutes===1?'':'s')+'.',false);return;}
-        state.authLinkRequest=(async()=>{
-          try{
-            try{localStorage.setItem(key,String(now));}catch{}
-            try{localStorage.setItem(cooldownKey,String(10*60*1000));}catch{}
-            const {error}=await sb.auth.signInWithOtp({email:window.ESSAdminSession.email,options:{shouldCreateUser:false,emailRedirectTo:'https://empowermentss.com/login.html?admin=1&recovery=1'}});
-            if(error)throw error;
-            message('A one-time secure link was sent to the existing ESS admin email. Open it on this device; your login screen and PIN remain unchanged.',false);
-          }catch(error){
-            const detail=error.message||'Connection unavailable.';
-            const rateLimited=error.status===429||/rate.?limit|too many requests|email rate/i.test(detail);
-            const retryDelay=rateLimited?60*60*1000:10*60*1000;
-            // Keep a cooldown after failures: Supabase may have accepted a request before the response failed.
-            try{localStorage.setItem(key,String(Date.now()));localStorage.setItem(cooldownKey,String(retryDelay));}catch{}
-            message(rateLimited?'Supabase is temporarily limiting secure sign-in emails. Check the ESS admin inbox and junk folder for a recent link. To avoid further rate limits, another request will be available in about an hour.':'The secure sign-in email could not be confirmed. Check the ESS admin inbox and junk folder before trying again; another request will be available in about 10 minutes.',true);
-          }
-          finally{state.authLinkRequest=null;}
-        })();
-        await state.authLinkRequest;return;
-      }
-      location.replace('/login.html');return;
+      // No parallel notebook login. One original admin PIN establishes Supabase Auth.
+      location.replace('/login.html?admin=1');
+      return;
     }
     try {
       const {data,error}=await sb.rpc('staff_hours_admin_access');if(error)throw error;
