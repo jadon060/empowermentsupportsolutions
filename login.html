@@ -29,6 +29,21 @@
     const JEREMY_PW = "0926";
     const OMAR_PW   = "0125";
     const ADMIN_PW  = "10301993";
+    // Complete the one-time Supabase sign-in callback without changing the shared login UI or PIN routing.
+    (async function finishAdminAuthReturn(){
+      const params=new URLSearchParams(location.search);
+      if(params.get("admin")!=="1"||params.get("recovery")!=="1")return;
+      const err=document.getElementById("err");err.textContent="Completing secure ESS admin sign-in…";
+      function load(src){return new Promise((resolve,reject)=>{const script=document.createElement("script");script.src=src;script.onload=resolve;script.onerror=()=>reject(new Error("Secure sign-in could not load. Reload this page and try the latest link."));document.head.append(script);});}
+      try{
+        await load("/portal/vendor/supabase-2.117.3.js");
+        await load("/portal/admin-session.js?v=20261016-repairs");
+        const client=window.ESSAdminSession?.client;if(!client)throw new Error("Secure sign-in could not connect. Reload this page and try the latest link.");
+        const {data,error}=await client.auth.getSession();if(error)throw error;if(!data.session)throw new Error("This secure sign-in link expired or was already used. Return to the Admin Portal and request a new one.");
+        try{localStorage.setItem("ESS_Admin_Login","true");localStorage.removeItem("ESS_Admin_Notebook_Link_Sent_At");}catch(e){}
+        location.replace("/portal/admin.html");
+      }catch(error){err.textContent=error.message||"Secure sign-in could not be completed. Return to the Admin Portal and try again.";}
+    })();
     function route(){
       const val=(document.getElementById("pw").value||"").trim(),err=document.getElementById("err");
       if(!val){err.textContent="Please enter a password or PIN.";return;}
