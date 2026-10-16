@@ -46,12 +46,12 @@
   const initials=name=>name.split(/\s+/).filter(Boolean).map(s=>s[0]).slice(0,2).join('');
   function el(tag,text,className) {const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(className)n.className=className;return n;}
   function button(text,fn,cls='text-button') {const b=el('button',text,cls);b.type='button';b.addEventListener('click',fn);return b;}
-  const state={clients:KNOWN.slice(),client:KNOWN[0],month:localDate().slice(0,7),months:new Map(),rows:[],admin:false,busy:false,loading:false,generation:0,authGeneration:0,historyGeneration:0,historyOffset:0,historyLoading:false,sessionId:null,channel:null,editing:null,pendingInsert:null};
+  const state={clients:KNOWN.slice(),client:KNOWN[0],month:localDate().slice(0,7),months:new Map(),rows:[],employees:[],teamRows:null,teamGeneration:0,admin:false,busy:false,loading:false,generation:0,authGeneration:0,historyGeneration:0,historyOffset:0,historyLoading:false,sessionId:null,channel:null,editing:null,pendingInsert:null,formBaseline:''};
   let sb;
   $('year').textContent=new Date().getFullYear();
   $('month').value=state.month;
   function message(text,error=false) {$('log-message').textContent=text;$('log-message').classList.toggle('error',error);}
-  function status(text) {$('sync-status').textContent=text;}
+  function status(text) {$('sync-status').textContent=text;$('sync-status').dataset.state=text==='Saved to cloud'?'saved':text.includes('…')?'loading':'attention';}
   function empty(text) {const tr=el('tr'),td=el('td',text,'empty');td.colSpan=5;tr.append(td);$('entries').replaceChildren(tr);}
   function summary(ready=true) {
     const t=totals(state.rows,state.client.id,state.month);
@@ -75,7 +75,7 @@
       if(c.portal){const a=el('a','Open portal ↗');a.href=c.portal;links.append(a);}else links.append(el('span','Client notebook'));
       links.append(button('Hours log →',()=>{selectClient(c.id);$('staff-log').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}));card.append(links);cards.push(card);
     }
-    $('client-tabs').replaceChildren(...tabs);$('client-cards').replaceChildren(...cards);$('client-count').textContent=state.clients.length+' client workspaces';
+    const strip=$('client-tabs'),left=strip.scrollLeft;strip.replaceChildren(...tabs);strip.scrollLeft=left;const selected=strip.querySelector('[aria-selected=true]');if(selected){const a=selected.getBoundingClientRect(),b=strip.getBoundingClientRect();if(a.left<b.left)strip.scrollLeft-=b.left-a.left;else if(a.right>b.right)strip.scrollLeft+=a.right-b.right;}$('client-cards').replaceChildren(...cards);$('client-count').textContent=state.clients.length+' client workspaces';
     $('notebook-panel').setAttribute('aria-labelledby','tab-'+state.client.id);controls();
   }
   function selectClient(id) {
@@ -115,11 +115,11 @@
   function renderRows() {
     if(!state.rows.length){empty('No entries for this month. Add your first staff hours entry.');return;}
     const rows=state.rows.map(row=>{
-      const tr=el('tr');tr.append(el('td',row.staff_name),el('td',dateLabel(row.worked_on)),el('td',fmt(row.hours)+' hrs'));
+      const tr=el('tr');tr.append(el('td',row.staff_name),el('td',dateLabel(row.worked_on)),el('td',fmt(row.hours)+' hrs'));[...tr.children].forEach((td,i)=>td.dataset.label=['Staff member','Date worked','Hours worked'][i]);
       const verify=el('td'),label=el('label',undefined,'verify-label'),check=el('input');check.type='checkbox';check.checked=row.verified_exported;
       label.append(check,el('span','Verified & Exported'));verify.append(label);if(row.verified_at)verify.append(el('small',timeLabel(row.verified_at),'verified-meta'));
       check.addEventListener('change',async()=>{const checked=check.checked;check.checked=row.verified_exported;await changeRow(row,{verified_exported:checked},checked?'Verification saved.':'Verification cleared.');});
-      const actions=el('td'),box=el('div',undefined,'row-actions');box.append(button('Edit',()=>openEntry(row)),button('Delete',()=>{if(confirm('Delete '+row.staff_name+'’s '+fmt(row.hours)+' hours on '+dateLabel(row.worked_on)+'? Verification history will be retained.'))changeRow(row,{deleted_at:new Date().toISOString()},'Entry deleted. History retained.');},'text-button danger'));actions.append(box);tr.append(verify,actions);return tr;
+      const actions=el('td'),box=el('div',undefined,'row-actions');box.append(button('Edit',()=>openEntry(row)),button('Delete',()=>{if(confirm('Delete '+row.staff_name+'’s '+fmt(row.hours)+' hours on '+dateLabel(row.worked_on)+'? Verification history will be retained.'))changeRow(row,{deleted_at:new Date().toISOString()},'Entry deleted. History retained.');},'text-button danger'));actions.append(box);verify.dataset.label='Verification';actions.dataset.label='Actions';tr.append(verify,actions);return tr;
     });$('entries').replaceChildren(...rows);controls();
   }
   async function changeRow(row,patch,success) {
@@ -130,21 +130,31 @@
       if(error)throw error;if(!data)throw new Error('This entry changed on another device. The latest version has been loaded; review it and try again.');
       message(success);
     } catch(error){message(error.message||'Save failed. No change was confirmed.',true);}
-    finally {state.busy=false;await loadEntries(true);}
+    finally {state.busy=false;await Promise.all([loadEntries(true),loadTeam()]);}
   }
   function openEntry(row=null) {
     if(!state.admin||state.busy||state.loading)return;
     state.editing=row;state.pendingInsert=null;$('entry-form').reset();$('form-error').textContent='';$('entry-client').textContent=state.client.name.toUpperCase();$('entry-dialog-title').textContent=row?'Edit staff hours':'Add staff hours';
-    $('staff-name').value=row?.staff_name||'';$('hours').value=row?.hours||'';$('worked-on').value=row?.worked_on||(localDate().startsWith(state.month)?localDate():state.month+'-01');
-    $('entry-dialog').showModal();$('staff-name').focus();
+    $('entry-client-name').value=state.client.name;
+    const options=[el('option','Select a staff member')];options[0].value='';
+    for(const employee of state.employees.filter(e=>e.active||e.id===row?.employee_id)){const o=el('option',employee.full_name+(employee.active?'':' (inactive)'));o.value=employee.id;options.push(o);}
+    const direct=el('option','ESS direct service — J');direct.value='ess_direct';options.push(direct);
+    let selected=row?.employee_id||(row?.entry_kind==='ess_direct'?'ess_direct':'');
+    if(row&&!selected){const legacy=el('option',row.staff_name+' (existing record)');legacy.value='legacy';options.push(legacy);selected='legacy';}
+    $('staff-name').replaceChildren(...options);$('staff-name').value=selected;$('hours').value=row?.hours||'';$('worked-on').value=row?.worked_on||(localDate().startsWith(state.month)?localDate():state.month+'-01');$('entry-verified').checked=Boolean(row?.verified_exported);
+    state.formBaseline=formSignature();$('entry-dialog').showModal();$('staff-name').focus();
   }
-  function closeEntry(){if(!state.busy)$('entry-dialog').close();}
+  function formSignature(){return JSON.stringify([$('staff-name').value,$('worked-on').value,$('hours').value,$('entry-verified').checked]);}
+  function formDirty(){return $('entry-dialog').open&&formSignature()!==state.formBaseline;}
+  function closeEntry(){if(!state.busy&&(!formDirty()||confirm('Discard the unsaved changes in this form?')))$('entry-dialog').close();}
   async function saveEntry(event) {
     event.preventDefault();if(!state.admin||state.busy)return;
-    let payload;try{payload=validateEntry($('staff-name').value,$('worked-on').value,$('hours').value);}catch(error){$('form-error').textContent=error.message;return;}
+    let payload;const choice=$('staff-name').value,employee=state.employees.find(e=>e.id===choice),desiredVerification=$('entry-verified').checked;
+    try{const name=employee?.full_name||(choice==='ess_direct'?'ESS direct service — J':choice==='legacy'?state.editing?.staff_name:'');payload={...validateEntry(name||'',$('worked-on').value,$('hours').value),employee_id:employee?.id||null,entry_kind:employee?'employee':choice==='ess_direct'?'ess_direct':'legacy',verified_exported:desiredVerification};}catch(error){$('form-error').textContent=error.message;return;}
     const row=state.editing,clientId=state.client.id,newMonth=payload.worked_on.slice(0,7);
     state.busy=true;controls();$('form-error').textContent='';status('Saving…');
     try {
+      if(!row&&!state.pendingInsert){const duplicate=await sb.from('admin_staff_hours').select('id').eq('client_id',clientId).eq('staff_name',payload.staff_name).eq('worked_on',payload.worked_on).eq('hours',payload.hours).is('deleted_at',null).limit(1);if(duplicate.error)throw duplicate.error;if(duplicate.data.length&&!confirm('An entry with this staff member, date, and hours already exists. Save this as an additional legitimate session?')){state.busy=false;controls();status('Saved to cloud');return;}}
       let query;
       if(row)query=sb.from('admin_staff_hours').update(payload).eq('id',row.id).eq('client_id',clientId).eq('revision',row.revision).is('deleted_at',null).select('*').maybeSingle();
       else {
@@ -156,14 +166,15 @@
       if(error?.code==='23505'&&!row) {
         const saved=await sb.from('admin_staff_hours').select('*').eq('id',state.pendingInsert).eq('client_id',clientId).single();
         if(saved.error)throw saved.error;
-        if(saved.data.staff_name!==payload.staff_name||saved.data.worked_on!==payload.worked_on||Number(saved.data.hours)!==payload.hours)throw new Error('Your previous save succeeded with different values. Close this form, refresh, and edit that entry.');
+        if(saved.data.staff_name!==payload.staff_name||saved.data.worked_on!==payload.worked_on||Number(saved.data.hours)!==payload.hours||saved.data.employee_id!==payload.employee_id)throw new Error('Your previous save succeeded with different values. Close this form, refresh, and edit that entry.');
         data=saved.data;error=null;
       }
       if(error)throw error;
       if(!data)throw new Error('This entry changed on another device. Close this form, refresh, and edit its latest version.');
+      if(desiredVerification&&!data.verified_exported){const verified=await sb.from('admin_staff_hours').update({verified_exported:true}).eq('id',data.id).eq('client_id',clientId).eq('revision',data.revision).is('deleted_at',null).select('*').maybeSingle();if(verified.error||!verified.data)throw new Error('Entry saved, but verification was not confirmed. Close this form, refresh, and review the saved entry.');data=verified.data;}
       state.month=newMonth;state.months.set(clientId,newMonth);$('month').value=newMonth;$('entry-dialog').close();state.pendingInsert=null;
-      message(row?'Entry updated. Review and check Verified & Exported again if its details changed.':'Entry saved in '+new Date(newMonth+'-01T12:00:00').toLocaleDateString(undefined,{month:'long',year:'numeric'})+'.');
-      state.busy=false;await loadEntries(true);
+      message((row?'Entry updated':'Entry saved')+' in '+new Date(newMonth+'-01T12:00:00').toLocaleDateString(undefined,{month:'long',year:'numeric'})+(data.verified_exported?' · Verified & Exported.':'.'));
+      state.busy=false;await Promise.all([loadEntries(true),loadTeam()]);
     }catch(error){$('form-error').textContent=error.message||'Could not confirm the save. Your entry remains in this form.';status('Save not confirmed');}
     finally {state.busy=false;controls();}
   }
@@ -191,54 +202,67 @@
     }catch(error){if(ticket===state.historyGeneration){$('history-list').replaceChildren(el('p','History could not be loaded: '+error.message,'small danger'));$('more-history').hidden=true;}}
     finally{if(ticket===state.historyGeneration){state.historyLoading=false;$('more-history').disabled=false;}}
   }
+  const currency=n=>new Intl.NumberFormat(undefined,{style:'currency',currency:'USD'}).format(Number(n));
+  function employeeTotals(employee,rows){
+    const selected=rows.filter(r=>r.employee_id===employee.id||(!r.employee_id&&r.entry_kind==='legacy'&&r.staff_name.trim().toLowerCase()===employee.full_name.toLowerCase()));
+    return {hours:selected.reduce((s,r)=>s+Math.round(Number(r.hours)*100),0)/100,verified:selected.filter(r=>r.verified_exported).reduce((s,r)=>s+Math.round(Number(r.hours)*100),0)/100};
+  }
+  async function loadTeam(){
+    if(!state.admin)return;
+    const ticket=++state.teamGeneration,month=$('team-month').value;
+    $('team-status').textContent='Loading the selected month…';
+    try{
+      const employees=await sb.from('admin_employee_snapshots').select('*').order('full_name');if(employees.error)throw employees.error;
+      const {start,end}=monthBounds(month),rows=await allRows(()=>sb.from('admin_staff_hours').select('id,employee_id,entry_kind,staff_name,hours,verified_exported,client_id,worked_on,deleted_at').is('deleted_at',null).gte('worked_on',start).lt('worked_on',end).order('id'));
+      if(ticket!==state.teamGeneration||!state.admin)return;
+      state.employees=employees.data;state.teamRows=rows;
+      $('team-status').textContent='Gusto verified snapshot · Automatic Gusto refresh is not connected. Notebook totals update as you work.';
+      const cards=state.employees.map(employee=>{
+        const total=employeeTotals(employee,rows),card=el('article',undefined,'employee-card'),head=el('div',undefined,'employee-head'),name=el('div');
+        name.append(el('h3',employee.full_name),el('p',employee.job_title,'muted small'));
+        head.append(el('span',initials(employee.full_name),'initials'),name,el('span',employee.active?'Active':'Inactive','employee-state'+(employee.active?'':' pending')));card.append(head);
+        const rate=el('div',undefined,'employee-rate');rate.append(el('strong',employee.hourly_rate===null?'Unavailable':currency(employee.hourly_rate)),el('span',' / hour · Gusto','muted small'));card.append(rate);
+        const facts=el('div',undefined,'employee-facts');facts.append(el('p','Hired '+dateLabel(employee.hire_date)),el('p','ESS assignment: '+(employee.assigned_clients.join(', ')||'Not assigned')));card.append(facts);
+        const metrics=el('div',undefined,'employee-metrics');for(const [label,value] of [['Manual hours',fmt(total.hours)+' hrs'],['Verified & Exported',fmt(total.verified)+' hrs'],['Estimated base wages',employee.hourly_rate===null?'Unavailable':currency(total.hours*Number(employee.hourly_rate))]]){const m=el('div');m.append(el('span',label,'muted small'),el('strong',value));metrics.append(m);}card.append(metrics,el('p','Estimate uses the current hourly rate; excludes overtime, taxes, and adjustments. Notebook entries do not confirm payment.','muted small employee-disclaimer'));
+        const detail=el('details'),summary=el('summary','Employee details');detail.append(summary);
+        for(const [label,value] of [['Last payroll processed',employee.last_processed_date?dateLabel(employee.last_processed_date):'Unavailable'],['Last payroll payday',employee.last_check_date?dateLabel(employee.last_check_date):'Unavailable'],['Last processed gross',employee.last_gross_pay===null?'Unavailable':currency(employee.last_gross_pay)],['YTD gross earnings',employee.ytd_gross===null?'Unavailable from the connected Gusto summary':currency(employee.ytd_gross)],['Gusto data verified',timeLabel(employee.verified_at)]]){const p=el('p',undefined,'employee-detail');p.append(el('span',label,'muted'),el('strong',value));detail.append(p);}card.append(detail);return card;
+      });
+      $('team-cards').replaceChildren(...cards);if(!cards.length)$('team-status').textContent='Employee data is unavailable. No payroll amounts have been estimated.';
+    }catch(error){if(ticket!==state.teamGeneration)return;state.teamRows=null;$('team-cards').replaceChildren();$('team-status').textContent='Employee information is unavailable: '+(error.message||'Connection unavailable.');}
+  }
+  $('team-month').value=state.month;$('team-month').addEventListener('change',()=>{if(monthPattern.test($('team-month').value))loadTeam();else $('team-month').value=state.month;});
   async function connect(session) {
     const sessionId=session?.user?.id||null;
     if(sessionId===state.sessionId&&state.admin)return;
     const ticket=++state.authGeneration;
     state.sessionId=sessionId;state.admin=false;state.generation++;state.historyGeneration++;state.loading=false;
     if(state.channel){sb.removeChannel(state.channel);state.channel=null;}
-    $('auth-panel').hidden=false;state.rows=[];summary(false);empty('Sign in to view your saved entries.');$('history-list').replaceChildren(el('p','Sign in to view history.','muted small'));$('more-history').hidden=true;$('entry-dialog').close();controls();
-    if(!session){status('Sign in to sync');return;}
+    document.body.classList.add('admin-checking');state.employees=[];state.teamRows=null;$('team-cards').replaceChildren();state.rows=[];summary(false);empty('Opening your admin session…');$('history-list').replaceChildren(el('p','Opening history…','muted small'));$('more-history').hidden=true;$('entry-dialog').close();controls();
+    if(!session){location.replace(window.ESSAdminSession.loginUrl);return;}
     try {
       const {data,error}=await sb.rpc('staff_hours_admin_access');if(error)throw error;
       if(sessionId!==state.sessionId||ticket!==state.authGeneration)return;
-      if(!data)throw new Error('This account is not authorized for ESS admin notebooks. Sign out and use the ESS admin email.');
-      state.admin=true;try{localStorage.setItem('ESS_Admin_Login','true');}catch{}$('auth-panel').hidden=true;
-      await fetchClients();if(ticket!==state.authGeneration)return;await loadEntries();if(ticket!==state.authGeneration||!state.admin)return;
-      state.channel=sb.channel('ess-admin-staff-hours').on('postgres_changes',{event:'*',schema:'public',table:'admin_staff_hours'},()=>{if(state.admin&&!state.busy)loadEntries(true);}).subscribe();
-      const {data:staff,error:staffError}=await sb.schema('ess').from('staff').select('full_name').order('full_name');
-      if(!staffError)$('staff-suggestions').replaceChildren(...staff.filter(s=>s.full_name).map(s=>{const o=el('option');o.value=s.full_name;return o;}));
-    }catch(error){if(ticket!==state.authGeneration)return;state.admin=false;$('auth-panel').hidden=false;$('auth-status').textContent=error.message;status('Connection needed');controls();}
+      if(!data){location.replace(window.ESSAdminSession.loginUrl);return;}
+      state.admin=true;try{localStorage.setItem('ESS_Admin_Login','true');}catch{}
+      await fetchClients();if(ticket!==state.authGeneration)return;await Promise.all([loadEntries(),loadTeam()]);if(ticket!==state.authGeneration||!state.admin)return;
+      document.body.classList.remove('admin-checking');
+      state.channel=sb.channel('ess-admin-staff-hours').on('postgres_changes',{event:'*',schema:'public',table:'admin_staff_hours'},()=>{if(state.admin&&!state.busy)Promise.all([loadEntries(true),loadTeam()]);}).subscribe();
+    }catch(error){if(ticket!==state.authGeneration)return;state.admin=false;document.querySelector('.session-loading').replaceChildren(el('p','Could not open your admin session: '+(error.message||'Connection unavailable.')),button('Retry',()=>connect(session),'button primary'));controls();}
   }
-  $('sign-in-form').addEventListener('submit',async event=>{
-    event.preventDefault();$('send-link').disabled=true;$('auth-status').textContent='Sending your secure sign-in link…';
-    try {const {error}=await sb.auth.signInWithOtp({email:$('admin-email').value,options:{shouldCreateUser:true,emailRedirectTo:location.origin+'/portal/admin.html'}});if(error)throw error;$('auth-status').textContent='Check your ESS email and open the sign-in link on this device. Return here to use your notebooks.';}
-    catch(error){$('auth-status').textContent='Sign-in email could not be sent: '+error.message;}
-    finally{setTimeout(()=>$('send-link').disabled=false,60000);}
-  });
-  $('complete-sign-in').addEventListener('submit',async event=>{
-    event.preventDefault();$('verify-link').disabled=true;
-    try {
-      const url=new URL($('email-link').value);
-      if(url.origin!=='https://bqanjupmcgydvmfgvutx.supabase.co'||url.pathname!=='/auth/v1/verify'||!url.searchParams.get('token'))throw new Error('Paste the original sign-in link from your ESS email.');
-      const type=url.searchParams.get('type');if(!['signup','magiclink','email'].includes(type))throw new Error('Use an ESS email sign-in link.');
-      const {data,error}=await sb.auth.verifyOtp({token_hash:url.searchParams.get('token'),type});if(error)throw error;
-      $('email-link').value='';await connect(data.session);
-    }catch(error){$('auth-status').textContent=error.message;}
-    finally{$('verify-link').disabled=false;}
-  });
   async function signOut(){if(state.busy)return;const {error}=await sb.auth.signOut();if(error){message(error.message,true);return;}try{localStorage.removeItem('ESS_Admin_Login');}catch{}location.href='/login.html';}
   $('sign-out').addEventListener('click',signOut);$('sign-out-mobile').addEventListener('click',signOut);
   $('month').addEventListener('change',()=>{if(!monthPattern.test($('month').value)){$('month').value=state.month;return;}state.month=$('month').value;state.months.set(state.client.id,state.month);loadEntries();});
   for(const [id,delta] of [['previous-month',-1],['next-month',1]])$(id).addEventListener('click',()=>{if(state.busy)return;state.month=shiftMonth(state.month,delta);$('month').value=state.month;state.months.set(state.client.id,state.month);loadEntries();});
   $('add-entry').addEventListener('click',()=>openEntry());$('entry-form').addEventListener('submit',saveEntry);$('close-entry').addEventListener('click',closeEntry);$('cancel-entry').addEventListener('click',closeEntry);
-  $('entry-dialog').addEventListener('cancel',e=>{if(state.busy)e.preventDefault();});
+  $('entry-dialog').addEventListener('cancel',e=>{e.preventDefault();closeEntry();});
+  for(const id of ['staff-name','worked-on','hours'])$(id).addEventListener('input',()=>{if(state.editing)$('entry-verified').checked=false;});
+  window.addEventListener('beforeunload',event=>{if(formDirty()){event.preventDefault();event.returnValue='';}});
   $('refresh').addEventListener('click',async()=>{try{await fetchClients();await loadEntries();}catch(error){message(error.message,true);}});
   $('history-section').addEventListener('toggle',()=>{if($('history-section').open)loadHistory();});$('more-history').addEventListener('click',()=>loadHistory(true));
-  window.addEventListener('online',()=>{if(state.admin)loadEntries();});window.addEventListener('offline',()=>status('Offline · changes need internet'));
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.admin&&!state.busy){fetchClients().then(()=>loadEntries(true)).catch(error=>message(error.message,true));}});
+  window.addEventListener('online',()=>{if(state.admin)Promise.all([loadEntries(),loadTeam()]);});window.addEventListener('offline',()=>status('Offline · changes need internet'));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.admin&&!state.busy){fetchClients().then(()=>Promise.all([loadEntries(true),loadTeam()])).catch(error=>message(error.message,true));}});
   // Poll while visible as a fallback if realtime is temporarily unavailable.
-  setInterval(()=>{if(!document.hidden&&state.admin&&!state.busy&&!state.loading&&!$('entry-dialog').open)fetchClients().then(()=>loadEntries(true)).catch(()=>status('Sync unavailable'));},30000);
+  setInterval(()=>{if(!document.hidden&&state.admin&&!state.busy&&!state.loading&&!$('entry-dialog').open)fetchClients().then(()=>Promise.all([loadEntries(true),loadTeam()])).catch(()=>status('Sync unavailable'));},30000);
 
   // Preserve the existing private notes collection and its import/export functions.
   const NOTE_KEY='ESS_Admin_PrivateNotes_v1';let editingNote=null;
@@ -251,8 +275,8 @@
   $('exportJson').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(notes(),null,2)],{type:'application/json'})),a=el('a');a.href=url;a.download='ess-admin-notes.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
   $('importFile').addEventListener('change',async event=>{const file=event.target.files[0];if(!file)return;try{const rows=JSON.parse(await file.text());if(!Array.isArray(rows)||rows.some(n=>!n||typeof n.text!=='string'))throw new Error('Choose a valid ESS notes export.');if(confirm('Replace this device’s notes with the imported notes?')){saveNotes(rows.map(n=>({id:n.id||crypto.randomUUID(),created:String(n.created||''),text:n.text})));renderNotes();}}catch(error){$('saveStatus').textContent=error.message;}event.target.value='';});
   renderClients();renderNotes();
-  if(!window.supabase){message('The secure connection library could not load. Reload this page.',true);return;}
-  sb=window.supabase.createClient('https://bqanjupmcgydvmfgvutx.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk');
+  if(!window.ESSAdminSession?.client){document.querySelector('.session-loading').textContent='Secure connection could not load. Reload this page.';return;}
+  sb=window.ESSAdminSession.client;
   // Run outside the auth callback to avoid Supabase's callback lock.
   sb.auth.onAuthStateChange((_event,session)=>setTimeout(()=>connect(session),0));
   sb.auth.getSession().then(({data,error})=>{if(error)throw error;return connect(data.session);}).catch(error=>message(error.message,true));
