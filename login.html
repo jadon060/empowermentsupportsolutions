@@ -45,7 +45,7 @@
     async function adminClient() {
       if (!window.ESSAdminSession?.client) {
         if (!window.supabase) await loadScript('/portal/vendor/supabase-2.117.3.js');
-        await loadScript('/portal/admin-session.js?v=20261016-pin-session');
+        await loadScript('/portal/admin-session.js?v=20261016-isolated-v2');
       }
       if (!window.ESSAdminSession?.client) throw new Error('Secure ESS connection unavailable.');
       return window.ESSAdminSession.client;
@@ -87,7 +87,7 @@
             throw new Error('Administrator permissions could not be confirmed.');
           }
           // Legacy flag keeps unrelated admin UI compatible; RLS uses verified Auth identity.
-          try { localStorage.setItem('ESS_Admin_Login', 'true'); } catch {}
+          try { localStorage.removeItem('sb-bqanjupmcgydvmfgvutx-auth-token'); localStorage.setItem('ESS_Admin_Login', 'true'); } catch {}
         } else {
           // Never carry a previous administrator session into a shared non-admin login.
           try {
@@ -96,7 +96,7 @@
               await client.auth.signOut({ scope: 'local' });
             }
           } catch {}
-          try { localStorage.removeItem('ESS_Admin_Login'); } catch {}
+          try { localStorage.removeItem('sb-bqanjupmcgydvmfgvutx-auth-token'); localStorage.removeItem('ESS_Admin_Login'); } catch {}
           if (ESS_EXPORT_FLAGS.has(result.session_flag)) {
             try { sessionStorage.setItem(result.session_flag, 'true'); } catch {}
           }
