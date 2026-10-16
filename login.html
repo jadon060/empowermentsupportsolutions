@@ -23,48 +23,95 @@
 <body>
   <div class="wrap"><header><h1>ESS Login</h1></header><div class="card"><p>Enter credentials to access your portal.</p><input id="pw" type="password" placeholder="Password / Client PIN" autocomplete="current-password" inputmode="numeric"><button id="go">Login</button><div id="err" class="err"></div><a class="home" href="/index.html">← Back to Home</a></div></div>
   <script>
-    const FAMILY_PW = "08052023";
-    const STAFF_PW  = "05041993";
-    const HAYDEN_PW = "0715";
-    const JEREMY_PW = "0926";
-    const OMAR_PW   = "0125";
-    const ADMIN_PW  = "10301993";
-    // Complete the one-time Supabase recovery callback by activating the existing ESS admin PIN.
-    function loadScript(src){return new Promise((resolve,reject)=>{const existing=[...document.scripts].find(s=>s.src.includes(src));if(existing){if(existing.dataset.loaded==='true'){resolve();return;}existing.addEventListener('load',resolve,{once:true});existing.addEventListener('error',()=>reject(new Error('Secure ESS sign-in could not load.')), {once:true});return;}const script=document.createElement('script');script.src=src;script.onload=()=>{script.dataset.loaded='true';resolve();};script.onerror=()=>reject(new Error('Secure ESS sign-in could not load.'));document.head.append(script);});}
-    async function adminClient(){await loadScript('/portal/vendor/supabase-2.117.3.js');await loadScript('/portal/admin-session.js?v=20261016-repairs');const client=window.ESSAdminSession?.client;if(!client)throw new Error('Secure ESS sign-in could not connect.');return client;}
-    (async function finishAdminAuthReturn(){
-      const params=new URLSearchParams(location.search);
-      if(params.get("admin")!=="1"||params.get("recovery")!=="1")return;
-      const err=document.getElementById("err");err.textContent="Activating your existing ESS admin PIN…";
-      try{
-        const client=await adminClient();
-        const {data,error}=await client.auth.getSession();if(error)throw error;if(!data.session)throw new Error("This recovery link expired or was already used. Return to the ESS login and enter your existing admin PIN.");
-        const {error:updateError}=await client.auth.updateUser({password:ADMIN_PW});if(updateError)throw updateError;
-        const {data:authorized,error:accessError}=await client.rpc('staff_hours_admin_access');if(accessError)throw accessError;if(!authorized){await client.auth.signOut();throw new Error('This account is not authorized for ESS administration.');}
-        try{localStorage.setItem("ESS_Admin_Login","true");localStorage.removeItem("ESS_Admin_Notebook_Link_Sent_At");localStorage.removeItem("ESS_Admin_Notebook_Link_Cooldown");}catch(e){}
-        location.replace("/portal/admin.html");
-      }catch(error){err.textContent=error.message||"Secure sign-in could not be completed. Return to the Admin Portal and try again.";}
-    })();
-    async function route(){
-      const val=(document.getElementById("pw").value||"").trim(),err=document.getElementById("err");
-      if(!val){err.textContent="Please enter a password or PIN.";return;}
-      if(val===ADMIN_PW){
-        const go=document.getElementById('go');go.disabled=true;err.textContent='Opening your ESS admin workspace…';
-        try{
-          const client=await adminClient(),{error}=await client.auth.signInWithPassword({email:window.ESSAdminSession.email,password:ADMIN_PW});
-          if(!error){const {data:authorized,error:accessError}=await client.rpc('staff_hours_admin_access');if(accessError)throw accessError;if(!authorized){await client.auth.signOut();throw new Error('This account is not authorized for ESS administration.');}try{localStorage.setItem('ESS_Admin_Login','true');}catch(e){}location.replace('/portal/admin.html');return;}
-          if(error.status===400&&/invalid login credentials/i.test(error.message||'')){try{localStorage.setItem('ESS_Admin_Login','true');}catch(e){}location.replace('/portal/admin.html');return;}
-          throw error;
-        }catch(error){err.textContent=error.message||'ESS admin sign-in could not connect. Try again when online.';go.disabled=false;return;}
-      }
-      if(val===OMAR_PW){try{sessionStorage.setItem("ESS_EXPORT_OMAR","true")}catch(e){} location.href="/omar-v.html";return;}
-      if(val===JEREMY_PW){try{sessionStorage.setItem("ESS_EXPORT_JEREMY","true")}catch(e){} location.href="/jeremy-n.html";return;}
-      if(val===HAYDEN_PW){location.href="/Hayden_H.html";return;}
-      if(val===FAMILY_PW){location.href="/families.html";return;}
-      if(val===STAFF_PW){location.href="/staff.html";return;}
-      err.textContent="Wrong password or PIN. Please try again.";
+    // Shared ESS PIN gateway. Existing PIN values are verified on the secure backend.
+    // This page never stores or embeds portal PINs or Supabase privileged keys.
+    const ESS_PIN_API = 'https://bqanjupmcgydvmfgvutx.supabase.co/functions/v1/ess-portal-auth';
+    const ESS_DESTINATIONS = new Set([
+      '/portal/admin.html', '/omar-v.html', '/jeremy-n.html',
+      '/Hayden_H.html', '/families.html', '/staff.html'
+    ]);
+    const ESS_EXPORT_FLAGS = new Set(['ESS_EXPORT_OMAR', 'ESS_EXPORT_JEREMY']);
+    let submitting = false;
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('Secure ESS connection could not load.'));
+        document.head.append(script);
+      });
     }
-    document.getElementById("go").addEventListener("click",()=>route());
-    document.getElementById("pw").addEventListener("keydown",e=>{if(e.key==="Enter")route()});
+    async function adminClient() {
+      if (!window.ESSAdminSession?.client) {
+        if (!window.supabase) await loadScript('/portal/vendor/supabase-2.117.3.js');
+        await loadScript('/portal/admin-session.js?v=20261016-pin-session');
+      }
+      if (!window.ESSAdminSession?.client) throw new Error('Secure ESS connection unavailable.');
+      return window.ESSAdminSession.client;
+    }
+    async function route() {
+      if (submitting) return;
+      const input = document.getElementById('pw'), go = document.getElementById('go');
+      const err = document.getElementById('err'), pin = input.value.trim();
+      if (!pin) { err.textContent = 'Please enter a password or PIN.'; return; }
+      submitting = true; go.disabled = true; err.textContent = 'Opening your ESS portal…';
+      try {
+        const response = await fetch(ESS_PIN_API, {
+          method: 'POST', mode: 'cors', cache: 'no-store', credentials: 'omit',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scope: 'shared', pin })
+        });
+        const result = await response.json();
+        if (!response.ok || !result?.ok) {
+          throw new Error(result?.error || 'Secure ESS login failed. Please try again.');
+        }
+        if (!ESS_DESTINATIONS.has(result.destination)) {
+          throw new Error('Invalid portal destination. Contact ESS administration.');
+        }
+        if (result.destination === '/portal/admin.html') {
+          if (!result.session?.access_token || !result.session?.refresh_token) {
+            throw new Error('Admin session was not established. Please try again.');
+          }
+          const client = await adminClient();
+          const { data: sessionData, error: sessionError } = await client.auth.setSession({
+            access_token: result.session.access_token,
+            refresh_token: result.session.refresh_token
+          });
+          if (sessionError || !sessionData?.session) {
+            throw new Error('Admin session could not be saved. Please try again.');
+          }
+          const { data: allowed, error: accessError } = await client.rpc('staff_hours_admin_access');
+          if (accessError || !allowed) {
+            await client.auth.signOut({ scope: 'local' });
+            throw new Error('Administrator permissions could not be confirmed.');
+          }
+          // Legacy flag keeps unrelated admin UI compatible; RLS uses verified Auth identity.
+          try { localStorage.setItem('ESS_Admin_Login', 'true'); } catch {}
+        } else {
+          // Never carry a previous administrator session into a shared non-admin login.
+          try {
+            if (window.ESSAdminSession?.client || localStorage.getItem('sb-bqanjupmcgydvmfgvutx-auth-token')) {
+              const client = await adminClient();
+              await client.auth.signOut({ scope: 'local' });
+            }
+          } catch {}
+          try { localStorage.removeItem('ESS_Admin_Login'); } catch {}
+          if (ESS_EXPORT_FLAGS.has(result.session_flag)) {
+            try { sessionStorage.setItem(result.session_flag, 'true'); } catch {}
+          }
+        }
+        input.value = '';
+        location.replace(result.destination);
+      } catch (error) {
+        err.textContent = error.message || 'Secure ESS login unavailable. Please try again.';
+        go.disabled = false;
+        submitting = false;
+      }
+    }
+    document.getElementById('go').addEventListener('click', route);
+    document.getElementById('pw').addEventListener('keydown', event => {
+      if (event.key === 'Enter') route();
+    });
   </script>
 </body></html>
