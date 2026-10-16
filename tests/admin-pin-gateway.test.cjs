@@ -47,7 +47,7 @@ test('client notebooks use scoped admin-only roster RPC instead of direct table 
   assert.match(js, /sb\.rpc\('admin_notebook_clients'\)/);
   assert.doesNotMatch(js, /sb\.schema\('ess'\)\.from\('clients'\)/);
   const dashboard = read('portal/admin.html');
-  assert.match(dashboard, /admin-notebooks\.js\?v=20261016-client-rpc-fix/);
+  assert.match(dashboard, /admin-notebooks\.js\?v=20261016-organizer-v1/);
 });
 
 test('admin session is isolated from shared public charting clients', () => {
