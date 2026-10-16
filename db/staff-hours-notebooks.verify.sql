@@ -17,6 +17,8 @@ declare fixture record; affected integer; saved public.admin_staff_hours;
 begin
   select * into fixture from notebook_test_context;
   assert public.staff_hours_admin_access(),'verified admin access';
+  assert (select count(*) from public.admin_employee_snapshots)>0,'admin can read verified employee snapshots';
+  assert not has_table_privilege(current_user,'public.admin_employee_snapshots','UPDATE'),'browser cannot change Gusto snapshots';
   insert into public.admin_staff_hours(id,client_id,staff_name,worked_on,hours)
   values(fixture.entry_id,fixture.client_a,' QA staff ','2026-10-01',6.5);
   insert into public.admin_staff_hours(client_id,staff_name,worked_on,hours)
@@ -61,6 +63,31 @@ begin
   end;
 end;
 $$;
+do $$
+declare test_id uuid:=gen_random_uuid(); employee_id_value uuid; client_id_value uuid; saved public.admin_staff_hours;
+begin
+  select id into employee_id_value from public.admin_employee_snapshots order by full_name limit 1;
+  select client_a into client_id_value from notebook_test_context;
+  insert into public.admin_staff_hours(id,client_id,staff_name,worked_on,hours,employee_id,entry_kind,verified_exported)
+  values(test_id,client_id_value,'QA employee session','2026-10-02',1.25,employee_id_value,'employee',true);
+  select * into saved from public.admin_staff_hours where id=test_id;
+  assert saved.verified_exported and saved.verified_at is not null,'verification at insertion works';
+  begin
+    insert into public.admin_staff_hours(id,client_id,staff_name,worked_on,hours) values(test_id,client_id_value,'Duplicate retry','2026-10-02',1.25);
+    raise exception 'duplicate UUID unexpectedly accepted';
+  exception when unique_violation then null;
+  end;
+  insert into public.admin_staff_hours(client_id,staff_name,worked_on,hours,employee_id,entry_kind)
+  values(client_id_value,'QA employee session','2026-10-02',1.25,employee_id_value,'employee');
+  assert (select count(*) from public.admin_staff_hours where client_id=client_id_value and staff_name='QA employee session' and worked_on='2026-10-02')=2,'legitimate same-day sessions allowed';
+  update public.admin_staff_hours set employee_id=null,entry_kind='ess_direct' where id=test_id;
+  select * into saved from public.admin_staff_hours where id=test_id;
+  assert not saved.verified_exported and saved.verified_at is null,'employee identity changes clear verification';
+  update public.admin_staff_hours set verified_exported=true where id=test_id;
+  select * into saved from public.admin_staff_hours where id=test_id;
+  assert saved.verified_exported and saved.verified_at is not null,'fresh verification after identity change works';
+end;
+$$;
 reset role;
 select set_config('request.jwt.claim.sub',(select outsider_id::text from notebook_test_context),true);
 set local role authenticated;
@@ -69,6 +96,7 @@ begin
   assert not public.staff_hours_admin_access(),'ordinary account not authorized';
   assert (select count(*) from public.admin_staff_hours)=0,'ordinary account cannot read notebooks';
   assert (select count(*) from public.admin_staff_hours_history)=0,'ordinary account cannot read history';
+  assert (select count(*) from public.admin_employee_snapshots)=0,'ordinary account cannot read payroll snapshots';
   begin
     insert into public.admin_staff_hours(client_id,staff_name,worked_on,hours)
     select client_a,'Unauthorized','2026-10-01',2 from notebook_test_context;
@@ -89,6 +117,17 @@ begin
   begin
     perform id from public.admin_staff_hours;
     raise exception 'anonymous access unexpectedly accepted';
+  exception when insufficient_privilege then null;
+  end;
+end;
+$$;
+reset role;
+set local role anon;
+do $$
+begin
+  begin
+    perform id from public.admin_employee_snapshots;
+    raise exception 'anonymous payroll access unexpectedly accepted';
   exception when insufficient_privilege then null;
   end;
 end;
