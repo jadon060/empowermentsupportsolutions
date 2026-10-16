@@ -22,8 +22,6 @@
 </head>
 <body>
   <div class="wrap"><header><h1>ESS Login</h1></header><div class="card"><p>Enter credentials to access your portal.</p><input id="pw" type="password" placeholder="Password / Client PIN" autocomplete="current-password" inputmode="numeric"><button id="go">Login</button><div id="err" class="err"></div><a class="home" href="/index.html">← Back to Home</a></div></div>
-  <script src="/portal/vendor/supabase-2.117.3.js"></script>
-  <script src="/portal/admin-session.js?v=20261016-repairs"></script>
   <script>
     const FAMILY_PW = "08052023";
     const STAFF_PW  = "05041993";
@@ -31,45 +29,15 @@
     const JEREMY_PW = "0926";
     const OMAR_PW   = "0125";
     const ADMIN_PW  = "10301993";
-    const session=window.ESSAdminSession;
-    const recoveryMode=new URLSearchParams(location.search).get('recovery')==='1';
-    let recovering=recoveryMode,recoverySessionReady=false;
-    const input=document.getElementById('pw'),go=document.getElementById('go'),err=document.getElementById('err');
-    function showRecovery(){recovering=true;document.querySelector('h1').textContent='Choose admin PIN';document.querySelector('.card p').textContent='Choose a numeric admin PIN with at least 6 digits. Your session will stay signed in on this device.';input.placeholder='New admin PIN';input.setAttribute('inputmode','numeric');input.autocomplete='new-password';go.textContent='Save admin PIN';}
-    if(recoveryMode)showRecovery();
-    if(session?.client){
-      session.client.auth.onAuthStateChange((event,currentSession)=>{if(event==='PASSWORD_RECOVERY'){recoverySessionReady=Boolean(currentSession);showRecovery();}});
-      session.client.auth.getSession().then(async({data})=>{
-        if(recoveryMode){if(data.session){recoverySessionReady=true;showRecovery();}return;}
-        if(data.session){const access=await session.client.rpc('staff_hours_admin_access');if(access.data)location.replace('/portal/admin.html');}
-      });
-    }
-    async function secureAdminLogin(password){
-      if(!session?.client)throw new Error('Secure admin access is unavailable. Refresh and try again.');
-      const {error}=await session.client.auth.signInWithPassword({email:session.email,password});
-      if(error)throw new Error('That admin password was not accepted. Check it or use the one-time recovery link.');
-      const access=await session.client.rpc('staff_hours_admin_access');
-      if(access.error||!access.data){await session.client.auth.signOut();throw new Error('This account is not authorized for ESS administration.');}
-      try{localStorage.setItem('ESS_Admin_Login','true');}catch{}
-      location.replace('/portal/admin.html');
-    }
-    async function route(){
-      const raw=input.value||"",val=raw.trim();
+    function route(){
+      const val=(document.getElementById("pw").value||"").trim(),err=document.getElementById("err");
       if(!val){err.textContent="Please enter a password or PIN.";return;}
-      if(recovering){
-        if(!/^\d{6,}$/.test(raw)){err.textContent='Choose a numeric PIN with at least 6 digits.';return;}
-        if(!session?.client){err.textContent='The secure recovery session is missing. Open the latest recovery link from the email.';return;}
-        if(!recoverySessionReady){const {data,error}=await session.client.auth.getSession();recoverySessionReady=Boolean(data.session);if(error||!recoverySessionReady){err.textContent='The recovery link did not establish a secure session. Open the latest recovery link from the email.';return;}}
-        go.disabled=true;err.textContent='Saving your admin PIN…';
-        session.client.auth.updateUser({password:raw}).then(({error})=>{if(error){err.textContent=error.message;go.disabled=false;return;}try{localStorage.setItem('ESS_Admin_Login','true');}catch{}location.replace('/portal/admin.html');}).catch(error=>{err.textContent=error.message||'Could not save the password. Try again.';go.disabled=false;});return;
-      }
       if(val===ADMIN_PW){try{localStorage.setItem("ESS_Admin_Login","true")}catch(e){} location.href="/portal/admin.html";return;}
       if(val===OMAR_PW){try{sessionStorage.setItem("ESS_EXPORT_OMAR","true")}catch(e){} location.href="/omar-v.html";return;}
       if(val===JEREMY_PW){try{sessionStorage.setItem("ESS_EXPORT_JEREMY","true")}catch(e){} location.href="/jeremy-n.html";return;}
       if(val===HAYDEN_PW){location.href="/Hayden_H.html";return;}
       if(val===FAMILY_PW){location.href="/families.html";return;}
       if(val===STAFF_PW){location.href="/staff.html";return;}
-      if(raw.length>=6){go.disabled=true;err.textContent='Signing in securely…';secureAdminLogin(raw).catch(error=>{err.textContent=error.message;go.disabled=false;});return;}
       err.textContent="Wrong password or PIN. Please try again.";
     }
     document.getElementById("go").addEventListener("click",route);
