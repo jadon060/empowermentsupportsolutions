@@ -68,7 +68,7 @@
   function renderClients() {
     const tabs=[],cards=[];
     for (const c of state.clients) {
-      const tab=button(c.name,()=>selectClient(c.id),'');tab.id='tab-'+c.id;tab.setAttribute('role','tab');tab.setAttribute('aria-controls','notebook-panel');tab.setAttribute('aria-selected',String(c.id===state.client.id));tab.tabIndex=c.id===state.client.id?0:-1;
+      const tab=button('',()=>selectClient(c.id),'');tab.append(el('span',initials(c.name),'tab-initials'),el('span',c.name,'tab-name'));tab.setAttribute('aria-label',c.name);tab.id='tab-'+c.id;tab.setAttribute('role','tab');tab.setAttribute('aria-controls','notebook-panel');tab.setAttribute('aria-selected',String(c.id===state.client.id));tab.tabIndex=c.id===state.client.id?0:-1;
       tab.addEventListener('keydown',e=>{const keys=['ArrowRight','ArrowLeft','Home','End'];if(!keys.includes(e.key)||state.busy)return;e.preventDefault();const i=state.clients.findIndex(x=>x.id===c.id),n=state.clients.length;const next=e.key==='Home'?0:e.key==='End'?n-1:(i+(e.key==='ArrowRight'?1:-1)+n)%n;selectClient(state.clients[next].id);$('tab-'+state.client.id).focus();});tabs.push(tab);
       const card=el('article',undefined,'client-card');card.append(el('span',initials(c.name),'initials'),el('h3',c.name),el('p','ESS client workspace'));
       const links=el('div',undefined,'client-card-links');
