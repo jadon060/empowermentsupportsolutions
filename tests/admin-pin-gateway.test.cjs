@@ -49,3 +49,46 @@ test('client notebooks use scoped admin-only roster RPC instead of direct table 
   const dashboard = read('portal/admin.html');
   assert.match(dashboard, /admin-notebooks\.js\?v=20261016-client-rpc-fix/);
 });
+
+test('admin session is isolated from shared public charting clients', () => {
+  const adminConfig = read('portal/admin-session.js');
+  assert.match(adminConfig, /storageKey:'ess-admin-pin-session-v2'/);
+  assert.match(adminConfig, /persistSession:true/);
+  const login = read('login.html');
+  assert.match(login, /sb-bqanjupmcgydvmfgvutx-auth-token/);
+  assert.match(login, /admin-session\.js\?v=20261016-isolated-v2/);
+  const dashboard = read('portal/admin.html');
+  assert.match(dashboard, /admin-session\.js\?v=20261016-isolated-v2/);
+});
+
+test('official charting and green status indicators never inherit administrator JWT', () => {
+  for (const filename of [
+    'omar-service-hours.js',
+    'client-portal-hayden-format.js',
+    'Eric_L_chart.html',
+    'eric-logistics.html',
+    'Hayden_H.html',
+    'client-logistics.html',
+    'admin-export.html'
+  ]) {
+    const contents = read(filename);
+    assert.match(contents, /persistSession:false,autoRefreshToken:false,detectSessionInUrl:false/,
+      filename + ' should use the original public charting role');
+  }
+  const shared = read('client-portal-hayden-format.js');
+  assert.match(shared, /markDotsFromServer/);
+  assert.match(shared, /daily_entries/);
+  assert.match(shared, /daily_drafts/);
+  const eric = read('Eric_L_chart.html');
+  assert.match(eric, /markDotsFromServer/);
+  assert.match(eric, /daily_entries/);
+  assert.match(eric, /daily_drafts/);
+});
+
+test('iPhone cache-busting loads restored charting assets', () => {
+  assert.match(read('omar-v.html'), /omar-service-hours\.js\?v=20261016-anon-restored/);
+  assert.match(read('omar-v.html'), /client-portal-hayden-format\.js\?v=20261016-anon-restored/);
+  assert.match(read('jeremy-n.html'), /client-portal-hayden-format\.js\?v=20261016-anon-restored/);
+  assert.match(read('Eric_L.html'), /Eric_L_chart\.html\?v=20261016-anon-restored/);
+  assert.match(read('Eric_L.html'), /eric-logistics\.html\?v=20261016-anon-restored/);
+});
