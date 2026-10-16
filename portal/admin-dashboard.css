@@ -49,3 +49,22 @@ select{font:inherit;color:var(--ink);background:#fff;border:1px solid #dce5f2;bo
 @media(max-width:820px){.team-grid{grid-template-columns:1fr}.employee-head p{font-size:12px}}
 @media(max-width:600px){.notebook-toolbar{flex-wrap:wrap}.notebook-name .initials{display:inline-grid}.month-control{margin-left:auto}.hours-table,.hours-table tbody,.hours-table tr,.hours-table td{display:block;width:100%}.hours-table thead{display:none}.hours-table tbody{padding:0 16px}.hours-table tbody tr{border:1px solid #e1e7f2;border-radius:13px;margin-bottom:12px;padding:10px 14px}.hours-table td,.hours-table td:first-child,.hours-table td:last-child{padding:7px 0;border:0;white-space:normal;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.hours-table td:before{content:attr(data-label);font-size:10px;color:#687894;font-weight:500}.hours-table td:first-child{font-weight:700}.hours-table td:first-child:before{display:none}.hours-table .empty{display:block;padding:20px 0!important}.verify-label{font-size:11px}.verified-meta{width:100%;text-align:right;margin:0}.row-actions .text-button{min-height:36px;padding:8px 10px;border:1px solid #dce5f2;border-radius:8px;background:#fff}.team-grid{padding:0 16px 16px}.team-status{margin-inline:16px;font-size:11px}.team-section .panel-heading{flex-wrap:wrap}.team-month-label{display:flex;align-items:center;gap:10px}.team-month-label input{font-size:16px}.employee-head{padding-inline:15px}.employee-head h3{font-size:16px}.employee-head p{font-size:10px}.employee-metrics{padding-inline:15px}.employee-metrics strong{font-size:17px}.notebook-summary .small{font-size:9px}.notes-controls input{font-size:16px}.notebook-summary>div{padding-inline:6px}.notebook-footer{align-items:center}.notebook-footer .small{max-width:220px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+
+/* Targeted Admin organizer UI — no changes to existing portal widgets. */
+.todo-body{padding:18px 22px 22px}
+.todo-input-row{display:flex;gap:9px;align-items:stretch}
+.todo-input-row input{flex:1;min-width:0;font-size:16px}
+.todo-input-row button{min-width:72px}
+#todoStatus{min-height:20px;margin:9px 0 8px}
+#todoList{display:grid;gap:8px}
+.todo-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;background:#f8faff;border:1px solid #e4eaf5;border-radius:12px}
+.todo-item-label{display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer;color:#263b66}
+.todo-item-label input{flex:0 0 auto;width:19px;height:19px;accent-color:#178f75}
+.todo-item-label span{overflow-wrap:anywhere}
+.todo-item-label .todo-done{text-decoration:line-through;color:#8793a9}
+.todo-row button{flex:0 0 auto}
+#manual-hours-link{color:#2a58a2;font-size:12px;font-weight:700;white-space:nowrap}
+#saveStatus.error,#todoStatus.error{color:#b42338}
+@media(max-width:700px){.todo-body{padding:15px 16px 19px}#manual-hours-link{order:3;width:100%;text-align:left}.notebook-toolbar{flex-wrap:wrap}}
+@media(max-width:420px){.todo-input-row{gap:6px}.todo-input-row button{min-width:58px;padding-inline:10px}}
