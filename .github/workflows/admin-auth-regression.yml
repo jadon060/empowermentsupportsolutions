@@ -1,0 +1,26 @@
+name: ESS Admin PIN Regression
+
+on:
+  pull_request:
+    paths:
+      - 'login.html'
+      - 'portal/admin.html'
+      - 'portal/admin-notebooks.js'
+      - 'tests/admin-pin-gateway.test.cjs'
+      - 'tests/admin-notebooks.test.cjs'
+      - '.github/workflows/admin-auth-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  auth-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test Admin PIN gateway and notebooks
+        run: node --test tests/admin-notebooks.test.cjs tests/admin-pin-gateway.test.cjs
