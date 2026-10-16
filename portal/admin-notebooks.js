@@ -244,16 +244,24 @@
         document.body.classList.remove('admin-checking');state.admin=false;status('Secure sign-in link needed');
         empty('Open the one-time ESS admin sign-in link on this device to load the staff hours notebook and employee overview.');controls();
         if(state.authLinkRequest){await state.authLinkRequest;return;}
-        const key='ESS_Admin_Notebook_Link_Sent_At',now=Date.now(),cooldown=10*60*1000;let last=0;
-        try{last=Number(localStorage.getItem(key)||0);}catch{}
-        if(now-last<cooldown){message('A one-time sign-in link was already sent to the ESS admin email. Open the latest link on this device. If it expired, reload this page after 10 minutes to request another.',false);return;}
+        const key='ESS_Admin_Notebook_Link_Sent_At',cooldownKey='ESS_Admin_Notebook_Link_Cooldown',now=Date.now();let last=0,cooldown=10*60*1000;
+        try{last=Number(localStorage.getItem(key)||0);cooldown=Number(localStorage.getItem(cooldownKey)||cooldown);}catch{}
+        if(now-last<cooldown){const minutes=Math.max(1,Math.ceil((cooldown-(now-last))/60000));message('A recent secure sign-in email request is still within the email provider’s cooldown. Check the ESS admin inbox and junk folder for the latest link. Another request can be made in about '+minutes+' minute'+(minutes===1?'':'s')+'.',false);return;}
         state.authLinkRequest=(async()=>{
           try{
             try{localStorage.setItem(key,String(now));}catch{}
+            try{localStorage.setItem(cooldownKey,String(10*60*1000));}catch{}
             const {error}=await sb.auth.signInWithOtp({email:window.ESSAdminSession.email,options:{shouldCreateUser:false,emailRedirectTo:location.origin+'/login.html?admin=1&recovery=1'}});
             if(error)throw error;
             message('A one-time secure link was sent to the existing ESS admin email. Open it on this device; your login screen and PIN remain unchanged.',false);
-          }catch(error){try{localStorage.removeItem(key);}catch{}message('Could not send the secure sign-in link: '+(error.message||'Connection unavailable. Reload to retry.'),true);}
+          }catch(error){
+            const detail=error.message||'Connection unavailable.';
+            const rateLimited=error.status===429||/rate.?limit|too many requests|email rate/i.test(detail);
+            const retryDelay=rateLimited?60*60*1000:10*60*1000;
+            // Keep a cooldown after failures: Supabase may have accepted a request before the response failed.
+            try{localStorage.setItem(key,String(Date.now()));localStorage.setItem(cooldownKey,String(retryDelay));}catch{}
+            message(rateLimited?'Supabase is temporarily limiting secure sign-in emails. Check the ESS admin inbox and junk folder for a recent link. To avoid further rate limits, another request will be available in about an hour.':'The secure sign-in email could not be confirmed. Check the ESS admin inbox and junk folder before trying again; another request will be available in about 10 minutes.',true);
+          }
           finally{state.authLinkRequest=null;}
         })();
         await state.authLinkRequest;return;
