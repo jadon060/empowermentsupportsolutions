@@ -241,8 +241,8 @@
     if(!session){
       let legacyAdmin=false;try{legacyAdmin=localStorage.getItem('ESS_Admin_Login')==='true';}catch{}
       if(legacyAdmin){
-        document.body.classList.remove('admin-checking');state.admin=false;status('Admin PIN activation needed');
-        empty('Open the one-time recovery link from your ESS admin email. It activates your existing admin PIN for notebooks and staff data; you do not need to choose a new PIN.');controls();
+        document.body.classList.remove('admin-checking');state.admin=false;status('Secure sign-in link needed');
+        empty('Open the one-time ESS admin sign-in link on this device to load the staff hours notebook and employee overview.');controls();
         if(state.authLinkRequest){await state.authLinkRequest;return;}
         const key='ESS_Admin_Notebook_Link_Sent_At',cooldownKey='ESS_Admin_Notebook_Link_Cooldown',now=Date.now();let last=0,cooldown=10*60*1000;
         try{last=Number(localStorage.getItem(key)||0);cooldown=Number(localStorage.getItem(cooldownKey)||cooldown);}catch{}
@@ -251,9 +251,9 @@
           try{
             try{localStorage.setItem(key,String(now));}catch{}
             try{localStorage.setItem(cooldownKey,String(10*60*1000));}catch{}
-            const {error}=await sb.auth.resetPasswordForEmail(window.ESSAdminSession.email,{redirectTo:'https://empowermentss.com/login.html?admin=1&recovery=1'});
+            const {error}=await sb.auth.signInWithOtp({email:window.ESSAdminSession.email,options:{shouldCreateUser:false,emailRedirectTo:'https://empowermentss.com/login.html?admin=1&recovery=1'}});
             if(error)throw error;
-            message('One recovery link was sent to the existing ESS admin email. Open it on this device; the portal will activate your existing PIN automatically. You will not need to choose a new PIN.',false);
+            message('A one-time secure link was sent to the existing ESS admin email. Open it on this device; your login screen and PIN remain unchanged.',false);
           }catch(error){
             const detail=error.message||'Connection unavailable.';
             const rateLimited=error.status===429||/rate.?limit|too many requests|email rate/i.test(detail);
