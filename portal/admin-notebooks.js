@@ -238,11 +238,15 @@
     state.sessionId=sessionId;state.admin=false;state.generation++;state.historyGeneration++;state.loading=false;
     if(state.channel){sb.removeChannel(state.channel);state.channel=null;}
     document.body.classList.add('admin-checking');state.employees=[];state.teamRows=null;$('team-cards').replaceChildren();state.rows=[];summary(false);empty('Opening your admin session…');$('history-list').replaceChildren(el('p','Opening history…','muted small'));$('more-history').hidden=true;$('entry-dialog').close();controls();
-    if(!session){location.replace(window.ESSAdminSession.loginUrl);return;}
+    if(!session){
+      let legacyAdmin=false;try{legacyAdmin=localStorage.getItem('ESS_Admin_Login')==='true';}catch{}
+      if(legacyAdmin){document.body.classList.remove('admin-checking');state.admin=false;status('Notebook access unavailable');empty('Private staff-hour notebooks need an authorized cloud session. No records are exposed without it.');message('Your ESS portal login is active, but the secure notebook session could not be restored. Contact ESS support to reconnect it.',true);controls();return;}
+      location.replace('/login.html');return;
+    }
     try {
       const {data,error}=await sb.rpc('staff_hours_admin_access');if(error)throw error;
       if(sessionId!==state.sessionId||ticket!==state.authGeneration)return;
-      if(!data){location.replace(window.ESSAdminSession.loginUrl);return;}
+      if(!data){let legacyAdmin=false;try{legacyAdmin=localStorage.getItem('ESS_Admin_Login')==='true';}catch{}if(legacyAdmin){document.body.classList.remove('admin-checking');state.admin=false;status('Notebook access unavailable');empty('Private staff-hour notebooks need an authorized cloud session. No records are exposed without it.');message('Your ESS portal login is active, but the secure notebook session could not be restored. Contact ESS support to reconnect it.',true);controls();return;}location.replace('/login.html');return;}
       state.admin=true;try{localStorage.setItem('ESS_Admin_Login','true');}catch{}
       await fetchClients();if(ticket!==state.authGeneration)return;await Promise.all([loadEntries(),loadTeam()]);if(ticket!==state.authGeneration||!state.admin)return;
       document.body.classList.remove('admin-checking');
