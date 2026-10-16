@@ -38,7 +38,7 @@
  const key=new URLSearchParams(location.search).get('client')||'jeremy', cfg=CONFIG[key]||CONFIG.jeremy;
  const SUPABASE_URL='https://bqanjupmcgydvmfgvutx.supabase.co';
  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk';
- const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY),ess=sb.schema('ess'),$=id=>document.getElementById(id);
+ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}),ess=sb.schema('ess'),$=id=>document.getElementById(id);
  $('title').textContent='📊 '+cfg.short+' Monthly Logistics'; $('subtitle').textContent='Live visual tracking for '+cfg.short+'’s approved SDP hours.';
  const fmt=v=>{const n=Number(v)||0;return n%1===0?String(n):n.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')};
  const monthKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
