@@ -305,7 +305,7 @@
     if(sb)return;
     $('serviceDate').value=todayISO();$('dispensedOn').value=todayISO();$('inventoryType').dispatchEvent(new Event('change'));
     if(!window.supabase){setSync(false,'Medication data service did not load. Medication charting is disabled.');return}
-    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);ess=sb.schema('ess');await loadAll();subscribeRealtime();
+    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});ess=sb.schema('ess');await loadAll();subscribeRealtime();
   }
 
   try{if(sessionStorage.getItem(SESSION_KEY)==='true'){gate.classList.add('hidden');start()}}catch(e){}
