@@ -68,3 +68,15 @@ select{font:inherit;color:var(--ink);background:#fff;border:1px solid #dce5f2;bo
 #saveStatus.error,#todoStatus.error{color:#b42338}
 @media(max-width:700px){.todo-body{padding:15px 16px 19px}#manual-hours-link{order:3;width:100%;text-align:left}.notebook-toolbar{flex-wrap:wrap}}
 @media(max-width:420px){.todo-input-row{gap:6px}.todo-input-row button{min-width:58px;padding-inline:10px}}
+
+
+/* Two presentation-only collapsible sections: hours log and notes. */
+.panel-heading-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.section-fold-toggle{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:40px;padding:9px 13px;border:1px solid #cbdaf9;border-radius:12px;background:linear-gradient(135deg,#eaf1ff,#f3edff);color:#3158b0;box-shadow:0 3px 12px rgba(44,79,157,.09);font:inherit;font-size:11px;font-weight:750;letter-spacing:.1px;cursor:pointer;transition:background-color .2s,border-color .2s,box-shadow .2s}
+.section-fold-toggle:hover{border-color:#8eacf2;box-shadow:0 5px 16px rgba(44,79,157,.16)}
+.section-fold-toggle:focus-visible{outline:3px solid #92b4f7;outline-offset:2px}
+.fold-chevron{display:inline-block;width:9px;height:9px;flex:0 0 auto;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(225deg);transition:transform .22s ease}
+.section-fold-toggle[aria-expanded="false"] .fold-chevron{transform:rotate(45deg)}
+#staff-log-content[hidden],#notes-content[hidden]{display:none!important}
+@media(max-width:520px){.panel-heading-actions{margin-left:auto;gap:7px}.panel-heading-actions .pill{padding:5px 7px;font-size:9px}.section-fold-toggle{min-height:38px;padding:8px 10px;font-size:10px}}
+@media(prefers-reduced-motion:reduce){.section-fold-toggle,.fold-chevron{transition:none}}
