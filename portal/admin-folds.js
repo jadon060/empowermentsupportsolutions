@@ -1,21 +1,30 @@
-/* Presentation-only collapsible Admin sections. No reads/writes to staff or note data. */
+/* ESS Admin display-only folds. Never reads, writes, deletes, or modifies logged data. */
 (() => {
   'use strict';
 
-  function attachFold(buttonId, contentId, sectionName) {
-    const button = document.getElementById(buttonId);
+  function attachFold(topId, bottomId, contentId, sectionName, shortName) {
     const content = document.getElementById(contentId);
-    if (!button || !content) return;
+    const buttons = [topId, bottomId]
+      .map(id => document.getElementById(id))
+      .filter(Boolean);
+    if (!content || !buttons.length) return;
 
-    button.addEventListener('click', () => {
-      const expanded = button.getAttribute('aria-expanded') !== 'true';
+    function show(expanded) {
       content.hidden = !expanded;
-      button.setAttribute('aria-expanded', String(expanded));
-      button.setAttribute('aria-label', (expanded ? 'Collapse ' : 'Expand ') + sectionName);
-      button.querySelector('.fold-action').textContent = expanded ? 'Collapse' : 'Expand';
-    });
+      for (const button of buttons) {
+        button.setAttribute('aria-expanded', String(expanded));
+        button.setAttribute('aria-label', (expanded ? 'Hide ' : 'Show ') + sectionName);
+        const caption = button.querySelector('.fold-action');
+        if (caption) caption.textContent = (expanded ? 'Hide ' : 'Show ') + shortName;
+      }
+    }
+
+    show(!content.hidden); // HTML starts closed, even before JS executes.
+    for (const button of buttons) {
+      button.addEventListener('click', () => show(content.hidden));
+    }
   }
 
-  attachFold('hours-fold-toggle', 'staff-log-content', 'Staff Hours Log');
-  attachFold('notes-fold-toggle', 'notes-content', 'My Notes');
+  attachFold('hours-fold-toggle', 'hours-fold-bottom', 'staff-log-content', 'Staff Hours Log', 'hours');
+  attachFold('notes-fold-toggle', 'notes-fold-bottom', 'notes-content', 'My Notes', 'notes');
 })();
