@@ -17,7 +17,7 @@
 
   mount.innerHTML = `
     <div class="service-hours-head">
-      <div><h2 id="serviceHoursTitle">Monthly Service Hours Tracker</h2><p>Omar’s completed official sessions by service category</p></div>
+      <div><h2 id="serviceHoursTitle">Monthly Service Hours Tracker</h2><p>Omar’s monthly category totals • signed sessions or labeled admin display adjustments</p></div>
       <label><span class="sr-only">Select month</span><input class="service-hours-month" id="serviceHoursMonth" type="month" aria-label="Select month"></label>
     </div>
     <div class="service-hours-grid" id="serviceHoursGrid"></div>
@@ -84,8 +84,7 @@
   let aggregate = { month: '', categories: Object.create(null), total: 0, uncategorized: 0 };
   let loadSequence = 0;
 
-  function render(data) {
-    const totalPct = AUTHORIZED_TOTAL ? data.total / AUTHORIZED_TOTAL * 100 : 0;
+  function render(data, official = data, manual = null) {
     grid.replaceChildren();
     CATEGORIES.forEach(category => {
       const used = data.categories[category.id] || 0;
@@ -104,15 +103,17 @@
     document.getElementById('serviceHoursTotal').textContent = `${fmt(data.total)} / ${AUTHORIZED_TOTAL} hours`;
     document.getElementById('serviceHoursRemaining').textContent = `${fmt(Math.max(0, AUTHORIZED_TOTAL - data.total))} hours remaining`;
     const legacy = document.getElementById('serviceHoursUncategorized');
-    if (data.uncategorized > 0) {
+    if (official.uncategorized > 0) {
       legacy.style.display = 'block';
-      legacy.textContent = `${fmt(data.uncategorized)} completed hour(s) are missing a recognizable 334 / 335-A / 335-B category. These hours are included in the total and need review.`;
+      legacy.textContent = `${fmt(official.uncategorized)} signed official hour(s) are missing a recognizable 334 / 335-A / 335-B category and need chart review.`;
     } else {
       legacy.style.display = 'none';
       legacy.textContent = '';
     }
     const totalState = stateFor(data.total, AUTHORIZED_TOTAL);
-    status.textContent = `${monthName(data.month)} · ${totalState.label}. Drafts and unsigned records are excluded. Historical service labels are normalized without changing saved notes.`;
+    status.textContent = manual
+      ? `${monthName(data.month)} · ADMIN-ADJUSTED DISPLAY. Signed official sessions: ${fmt(official.total)} hours; displayed manually: ${fmt(data.total)} hours. Signed charts, signatures and billing are unchanged. ${totalState.label}.`
+      : `${monthName(data.month)} · ${totalState.label}. Drafts and unsigned records are excluded. Historical service labels are normalized without changing saved notes.`;
     status.className = 'service-hours-note service-hours-state ' + totalState.className;
   }
 
@@ -142,23 +143,49 @@
     return next;
   }
 
+  async function readManual(key) {
+    // Only display values are exposed to the public viewer; edit notes stay admin-only.
+    const { data, error } = await sb.from('omar_tracker_monthly_manual')
+      .select('month_key,hours_334,hours_335_a,hours_335_b,enabled,updated_at')
+      .eq('month_key', key).maybeSingle();
+    return { data, error };
+  }
+
   async function loadMonth(key = monthPicker.value || currentMonth()) {
     if (!/^\d{4}-\d{2}$/.test(key)) return null;
     const request = ++loadSequence;
     monthPicker.value = key;
     status.textContent = navigator.onLine === false ? 'Offline — waiting to synchronize saved session records…' : 'Loading official session records…';
-    const next = await readMonth(key);
+    const [official, manualResult] = await Promise.all([readMonth(key), readManual(key)]);
     if (request !== loadSequence || key !== monthPicker.value) return null;
-    if (!next) {
+    if (!official) {
       status.textContent = navigator.onLine === false
         ? 'Offline — saved totals are not confirmed. Reconnect to load this month’s records.'
         : 'Could not load Omar’s official session records. Totals are unavailable; retry or check ESS database access.';
       status.className = 'service-hours-note service-hours-state over';
       return null;
     }
-    aggregate = next;
-    render(next);
-    return next;
+    aggregate = official; // Warnings and submission checks always use signed sessions.
+    const manual = !manualResult.error && manualResult.data?.enabled ? manualResult.data : null;
+    let display = official;
+    if (manual) {
+      const categories = {
+        '334': Number(manual.hours_334),
+        '335-A': Number(manual.hours_335_a),
+        '335-B': Number(manual.hours_335_b)
+      };
+      display = {
+        ...official,
+        categories,
+        total: Object.values(categories).reduce((sum, hours) => sum + hours, 0)
+      };
+    }
+    render(display, official, manual);
+    if (manualResult.error) {
+      status.textContent = 'Could not verify admin display adjustments; showing signed official totals only. Reload before relying on the displayed figures.';
+      status.className = 'service-hours-note service-hours-state warning';
+    }
+    return official;
   }
 
   async function warnSession(category, sessionHours, serviceDate) {
