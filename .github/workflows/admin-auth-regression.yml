@@ -8,6 +8,12 @@ on:
       - 'portal/admin-notebooks.js'
       - 'tests/admin-pin-gateway.test.cjs'
       - 'tests/admin-notebooks.test.cjs'
+      - 'tests/omar-tracker-admin.test.cjs'
+      - 'portal/omar-tracker-admin.html'
+      - 'portal/omar-tracker-admin.js'
+      - 'omar-service-hours.js'
+      - 'omar-v.html'
+      - 'db/omar-tracker-monthly-manual.sql'
       - '.github/workflows/admin-auth-regression.yml'
   workflow_dispatch:
 
@@ -23,4 +29,4 @@ jobs:
         with:
           node-version: '22'
       - name: Test Admin PIN gateway and notebooks
-        run: node --test tests/admin-notebooks.test.cjs tests/admin-pin-gateway.test.cjs
+        run: node --test tests/admin-notebooks.test.cjs tests/admin-pin-gateway.test.cjs tests/omar-tracker-admin.test.cjs
