@@ -95,3 +95,34 @@ select{font:inherit;color:var(--ink);background:#fff;border:1px solid #dce5f2;bo
   .section-fold-toggle{min-height:43px;font-size:12px;padding:8px 14px}
 }
 @media(prefers-reduced-motion:reduce){.section-fold-toggle .fold-chevron::after{transition:none}}
+
+
+/* Omar-only shortcut: preserve existing card actions and portal layout. */
+.client-card .omar-service-hours-edit {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  width:100%;
+  margin-top:12px;
+  padding:10px 12px;
+  border:1px solid #b7dcf0;
+  border-radius:11px;
+  background:linear-gradient(105deg,#edf5ff,#e7faf7);
+  color:#2457a7;
+  font-size:11px;
+  font-weight:800;
+  line-height:1.35;
+  text-align:center;
+  text-decoration:none;
+  transition:background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.client-card .omar-service-hours-edit:hover {
+  border-color:#63bfc2;
+  background:linear-gradient(105deg,#dfeeff,#d5f6ee);
+  box-shadow:0 4px 10px rgba(31,95,152,.12);
+}
+.client-card .omar-service-hours-edit:focus-visible {
+  outline:3px solid #2b84cd;
+  outline-offset:3px;
+}
