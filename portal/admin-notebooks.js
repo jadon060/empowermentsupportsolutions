@@ -73,7 +73,14 @@
       const card=el('article',undefined,'client-card');card.append(el('span',initials(c.name),'initials'),el('h3',c.name),el('p','ESS client workspace'));
       const links=el('div',undefined,'client-card-links');
       if(c.portal){const a=el('a','Open portal ↗');a.href=c.portal;links.append(a);}else links.append(el('span','Client notebook'));
-      links.append(button('Hours log →',()=>{selectClient(c.id);$('staff-log').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}));if(c.key){const manual=el('a','Manual client hours ↗');manual.href='/portal/client-hours-admin.html?client='+encodeURIComponent(c.key);links.append(manual);}card.append(links);cards.push(card);
+      links.append(button('Hours log →',()=>{selectClient(c.id);$('staff-log').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}));if(c.key){const manual=el('a','Manual client hours ↗');manual.href='/portal/client-hours-admin.html?client='+encodeURIComponent(c.key);links.append(manual);}card.append(links);
+      if(c.id==='521dd725-2fa6-4d78-9fcc-e5447dc727cb') {
+        const edit=el('a','✎ Edit service hours ↗','omar-service-hours-edit');
+        edit.href='/portal/omar-tracker-admin.html';
+        edit.setAttribute('aria-label','Edit Omar Velasquez monthly service hours tracker');
+        card.append(edit);
+      }
+      cards.push(card);
     }
     const strip=$('client-tabs'),left=strip.scrollLeft;strip.replaceChildren(...tabs);strip.scrollLeft=left;const selected=strip.querySelector('[aria-selected=true]');if(selected){const a=selected.getBoundingClientRect(),b=strip.getBoundingClientRect();if(a.left<b.left)strip.scrollLeft-=b.left-a.left;else if(a.right>b.right)strip.scrollLeft+=a.right-b.right;}$('client-cards').replaceChildren(...cards);$('client-count').textContent=state.clients.length+' client workspaces';
     const manual=$('manual-hours-link');if(manual){manual.hidden=!state.client.key;if(state.client.key)manual.href='/portal/client-hours-admin.html?client='+encodeURIComponent(state.client.key);}
