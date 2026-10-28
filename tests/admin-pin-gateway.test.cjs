@@ -47,7 +47,7 @@ test('client notebooks use scoped admin-only roster RPC instead of direct table 
   assert.match(js, /sb\.rpc\('admin_notebook_clients'\)/);
   assert.doesNotMatch(js, /sb\.schema\('ess'\)\.from\('clients'\)/);
   const dashboard = read('portal/admin.html');
-  assert.match(dashboard, /admin-notebooks\.js\?v=20261016-organizer-v1/);
+  assert.match(dashboard, /admin-notebooks\.js\?v=20261028-omar-card-v1/);
 });
 
 test('admin session is isolated from shared public charting clients', () => {
@@ -134,4 +134,19 @@ test('legacy device notes are merged without overwriting records or deleting loc
   assert.match(organizer,/migrateLocal/);
   assert.doesNotMatch(organizer,/localStorage\.removeItem\(LEGACY_KEY\)/);
   assert.doesNotMatch(organizer,/localStorage\.setItem\(LEGACY_KEY/);
+});
+
+test('Omar client card includes the monthly service hours editor without changing existing links', () => {
+  const notebooks=read('portal/admin-notebooks.js');
+  const dashboard=read('portal/admin.html');
+  const styles=read('portal/admin-dashboard.css');
+  assert.match(notebooks, /c\.id==='521dd725-2fa6-4d78-9fcc-e5447dc727cb'/);
+  assert.match(notebooks, /Edit service hours/);
+  assert.match(notebooks, /'\/portal\/omar-tracker-admin\.html'/);
+  assert.match(notebooks, /card\.append\(edit\)/);
+  assert.match(notebooks, /Open portal ↗/);
+  assert.match(notebooks, /Hours log →/);
+  assert.match(notebooks, /Manual client hours ↗/);
+  assert.match(styles, /\.client-card \.omar-service-hours-edit/);
+  assert.match(dashboard, /admin-dashboard\.css\?v=20261028-omar-card-v1/);
 });
