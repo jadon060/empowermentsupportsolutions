@@ -58,7 +58,7 @@
     $('monthly-hours').textContent=ready?fmt(t.hours):'—';$('verified-hours').textContent=ready?fmt(t.verified):'—';$('entry-count').textContent=ready?t.count:'—';
   }
   function controls() {
-    for (const id of ['add-entry','refresh']) $(id).disabled=!state.admin||state.busy||state.loading;
+    for (const id of ['add-entry','refresh','export-hours-pdf']) $(id).disabled=!state.admin||state.busy||state.loading;
     for (const id of ['previous-month','next-month','month']) $(id).disabled=state.busy;
     $('previous-month').disabled=state.busy||state.month==='2000-01';$('next-month').disabled=state.busy||state.month==='2100-12';
     $('client-tabs').querySelectorAll('button').forEach(b=>b.disabled=state.busy);
@@ -266,6 +266,14 @@
   $('sign-out').addEventListener('click',signOut);$('sign-out-mobile').addEventListener('click',signOut);
   $('month').addEventListener('change',()=>{if(!monthPattern.test($('month').value)){$('month').value=state.month;return;}state.month=$('month').value;state.months.set(state.client.id,state.month);loadEntries();});
   for(const [id,delta] of [['previous-month',-1],['next-month',1]])$(id).addEventListener('click',()=>{if(state.busy)return;state.month=shiftMonth(state.month,delta);$('month').value=state.month;state.months.set(state.client.id,state.month);loadEntries();});
+  $('export-hours-pdf').addEventListener('click',()=>{
+    if(!state.admin||state.busy||state.loading||!monthPattern.test(state.month))return;
+    // The report page independently validates the Admin PIN session, client access and
+    // fetches fresh rows. Never rely on browser-only totals for a filed snapshot.
+    const url='/portal/staff-hours-report.html?client='+encodeURIComponent(state.client.id)
+      +'&month='+encodeURIComponent(state.month)+'&print=1';
+    window.open(url,'_blank','noopener');
+  });
   $('add-entry').addEventListener('click',()=>openEntry());$('entry-form').addEventListener('submit',saveEntry);$('close-entry').addEventListener('click',closeEntry);$('cancel-entry').addEventListener('click',closeEntry);
   $('entry-dialog').addEventListener('cancel',e=>{e.preventDefault();closeEntry();});
   for(const id of ['staff-name','worked-on','hours'])$(id).addEventListener('input',()=>{if(state.editing)$('entry-verified').checked=false;});
