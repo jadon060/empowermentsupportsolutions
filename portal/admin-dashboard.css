@@ -126,3 +126,17 @@ select{font:inherit;color:var(--ink);background:#fff;border:1px solid #dce5f2;bo
   outline:3px solid #2b84cd;
   outline-offset:3px;
 }
+
+
+/* Monthly staff hours PDF export. Keep original notebook controls unchanged. */
+.notebook-export-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.notebook-export-actions .button{font-size:11px;white-space:nowrap;padding:10px 13px}
+.notebook-export-actions #manual-hours-link{white-space:nowrap}
+@media (max-width:1100px){
+  .notebook-toolbar{flex-wrap:wrap}
+  .notebook-export-actions{justify-content:flex-start}
+}
+@media (max-width:520px){
+  .notebook-export-actions{width:100%;justify-content:flex-start;gap:9px}
+  .notebook-export-actions .button{font-size:11px;flex-shrink:0}
+}

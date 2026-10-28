@@ -6,6 +6,10 @@ on:
       - 'login.html'
       - 'portal/admin.html'
       - 'portal/admin-notebooks.js'
+      - 'portal/admin-dashboard.css'
+      - 'portal/staff-hours-report.html'
+      - 'portal/staff-hours-report.js'
+      - 'tests/admin-hours-report.test.cjs'
       - 'tests/admin-pin-gateway.test.cjs'
       - 'tests/admin-notebooks.test.cjs'
       - 'tests/omar-tracker-admin.test.cjs'
@@ -29,4 +33,4 @@ jobs:
         with:
           node-version: '22'
       - name: Test Admin PIN gateway and notebooks
-        run: node --test tests/admin-notebooks.test.cjs tests/admin-pin-gateway.test.cjs tests/omar-tracker-admin.test.cjs
+        run: node --test tests/admin-notebooks.test.cjs tests/admin-pin-gateway.test.cjs tests/omar-tracker-admin.test.cjs tests/admin-hours-report.test.cjs
