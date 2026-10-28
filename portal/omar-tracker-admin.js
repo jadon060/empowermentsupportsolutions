@@ -72,7 +72,10 @@
     state.busy = value;
     ['tracker-month','override-334','override-335a','override-335b','edit-reason','save-manual','restore-auto','reload-manual']
       .forEach(id => { $(id).disabled = value || !state.authorized; });
-    if (!value) $('restore-auto').disabled = !state.row?.enabled;
+    if (!value) {
+      $('restore-auto').disabled = !state.row?.enabled;
+      $('save-manual').disabled = !state.official || !state.authorized;
+    }
   }
   function totalPreview() {
     try {
@@ -125,9 +128,9 @@
     return summarizeSigned(data);
   }
   async function loadMonth() {
-    if (!state.authorized) return;
+    if (!state.authorized) return false;
     const month=$('tracker-month').value;
-    if (!validMonth(month)){notice('Choose a valid month.','error');return;}
+    if (!validMonth(month)){notice('Choose a valid month.','error');return false;}
     const seq=++state.loadId;disabled(true);notice('Reading the saved tracker and official signed hours…');
     try {
       const [official,manualResult,historyResult] = await Promise.all([
@@ -143,9 +146,11 @@
       notice(state.row?.enabled
         ? 'Manual display adjustment is ACTIVE for this month. Original signed records remain unchanged.'
         : 'Automatic signed-session totals are active. No manual display adjustment is in effect.');
+      return true;
     } catch (error) {
       state.official=null;state.row=null;
       notice(error.message || 'Unable to load the selected month.','error');
+      return false;
     } finally { if (seq===state.loadId) disabled(false); }
   }
   async function saveManual() {
@@ -174,8 +179,9 @@
         request=await admin.from('omar_tracker_monthly_manual').insert({...payload,month_key:month}).select('revision').single();
       }
       if (request.error) throw request.error;
-      await loadMonth();
-      notice('Saved ✅ The adjusted display totals will appear on Omar’s tracker after refresh.','success');
+      const verified = await loadMonth();
+      if (verified) notice('Saved ✅ The adjusted display totals will appear on Omar’s tracker after refresh.','success');
+      else notice('Save succeeded but verification reload failed. Refresh before relying on the displayed totals.','error');
     } catch (error) {
       notice('Save failed: '+(error.message || 'Unknown error')+'. Reload before retrying.','error');
     } finally { disabled(false); }
@@ -191,8 +197,9 @@
         .eq('month_key',month).eq('revision',state.row.revision).select('revision').maybeSingle();
       if (result.error) throw result.error;
       if (!result.data) throw new Error('The record changed. Reload and try again.');
-      await loadMonth();
-      notice('Automatic totals restored ✅ No signed chart records were changed.','success');
+      const verified = await loadMonth();
+      if (verified) notice('Automatic totals restored ✅ No signed chart records were changed.','success');
+      else notice('Automatic mode was updated but verification reload failed. Refresh to confirm.','error');
     } catch (error) {
       notice('Could not restore automatic totals: '+(error.message || 'Unknown error'),'error');
     } finally { disabled(false); }
