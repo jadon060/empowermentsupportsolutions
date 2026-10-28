@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>ESS Staff Hours Monthly Report</title>
+  <style>
+    :root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#1d2e4b;background:#eff4fc}
+    *{box-sizing:border-box}
+    body{margin:0}
+    .screenbar{max-width:960px;margin:22px auto 0;padding:12px 16px;border-radius:14px;background:#fff;border:1px solid #d9e4f5;box-shadow:0 5px 22px rgba(30,64,124,.07);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+    .screenbar p{margin:0;color:#4d6283;font-size:13px;line-height:1.5}
+    .screenbar .actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    button,.back{font:inherit;font-weight:750;border-radius:10px;padding:10px 14px}
+    button{background:#284eaa;color:#fff;border:0;cursor:pointer}
+    button:disabled{opacity:.45;cursor:not-allowed}
+    a.back{background:#eff4ff;color:#294f94;text-decoration:none;font-size:13px}
+    #status{color:#3d5e8c;min-height:22px}
+    .report{max-width:960px;margin:16px auto 36px;padding:42px 46px;background:#fff;box-shadow:0 15px 42px rgba(30,64,124,.12);border:1px solid #dae5f5;min-height:700px}
+    .report[hidden]{display:none}
+    .heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding-bottom:18px;border-bottom:3px solid #2d5db4}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand-mark{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#2b5eb8,#2dafa6);display:grid;place-items:center;color:#fff;letter-spacing:-.08em;font-size:20px;font-weight:900}
+    .brand-name{margin:0;color:#213c76;font-size:14px;font-weight:900;letter-spacing:.035em;line-height:1.26}
+    .brand-sub{display:block;margin-top:5px;color:#647693;font-weight:600;font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+    .label{color:#637a9c;letter-spacing:.13em;font-size:10px;font-weight:850;text-transform:uppercase}
+    .report-type{text-align:right}
+    .report-type strong{display:block;margin:6px 0;color:#1f4387;font-size:19px;line-height:1.2}
+    .report-type span{font-size:11px;color:#526684}
+    h1{color:#1d366a;margin:24px 0 12px;font-size:27px;letter-spacing:-.025em}
+    h2{margin:25px 0 11px;font-size:15px;color:#1c3c79}
+    .meta{display:grid;grid-template-columns:1.35fr .9fr 1fr;gap:10px 18px;padding:16px 18px;background:#f2f7ff;border:1px solid #dae5f6;border-radius:13px}
+    .meta-label{display:block;color:#5e7495;font-size:10px;line-height:1.3;text-transform:uppercase;letter-spacing:.09em;font-weight:850}
+    .meta-value{display:block;color:#203a6d;font-weight:800;margin-top:6px;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+    .kpi{padding:14px 13px;border:1px solid #dae6f6;border-radius:12px;background:#fff}
+    .kpi .number{display:block;margin:8px 0 0;color:#204790;font-size:23px;line-height:1.1;font-weight:900}
+    .kpi.verified{background:#f0fbf6;border-color:#c8e9d8}.kpi.verified .number{color:#157357}
+    .kpi.pending{background:#fff9eb;border-color:#f1e4b9}.kpi.pending .number{color:#8c6524}
+    .caption{color:#667994;font-size:10px;margin:12px 0;line-height:1.5}
+    .table-wrap{margin-top:12px}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+    thead{display:table-header-group}
+    tr{break-inside:avoid;page-break-inside:avoid}
+    th{background:#eaf2ff;color:#23467f;text-align:left;font-size:10px;line-height:1.3;padding:10px 9px;text-transform:uppercase;letter-spacing:.045em;border-bottom:1px solid #cbdcf3}
+    td{padding:9px;border-bottom:1px solid #e5ebf5;vertical-align:top;line-height:1.35;overflow-wrap:anywhere}
+    tbody tr:nth-child(even){background:#f9fbfe}
+    .align-right{text-align:right}.align-center{text-align:center}
+    .tag{display:inline-block;font-size:9px;font-weight:800;padding:3px 6px;border-radius:6px;color:#126549;background:#e7f8ef}
+    .tag.pending{color:#825b21;background:#fff2d6}
+    .total-row td{background:#eef5ff;font-weight:900;color:#1f457e;border-top:2px solid #aec7f1}
+    .note{margin:20px 0 0;padding:12px 14px;border-left:3px solid #4e91c6;background:#f4f8fe;font-size:10.5px;line-height:1.6;color:#526682}
+    .closing{display:flex;justify-content:space-between;gap:12px;margin-top:22px;padding-top:12px;border-top:1px solid #d7e2f3;color:#526a8b;font-size:10px;line-height:1.6}
+    .closing strong{color:#21457c}
+    .empty{color:#64748b;padding:18px 8px;font-style:italic}
+    .error-screen{max-width:800px;padding:22px;margin:24px auto;background:#fff;border:1px solid #e9caca;border-radius:12px;color:#a52d2d}
+    .error-screen a{color:#245d9c}
+    .small{font-size:10px;color:#667891}
+    @media(max-width:720px){
+      .report{margin:8px;padding:19px;box-shadow:none}.meta{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr 1fr}
+      .heading{gap:12px}.report-type strong{font-size:15px}h1{font-size:22px}
+      .screenbar{margin:8px}.table-wrap{overflow-x:auto}table{min-width:600px}
+    }
+    @page{size:letter;margin:13mm 13mm 16mm}
+    @media print{
+      html,body{background:#fff;color:#111f37}
+      body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .screenbar,.error-screen{display:none!important}
+      .report{max-width:none;min-height:0;margin:0;padding:0;box-shadow:none;border:0}
+      .heading{break-after:avoid}.meta,.kpis,h2{break-inside:avoid}
+      .table-wrap{overflow:visible}
+      table{min-width:0;font-size:9.5px}
+      th{font-size:9px;padding:7px 7px}
+      td{padding:7px}
+      h1{margin-top:19px}
+      .note,.closing{break-inside:avoid}
+      .brand-mark{background:#2b5eb8!important}
+    }
+  </style>
+  <script src="/portal/vendor/supabase-2.117.3.js" defer></script>
+  <script src="/portal/admin-session.js?v=20261016-isolated-v2" defer></script>
+  <script src="/portal/staff-hours-report.js?v=20261028-v1" defer></script>
+</head>
+<body>
+  <div class="screenbar" role="region" aria-label="PDF export options">
+    <div><strong>ESS Staff Hours PDF</strong><p id="status" role="status" aria-live="polite">Checking administrator access and loading the report...</p></div>
+    <div class="actions"><a class="back" href="/portal/admin.html#staff-log">← Admin Hours Log</a><button id="print-report" disabled type="button">Save / Print PDF</button></div>
+  </div>
+  <div id="error-screen" class="error-screen" hidden role="alert"></div>
+  <main id="report" class="report" hidden>
+    <header class="heading">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">ESS</div><div><p class="brand-name">EMPOWERMENT SUPPORT<br>SOLUTIONS, LLC</p><span class="brand-sub">Administrative Records • Internal Use</span></div></div>
+      <div class="report-type"><span class="label">MONTHLY STAFF HOURS</span><strong>Hours &amp; Verification Report</strong><span>Archived administrative snapshot</span></div>
+    </header>
+    <h1 id="report-title">Staff Hours — Monthly Report</h1>
+    <section class="meta" aria-label="Report details">
+      <div><span class="meta-label">Client / participant</span><span class="meta-value" id="report-client">—</span></div>
+      <div><span class="meta-label">Service period</span><span class="meta-value" id="report-period">—</span></div>
+      <div><span class="meta-label">Report reference</span><span class="meta-value" id="report-reference">—</span></div>
+      <div><span class="meta-label">Report generated (Pacific)</span><span class="meta-value" id="report-generated">—</span></div>
+      <div><span class="meta-label">Records included</span><span class="meta-value" id="report-scope">—</span></div>
+      <div><span class="meta-label">Recommended filing folder</span><span class="meta-value" id="report-filing">—</span></div>
+    </section>
+    <section class="kpis" aria-label="Monthly hour summary">
+      <div class="kpi"><span class="meta-label">Total monthly hours</span><strong class="number" id="report-hours">—</strong></div>
+      <div class="kpi verified"><span class="meta-label">Verified &amp; Exported</span><strong class="number" id="report-verified">—</strong></div>
+      <div class="kpi pending"><span class="meta-label">Not verified</span><strong class="number" id="report-pending">—</strong></div>
+      <div class="kpi"><span class="meta-label">Entries included</span><strong class="number" id="report-count">—</strong></div>
+    </section>
+    <h2>Staff Member Summary</h2>
+    <div class="table-wrap"><table aria-label="Staff hours summary"><thead><tr><th style="width:42%">Staff member</th><th class="align-right" style="width:17%">Total hours</th><th class="align-right" style="width:19%">Verified hours</th><th class="align-right" style="width:22%">Entries</th></tr></thead><tbody id="staff-totals"></tbody></table></div>
+    <h2>Detailed Monthly Hour Log</h2>
+    <div class="table-wrap">
+      <table aria-label="Detailed monthly entries">
+        <thead><tr><th style="width:14%">Date worked</th><th style="width:27%">Staff member</th><th style="width:13%" class="align-right">Hours</th><th style="width:18%">Verification</th><th style="width:28%">Verified date (Pacific)</th></tr></thead>
+        <tbody id="report-entries"></tbody>
+      </table>
+    </div>
+    <p class="note"><strong>Record classification:</strong> Internal ESS administrative staff-hours notebook. This report reflects the saved client/month entries at the generation time shown above. “Verified &amp; Exported” reproduces the administrator's checkbox status and is not proof that an invoice, payroll run, or official session chart was submitted. This PDF does not replace signed charting, an authorization, or an invoice. Deleted entries are excluded; later changes are not reflected in this saved snapshot.</p>
+    <footer class="closing"><div><strong>Empowerment Support Solutions, LLC</strong><br>Confidential administrative reference • Store securely</div><div class="align-right" id="report-footer-ref"></div></footer>
+  </main>
+</body>
+</html>
