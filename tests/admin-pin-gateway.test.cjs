@@ -148,7 +148,7 @@ test('Omar client card includes the monthly service hours editor without changin
   assert.match(notebooks, /Hours log →/);
   assert.match(notebooks, /Manual client hours ↗/);
   assert.match(styles, /\.client-card \.omar-service-hours-edit/);
-  assert.match(dashboard, /admin-dashboard\.css\?v=20261028-omar-card-v1/);
+  assert.match(dashboard, /admin-dashboard\.css\?v=20261028-hours-pdf-v1/);
 });
 
 test('staff notebooks expose authenticated PDF export for the selected month', () => {
