@@ -93,7 +93,7 @@
     document.title=file;
     $('report-title').textContent=title+' | '+clientName;
     $('report-client').textContent=clientName;
-    $('report-period').textContent=title+' ('+year+'-'+m+'-01 through '+new Date(Date.UTC(Number(year),Number(m),0)).getUTCDate()+')';
+    $('report-period').textContent=title+' (days 1–'+new Date(Date.UTC(Number(year),Number(m),0)).getUTCDate()+')';
     $('report-reference').textContent=ref;
     $('report-generated').textContent=generated;
     $('report-scope').textContent='Saved, active notebook entries';
