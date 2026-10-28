@@ -86,7 +86,7 @@ test('official charting and green status indicators never inherit administrator 
 });
 
 test('iPhone cache-busting loads restored charting assets', () => {
-  assert.match(read('omar-v.html'), /omar-service-hours\.js\?v=20261016-anon-restored/);
+  assert.match(read('omar-v.html'), /omar-service-hours\.js\?v=20261028-manual-v1/);
   assert.match(read('omar-v.html'), /client-portal-hayden-format\.js\?v=20261016-anon-restored/);
   assert.match(read('jeremy-n.html'), /client-portal-hayden-format\.js\?v=20261016-anon-restored/);
   assert.match(read('Eric_L.html'), /Eric_L_chart\.html\?v=20261016-anon-restored/);
