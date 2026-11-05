@@ -47,7 +47,7 @@ test('client notebooks use scoped admin-only roster RPC instead of direct table 
   assert.match(js, /sb\.rpc\('admin_notebook_clients'\)/);
   assert.doesNotMatch(js, /sb\.schema\('ess'\)\.from\('clients'\)/);
   const dashboard = read('portal/admin.html');
-  assert.match(dashboard, /admin-notebooks\.js\?v=20261028-hours-pdf-v1/);
+  assert.match(dashboard, /admin-notebooks\.js\?v=\d{8}-[a-z0-9-]+/i);
 });
 
 test('admin session is isolated from shared public charting clients', () => {
@@ -148,20 +148,23 @@ test('Omar client card includes the monthly service hours editor without changin
   assert.match(notebooks, /Hours log →/);
   assert.match(notebooks, /Manual client hours ↗/);
   assert.match(styles, /\.client-card \.omar-service-hours-edit/);
-  assert.match(dashboard, /admin-dashboard\.css\?v=20261028-hours-pdf-v1/);
+  assert.match(dashboard, /admin-dashboard\.css\?v=\d{8}-[a-z0-9-]+/i);
 });
 
-test('staff notebooks expose authenticated PDF export for the selected month', () => {
+test('staff notebooks expose authenticated PDF export for selected month or invoice period', () => {
   const page=read('portal/admin.html');
   const js=read('portal/admin-notebooks.js');
   const report=read('portal/staff-hours-report.html');
   const reportJs=read('portal/staff-hours-report.js');
   assert.match(page, /id="export-hours-pdf"/);
-  assert.match(page, /admin-dashboard\.css\?v=20261028-hours-pdf-v1/);
+  assert.match(page, /admin-dashboard\.css\?v=\d{8}-[a-z0-9-]+/i);
   assert.match(js, /\['add-entry','refresh','export-hours-pdf'\]/);
   assert.match(js, /\$\('export-hours-pdf'\)\.addEventListener/);
   assert.match(js, /encodeURIComponent\(state\.client\.id\)/);
   assert.match(js, /encodeURIComponent\(state\.month\)/);
+  assert.match(js, /encodeURIComponent\(state\.period\)/);
+  assert.match(page, /id="invoice-period-picker"/);
+  assert.match(reportJs, /invoiceBounds\(month,period\)/);
   assert.match(report, /id="print-report"/);
   assert.match(report, /id="staff-totals"/);
   assert.match(report, /id="report-entries"/);
