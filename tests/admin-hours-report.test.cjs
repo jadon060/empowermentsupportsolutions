@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {reportModel,safeFilename,monthBounds,monthLabel}=require('../portal/staff-hours-report.js');
+const {reportModel,safeFilename,monthBounds,invoiceBounds,invoicePeriodLabel,monthLabel}=require('../portal/staff-hours-report.js');
 
 const CLIENT='521dd725-2fa6-4d78-9fcc-e5447dc727cb';
 function entry(id,date,staff,hours,verified=false,extras={}){
@@ -59,4 +59,36 @@ test('filing name is client/month/date labelled and strips unsafe characters',()
 test('invalid out-of-policy hours abort report generation',()=>{
   assert.throws(()=>reportModel([entry(1,'2026-10-01','Ivan',-1)],CLIENT,'2026-10'));
   assert.throws(()=>reportModel([entry(1,'2026-10-01','Ivan',24.01)],CLIENT,'2026-10'));
+});
+
+test('PDF uses exactly 1–14 or 15–month end with no duplicated staff dates',()=>{
+  const rows=[
+    entry(1,'2026-11-01','Ivan',2,true),
+    entry(2,'2026-11-14','Ivan',6,true),
+    entry(3,'2026-11-15','Ivan',3,false),
+    entry(4,'2026-11-30','Robert',4,true),
+    entry(5,'2026-12-01','Robert',9,true),
+    entry(6,'2026-11-15','Someone',11,true,{deleted_at:'2026-11-20'})
+  ];
+  const first=reportModel(rows,CLIENT,'2026-11','first');
+  const second=reportModel(rows,CLIENT,'2026-11','second');
+  const monthly=reportModel(rows,CLIENT,'2026-11');
+  assert.deepEqual(first.rows.map(x=>x.date),['2026-11-01','2026-11-14']);
+  assert.deepEqual(second.rows.map(x=>x.date),['2026-11-15','2026-11-30']);
+  assert.equal(first.cents,800);
+  assert.equal(second.cents,700);
+  assert.equal(monthly.cents,first.cents+second.cents);
+  assert.equal(first.verifiedCents,800);
+  assert.equal(second.verifiedCents,400);
+  assert.equal(first.count+second.count,monthly.count);
+});
+test('export dates, names and period labels honor leap years and reject invalid periods',()=>{
+  assert.deepEqual(invoiceBounds('2028-02','second'),{start:'2028-02-15',end:'2028-03-01'});
+  assert.equal(invoicePeriodLabel('2026-11','first'),'November 1–14, 2026');
+  assert.equal(invoicePeriodLabel('2026-11','second'),'November 15–30, 2026');
+  assert.equal(invoicePeriodLabel('2028-02','second'),'February 15–29, 2028');
+  assert.match(safeFilename('Omar Velasquez','2026-11','20261105_1111','first'),/_2026-11_01-14_202611051111$/);
+  assert.match(safeFilename('Omar Velasquez','2028-02','20280227_1200','second'),/_2028-02_15-29_202802271200$/);
+  assert.throws(()=>invoiceBounds('2026-11','incorrect'));
+  assert.throws(()=>reportModel([],CLIENT,'2026-11','incorrect'));
 });
