@@ -1,4 +1,4 @@
-/* Staff-hours monthly report: read-only, admin-authenticated, client-side print/PDF. */
+/* Staff-hours month/invoice-period report: read-only, admin-authenticated, client-side print/PDF. */
 (function(){
   'use strict';
   const KNOWN_CLIENTS={
@@ -24,14 +24,30 @@
     const [year,month]=key.split('-').map(Number);
     return {start:key+'-01',end:(month===12?year+1:year)+'-'+String(month===12?1:month+1).padStart(2,'0')+'-01'};
   }
-  function safeFilename(name,month,stamp) {
-    if(!MONTH.test(month)) throw Error('Invalid file month');
-    const clean=String(name).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9 ]+/g,'').trim().replace(/\s+/g,'_').slice(0,70);
-    const period=stamp.replace(/[^0-9]/g,'').slice(0,12);
-    return 'ESS_Staff_Hours_'+(clean||'Client')+'_'+month+'_'+period;
+  // Half-open date ranges prevent the 14th and 15th from ever appearing in two exports.
+  function invoiceBounds(month,period='all') {
+    const monthly=monthBounds(month);
+    if(period==='all')return monthly;
+    if(period==='first')return {start:monthly.start,end:month+'-15'};
+    if(period==='second')return {start:month+'-15',end:monthly.end};
+    throw Error('Invalid invoice period.');
   }
-  function reportModel(inputRows,clientId,month) {
-    const {start,end}=monthBounds(month);
+  function invoicePeriodLabel(month,period='all') {
+    invoiceBounds(month,period);
+    const [year,m]=month.split('-').map(Number);
+    const lastDay=new Date(Date.UTC(year,m,0)).getUTCDate();
+    const label=monthLabel(month).replace(/ \d{4}$/,'');
+    return label+' '+(period==='second'?'15':'1')+'–'+(period==='first'?'14':lastDay)+', '+year;
+  }
+  function safeFilename(name,month,stamp,period='all') {
+    invoiceBounds(month,period);
+    const clean=String(name).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9 ]+/g,'').trim().replace(/\s+/g,'_').slice(0,70);
+    const timestamp=stamp.replace(/[^0-9]/g,'').slice(0,12);
+    const dayPart=period==='all'?'':period==='first'?'_01-14':'_15-'+String(new Date(Date.UTC(...month.split('-').map(Number),0)).getUTCDate()).padStart(2,'0');
+    return 'ESS_Staff_Hours_'+(clean||'Client')+'_'+month+dayPart+'_'+timestamp;
+  }
+  function reportModel(inputRows,clientId,month,period='all') {
+    const {start,end}=invoiceBounds(month,period);
     const active=(inputRows||[]).filter(r=>r.client_id===clientId && !r.deleted_at && r.worked_on>=start&&r.worked_on<end)
       .map(row=>{
         const cents=toCents(row.hours);
@@ -54,13 +70,14 @@
     return {rows:active,staff,cents,verifiedCents,pendingCents:cents-verifiedCents,
       count:active.length,verifiedCount:active.filter(r=>r.verified).length};
   }
-  if(typeof module!=='undefined'&&module.exports) module.exports={reportModel,safeFilename,monthBounds,monthLabel};
+  if(typeof module!=='undefined'&&module.exports) module.exports={reportModel,safeFilename,monthBounds,invoiceBounds,invoicePeriodLabel,monthLabel};
   if(typeof document==='undefined')return;
 
   const $=id=>document.getElementById(id);
   const params=new URLSearchParams(location.search);
   const id=params.get('client')||'';
   const month=params.get('month')||'';
+  const period=params.get('period')||'all';
   const printRequested=params.get('print')==='1';
   const sb=window.ESSAdminSession?.client;
 
@@ -80,7 +97,7 @@
     tbody.append(tr);
   }
   function render(clientName,model,generatedAt){
-    const title=monthLabel(month);
+    const title=invoicePeriodLabel(month,period);
     const [year,m]=month.split('-');
     const generated=longPacific(generatedAt);
     const pacificStamp=new Intl.DateTimeFormat('en-CA',{
@@ -88,28 +105,31 @@
     }).formatToParts(generatedAt).reduce((acc,p)=>{if(p.type!=='literal')acc[p.type]=p.value;return acc;},{});
     const stamp=pacificStamp.year+pacificStamp.month+pacificStamp.day+'_'+pacificStamp.hour+pacificStamp.minute;
     const slug=clientName.split(/\s+/).map(s=>s.slice(0,1)).join('').toUpperCase().slice(0,5);
-    const ref='ESS-HR-'+year+m+'-'+slug+'-'+stamp.replace('_','');
-    const file=safeFilename(clientName,month,stamp);
+    const ref='ESS-HR-'+year+m+'-'+(period==='first'?'P1-':period==='second'?'P2-':'')+slug+'-'+stamp.replace('_','');
+    const file=safeFilename(clientName,month,stamp,period);
     document.title=file;
     $('report-title').textContent=title+' | '+clientName;
     $('report-client').textContent=clientName;
-    $('report-period').textContent=title+' (days 1–'+new Date(Date.UTC(Number(year),Number(m),0)).getUTCDate()+')';
+    $('report-period').textContent=title;
     $('report-reference').textContent=ref;
     $('report-generated').textContent=generated;
-    $('report-scope').textContent='Saved, active notebook entries';
-    $('report-filing').textContent='Staff Hours / '+year+' / '+m+'_'+title.split(' ')[0];
+    $('report-scope').textContent=period==='all'?'Saved, active notebook entries':'Saved, active entries in this billing period';
+    $('report-filing').textContent='Staff Hours / '+year+' / '+m+'_'+monthLabel(month).split(' ')[0]+(period==='first'?' / 01-14':period==='second'?' / 15-End':'');
+    $('report-type-label').textContent=period==='all'?'MONTHLY STAFF HOURS':'INVOICE-PERIOD STAFF HOURS';
+    $('report-hours-label').textContent=period==='all'?'Total monthly hours':'Invoice-period hours';
+    $('report-detail-heading').textContent=period==='all'?'Detailed Monthly Hour Log':'Detailed Invoice-Period Hour Log';
     $('report-hours').textContent=hours(model.cents)+' hrs';
     $('report-verified').textContent=hours(model.verifiedCents)+' hrs';
     $('report-pending').textContent=hours(model.pendingCents)+' hrs';
     $('report-count').textContent=String(model.count);
     $('report-footer-ref').textContent=ref+'\n'+model.count+' records';
     const body=$('staff-totals');body.replaceChildren();
-    if(!model.staff.length)addEmpty(body,'No staff hour records saved in this month.',4);
+    if(!model.staff.length)addEmpty(body,'No staff hour records saved in the selected period.',4);
     for(const row of model.staff){
       const tr=document.createElement('tr');addCell(tr,row.staff);
       addCell(tr,hours(row.cents),'align-right');addCell(tr,hours(row.verifiedCents),'align-right');addCell(tr,String(row.count),'align-right');body.append(tr);
     }
-    addTotal(body,'MONTHLY TOTAL',model.cents,model.verifiedCents,model.count);
+    addTotal(body,period==='all'?'MONTHLY TOTAL':'PERIOD TOTAL',model.cents,model.verifiedCents,model.count);
     const entries=$('report-entries');entries.replaceChildren();
     if(!model.rows.length)addEmpty(entries,'No entries found for this client and period.',5);
     for(const row of model.rows){
@@ -149,7 +169,7 @@
     throw Error('Too many records to safely export as one report.');
   }
   async function boot(){
-    if(!MONTH.test(month)||!UUID.test(id)){error('Select a valid client and month from the Admin Hours Log.');return;}
+    if(!MONTH.test(month)||!UUID.test(id)||!['all','first','second'].includes(period)){error('Select a valid client, month and invoice period from the Admin Hours Log.');return;}
     if(!sb){error('ESS secure connection could not load.');return;}
     try{
       const {data:auth,error:authError}=await sb.auth.getUser();
@@ -161,12 +181,12 @@
       const client=(clients||[]).find(c=>c.id===id);
       if(!client)throw Error('The selected client is not available to this administrator.');
       const clientName=KNOWN_CLIENTS[id]||String(client.full_name||[client.first_name,client.last_initial].filter(Boolean).join(' ')||'Client');
-      const {start,end}=monthBounds(month);
+      const {start,end}=invoiceBounds(month,period);
       const rows=await allRows(()=>sb.from('admin_staff_hours')
         .select('id,client_id,staff_name,worked_on,hours,verified_exported,verified_at,deleted_at')
         .eq('client_id',id).is('deleted_at',null).gte('worked_on',start).lt('worked_on',end)
         .order('worked_on').order('id'));
-      const model=reportModel(rows,id,month);
+      const model=reportModel(rows,id,month,period);
       // Print from a verified, freshly loaded database snapshot, never cached dashboard counters.
       render(clientName,model,new Date());
       if(printRequested){
