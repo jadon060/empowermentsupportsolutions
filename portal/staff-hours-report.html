@@ -81,7 +81,7 @@
   </style>
   <script src="/portal/vendor/supabase-2.117.3.js" defer></script>
   <script src="/portal/admin-session.js?v=20261016-isolated-v2" defer></script>
-  <script src="/portal/staff-hours-report.js?v=20261028-v1" defer></script>
+  <script src="/portal/staff-hours-report.js?v=20261105-invoice-periods-v1" defer></script>
 </head>
 <body>
   <div class="screenbar" role="region" aria-label="PDF export options">
@@ -92,7 +92,7 @@
   <main id="report" class="report" hidden>
     <header class="heading">
       <div class="brand"><div class="brand-mark" aria-hidden="true">ESS</div><div><p class="brand-name">EMPOWERMENT SUPPORT<br>SOLUTIONS, LLC</p><span class="brand-sub">Administrative Records • Internal Use</span></div></div>
-      <div class="report-type"><span class="label">MONTHLY STAFF HOURS</span><strong>Hours &amp; Verification Report</strong><span>Prepared for secure filing</span></div>
+      <div class="report-type"><span class="label" id="report-type-label">MONTHLY STAFF HOURS</span><strong>Hours &amp; Verification Report</strong><span>Prepared for secure filing</span></div>
     </header>
     <h1 id="report-title">Staff Hours — Monthly Report</h1>
     <section class="meta" aria-label="Report details">
@@ -104,21 +104,21 @@
       <div><span class="meta-label">Recommended filing folder</span><span class="meta-value" id="report-filing">—</span></div>
     </section>
     <section class="kpis" aria-label="Monthly hour summary">
-      <div class="kpi"><span class="meta-label">Total monthly hours</span><strong class="number" id="report-hours">—</strong></div>
+      <div class="kpi"><span class="meta-label" id="report-hours-label">Total monthly hours</span><strong class="number" id="report-hours">—</strong></div>
       <div class="kpi verified"><span class="meta-label">Verified &amp; Exported</span><strong class="number" id="report-verified">—</strong></div>
       <div class="kpi pending"><span class="meta-label">Not verified</span><strong class="number" id="report-pending">—</strong></div>
       <div class="kpi"><span class="meta-label">Entries included</span><strong class="number" id="report-count">—</strong></div>
     </section>
     <h2>Staff Member Summary</h2>
     <div class="table-wrap"><table aria-label="Staff hours summary"><thead><tr><th style="width:42%">Staff member</th><th class="align-right" style="width:17%">Total hours</th><th class="align-right" style="width:19%">Verified hours</th><th class="align-right" style="width:22%">Entries</th></tr></thead><tbody id="staff-totals"></tbody></table></div>
-    <h2>Detailed Monthly Hour Log</h2>
+    <h2 id="report-detail-heading">Detailed Monthly Hour Log</h2>
     <div class="table-wrap">
       <table aria-label="Detailed monthly entries">
         <thead><tr><th style="width:14%">Date worked</th><th style="width:27%">Staff member</th><th style="width:13%" class="align-right">Hours</th><th style="width:18%">Verification</th><th style="width:28%">Verified date (Pacific)</th></tr></thead>
         <tbody id="report-entries"></tbody>
       </table>
     </div>
-    <p class="note"><strong>Record classification:</strong> Internal ESS administrative staff-hours notebook. This report reflects the saved client/month entries at the generation time shown above. “Verified &amp; Exported” reproduces the administrator's checkbox status and is not proof that an invoice, payroll run, or official session chart was submitted. This PDF does not replace signed charting, an authorization, or an invoice. Deleted entries are excluded; later changes are not reflected in this saved snapshot.</p>
+    <p class="note"><strong>Record classification:</strong> Internal ESS administrative staff-hours notebook. This report reflects the saved entries for the client and billing period shown above at the time of generation. “Verified &amp; Exported” reproduces the administrator's checkbox status and is not proof that an invoice, payroll run, or official session chart was submitted. This PDF does not replace signed charting, an authorization, or an invoice. Deleted entries are excluded; later changes are not reflected in this saved snapshot.</p>
     <footer class="closing"><div><strong>Empowerment Support Solutions, LLC</strong><br>Confidential administrative reference • Store securely</div><div class="align-right" id="report-footer-ref"></div></footer>
   </main>
 </body>
