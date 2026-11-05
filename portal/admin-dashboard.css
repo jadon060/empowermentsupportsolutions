@@ -140,3 +140,18 @@ select{font:inherit;color:var(--ink);background:#fff;border:1px solid #dce5f2;bo
   .notebook-export-actions{width:100%;justify-content:flex-start;gap:9px}
   .notebook-export-actions .button{font-size:11px;flex-shrink:0}
 }
+
+/* Staff hours invoice-period controls: view/export filters only; no changes to entries. */
+.invoice-period-block{margin:0 24px 18px;padding:15px 18px;background:linear-gradient(110deg,#f4f8ff,#f1faf9);border:1px solid #dce7f7;border-radius:12px}
+.invoice-period-top{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.invoice-period-top h3{font-size:13px;font-weight:750;color:#244782;margin:0 0 4px}
+.invoice-period-top p{max-width:460px;line-height:1.4;margin:0}
+.invoice-period-picker{display:flex;flex-wrap:wrap;gap:5px;background:#e8eff9;border-radius:10px;padding:4px}
+.invoice-period-picker button{border:1px solid transparent;background:transparent;color:#445d83;padding:8px 11px;border-radius:8px;cursor:pointer;font:inherit;font-size:11px;font-weight:700;white-space:nowrap}
+.invoice-period-picker button.selected,.invoice-period-picker button[aria-pressed=true]{background:#fff;color:#1e4d9a;border-color:#d5e3f8;box-shadow:0 2px 6px #173f7b12}
+.invoice-period-picker button:focus-visible{outline:2px solid #2a63c7;outline-offset:2px}
+.invoice-period-picker button:disabled{opacity:.55;cursor:wait}
+.invoice-period-stats{border-top:1px solid #dce6f2;margin-top:12px;padding-top:12px;display:flex;gap:13px 24px;align-items:center;flex-wrap:wrap}
+.invoice-period-stats>span{font-size:11px;color:#657895}
+.invoice-period-stats strong{color:#264d90;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+@media(max-width:700px){.invoice-period-block{margin:0 16px 16px;padding:13px}.invoice-period-picker{width:100%;justify-content:space-between}.invoice-period-picker button{font-size:10px;flex:1;padding:9px 7px}.invoice-period-stats{gap:9px 16px}}
