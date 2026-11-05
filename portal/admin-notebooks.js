@@ -21,9 +21,21 @@
   function localDate(now = new Date()) {
     return now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
   }
-  function totals(rows, clientId, month) {
-    const {start,end}=monthBounds(month);
-    const selected=rows.filter(r=>r.client_id===clientId && !r.deleted_at && r.worked_on>=start && r.worked_on<end);
+  // Invoice periods are inclusive 1–14 and 15–last day. The end returned here is exclusive.
+  // These boundaries are based on worked_on calendar dates, never timestamps or invoice creation dates.
+  function invoiceBounds(month,period='all') {
+    const bounds=monthBounds(month);
+    if(period==='all')return bounds;
+    if(period==='first')return {start:bounds.start,end:month+'-15'};
+    if(period==='second')return {start:month+'-15',end:bounds.end};
+    throw new Error('Choose a valid invoice period.');
+  }
+  function invoiceRows(rows,clientId,month,period='all') {
+    const {start,end}=invoiceBounds(month,period);
+    return rows.filter(r=>r.client_id===clientId&&!r.deleted_at&&r.worked_on>=start&&r.worked_on<end);
+  }
+  function totals(rows,clientId,month,period='all') {
+    const selected=invoiceRows(rows,clientId,month,period);
     return {hours:selected.reduce((n,r)=>n+Math.round(Number(r.hours)*100),0)/100,
       verified:selected.filter(r=>r.verified_exported).reduce((n,r)=>n+Math.round(Number(r.hours)*100),0)/100,count:selected.length};
   }
@@ -38,7 +50,7 @@
     if (!Number.isFinite(value)||value<=0||value>24||Math.abs(value*100-Math.round(value*100))>0.000001) throw new Error('Hours must be greater than 0, at most 24, with up to two decimal places.');
     return {staff_name:staff.trim(),worked_on:date,hours:value};
   }
-  if (typeof module !== 'undefined' && module.exports) module.exports={monthBounds,shiftMonth,localDate,totals,resolveClients,validateEntry};
+  if (typeof module !== 'undefined' && module.exports) module.exports={monthBounds,invoiceBounds,invoiceRows,shiftMonth,localDate,totals,resolveClients,validateEntry};
   if (typeof document === 'undefined') return;
   const $=id=>document.getElementById(id), fmt=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
   const dateLabel=s=>new Date(s+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
@@ -46,7 +58,7 @@
   const initials=name=>name.split(/\s+/).filter(Boolean).map(s=>s[0]).slice(0,2).join('');
   function el(tag,text,className) {const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(className)n.className=className;return n;}
   function button(text,fn,cls='text-button') {const b=el('button',text,cls);b.type='button';b.addEventListener('click',fn);return b;}
-  const state={clients:KNOWN.slice(),client:KNOWN[0],month:localDate().slice(0,7),months:new Map(),rows:[],employees:[],teamRows:null,teamGeneration:0,admin:false,busy:false,loading:false,generation:0,authGeneration:0,historyGeneration:0,historyOffset:0,historyLoading:false,sessionId:null,channel:null,editing:null,pendingInsert:null,formBaseline:'',authLinkRequest:null};
+  const state={clients:KNOWN.slice(),client:KNOWN[0],month:localDate().slice(0,7),period:'all',months:new Map(),rows:[],employees:[],teamRows:null,teamGeneration:0,admin:false,busy:false,loading:false,generation:0,authGeneration:0,historyGeneration:0,historyOffset:0,historyLoading:false,sessionId:null,channel:null,editing:null,pendingInsert:null,formBaseline:'',authLinkRequest:null};
   let sb;
   $('year').textContent=new Date().getFullYear();
   $('month').value=state.month;
@@ -54,14 +66,29 @@
   function status(text) {$('sync-status').textContent=text;$('sync-status').dataset.state=text==='Saved to cloud'?'saved':text.includes('…')?'loading':'attention';}
   function empty(text) {const tr=el('tr'),td=el('td',text,'empty');td.colSpan=5;tr.append(td);$('entries').replaceChildren(tr);}
   function summary(ready=true) {
-    const t=totals(state.rows,state.client.id,state.month);
-    $('monthly-hours').textContent=ready?fmt(t.hours):'—';$('verified-hours').textContent=ready?fmt(t.verified):'—';$('entry-count').textContent=ready?t.count:'—';
+    const monthly=totals(state.rows,state.client.id,state.month);
+    const period=totals(state.rows,state.client.id,state.month,state.period);
+    $('monthly-hours').textContent=ready?fmt(monthly.hours):'—';
+    $('verified-hours').textContent=ready?fmt(monthly.verified):'—';
+    $('entry-count').textContent=ready?monthly.count:'—';
+    $('invoice-period-hours').textContent=ready?fmt(period.hours):'—';
+    $('invoice-period-verified').textContent=ready?fmt(period.verified):'—';
+    $('invoice-period-count').textContent=ready?period.count:'—';
+    const [year,m]=state.month.split('-').map(Number);
+    const lastDay=new Date(Date.UTC(year,m,0)).getUTCDate();
+    $('invoice-period-dates').textContent=state.period==='first'?'1–14':state.period==='second'?'15–'+lastDay:'1–'+lastDay;
+    $('invoice-period-picker').querySelectorAll('button').forEach(b=>{
+      const selected=b.dataset.period===state.period;
+      b.setAttribute('aria-pressed',String(selected));
+      b.classList.toggle('selected',selected);
+    });
   }
   function controls() {
     for (const id of ['add-entry','refresh','export-hours-pdf']) $(id).disabled=!state.admin||state.busy||state.loading;
     for (const id of ['previous-month','next-month','month']) $(id).disabled=state.busy;
     $('previous-month').disabled=state.busy||state.month==='2000-01';$('next-month').disabled=state.busy||state.month==='2100-12';
     $('client-tabs').querySelectorAll('button').forEach(b=>b.disabled=state.busy);
+    $('invoice-period-picker').querySelectorAll('button').forEach(b=>b.disabled=state.busy||!state.admin);
     $('entries').querySelectorAll('button,input').forEach(b=>b.disabled=state.busy||!state.admin);
     $('save-entry').disabled=state.busy;$('cancel-entry').disabled=state.busy;$('close-entry').disabled=state.busy;
   }
@@ -122,8 +149,10 @@
     finally {if(ticket===state.generation){state.loading=false;controls();}}
   }
   function renderRows() {
-    if(!state.rows.length){empty('No entries for this month. Add your first staff hours entry.');return;}
-    const rows=state.rows.map(row=>{
+    const visible=invoiceRows(state.rows,state.client.id,state.month,state.period);
+    $('table-caption').textContent=state.client.name+' staff hours for '+state.month+' ('+$('invoice-period-dates').textContent+')';
+    if(!visible.length){empty(state.period==='all'?'No entries for this month. Add your first staff hours entry.':'No entries for this invoice period. Other dates remain in the full-month view.');return;}
+    const rows=visible.map(row=>{
       const tr=el('tr');tr.append(el('td',row.staff_name),el('td',dateLabel(row.worked_on)),el('td',fmt(row.hours)+' hrs'));[...tr.children].forEach((td,i)=>td.dataset.label=['Staff member','Date worked','Hours worked'][i]);
       const verify=el('td'),label=el('label',undefined,'verify-label'),check=el('input');check.type='checkbox';check.checked=row.verified_exported;
       label.append(check,el('span','Verified & Exported'));verify.append(label);if(row.verified_at)verify.append(el('small',timeLabel(row.verified_at),'verified-meta'));
@@ -150,7 +179,10 @@
     const direct=el('option','ESS direct service — J');direct.value='ess_direct';options.push(direct);
     let selected=row?.employee_id||(row?.entry_kind==='ess_direct'?'ess_direct':'');
     if(row&&!selected){const legacy=el('option',row.staff_name+' (existing record)');legacy.value='legacy';options.push(legacy);selected='legacy';}
-    $('staff-name').replaceChildren(...options);$('staff-name').value=selected;$('hours').value=row?.hours||'';$('worked-on').value=row?.worked_on||(localDate().startsWith(state.month)?localDate():state.month+'-01');$('entry-verified').checked=Boolean(row?.verified_exported);
+    $('staff-name').replaceChildren(...options);$('staff-name').value=selected;$('hours').value=row?.hours||'';$('worked-on').value=row?.worked_on||(()=>{
+      const today=localDate(),bounds=invoiceBounds(state.month,state.period);
+      return today>=bounds.start&&today<bounds.end?today:bounds.start;
+    })();$('entry-verified').checked=Boolean(row?.verified_exported);
     state.formBaseline=formSignature();$('entry-dialog').showModal();$('staff-name').focus();
   }
   function formSignature(){return JSON.stringify([$('staff-name').value,$('worked-on').value,$('hours').value,$('entry-verified').checked]);}
@@ -181,7 +213,9 @@
       if(error)throw error;
       if(!data)throw new Error('This entry changed on another device. Close this form, refresh, and edit its latest version.');
       if(desiredVerification&&!data.verified_exported){const verified=await sb.from('admin_staff_hours').update({verified_exported:true}).eq('id',data.id).eq('client_id',clientId).eq('revision',data.revision).is('deleted_at',null).select('*').maybeSingle();if(verified.error||!verified.data)throw new Error('Entry saved, but verification was not confirmed. Close this form, refresh, and review the saved entry.');data=verified.data;}
-      state.month=newMonth;state.months.set(clientId,newMonth);$('month').value=newMonth;$('entry-dialog').close();state.pendingInsert=null;
+      state.month=newMonth;state.months.set(clientId,newMonth);$('month').value=newMonth;
+      if(state.period!=='all')state.period=Number(payload.worked_on.slice(-2))<=14?'first':'second';
+      $('entry-dialog').close();state.pendingInsert=null;
       message((row?'Entry updated':'Entry saved')+' in '+new Date(newMonth+'-01T12:00:00').toLocaleDateString(undefined,{month:'long',year:'numeric'})+(data.verified_exported?' · Verified & Exported.':'.'));
       state.busy=false;await Promise.all([loadEntries(true),loadTeam()]);
     }catch(error){$('form-error').textContent=error.message||'Could not confirm the save. Your entry remains in this form.';status('Save not confirmed');}
@@ -266,12 +300,17 @@
   $('sign-out').addEventListener('click',signOut);$('sign-out-mobile').addEventListener('click',signOut);
   $('month').addEventListener('change',()=>{if(!monthPattern.test($('month').value)){$('month').value=state.month;return;}state.month=$('month').value;state.months.set(state.client.id,state.month);loadEntries();});
   for(const [id,delta] of [['previous-month',-1],['next-month',1]])$(id).addEventListener('click',()=>{if(state.busy)return;state.month=shiftMonth(state.month,delta);$('month').value=state.month;state.months.set(state.client.id,state.month);loadEntries();});
+  $('invoice-period-picker').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    if(state.busy||!state.admin||state.loading)return;
+    state.period=b.dataset.period;
+    summary();renderRows();
+  }));
   $('export-hours-pdf').addEventListener('click',()=>{
     if(!state.admin||state.busy||state.loading||!monthPattern.test(state.month))return;
     // The report page independently validates the Admin PIN session, client access and
     // fetches fresh rows. Never rely on browser-only totals for a filed snapshot.
     const url='/portal/staff-hours-report.html?client='+encodeURIComponent(state.client.id)
-      +'&month='+encodeURIComponent(state.month)+'&print=1';
+      +'&month='+encodeURIComponent(state.month)+'&period='+encodeURIComponent(state.period)+'&print=1';
     window.open(url,'_blank','noopener');
   });
   $('add-entry').addEventListener('click',()=>openEntry());$('entry-form').addEventListener('submit',saveEntry);$('close-entry').addEventListener('click',closeEntry);$('cancel-entry').addEventListener('click',closeEntry);
