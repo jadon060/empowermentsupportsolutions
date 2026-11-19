@@ -1,3 +1,38 @@
+// Preserve an admin's manual baseline while including each newly signed chart exactly once.
+// Recalculate from chart timestamps on every refresh; never compound previously displayed totals.
+function reconcileManualLogistics(saved, entries, names, hoursFromEntry, isDirectStaff) {
+  if (!saved || !saved.manual_override) return null;
+  const baselineTime = Date.parse(saved.manual_updated_at || '');
+  if (!Number.isFinite(baselineTime)) return { row: saved, addedHours: 0, addedCharts: 0, missingBaseline: true };
+  let addedStaff = 0, addedDirect = 0, addedCharts = 0;
+  for (const entry of entries || []) {
+    const signedTime = Date.parse(entry.signed_at || '');
+    if (!Number.isFinite(signedTime) || signedTime <= baselineTime) continue;
+    const hours = Number(hoursFromEntry(entry));
+    if (!Number.isFinite(hours) || hours <= 0) continue;
+    if (isDirectStaff(names.get(entry.staff_id) || '')) addedDirect += hours;
+    else addedStaff += hours;
+    addedCharts += 1;
+  }
+  const staffHours = Math.max(0, Number(saved.robert_hours) || 0) + addedStaff;
+  const essHours = Math.max(0, Number(saved.ess_direct_hours) || 0) + addedDirect;
+  const completed = staffHours + essHours;
+  const approved = Math.max(0, Number(saved.monthly_approved_hours) || 0);
+  return {
+    row: {
+      ...saved,
+      robert_hours: staffHours,
+      ess_direct_hours: essHours,
+      completed_hours: completed,
+      remaining_hours: Math.max(0, approved - completed)
+    },
+    addedHours: addedStaff + addedDirect,
+    addedCharts,
+    missingBaseline: false
+  };
+}
+if (typeof module !== 'undefined' && module.exports) module.exports = { reconcileManualLogistics };
+
 document.addEventListener('DOMContentLoaded',()=>{
   const SUPABASE_URL='https://bqanjupmcgydvmfgvutx.supabase.co';
   const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxYW5qdXBtY2d5ZHZtZmd2dXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTI4NzQsImV4cCI6MjA3NjM4ODg3NH0.J3A12rwUlSqjIsmlnNCcwis6Qt_ryw7ZzFqLftuMKUk';
@@ -24,32 +59,52 @@ document.addEventListener('DOMContentLoaded',()=>{
     const approved=numeric(row.monthly_approved_hours??APPROVED)||APPROVED, completed=Math.max(0,numeric(row.completed_hours)), remaining=Math.max(0,approved-completed), pct=approved?completed/approved*100:0;
     const staff=Math.max(0,numeric(row.robert_hours)), essHours=Math.max(0,numeric(row.ess_direct_hours));
     $('monthlyApprovedHours').textContent=fmtHours(approved);$('completedHours').textContent=fmtHours(completed);$('remainingHours').textContent=fmtHours(remaining);$('currentMonth').textContent=row.month_label||monthLabel(row.month_key||monthKey());$('progressText').textContent=`${fmtHours(completed)} of ${fmtHours(approved)} hours completed`;$('progressPercent').textContent=`${pct.toFixed(1)}% used`;$('progressFill').style.width=`${Math.min(100,Math.max(0,pct))}%`;$('staffHours').textContent=`${fmtHours(staff)} hours`;$('essHours').textContent=`${fmtHours(essHours)} hours`;
-    if(row.manual_override){$('logisticsSyncNote').textContent='Manual admin hours are active for this month. Automatic chart totals will not overwrite them.'}
+    if(row.manual_override){$('logisticsSyncNote').textContent='Manual baseline is active. Checking for newly signed charts…'}
     if(completed>approved)setAlert('over',`🔴 <strong>Over Limit Warning:</strong> Hours exceed ${CLIENT_SHORT}’s ${fmtHours(approved)}-hour monthly amount.`);else if(approved&&completed>=approved)setAlert('ready',`🔵 <strong>Invoice Ready:</strong> ${CLIENT_SHORT}’s ${fmtHours(approved)} approved hours are complete for this month.`);else if(approved&&completed<approved*.25)setAlert('behind','🟡 <strong>Behind Pace:</strong> More hours should be scheduled soon.');else setAlert('on','🟢 <strong>On Track:</strong> Hours are being used normally.');
   }
   async function readLogisticsRow(mk=monthKey()){const {data,error}=await publicDb.from(LOGISTICS_TABLE).select('*').eq('client_id',CLIENT_ID).eq('month_key',mk).maybeSingle();if(error)throw error;return data||null}
   async function officialMonthEntries(mk){
     const {first,last}=monthBounds(mk);
-    let result=await ess.from('daily_entries').select('hours,total_minutes,staff_id,service_date,start_time,end_time').eq('client_id',CLIENT_ID).gte('service_date',first).lte('service_date',last);
-    if(result.error&&String(result.error.message||'').toLowerCase().includes('hours'))result=await ess.from('daily_entries').select('total_minutes,staff_id,service_date,start_time,end_time').eq('client_id',CLIENT_ID).gte('service_date',first).lte('service_date',last);
+    let result=await ess.from('daily_entries').select('hours,total_minutes,staff_id,service_date,start_time,end_time,signed_at').eq('client_id',CLIENT_ID).gte('service_date',first).lte('service_date',last).not('signed_at','is',null);
+    if(result.error&&String(result.error.message||'').toLowerCase().includes('hours'))result=await ess.from('daily_entries').select('total_minutes,staff_id,service_date,start_time,end_time,signed_at').eq('client_id',CLIENT_ID).gte('service_date',first).lte('service_date',last).not('signed_at','is',null);
     if(result.error)throw result.error;return result.data||[];
   }
   function hoursFromEntry(e){if(e.hours!==undefined&&e.hours!==null)return numeric(e.hours);if(e.total_minutes!==undefined&&e.total_minutes!==null)return numeric(e.total_minutes)/60;if(e.start_time&&e.end_time){const [sh,sm]=String(e.start_time).split(':').map(Number),[eh,em]=String(e.end_time).split(':').map(Number);let mins=(eh*60+em)-(sh*60+sm);if(mins<0)mins+=1440;return mins/60}return 0}
   async function syncLogistics(mk=monthKey()){
-    const saved=await readLogisticsRow(mk);if(saved?.manual_override){renderLogistics(saved);return saved}
+    const saved=await readLogisticsRow(mk);
+    // Always read the current signed charts, including when an admin baseline exists.
     const entries=await officialMonthEntries(mk), ids=[...new Set(entries.map(e=>e.staff_id).filter(Boolean))], names=new Map();
     if(ids.length){const {data,error}=await ess.from('staff').select('id,full_name').in('id',ids);if(!error)(data||[]).forEach(r=>names.set(r.id,r.full_name||''))}
+    if(saved?.manual_override){
+      const result=reconcileManualLogistics(saved,entries,names,hoursFromEntry,isEssDirectStaffName);
+      renderLogistics(result.row);
+      $('logisticsSyncNote').textContent=result.missingBaseline
+        ? 'Manual baseline is active, but its save timestamp is missing. Ask ESS Admin to save the adjustment again to enable automatic additions.'
+        : `Manual admin baseline preserved. ${fmtHours(result.addedHours)} hours from ${result.addedCharts} newly signed chart(s) added automatically. Each signed chart is counted once; drafts are excluded.`;
+      return result.row;
+    }
     let staffHours=0,essHours=0;entries.forEach(e=>{const h=hoursFromEntry(e);if(isEssDirectStaffName(names.get(e.staff_id)||''))essHours+=h;else staffHours+=h});
     const completed=staffHours+essHours,payload={client_id:CLIENT_ID,client_name:CLIENT_NAME,month_key:mk,month_label:monthLabel(mk),monthly_approved_hours:APPROVED,completed_hours:completed,remaining_hours:Math.max(0,APPROVED-completed),robert_hours:staffHours,ess_direct_hours:essHours};
     let write;
     if(saved){write=await publicDb.from(LOGISTICS_TABLE).update(payload).eq('client_id',CLIENT_ID).eq('month_key',mk).eq('manual_override',false)}
     else {write=await publicDb.from(LOGISTICS_TABLE).insert(payload)}
     if(write.error&&write.error.code!=='23505')console.error(`${CLIENT_SHORT} logistics write failed`,write.error);
-    const persisted=await readLogisticsRow(mk).catch(()=>null), row=persisted||payload;renderLogistics(row);if(!row.manual_override)$('logisticsSyncNote').textContent=`Auto-synced from ${CLIENT_SHORT}’s officially submitted daily charts. Saved drafts do not count.`;return row;
+    const persisted=await readLogisticsRow(mk).catch(()=>null), row=persisted||payload;
+    if(row.manual_override){
+      // An admin may have saved an adjustment during our asynchronous read/write.
+      return syncLogistics(mk);
+    }
+    renderLogistics(row);$('logisticsSyncNote').textContent=`Auto-synced from ${CLIENT_SHORT}’s officially submitted daily charts. Saved drafts do not count.`;return row;
   }
   async function loadLogistics(){try{await syncLogistics(monthKey())}catch(e){console.error(`${CLIENT_SHORT} logistics load issue`,e);const saved=await readLogisticsRow(monthKey()).catch(()=>null);renderLogistics(saved||{monthly_approved_hours:APPROVED,completed_hours:0,remaining_hours:APPROVED,month_key:monthKey(),month_label:monthLabel(monthKey()),robert_hours:0,ess_direct_hours:0});$('logisticsSyncNote').textContent='Live logistics could not fully reconcile. Showing the latest saved monthly values.'}}
   loadLogistics();
-  try{sb.channel(`client-logistics-${CLIENT_ID}`).on('postgres_changes',{event:'*',schema:'public',table:LOGISTICS_TABLE,filter:`client_id=eq.${CLIENT_ID}`},p=>{const row=p?.new;if(row&&row.month_key===monthKey())renderLogistics(row)}).subscribe()}catch(e){console.error(e)}
+  // Reconcile edits and submissions from other devices even if Realtime disconnects.
+  const refreshLogistics=()=>{if(navigator.onLine!==false)loadLogistics()};
+  window.addEventListener('focus',refreshLogistics);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshLogistics()});
+  window.addEventListener('online',refreshLogistics);
+  window.setInterval(()=>{if(!document.hidden)refreshLogistics()},60000);
+  try{sb.channel(`client-logistics-${CLIENT_ID}`).on('postgres_changes',{event:'*',schema:'public',table:LOGISTICS_TABLE,filter:`client_id=eq.${CLIENT_ID}`},p=>{const row=p?.new;if(row&&row.month_key===monthKey()){if(row.manual_override)loadLogistics();else renderLogistics(row)}}).subscribe()}catch(e){console.error(e)}
 
   const CLIENT_ID_INPUT=$('client_id'),STAFF_INPUT=$('staff_id'),w_days=$('w_days'),w_range=$('w_range'),w_startTxt=$('w_startTxt'),w_endTxt=$('w_endTxt'),w_prevWeek=$('w_prevWeek'),w_nextWeek=$('w_nextWeek'),w_panel=$('w_panel'),w_panelDate=$('w_panelDate'),w_recordState=$('w_recordState'),w_draftTray=$('w_draftTray'),w_draftList=$('w_draftList'),w_start=$('w_start'),w_end=$('w_end'),w_modality=$('w_modality'),w_hours=$('w_hours'),w_domain=$('w_domain'),w_serviceCategory=$('w_serviceCategory'),w_notes=$('w_notes'),w_obs=$('w_obs'),w_plan=$('w_plan'),w_rc=$('w_rc'),w_sc=$('w_sc'),w_saveDraft=$('w_saveDraft'),w_submitDay=$('w_submitDay'),w_toast=$('w_toast'),w_error=$('w_error'),staffSigCanvas=$('staffSig'),clientSigCanvas=$('clientSig');
   let staffSigData=null,clientSigData=null;
