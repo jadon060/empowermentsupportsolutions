@@ -47,10 +47,71 @@
  const isDirect=name=>{const s=String(name||'').toLowerCase();return s.includes('empowerment')||s.includes('ess')||s.includes('jadon')||s.includes('jay ')||s==='jay'};
  function status(type,msg){const styles={on:['🟢 On Track','#ecfdf5','#bbf7d0','#14532d'],behind:['🟡 Behind Pace','#fffbeb','#fde68a','#78350f'],over:['🔴 Over Limit','#fef2f2','#fecaca','#7f1d1d'],ready:['🔵 Invoice Ready','#eff6ff','#bfdbfe','#1e3a8a']},s=styles[type]||styles.on;$('badge').textContent=s[0];$('badge').style.background=s[1];$('badge').style.borderColor=s[2];$('badge').style.color=s[3];$('alert').innerHTML=msg;$('alert').style.background=s[1];$('alert').style.borderColor=s[2];$('alert').style.color=s[3]}
  function render(row,manual=false){const approved=Math.max(0,Number(row.monthly_approved_hours??cfg.approved)||0),completed=Math.max(0,Number(row.completed_hours)||0),essHours=Math.max(0,Number(row.ess_direct_hours)||0),staff=Math.max(0,Number(row.robert_hours??(completed-essHours))||0),remaining=Math.max(0,approved-completed),pct=approved?completed/approved*100:0;$('approved').textContent=fmt(approved);$('completed').textContent=fmt(completed);$('remaining').textContent=fmt(remaining);$('month').textContent=row.month_label||monthLabel(monthKey());$('progressText').textContent=`${fmt(completed)} of ${fmt(approved)} hours completed`;$('percent').textContent=`${pct.toFixed(1)}% used`;$('fill').style.width=Math.min(100,pct)+'%';$('staffHours').textContent=fmt(staff)+' hours';$('essHours').textContent=fmt(essHours)+' hours';$('manualNote').style.display=manual?'block':'none';if(completed>approved)status('over','🔴 <strong>Over Limit Warning:</strong> Completed hours exceed the monthly approved amount.');else if(completed>=approved)status('ready','🔵 <strong>Invoice Ready:</strong> Approved hours are complete for this month.');else if(completed<approved*.25)status('behind','🟡 <strong>Behind Pace:</strong> More hours should be scheduled soon.');else status('on','🟢 <strong>On Track:</strong> Hours are being used normally.')}
- async function officialRow(mk){const b=bounds(mk);const {data:entries,error}=await ess.from('daily_entries').select('total_minutes,staff_id,service_date').eq('client_id',cfg.id).gte('service_date',b.first).lte('service_date',b.last);if(error)throw error;const ids=[...new Set((entries||[]).map(x=>x.staff_id).filter(Boolean))],names=new Map();if(ids.length){const r=await ess.from('staff').select('id,full_name').in('id',ids);if(!r.error)(r.data||[]).forEach(x=>names.set(x.id,x.full_name||''))}let completed=0,direct=0,staff=0;(entries||[]).forEach(x=>{const h=(Number(x.total_minutes)||0)/60;completed+=h;if(isDirect(names.get(x.staff_id)))direct+=h;else staff+=h});return{client_id:cfg.id,client_name:cfg.name,month_key:mk,month_label:monthLabel(mk),monthly_approved_hours:cfg.approved,completed_hours:completed,remaining_hours:Math.max(0,cfg.approved-completed),robert_hours:staff,robert_target_hours:cfg.approved,ess_direct_hours:direct,ess_direct_target_hours:0,manual_override:false}}
- async function load(){const mk=monthKey();try{const saved=await sb.from('client_logistics').select('*').eq('client_id',cfg.id).eq('month_key',mk).maybeSingle();if(saved.error)throw saved.error;if(saved.data?.manual_override){render(saved.data,true);$('syncNote').textContent='Manual hours saved by ESS Admin. Automatic official-chart totals are paused until the override is released.';return}const row=await officialRow(mk);const write=await sb.from('client_logistics').upsert(row,{onConflict:'client_id,month_key'});if(write.error)console.warn(write.error);render(row,false);$('syncNote').textContent='Live from officially submitted daily charts. Drafts do not count toward completed hours.'}catch(e){console.error(e);const fallback={month_label:monthLabel(mk),monthly_approved_hours:cfg.approved,completed_hours:0,remaining_hours:cfg.approved,robert_hours:0,ess_direct_hours:0};render(fallback,false);$('syncNote').textContent='Live reconciliation could not load. Refresh the page or check Supabase access.'}}
+ async function officialRow(mk, signedAfter=null){
+  const b=bounds(mk);
+  const {data:entries,error}=await ess.from('daily_entries')
+    .select('total_minutes,staff_id,service_date,start_time,end_time,signed_at')
+    .eq('client_id',cfg.id).gte('service_date',b.first).lte('service_date',b.last).not('signed_at','is',null);
+  if(error)throw error;
+  const ids=[...new Set((entries||[]).map(x=>x.staff_id).filter(Boolean))],names=new Map();
+  if(ids.length){const r=await ess.from('staff').select('id,full_name').in('id',ids);if(!r.error)(r.data||[]).forEach(x=>names.set(x.id,x.full_name||''))}
+  const cutoff=signedAfter?Date.parse(signedAfter):null;
+  if(signedAfter && !Number.isFinite(cutoff))throw new Error('Missing a valid manual adjustment timestamp');
+  let completed=0,direct=0,staff=0;
+  (entries||[]).forEach(x=>{
+    if(cutoff!==null && (!Number.isFinite(Date.parse(x.signed_at||'')) || Date.parse(x.signed_at)<=cutoff))return;
+    let h=(Number(x.total_minutes)||0)/60;
+    if(h<=0 && x.start_time && x.end_time){
+      const [sh,sm]=String(x.start_time).split(':').map(Number),[eh,em]=String(x.end_time).split(':').map(Number);
+      if([sh,sm,eh,em].every(Number.isFinite)){let mins=(eh*60+em)-(sh*60+sm);if(mins<0)mins+=1440;h=mins/60}
+    }
+    if(h<=0)return;
+    completed+=h;
+    if(isDirect(names.get(x.staff_id)))direct+=h;else staff+=h;
+  });
+  return{client_id:cfg.id,client_name:cfg.name,month_key:mk,month_label:monthLabel(mk),monthly_approved_hours:cfg.approved,completed_hours:completed,remaining_hours:Math.max(0,cfg.approved-completed),robert_hours:staff,robert_target_hours:cfg.approved,ess_direct_hours:direct,ess_direct_target_hours:0,manual_override:false}
+ }
+ async function load(){
+  const mk=monthKey();
+  try{
+    const saved=await sb.from('client_logistics').select('*').eq('client_id',cfg.id).eq('month_key',mk).maybeSingle();
+    if(saved.error)throw saved.error;
+    if(saved.data?.manual_override){
+      const baseline=saved.data;
+      if(!baseline.manual_updated_at){
+        render(baseline,true);
+        $('syncNote').textContent='Manual baseline has no saved timestamp; ask ESS Admin to resave it before new charts can be automatically added.';
+        return;
+      }
+      const added=await officialRow(mk,baseline.manual_updated_at);
+      const staff=(Number(baseline.robert_hours)||0)+added.robert_hours;
+      const direct=(Number(baseline.ess_direct_hours)||0)+added.ess_direct_hours;
+      const completed=staff+direct;
+      render({...baseline,robert_hours:staff,ess_direct_hours:direct,completed_hours:completed,remaining_hours:Math.max(0,(Number(baseline.monthly_approved_hours)||cfg.approved)-completed)},true);
+      $('syncNote').textContent='Manual baseline plus '+fmt(added.completed_hours)+' newly signed chart hours. New charts are counted once; drafts are excluded.';
+      $('manualNote').textContent='🔒 Admin baseline preserved; new signed charts are added automatically.';
+      return;
+    }
+    const row=await officialRow(mk);
+    const write=await sb.from('client_logistics').upsert(row,{onConflict:'client_id,month_key'});
+    if(write.error)console.warn(write.error);
+    render(row,false);
+    $('syncNote').textContent='Live from officially signed daily charts. Drafts do not count toward completed hours.';
+  }catch(e){
+    console.error(e);
+    const fallback={month_label:monthLabel(mk),monthly_approved_hours:cfg.approved,completed_hours:0,remaining_hours:cfg.approved,robert_hours:0,ess_direct_hours:0};
+    render(fallback,false);
+    $('syncNote').textContent='Live reconciliation could not load. Refresh the page or check ESS database access.';
+  }
+ }
  load();
- try{sb.channel('client-logistics-'+key).on('postgres_changes',{event:'*',schema:'public',table:'client_logistics',filter:`client_id=eq.${cfg.id}`},p=>{if(p.new?.month_key===monthKey()){render(p.new,!!p.new.manual_override);$('syncNote').textContent=p.new.manual_override?'Manual hours saved by ESS Admin. Automatic official-chart totals are paused until the override is released.':'Live logistics update received.'}}).subscribe()}catch(e){}
+ try{sb.channel('client-logistics-'+key).on('postgres_changes',{event:'*',schema:'public',table:'client_logistics',filter:`client_id=eq.${cfg.id}`},p=>{if(p.new?.month_key===monthKey()){if(p.new.manual_override)load();else{render(p.new,false);$('syncNote').textContent='Live logistics update received.'}}}).subscribe()}catch(e){}
+try{sb.channel('client-logistics-charts-'+key).on('postgres_changes',{event:'*',schema:'ess',table:'daily_entries',filter:`client_id=eq.${cfg.id}`},()=>load()).subscribe()}catch(e){}
+ const refresh=()=>{if(navigator.onLine!==false)load()};
+ window.addEventListener('focus',refresh);
+ window.addEventListener('online',refresh);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+ window.setInterval(()=>{if(!document.hidden)refresh()},60000);
 })();
 </script>
 </body></html>
