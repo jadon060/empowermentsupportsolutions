@@ -81,7 +81,7 @@ test('a missing baseline timestamp does not silently add unknown historical sess
 
 test('portal loads this fix and retrieves only signed records', () => {
   const html = fs.readFileSync(path.join(__dirname, '../omar-v.html'), 'utf8');
-  assert.match(html, /client-portal-hayden-format\.js\?v=20261118-manual-hour-reconcile/);
+  assert.match(html, /client-portal-hayden-format\.js\?v=20261123-omar-time-validation/);
   assert.match(source, /\.not\('signed_at','is',null\)/);
   assert.match(source, /if\(row.manual_override\)loadLogistics\(\)/);
 });
