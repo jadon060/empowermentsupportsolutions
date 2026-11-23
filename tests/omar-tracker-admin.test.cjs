@@ -84,6 +84,28 @@ test('admin baseline covers a signed chart missing start and end times without e
   assert.equal(original.categories['335-B'],38); // Official records are unchanged.
 });
 
+test('category scheduling amounts sum to 18 rather than showing 24 available', () => {
+  const publicScript = fs.readFileSync(path.join(__dirname,'../omar-service-hours.js'),'utf8');
+  const extracted = publicScript.slice(publicScript.indexOf('  function schedulingPlan('),publicScript.indexOf('  function render('));
+  const calc = new Function('CATEGORIES','AUTHORIZED_TOTAL',extracted+';return schedulingPlan;')(
+    [{id:'334',authorized:30},{id:'335-A',authorized:54},{id:'335-B',authorized:38}],122
+  );
+  const afterBaseline = calc({total:104,categories:{'334':22,'335-A':38,'335-B':38}});
+  assert.equal(afterBaseline.monthlyRemaining,18);
+  assert.equal(afterBaseline.rawHeadroom,24);
+  assert.equal(afterBaseline.categoryGap,6);
+  assert.deepEqual(Array.from(Object.values(afterBaseline.hours)),[8,10,0]);
+  assert.equal(afterBaseline.proposedTotal,18);
+  const afterNewSixHourChart = calc({total:110,categories:{'334':28,'335-A':38,'335-B':38}});
+  assert.deepEqual(Array.from(Object.values(afterNewSixHourChart.hours)),[2,10,0]);
+  assert.equal(afterNewSixHourChart.proposedTotal,12);
+  const noPending = calc({total:98,categories:{'334':22,'335-A':38,'335-B':38}});
+  assert.deepEqual(Array.from(Object.values(noPending.hours)),[8,16,0]);
+  const atLimit = calc({total:122,categories:{'334':30,'335-A':54,'335-B':38}});
+  assert.equal(atLimit.proposedTotal,0);
+  assert.equal(atLimit.monthlyRemaining,0);
+});
+
 test('schema restricts anonymous edits and preserves an audit trail', () => {
   const sql=fs.readFileSync(path.join(__dirname,'../db/omar-tracker-monthly-manual.sql'),'utf8');
   assert.match(sql,/enable row level security/);
