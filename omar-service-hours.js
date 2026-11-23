@@ -84,7 +84,57 @@
   let aggregate = { month: '', categories: Object.create(null), total: 0, uncategorized: 0 };
   let loadSequence = 0;
 
-  function render(data, official = data, manual = null) {
+  // Align the category viewer with Omar's existing logistics baseline. It can
+  // include verified admin hours that a signed chart cannot calculate when
+  // its start/end times were omitted. Never rewrite a signed chart here.
+  function reconcileLogistics(official, baseline) {
+    if (!baseline?.manual_override || !baseline.manual_updated_at) return { data: official, adjustment: null };
+    const cutoff = Date.parse(baseline.manual_updated_at);
+    if (!Number.isFinite(cutoff)) return { data: official, adjustment: null };
+    const laterHours = (official.rows || []).reduce((sum, row) =>
+      sum + (Date.parse(row.signed_at || '') > cutoff ? hoursFor(row) : 0), 0);
+    const baselineHours = Number(baseline.robert_hours) + Number(baseline.ess_direct_hours);
+    if (!Number.isFinite(baselineHours) || baselineHours < 0) return { data: official, adjustment: null };
+    const expected = Math.round((baselineHours + laterHours) * 100) / 100;
+    const gap = Math.round((expected - official.total) * 100) / 100;
+    if (gap <= 0) return { data: official, adjustment: gap < 0 ? {kind:'conflict', hours:Math.abs(gap)} : null };
+    const missingDuration = (official.rows || []).filter(row =>
+      !hoursFor(row) && Number.isFinite(Date.parse(row.signed_at || '')) &&
+      Date.parse(row.signed_at) <= cutoff);
+    const display = {...official, categories: {...official.categories}, total: expected};
+    if (missingDuration.length === 1 && gap <= 24) {
+      const row = missingDuration[0];
+      const category = categoryFor(row);
+      if (category) {
+        display.categories[category] += gap;
+        return {data: display, adjustment: {kind:'matched', hours:gap, date:row.service_date, category}};
+      }
+    }
+    // Unknown distribution is visible, never silently assigned to a code.
+    display.uncategorized += gap;
+    return {data: display, adjustment: {kind:'unassigned', hours:gap}};
+  }
+
+  function applyLaterSignedToManual(official, manual) {
+    const categories = {
+      '334': Number(manual.hours_334),
+      '335-A': Number(manual.hours_335_a),
+      '335-B': Number(manual.hours_335_b)
+    };
+    if (Object.values(categories).some(value => !Number.isFinite(value) || value < 0)) return null;
+    const cutoff = Date.parse(manual.updated_at || '');
+    if (!Number.isFinite(cutoff)) return null;
+    for (const row of official.rows || []) {
+      if (Date.parse(row.signed_at || '') <= cutoff) continue;
+      const hours = hoursFor(row);
+      const category = categoryFor(row);
+      if (category) categories[category] += hours;
+    }
+    return {...official, categories,
+      total: Object.values(categories).reduce((sum, value) => sum + value, 0)};
+  }
+
+  function render(data, official = data, manual = null, adjustment = null) {
     grid.replaceChildren();
     CATEGORIES.forEach(category => {
       const used = data.categories[category.id] || 0;
@@ -103,17 +153,25 @@
     document.getElementById('serviceHoursTotal').textContent = `${fmt(data.total)} / ${AUTHORIZED_TOTAL} hours`;
     document.getElementById('serviceHoursRemaining').textContent = `${fmt(Math.max(0, AUTHORIZED_TOTAL - data.total))} hours remaining`;
     const legacy = document.getElementById('serviceHoursUncategorized');
-    if (official.uncategorized > 0) {
+    if (adjustment || official.uncategorized > 0) {
       legacy.style.display = 'block';
-      legacy.textContent = `${fmt(official.uncategorized)} signed official hour(s) are missing a recognizable 334 / 335-A / 335-B category and need chart review.`;
+      if (adjustment?.kind === 'matched') {
+        legacy.textContent = `${fmt(adjustment.hours)} hour(s) from the saved admin logistics baseline were matched to the signed ${adjustment.date} ${adjustment.category} chart, which is missing start/end times. This is a display reconciliation, not a correction to the signed chart. Review its actual times and service code before billing.`;
+      } else if (adjustment?.kind === 'unassigned') {
+        legacy.textContent = `${fmt(adjustment.hours)} hour(s) in the saved admin baseline are not yet supported by timed signed charts. Category allocation requires review; no hours were assigned to a code.`;
+      } else if (adjustment?.kind === 'conflict') {
+        legacy.textContent = `Signed sessions exceed the saved admin baseline reconciliation by ${fmt(adjustment.hours)} hour(s). Review the conflicting records; signed categories were preserved.`;
+      } else {
+        legacy.textContent = `${fmt(official.uncategorized)} signed official hour(s) are missing a recognizable 334 / 335-A / 335-B category and need chart review.`;
+      }
     } else {
       legacy.style.display = 'none';
       legacy.textContent = '';
     }
     const totalState = stateFor(data.total, AUTHORIZED_TOTAL);
     status.textContent = manual
-      ? `${monthName(data.month)} · ADMIN-ADJUSTED DISPLAY. Signed official sessions: ${fmt(official.total)} hours; displayed manually: ${fmt(data.total)} hours. Signed charts, signatures and billing are unchanged. ${totalState.label}.`
-      : `${monthName(data.month)} · ${totalState.label}. Drafts and unsigned records are excluded. Historical service labels are normalized without changing saved notes.`;
+      ? `${monthName(data.month)} · ADMIN-ADJUSTED DISPLAY. Signed official sessions: ${fmt(official.total)} hours; adjusted display with later signed sessions: ${fmt(data.total)} hours. Signed charts, signatures and billing are unchanged. ${totalState.label}.`
+      : `${monthName(data.month)} · ${totalState.label}. Drafts and unsigned records are excluded. ${adjustment ? 'Admin baseline reconciled separately from the signed charts; check the notice above.' : 'Historical service labels are normalized without changing saved notes.'}`;
     status.className = 'service-hours-note service-hours-state ' + totalState.className;
   }
 
@@ -130,7 +188,7 @@
       console.error('Omar monthly service tracker could not load', error);
       return null;
     }
-    const next = { month: key, categories: Object.create(null), total: 0, uncategorized: 0 };
+    const next = { month: key, categories: Object.create(null), total: 0, uncategorized: 0, rows: data || [] };
     CATEGORIES.forEach(category => { next.categories[category.id] = 0; });
     (data || []).forEach(row => {
       const hours = hoursFor(row);
@@ -151,12 +209,20 @@
     return { data, error };
   }
 
+  async function readLogistics(key) {
+    return sb.from('client_logistics')
+      .select('month_key,manual_override,manual_updated_at,robert_hours,ess_direct_hours')
+      .eq('client_id', CLIENT_ID).eq('month_key', key).maybeSingle();
+  }
+
   async function loadMonth(key = monthPicker.value || currentMonth()) {
     if (!/^\d{4}-\d{2}$/.test(key)) return null;
     const request = ++loadSequence;
     monthPicker.value = key;
     status.textContent = navigator.onLine === false ? 'Offline — waiting to synchronize saved session records…' : 'Loading official session records…';
-    const [official, manualResult] = await Promise.all([readMonth(key), readManual(key)]);
+    const [official, manualResult, logisticsResult] = await Promise.all([
+      readMonth(key), readManual(key), readLogistics(key)
+    ]);
     if (request !== loadSequence || key !== monthPicker.value) return null;
     if (!official) {
       status.textContent = navigator.onLine === false
@@ -165,22 +231,20 @@
       status.className = 'service-hours-note service-hours-state over';
       return null;
     }
-    aggregate = official; // Warnings and submission checks always use signed sessions.
+    aggregate = official; // Manual category display edits never affect official records.
     const manual = !manualResult.error && manualResult.data?.enabled ? manualResult.data : null;
-    let display = official;
-    if (manual) {
-      const categories = {
-        '334': Number(manual.hours_334),
-        '335-A': Number(manual.hours_335_a),
-        '335-B': Number(manual.hours_335_b)
-      };
-      display = {
-        ...official,
-        categories,
-        total: Object.values(categories).reduce((sum, hours) => sum + hours, 0)
-      };
+    const reconciled = logisticsResult.error
+      ? {data:official, adjustment:null}
+      : reconcileLogistics(official, logisticsResult.data);
+    let display = reconciled.data;
+    if (manual) display = applyLaterSignedToManual(official, manual) || reconciled.data;
+    // Include an admin-reconciled, otherwise missing signed chart in allocation warnings.
+    if (!manual && reconciled.adjustment?.kind === 'matched') aggregate = reconciled.data;
+    render(display, official, manual, manual ? null : reconciled.adjustment);
+    if (logisticsResult.error && !manual) {
+      status.textContent += ' The separate monthly logistics baseline could not be verified.';
+      status.className = 'service-hours-note service-hours-state warning';
     }
-    render(display, official, manual);
     if (manualResult.error) {
       status.textContent = 'Could not verify admin display adjustments; showing signed official totals only. Reload before relying on the displayed figures.';
       status.className = 'service-hours-note service-hours-state warning';
