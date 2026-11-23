@@ -50,6 +50,37 @@ test('tracker distinguishes display adjustment from official session warnings', 
   assert.match(publicScript,/readManual/);
   assert.match(publicScript,/warnSession/);
 });
+test('admin baseline covers a signed chart missing start and end times without editing it', () => {
+  const source = fs.readFileSync(path.join(__dirname,'../omar-service-hours.js'),'utf8');
+  const extract = source.slice(source.indexOf('  function reconcileLogistics('),source.indexOf('  function applyLaterSignedToManual('));
+  const reconcile = new Function('hoursFor','categoryFor',extract+';return reconcileLogistics;')(
+    row => Number(row.total_minutes || 0) / 60,
+    row => row.service_category
+  );
+  const rows = [
+    {service_date:'2026-11-06',service_category:'335-B',total_minutes:null,signed_at:'2026-11-06T23:07:25Z'},
+    {service_date:'2026-11-17',service_category:'335-A',total_minutes:360,signed_at:'2026-11-17T22:06:00Z'},
+    {service_date:'2026-11-18',service_category:'335-A',total_minutes:360,signed_at:'2026-11-19T02:38:26Z'}
+  ];
+  const original = {month:'2026-11',rows,categories:{'334':22,'335-A':26,'335-B':38},total:86,uncategorized:0};
+  const baseline = {manual_override:true,manual_updated_at:'2026-11-17T04:50:34Z',robert_hours:72,ess_direct_hours:0};
+  const result = reconcile(original,baseline);
+  assert.equal(result.data.total,84); // Base 72 plus two new six-hour charts
+  assert.equal(result.adjustment.kind,'conflict'); // Synthetic official data inconsistent with baseline
+  // The production reconciliation assigns only positive, uniquely matched gaps.
+  const correct = {...original,categories:{'334':22,'335-A':38,'335-B':38},total:98};
+  const later = [...rows,
+    {service_date:'2026-11-19',service_category:'335-A',total_minutes:360,signed_at:'2026-11-20T01:53:37Z'},
+    {service_date:'2026-11-20',service_category:'334',total_minutes:480,signed_at:'2026-11-21T08:03:09Z'},
+    {service_date:'2026-11-21',service_category:'335-A',total_minutes:360,signed_at:'2026-11-22T05:52:27Z'}
+  ];
+  const matched = reconcile({...correct,rows:later},baseline);
+  assert.equal(matched.data.total,104);
+  assert.equal(matched.data.categories['335-B'],44);
+  assert.equal(matched.adjustment.date,'2026-11-06');
+  assert.equal(original.categories['335-B'],38); // Official records are unchanged.
+});
+
 test('schema restricts anonymous edits and preserves an audit trail', () => {
   const sql=fs.readFileSync(path.join(__dirname,'../db/omar-tracker-monthly-manual.sql'),'utf8');
   assert.match(sql,/enable row level security/);
