@@ -21,6 +21,7 @@
       <label><span class="sr-only">Select month</span><input class="service-hours-month" id="serviceHoursMonth" type="month" aria-label="Select month"></label>
     </div>
     <div class="service-hours-grid" id="serviceHoursGrid"></div>
+    <div class="service-hours-planning" id="serviceHoursPlanning" role="status"></div>
     <div class="service-hours-total"><div><span class="service-hours-code">Total monthly hours completed</span><div><strong id="serviceHoursTotal">0 / 122 hours</strong></div></div><div id="serviceHoursRemaining">122 hours remaining</div></div>
     <div class="service-hours-uncategorized" id="serviceHoursUncategorized"></div>
     <p class="service-hours-note" id="serviceHoursStatus" role="status" aria-live="polite">Loading official session records…</p>
@@ -130,22 +131,60 @@
       total: Object.values(categories).reduce((sum, value) => sum + value, 0)};
   }
 
+  // The sum of unused per-code capacity can exceed the shared 122-hour
+  // monthly balance when some already-worked hours remain uncategorized.
+  // This is a *scheduling suggestion*, not a billing category assignment.
+  // Prioritize 334, then 335-A, never suggesting work under a full 335-B.
+  function schedulingPlan(data) {
+    let availableCents = Math.max(0, Math.round((AUTHORIZED_TOTAL - Number(data.total || 0)) * 100));
+    const totalCents = availableCents;
+    const plan = {};
+    let rawHeadroomCents = 0;
+    CATEGORIES.forEach(category => {
+      const categoryHours = Number(data.categories[category.id] || 0);
+      const freeCents = Math.max(0, Math.round((category.authorized - categoryHours) * 100));
+      rawHeadroomCents += freeCents;
+      const proposed = Math.min(freeCents, availableCents);
+      plan[category.id] = proposed / 100;
+      availableCents -= proposed;
+    });
+    return {
+      hours: plan,
+      monthlyRemaining: totalCents / 100,
+      proposedTotal: (totalCents - availableCents) / 100,
+      unplanned: availableCents / 100,
+      rawHeadroom: rawHeadroomCents / 100,
+      categoryGap: Math.max(0, rawHeadroomCents - totalCents) / 100
+    };
+  }
+
   function render(data, official = data, manual = null, adjustment = null) {
     grid.replaceChildren();
+    const plan = schedulingPlan(data);
     CATEGORIES.forEach(category => {
       const used = data.categories[category.id] || 0;
       const remaining = Math.max(0, category.authorized - used);
+      const suggested = plan.hours[category.id];
       const state = stateFor(used, category.authorized);
       const card = document.createElement('article');
       card.className = 'service-hours-item';
       card.innerHTML = `
         <div class="service-hours-code">${category.code}</div>
         <div class="service-hours-desc">${category.description}</div>
-        <div class="service-hours-numbers"><strong>${fmt(used)} / ${category.authorized} hours</strong><span>${fmt(remaining)} remaining</span></div>
+        <div class="service-hours-numbers"><strong>${fmt(used)} / ${category.authorized} hours</strong><span>${fmt(suggested)} to schedule</span></div>
         <div class="service-hours-bar" role="progressbar" aria-label="${category.code} monthly allocation" aria-valuemin="0" aria-valuemax="${category.authorized}" aria-valuenow="${Math.min(used, category.authorized)}"><div class="service-hours-fill" style="width:${Math.min(100, Math.max(0, used / category.authorized * 100))}%"></div></div>
-        <div class="service-hours-state ${state.className}">${state.label}</div>`;
+        <div class="service-hours-state ${state.className}">${state.label}</div>
+        <div class="service-hours-plan-detail">${fmt(remaining)} unused in category${suggested < remaining ? ' · monthly balance limits scheduling to ' + fmt(suggested) : ''}</div>`;
       grid.appendChild(card);
     });
+    const planning = document.getElementById('serviceHoursPlanning');
+    if (plan.categoryGap > 0 || plan.unplanned > 0) {
+      planning.style.display = 'block';
+      planning.textContent = `Monthly scheduling balance: ${fmt(plan.monthlyRemaining)} hours. Suggested split: ${CATEGORIES.map(category => category.id + ' ' + fmt(plan.hours[category.id]) + 'h').join(' + ')} = ${fmt(plan.proposedTotal)}h. ${plan.categoryGap > 0 ? fmt(plan.categoryGap) + 'h of unused category capacity is not available to schedule because those hours are already included in the monthly total but await service-code reconciliation. ' : ''}${plan.unplanned > 0 ? fmt(plan.unplanned) + 'h cannot be scheduled within the listed code limits. ' : ''}This is a planning suggestion only; use each service code for work actually performed and verify any pending chart before final allocation.`;
+    } else {
+      planning.style.display = 'none';
+      planning.textContent = '';
+    }
     document.getElementById('serviceHoursTotal').textContent = `${fmt(data.total)} / ${AUTHORIZED_TOTAL} hours`;
     document.getElementById('serviceHoursRemaining').textContent = `${fmt(Math.max(0, AUTHORIZED_TOTAL - data.total))} hours remaining`;
     const legacy = document.getElementById('serviceHoursUncategorized');
