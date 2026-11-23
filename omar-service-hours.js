@@ -102,17 +102,13 @@
       !hoursFor(row) && Number.isFinite(Date.parse(row.signed_at || '')) &&
       Date.parse(row.signed_at) <= cutoff);
     const display = {...official, categories: {...official.categories}, total: expected};
-    if (missingDuration.length === 1 && gap <= 24) {
-      const row = missingDuration[0];
-      const category = categoryFor(row);
-      if (category) {
-        display.categories[category] += gap;
-        return {data: display, adjustment: {kind:'matched', hours:gap, date:row.service_date, category}};
-      }
-    }
-    // Unknown distribution is visible, never silently assigned to a code.
+    // A chart with no duration does not prove how many hours belong to its
+    // selected category. Preserve the admin baseline in the overall total,
+    // but NEVER silently allocate its gap to a service code (including 335-B).
+    // Staff must verify the actual session times and work before chart edits.
+    const missingDates = missingDuration.map(row => row.service_date);
     display.uncategorized += gap;
-    return {data: display, adjustment: {kind:'unassigned', hours:gap}};
+    return {data: display, adjustment: {kind:'unassigned', hours:gap, missingDates}};
   }
 
   function applyLaterSignedToManual(official, manual) {
@@ -158,7 +154,7 @@
       if (adjustment?.kind === 'matched') {
         legacy.textContent = `${fmt(adjustment.hours)} hour(s) from the saved admin logistics baseline were matched to the signed ${adjustment.date} ${adjustment.category} chart, which is missing start/end times. This is a display reconciliation, not a correction to the signed chart. Review its actual times and service code before billing.`;
       } else if (adjustment?.kind === 'unassigned') {
-        legacy.textContent = `${fmt(adjustment.hours)} hour(s) in the saved admin baseline are not yet supported by timed signed charts. Category allocation requires review; no hours were assigned to a code.`;
+        legacy.textContent = `${fmt(adjustment.hours)} hour(s) from the saved admin baseline are PENDING SERVICE-CODE VERIFICATION${adjustment.missingDates?.length ? ' (chart date: ' + adjustment.missingDates.join(', ') + ')' : ''}. They count toward Omar's overall monthly total, but are not assigned to 334 / 335-A / 335-B until the actual times and service focus are confirmed. Signed chart records are unchanged.`;
       } else if (adjustment?.kind === 'conflict') {
         legacy.textContent = `Signed sessions exceed the saved admin baseline reconciliation by ${fmt(adjustment.hours)} hour(s). Review the conflicting records; signed categories were preserved.`;
       } else {
@@ -238,8 +234,9 @@
       : reconcileLogistics(official, logisticsResult.data);
     let display = reconciled.data;
     if (manual) display = applyLaterSignedToManual(official, manual) || reconciled.data;
-    // Include an admin-reconciled, otherwise missing signed chart in allocation warnings.
-    if (!manual && reconciled.adjustment?.kind === 'matched') aggregate = reconciled.data;
+    // Prevent new sessions exceeding 122 even when some baseline hours are
+    // pending service-code review. Category warnings still use verified hours.
+    if (!manual && reconciled.adjustment?.kind === 'unassigned') aggregate = reconciled.data;
     render(display, official, manual, manual ? null : reconciled.adjustment);
     if (logisticsResult.error && !manual) {
       status.textContent += ' The separate monthly logistics baseline could not be verified.';
